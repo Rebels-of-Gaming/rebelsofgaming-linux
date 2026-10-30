@@ -112,4 +112,64 @@
   <data name="Linux_Close" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="Linux_SquadInternal" xml:space="preserve">
+    <value>Internal</value>
+  </data>
+  <data name="Linux_SquadNoMembers" xml:space="preserve">
+    <value>Nobody in the line-up yet.</value>
+  </data>
+  <data name="Linux_SquadNoServers" xml:space="preserve">
+    <value>This squad has no servers of its own.</value>
+  </data>
+  <data name="Linux_InternalEmpty" xml:space="preserve">
+    <value>Nothing new in the internal area right now.</value>
+  </data>
+  <data name="Linux_InternalChatTitle" xml:space="preserve">
+    <value>SQUAD GROUP</value>
+  </data>
+  <data name="Linux_InternalChat" xml:space="preserve">
+    <value>Open squad group</value>
+  </data>
+  <data name="Linux_InternalChatUnread" xml:space="preserve">
+    <value>Squad group – new messages</value>
+  </data>
+  <data name="Linux_InternalEvents" xml:space="preserve">
+    <value>UPCOMING EVENTS</value>
+  </data>
+  <data name="Linux_InternalForum" xml:space="preserve">
+    <value>SQUAD FORUM</value>
+  </data>
+  <data name="Linux_InternalFiles" xml:space="preserve">
+    <value>DOWNLOADS AND ALBUMS</value>
+  </data>
+  <data name="Linux_InternalReplies" xml:space="preserve">
+    <value>{0} replies</value>
+  </data>
+  <data name="Linux_InternalAlbumItems" xml:space="preserve">
+    <value>{0} images</value>
+  </data>
+  <data name="Linux_InternalMissingScopes" xml:space="preserve">
+    <value>Some sections are missing because this device’s sign-in doesn’t allow them ({0}). Sign out and in again to grant them.</value>
+  </data>
+  <data name="Linux_EventsNoRsvp" xml:space="preserve">
+    <value>You haven’t answered yet. Replying in the app is coming soon – until then use the browser.</value>
+  </data>
+  <data name="Linux_EventsRsvpGuest" xml:space="preserve">
+    <value>Sign in to reply to events.</value>
+  </data>
+  <data name="Linux_EventsDayEmpty" xml:space="preserve">
+    <value>Nothing on this day.</value>
+  </data>
+  <data name="Linux_Today" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="Linux_RulesAcceptInBrowser" xml:space="preserve">
+    <value>You still need to accept these rules. For now that’s done on the website.</value>
+  </data>
+  <data name="Linux_SearchTitle" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Linux_SearchHint" xml:space="preserve">
+    <value>Type at least 2 characters – searches news, squads, members, events, forum, wiki and more.</value>
+  </data>
 </root>

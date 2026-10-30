@@ -112,4 +112,64 @@
   <data name="Linux_Close" xml:space="preserve">
     <value>Fermer</value>
   </data>
+  <data name="Linux_SquadInternal" xml:space="preserve">
+    <value>Interne</value>
+  </data>
+  <data name="Linux_SquadNoMembers" xml:space="preserve">
+    <value>Personne dans le line-up pour l’instant.</value>
+  </data>
+  <data name="Linux_SquadNoServers" xml:space="preserve">
+    <value>Ce squad n’a pas de serveurs à lui.</value>
+  </data>
+  <data name="Linux_InternalEmpty" xml:space="preserve">
+    <value>Rien de neuf dans l’espace interne pour le moment.</value>
+  </data>
+  <data name="Linux_InternalChatTitle" xml:space="preserve">
+    <value>GROUPE DU SQUAD</value>
+  </data>
+  <data name="Linux_InternalChat" xml:space="preserve">
+    <value>Ouvrir le groupe du squad</value>
+  </data>
+  <data name="Linux_InternalChatUnread" xml:space="preserve">
+    <value>Groupe du squad – nouveaux messages</value>
+  </data>
+  <data name="Linux_InternalEvents" xml:space="preserve">
+    <value>PROCHAINS ÉVÉNEMENTS</value>
+  </data>
+  <data name="Linux_InternalForum" xml:space="preserve">
+    <value>FORUM DU SQUAD</value>
+  </data>
+  <data name="Linux_InternalFiles" xml:space="preserve">
+    <value>TÉLÉCHARGEMENTS ET ALBUMS</value>
+  </data>
+  <data name="Linux_InternalReplies" xml:space="preserve">
+    <value>{0} réponses</value>
+  </data>
+  <data name="Linux_InternalAlbumItems" xml:space="preserve">
+    <value>{0} images</value>
+  </data>
+  <data name="Linux_InternalMissingScopes" xml:space="preserve">
+    <value>Certaines sections manquent car la connexion de cet appareil ne les autorise pas ({0}). Déconnecte-toi puis reconnecte-toi pour les autoriser.</value>
+  </data>
+  <data name="Linux_EventsNoRsvp" xml:space="preserve">
+    <value>Tu n’as pas encore répondu. Répondre dans l’app arrive bientôt – en attendant, via le navigateur.</value>
+  </data>
+  <data name="Linux_EventsRsvpGuest" xml:space="preserve">
+    <value>Connecte-toi pour répondre aux événements.</value>
+  </data>
+  <data name="Linux_EventsDayEmpty" xml:space="preserve">
+    <value>Rien de prévu ce jour-là.</value>
+  </data>
+  <data name="Linux_Today" xml:space="preserve">
+    <value>Aujourd’hui</value>
+  </data>
+  <data name="Linux_RulesAcceptInBrowser" xml:space="preserve">
+    <value>Tu dois encore accepter ce règlement. Pour l’instant, cela se fait sur le site.</value>
+  </data>
+  <data name="Linux_SearchTitle" xml:space="preserve">
+    <value>Recherche</value>
+  </data>
+  <data name="Linux_SearchHint" xml:space="preserve">
+    <value>Saisis au moins 2 caractères – recherche dans les news, squads, membres, événements, forum, wiki et plus.</value>
+  </data>
 </root>

@@ -16,6 +16,27 @@
     <DataTemplate DataType="vm:MessagesViewModel"><views:MessagesView /></DataTemplate>
     <DataTemplate DataType="vm:AccountViewModel"><views:AccountView /></DataTemplate>
     <DataTemplate DataType="vm:PlaceholderViewModel"><views:PlaceholderView /></DataTemplate>
+    <DataTemplate DataType="vm:SquadsViewModel"><views:SquadsView /></DataTemplate>
+    <DataTemplate DataType="vm:MembersViewModel"><views:MembersView /></DataTemplate>
+    <DataTemplate DataType="vm:ServersViewModel"><views:ServersView /></DataTemplate>
+    <DataTemplate DataType="vm:EventsViewModel"><views:EventsView /></DataTemplate>
+    <DataTemplate DataType="vm:InfoViewModel"><views:InfoView /></DataTemplate>
+    <DataTemplate DataType="vm:SearchViewModel"><views:SearchView /></DataTemplate>
+    <!-- Bausteine, die mehrere Seiten zeigen -->
+    <DataTemplate DataType="vm:ServerItemViewModel"><views:ServerCard /></DataTemplate>
+    <DataTemplate DataType="vm:InternalRowViewModel">
+      <Button Classes="row" Background="{DynamicResource RoGBg2Brush}" Padding="12,10" Command="{Binding OpenCommand}"
+              AutomationProperties.Name="{Binding Title}">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <PathIcon Data="{Binding Icon}" Width="18" Height="18" Foreground="{DynamicResource RoGMutedBrush}" VerticalAlignment="Top" Margin="0,2,12,0" />
+          <StackPanel Grid.Column="1" Spacing="2">
+            <TextBlock Classes="body" Classes.strong="{Binding IsUnread}" Text="{Binding Title}" TextTrimming="CharacterEllipsis" MaxLines="2" />
+            <TextBlock Classes="muted small" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" TextTrimming="CharacterEllipsis" MaxLines="2" />
+          </StackPanel>
+          <Ellipse Grid.Column="2" Width="10" Height="10" Fill="{DynamicResource RoGRedBrush}" IsVisible="{Binding IsUnread}" VerticalAlignment="Center" Margin="8,0,0,0" />
+        </Grid>
+      </Button>
+    </DataTemplate>
   </Application.DataTemplates>
 
   <Application.Resources>

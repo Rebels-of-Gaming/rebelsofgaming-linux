@@ -1,0 +1,144 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MembersView"
+             x:DataType="vm:MembersViewModel">
+
+  <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}">
+    <!-- Liste -->
+    <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,16,12">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="display" Text="{l:T MembersPage_Title.Text}" />
+            <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                    ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+              <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+            </Button>
+          </Grid>
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <ToggleButton Classes="segment" IsChecked="{Binding AllMode}" Content="{l:T MembersPage_ModeAll.Text, Upper=True}" />
+            <ToggleButton Classes="segment" IsChecked="{Binding TeamMode}" Content="{l:T MembersPage_ModeTeam.Text, Upper=True}" />
+          </StackPanel>
+          <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowFilters}" Margin="0,0,8,0">
+            <TextBox x:Name="SearchBox" Text="{Binding SearchText}" PlaceholderText="{l:T MembersPage_Search.PlaceholderText}"
+                     AutomationProperties.Name="{l:T MembersPage_Search.AutomationProperties.Name}" />
+            <CheckBox Grid.Column="1" IsChecked="{Binding OnlineOnly}" Content="{l:T MembersPage_OnlineOnly.Header}" Margin="12,0,0,0" />
+          </Grid>
+        </StackPanel>
+        <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="12,0,12,12" HorizontalAlignment="Stretch"
+                IsVisible="{Binding HasMore}" IsEnabled="{Binding !IsLoadingMore}"
+                Command="{Binding LoadMoreCommand}" Content="{l:T Common_LoadMore.Content}" />
+        <Panel>
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T MembersPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+          <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                   IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T MembersPage_List.AutomationProperties.Name}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:MemberListItemViewModel">
+                <Grid ColumnDefinitions="Auto,*" AutomationProperties.Name="{Binding AutomationName}">
+                  <c:AvatarView Size="44" Source="{Binding Avatar}" DisplayName="{Binding Name}"
+                                Presence="{Binding Presence}" PresenceText="{Binding PresenceText}" VerticalAlignment="Top" />
+                  <StackPanel Grid.Column="1" Spacing="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                      <TextBlock Classes="kicker" Foreground="{Binding RankBrush}" Text="{Binding Rank}" IsVisible="{Binding HasRank}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Classes="muted small" Text="{Binding Subtitle}" IsVisible="{Binding HasSubtitle}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Panel>
+      </DockPanel>
+    </Border>
+
+    <!-- Profil -->
+    <Panel>
+      <TextBlock Classes="muted" Text="{l:T MembersPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsVisible="{Binding ShowSelectHint}" Margin="32" />
+      <c:StateView DataContext="{Binding Detail}" x:DataType="vm:MemberDetailViewModel"
+                   IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Detail.ShowContent}">
+        <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="32,24,32,40" HorizontalAlignment="Left" Spacing="16"
+                    DataContext="{Binding Detail}" x:DataType="vm:MemberDetailViewModel">
+          <Button Classes="secondary" HorizontalAlignment="Left"
+                  Command="{Binding $parent[UserControl].((vm:MembersViewModel)DataContext).CloseDetailCommand}"
+                  IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+              <TextBlock Text="{l:T Common_Back}" />
+            </StackPanel>
+          </Button>
+          <Border CornerRadius="{StaticResource RoGCardRadius}" ClipToBounds="True" Height="160" IsVisible="{Binding HasBanner}">
+            <Image Source="{Binding Banner}" Stretch="UniformToFill" />
+          </Border>
+          <Grid ColumnDefinitions="Auto,*">
+            <c:AvatarView Size="96" Source="{Binding Avatar}" DisplayName="{Binding Name}"
+                          Presence="{Binding Presence}" PresenceText="{Binding PresenceText}" VerticalAlignment="Top" />
+            <StackPanel Grid.Column="1" Spacing="4" Margin="20,4,0,0" VerticalAlignment="Center">
+              <TextBlock Classes="kicker" FontSize="14" Foreground="{Binding RankBrush}" Text="{Binding Rank}" />
+              <SelectableTextBlock Classes="title" Text="{Binding Name}" AutomationProperties.HeadingLevel="1" />
+              <TextBlock Classes="muted" Text="{Binding StatusLine}" />
+            </StackPanel>
+          </Grid>
+          <Border BorderBrush="{DynamicResource RoGGoldBrush}" BorderThickness="3,0,0,0" Padding="14,4" IsVisible="{Binding HasMotto}">
+            <SelectableTextBlock Classes="body" FontStyle="Italic" Text="{Binding Motto}" />
+          </Border>
+          <SelectableTextBlock Classes="body" Text="{Binding Bio}" IsVisible="{Binding HasBio}" />
+          <StackPanel Spacing="6">
+            <TextBlock Classes="muted" Text="{Binding Facts}" IsVisible="{Binding HasFacts}" />
+            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasSquads}">
+              <PathIcon Data="{StaticResource IconSquads}" Width="16" Height="16" Foreground="{DynamicResource RoGMutedBrush}" />
+              <TextBlock Classes="body" Text="{Binding Squads}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasCoins}">
+              <PathIcon Data="{StaticResource IconStar}" Width="16" Height="16" Foreground="{DynamicResource RoGGoldBrush}" />
+              <TextBlock Classes="body" Text="{Binding CoinsText}" />
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="8" IsVisible="{Binding HasBadges}">
+            <TextBlock Classes="section" Text="{l:T MembersPage_Badges.Text}" />
+            <ItemsControl ItemsSource="{Binding Badges}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel ItemSpacing="8" LineSpacing="8" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:BadgeViewModel">
+                  <Border Classes="chip" BorderBrush="{Binding ChipBrush}" ToolTip.Tip="{Binding Description}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <PathIcon Data="{StaticResource IconStar}" Width="12" Height="12" Foreground="{Binding ChipBrush}" />
+                      <TextBlock Text="{Binding Name}" />
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <StackPanel Spacing="6" IsVisible="{Binding HasPlatforms}">
+            <TextBlock Classes="section" Text="{l:T MembersPage_Platforms.Text}" />
+            <ItemsControl ItemsSource="{Binding Platforms}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                  <SelectableTextBlock Classes="body" Text="{Binding}" Margin="0,2" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding OpenInBrowserCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+              <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </c:ListDetailPanel>
+</UserControl>

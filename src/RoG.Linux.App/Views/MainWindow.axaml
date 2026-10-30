@@ -15,7 +15,7 @@
     <DockPanel IsVisible="{Binding IsShellVisible}">
       <!-- Schmale Ansicht (< 600 px): Kopfleiste mit Menü-Knopf statt fester Seitenleiste -->
       <Border DockPanel.Dock="Top" Classes="topbar" IsVisible="{Binding IsNarrow}">
-        <Grid ColumnDefinitions="Auto,Auto,*">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto">
           <Button Classes="icon" Command="{Binding TogglePaneCommand}"
                   ToolTip.Tip="{Binding OpenMenuText}" AutomationProperties.Name="{Binding OpenMenuText}">
             <PathIcon Data="{StaticResource IconMenu}" Width="20" Height="20" />
@@ -24,6 +24,10 @@
           <TextBlock Grid.Column="2" Text="{Binding CurrentTitle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                      FontFamily="{StaticResource RoGDisplayFont}" FontWeight="SemiBold" FontSize="18" LetterSpacing="1"
                      Foreground="{DynamicResource RoGInkBrush}" />
+          <Button Grid.Column="3" Classes="icon" Command="{Binding NavigateCommand}" CommandParameter="{Binding SearchItem}"
+                  ToolTip.Tip="{Binding SearchText}" AutomationProperties.Name="{Binding SearchText}">
+            <PathIcon Data="{StaticResource IconSearch}" Width="20" Height="20" />
+          </Button>
         </Grid>
       </Border>
 

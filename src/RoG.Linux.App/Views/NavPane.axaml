@@ -53,6 +53,9 @@
         </StackPanel>
       </Grid>
 
+      <!-- Suche (Strg+K) über den Bereichen -->
+      <ContentControl DockPanel.Dock="Top" Content="{Binding SearchItem}" ContentTemplate="{StaticResource NavItemTemplate}" Margin="8,0,8,0" />
+
       <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding FooterItems}" Margin="8,4,8,8"
                     ItemTemplate="{StaticResource NavItemTemplate}" />
 

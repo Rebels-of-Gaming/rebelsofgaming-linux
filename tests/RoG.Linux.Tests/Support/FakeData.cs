@@ -52,7 +52,7 @@ public static class FakeData
     public static string Me => $$$"""
         {"data":{"id":"01USERWAHKE","slug":"wahke","name":"Wahke","email":null,"avatar_url":"{{{Cdn}}}/avatars/wahke.png","status":"active",
           "rank":{"name":"owner","label":"Owner","color":"#D4AE3C"},"two_factor_enabled":true,"joined_at":"2020-03-01",
-          "squads":[],"permissions":{"global":["news.write"]},"token":{"scopes":["news:read","messages:read","profile:read"]} }}
+          "squads":[],"permissions":{"global":["news.write"]},"token":{"scopes":["news:read","messages:read","profile:read","squads:read","events:read","forum:read","members:read","servers:read","notifications:read"]} }}
         """;
 
     public static string Platform => """
@@ -92,6 +92,175 @@ public static class FakeData
           {"key":"event","label":"Zu einem Termin zusagen","done":false,"url":"https://rebelsofgaming.com/de/events"}
         ]}}
         """;
+
+    // ---- Stufe 2: Community ----
+
+    public static string Squads => $$$"""
+        {"data":[
+          {{{Squad("01SQ1", "enemy-territory", "Enemy Territory", "Objective-Spezialisten seit Tag eins", "ET", "Wolfenstein: Enemy Territory", "open", 12, "Wahke")}}},
+          {{{Squad("01SQ2", "counter-strike-2", "Counter-Strike 2", "Premier, Faceit und Clanwars mit Teamplay", "CS2", "Counter-Strike 2", "waitlist", 8, "Nyx")}}},
+          {{{Squad("01SQ3", "minecraft", "Minecraft", "Freebuild, Plots und Minigames", "MC", "Minecraft", "full", 21, "Kaito")}}}
+        ],"meta":{"per_page":50,"next_cursor":null}}
+        """;
+
+    public static string SquadDetail =>
+        "{\"data\":" + Squad("01SQ1", "enemy-territory", "Enemy Territory", "Objective-Spezialisten seit Tag eins", "ET", "Wolfenstein: Enemy Territory", "open", 12, "Wahke",
+            "Wolfenstein: Enemy Territory ist da, wo Rebels of Gaming angefangen hat. Bei uns zählt das Objective, nicht das Scoreboard: Wir planen Pushes, decken unsere Engineers und spielen jede Klasse so, wie das Team sie braucht.",
+            "Dienstag und Donnerstag ab 20 Uhr") + "}";
+
+    public static string SquadMembers => $$$"""
+        {"data":[
+          {"id":"01USERWAHKE","slug":"wahke","name":"Wahke","avatar_url":"{{{Cdn}}}/avatars/wahke.png","role":{"id":"r1","name":"squad-leader","label":"Squad-Leader","color":"#E0324A"},"is_substitute":false,"minecraft":null},
+          {"id":"01U2","slug":"nyx","name":"Nyx","avatar_url":"{{{Cdn}}}/avatars/nyx.png","role":{"id":"r2","name":"member","label":"Member","color":"#F1EFEA"},"is_substitute":false,"minecraft":null},
+          {"id":"01U3","slug":"kaito","name":"Kaito","avatar_url":null,"role":{"id":"r2","name":"member","label":"Member","color":"#F1EFEA"},"is_substitute":false,"minecraft":null},
+          {"id":"01U4","slug":"blizzard","name":"Blizzard","avatar_url":"{{{Cdn}}}/avatars/blizzard.png","role":{"id":"r2","name":"member","label":"Member","color":"#F1EFEA"},"is_substitute":true,"minecraft":null}
+        ]}
+        """;
+
+    public static string SquadInternal => """
+        {"data":{"squad":{"id":"01SQ1","slug":"enemy-territory","name":"Enemy Territory","url":"https://rebelsofgaming.com/de/squads/enemy-territory"},
+          "forum":{"access":true,"board":{"name":"ET intern","slug":"et-intern"},"can_post":true,"url":"https://rebelsofgaming.com/de/forum/et-intern","new_url":null,"threads":[
+            {"id":"01T1","title":"Taktik für Supply – wer übernimmt die Engineers?","url":"https://rebelsofgaming.com/de/forum/t/01T1/taktik","author":"Nyx","replies":7,"pinned":true,"locked":false,"pending":false,"last_post_at":"2026-10-29T20:10:00Z","last_poster":"Wahke"},
+            {"id":"01T2","title":"Clanwar gegen [XYZ] am Samstag","url":"https://rebelsofgaming.com/de/forum/t/01T2/cw","author":"Kaito","replies":3,"pinned":false,"locked":false,"pending":false,"last_post_at":"2026-10-28T18:00:00Z","last_poster":"Kaito"}]},
+          "conversation":{"access":true,"id":"01CONV2","url":"https://rebelsofgaming.com/de/messages/01CONV2","unread":true,"last_message":{"author":"Kaito","excerpt":"Training morgen fällt aus.","at":"2026-10-30T06:41:00Z","mine":false}},
+          "events":{"access":true,"url":"https://rebelsofgaming.com/de/events","items":[
+            {"id":"01EV1","title":"Scrim-Abend CS2","type":"training","type_label":"Training","event_type":{"key":"training"},"color":"#3DDC84","starts_at":"2026-11-03T19:00:00Z","ends_at":"2026-11-03T21:00:00Z","mandatory":true,"location":"ET: Sniper","yes":5,"my_rsvp":"yes"}]},
+          "downloads":{"access":true,"url":"https://rebelsofgaming.com/de/downloads","items":[
+            {"slug":"et-config","title":"ET-Config für Clanwars","visibility":"squad","visibility_label":"Squad","version":"2.1","size":2048,"updated_at":"2026-10-20T10:00:00Z","url":"https://rebelsofgaming.com/de/downloads/et-config"}]},
+          "albums":{"access":true,"url":"https://rebelsofgaming.com/de/gallery","items":[
+            {"slug":"lan-2026","title":"LAN 2026","visibility":"squad","items":42,"cover":null,"url":"https://rebelsofgaming.com/de/gallery/lan-2026"}]}},
+         "meta":{"missing_scopes":["downloads:read"]}}
+        """;
+
+    public static string Servers => """
+        {"data":[
+          {"id":"01SV1","slug":"et-sniper","name":"RoG ET: Sniper","description":null,"game":{"id":"g1","name":"Wolfenstein: Enemy Territory","short":"ET"},"squad":{"id":"01SQ1","slug":"enemy-territory","name":"Enemy Territory"},
+           "address":"et.rogclan.de:27960","query_type":"quake3","connect_url":"et://et.rogclan.de:27960","visibility":"public",
+           "live":{"online":true,"name":"RoG Sniper","map":"supply","players":9,"max_players":20,"passworded":false,"player_list":[{"name":"Nyx","score":42,"ping":28,"member":{"name":"Nyx"}},{"name":"^1Kai^7to","score":30,"ping":35,"member":{"name":"Kaito"}},{"name":"Gast","score":12,"ping":80,"member":null}]},"control":null,"provisioning":null},
+          {"id":"01SV2","slug":"cs2-retake","name":"RoG CS2: Retake","description":null,"game":{"id":"g2","name":"Counter-Strike 2","short":"CS2"},"squad":{"id":"01SQ2","slug":"counter-strike-2","name":"Counter-Strike 2"},
+           "address":"cs.rogclan.de:27015","query_type":"source","connect_url":"steam://connect/cs.rogclan.de:27015","visibility":"public",
+           "live":{"online":true,"name":"RoG Retake","map":"de_mirage","players":4,"max_players":10,"passworded":true,"player_list":null},"control":null,"provisioning":null},
+          {"id":"01SV3","slug":"rog-mc","name":"RoG Minecraft Netzwerk","description":null,"game":{"id":"g3","name":"Minecraft","short":"MC"},"squad":null,
+           "address":"mc.rogclan.de:25565","query_type":"minecraft","connect_url":null,"visibility":"public",
+           "live":{"online":true,"name":"RoG MC","map":null,"players":0,"max_players":100,"passworded":false,"player_list":null},"control":null,"provisioning":null},
+          {"id":"01SV4","slug":"rtcw","name":"RoG RtCW Classic","description":null,"game":{"id":"g4","name":"Return to Castle Wolfenstein","short":"RtCW"},"squad":null,
+           "address":"rtcw.rogclan.de:27960","query_type":"quake3","connect_url":"wolf://rtcw.rogclan.de:27960","visibility":"public",
+           "live":{"online":false,"name":null,"map":null,"players":0,"max_players":0,"passworded":false,"player_list":null},"control":null,"provisioning":null}
+        ],"meta":{"per_page":50,"next_cursor":null}}
+        """;
+
+    public static string Members => $$$"""
+        {"data":[
+          {{{Member("01USERWAHKE", "wahke", "Wahke", "owner", "Owner", "#D4AE3C", "online", null, "Enemy Territory")}}},
+          {{{Member("01U2", "nyx", "Nyx", "member", "Member", "#F1EFEA", "voice", "Discord: Talk 1", "Counter-Strike 2")}}},
+          {{{Member("01U3", "kaito", "Kaito", "moderator", "Moderator", "#3DDC84", "server", "RoG ET: Sniper", "Enemy Territory")}}},
+          {{{Member("01U4", "blizzard", "Blizzard", "member", "Member", "#F1EFEA", "ingame", "Valorant", "Valorant")}}},
+          {{{Member("01U5", "sariela", "Sariela", "owner", "Owner", "#D4AE3C", null, null, "Minecraft")}}},
+          {{{Member("01U6", "fitti", "Fitti", "trial", "Trial", "#A8ACB6", null, null, null)}}}
+        ],"meta":{"per_page":40,"next_cursor":"MEMBERS2"}}
+        """;
+
+    public static string MemberProfile => $$$"""
+        {"data":{"id":"01U2","slug":"nyx","name":"Nyx","avatar_url":"{{{Cdn}}}/avatars/nyx.png","rank":{"id":"r","name":"member","label":"Member","color":"#E0324A"},
+          "status":"voice","activity":{"label":"Discord: Talk 1"},"last_seen_at":"2026-10-30T07:58:00Z","joined_at":"2021-05-14T18:00:00Z",
+          "squads":[{"id":"01SQ2","slug":"counter-strike-2","name":"Counter-Strike 2"},{"id":"01SQ1","slug":"enemy-territory","name":"Enemy Territory"}],
+          "roles":null,
+          "badges":[{"name":"Gründungsmitglied","description":"Seit 2020 dabei","color":"#D4AE3C"},{"name":"Turniersieger","description":"ET-Cup 2025","color":"#E0324A"},{"name":"Helfer","description":null,"color":"#3DDC84"}],
+          "profile":{"bio":"Entry-Fragger in CS2, Engineer in ET. Organisiere die Scrim-Abende und bin fast jeden Abend im Voice.","motto":"Erst das Objective, dann der Spaß.",
+            "banner":{"url":"{{{Cdn}}}/banners/nyx.png","url_small":"{{{Cdn}}}/banners/nyx-small.png"},"city":"Trier","country":"Deutschland",
+            "platform_ids":[{"name":"Steam","handle":"nyx_rog"},{"name":"Faceit","handle":"NyxROG"}],"rebel_coins":{"balance":1250,"streak":4,"best_streak":12},"minecraft":null} } }
+        """;
+
+    public static string Team => $$$"""
+        {"data":[
+          {"id":"tg1","name":"Clanleitung","description":"Entscheidet über Richtung, Finanzen und Aufnahmen.","members":[
+            {"id":"01U5","slug":"sariela","name":"Sariela","avatar_url":"{{{Cdn}}}/avatars/sariela.png","role":{"id":"r","name":"owner","label":"Owner","color":"#D4AE3C"},"squads":[],"responsibility":"Finanzen"},
+            {"id":"01USERWAHKE","slug":"wahke","name":"Wahke","avatar_url":"{{{Cdn}}}/avatars/wahke.png","role":{"id":"r","name":"owner","label":"Owner","color":"#D4AE3C"},"squads":[],"responsibility":"Technik und Server"}]},
+          {"id":"tg2","name":"Moderation","description":null,"members":[
+            {"id":"01U3","slug":"kaito","name":"Kaito","avatar_url":null,"role":{"id":"r","name":"moderator","label":"Moderator","color":"#3DDC84"},"squads":[],"responsibility":null}]}
+        ]}
+        """;
+
+    public static string Games => """
+        {"data":[
+          {"id":"g1","slug":"et","name":"Wolfenstein: Enemy Territory","short":"ET","platform":"pc","active":true,"genre":"Shooter","emoji":null,"clan_tag":"RoG|","header":null,"links":[{"label":"ET: Legacy","url":"https://www.etlegacy.com","short_url":null,"code":null}]},
+          {"id":"g2","slug":"cs2","name":"Counter-Strike 2","short":"CS2","platform":"pc","active":true,"genre":"Shooter","emoji":null,"clan_tag":null,"header":null,"links":[{"label":"Steam","url":"https://store.steampowered.com/app/730","short_url":null,"code":null}]},
+          {"id":"g3","slug":"mc","name":"Minecraft","short":"MC","platform":"pc","active":true,"genre":"Sandbox","emoji":null,"clan_tag":null,"header":null,"links":[]}
+        ]}
+        """;
+
+    public static string EventDetail =>
+        "{\"data\":" + Event("01EV1", "Scrim-Abend CS2", "2026-11-03T19:00:00Z", "2026-11-03T21:00:00Z")
+            .Replace("\"description\":null", "\"description\":\"Wir spielen drei Maps gegen [XYZ]. Bitte 15 Minuten vorher im TeamSpeak sein.\"", StringComparison.Ordinal)
+            .Replace("\"my_rsvp\":null", "\"my_rsvp\":{\"status\":\"yes\",\"comment\":null}", StringComparison.Ordinal)
+            .Replace("\"location\":{\"type\":null,\"value\":null,\"label\":null,\"server\":null}",
+                "\"location\":{\"type\":\"server\",\"value\":null,\"label\":\"RoG CS2: Retake\",\"server\":{\"id\":\"01SV2\",\"slug\":\"cs2-retake\",\"name\":\"RoG CS2: Retake\",\"game\":\"Counter-Strike 2\",\"address\":\"cs.rogclan.de:27015\",\"connect_url\":\"steam://connect/cs.rogclan.de:27015\",\"online\":true,\"map\":\"de_mirage\",\"players\":4,\"max_players\":10}}", StringComparison.Ordinal)
+        + "}";
+
+    /// <summary>Termin ohne eigene Antwort (Gastmodus).</summary>
+    public static string EventItem(string id) => Event(id, "Clan-Abend November", "2026-11-06T19:30:00Z", null);
+
+    public static string EventParticipants => """
+        {"data":{"yes":[{"id":"01U2","slug":"nyx","name":"Nyx","absent":false,"comment":null},{"id":"01U3","slug":"kaito","name":"Kaito","absent":false,"comment":null}],
+          "maybe":[{"id":"01U4","slug":"blizzard","name":"Blizzard","absent":false,"comment":"Wenn ich rechtzeitig da bin"}],
+          "no":[],"open":[{"id":"01U5","slug":"sariela","name":"Sariela","absent":true,"comment":null}]}}
+        """;
+
+    public static string Rules => """
+        {"data":[{"id":"01R1","slug":"clan","scope":"clan","title":"Clanregeln – Rebels of Gaming","intro":"Sei fair, sei respektvoll, hab Spaß.","visibility":"public","requires_acceptance":true,"version":1,"accepted":false,"updated_at":"2026-10-11T12:10:09Z"},
+          {"id":"01R2","slug":"enemy-territory","scope":"game","title":"Server-Regeln Enemy Territory","intro":null,"visibility":"public","requires_acceptance":false,"version":3,"accepted":null,"updated_at":"2026-10-01T12:00:00Z"}]}
+        """;
+
+    public static string RulesDetail => """
+        {"data":{"id":"01R1","slug":"clan","scope":"clan","title":"Clanregeln – Rebels of Gaming","intro":"Diese Regeln gelten für alle Mitglieder, Trials und Gäste – auf Website, Discord, TeamSpeak und unseren Gameservern.","visibility":"public","requires_acceptance":true,"version":1,"accepted":false,"updated_at":"2026-10-11T12:10:09Z",
+          "sections":[
+            {"number":1,"anchor":"regel-1","title":"Geltungsbereich","body":"","html":"<ul><li>Die Clanregeln gelten auf <strong>allen RoG-Plattformen</strong>.</li><li>Spiel- und Squad-Regeln ergänzen dieses Regelwerk.</li></ul>","important":false},
+            {"number":2,"anchor":"regel-2","title":"Respekt","body":"","html":"<p>Beleidigungen, Rassismus und Hetze haben bei uns <strong>keinen Platz</strong>. Wer das ignoriert, fliegt.</p>","important":true},
+            {"number":3,"anchor":"regel-3","title":"Fair Play","body":"","html":"<p>Cheats, Exploits und Smurfing sind verboten. Im Zweifel fragst du die Squad-Leitung.</p>","important":false}]}}
+        """;
+
+    public static string Pages => """
+        {"data":[{"slug":"about","title":"Über uns","sort":1},{"slug":"partners","title":"Partner","sort":2}]}
+        """;
+
+    public static string Legal => """
+        {"data":[{"type":"privacy","title":"Datenschutzerklärung","version":26,"published_at":"2026-10-29T07:57:29Z","requires_acceptance":false,"acceptable":true},
+          {"type":"imprint","title":"Impressum","version":3,"published_at":"2026-09-01T07:00:00Z","requires_acceptance":false,"acceptable":false}]}
+        """;
+
+    public static string Search => """
+        {"data":[
+          {"key":"squads","label":"Squads","hits":[{"title":"Enemy Territory","excerpt":"Objective-Spezialisten seit Tag eins","url":"https://rebelsofgaming.com/de/squads/enemy-territory","meta":null}],"failed":false},
+          {"key":"news","label":"News","hits":[{"title":"Enemy Territory: Neuer Server mit Map-Rotation","excerpt":"Ab sofort läuft unser neuer <b>ET</b>-Server …","url":"https://rebelsofgaming.com/de/news/neuer-et-server","meta":"27.10.2026"}],"failed":false},
+          {"key":"forum","label":"Forum","hits":[{"title":"Taktik für Supply","excerpt":"Wer übernimmt die Engineers?","url":"https://rebelsofgaming.com/de/forum/t/01T1/taktik","meta":"Nyx"}],"failed":false},
+          {"key":"wiki","label":"Wiki","hits":[],"failed":true}
+        ]}
+        """;
+
+    private static string Squad(string id, string slug, string name, string tagline, string gameShort, string game, string recruiting, int members, string leader, string? description = null, string? training = null)
+    {
+        var desc = description is null ? "null" : System.Text.Json.JsonSerializer.Serialize(description);
+        var train = training is null ? "\"\"" : System.Text.Json.JsonSerializer.Serialize(training);
+        return $$$"""
+            {"id":"{{{id}}}","slug":"{{{slug}}}","name":"{{{name}}}","tagline":"{{{tagline}}}","description":{{{desc}}},"training_times":{{{train}}},"recruiting_status":"{{{recruiting}}}",
+             "header":{"url":"{{{Cdn}}}/squads/{{{slug}}}-header.png","variants":[]},"logo":{"url":"{{{Cdn}}}/squads/{{{slug}}}-logo.png","variants":[]},
+             "game":{"id":"g-{{{slug}}}","name":"{{{game}}}","short":"{{{gameShort}}}"},"members_count":{{{members}}},"leader":{"id":"l","slug":"{{{leader.ToLowerInvariant()}}}","name":"{{{leader}}}"},
+             "clan":{"tag":"RoG|","name":"Rebels of Gaming","level":7,"requirements":null},
+             "links":[{"label":"Discord-Einladung","url":"https://discord.gg/rog","short_url":null,"code":null},{"label":"Ref-Link ET: Legacy","url":"https://www.etlegacy.com","short_url":null,"code":"ROG2026"}],"archived_at":null}
+            """;
+    }
+
+    private static string Member(string id, string slug, string name, string rankName, string rankLabel, string color, string? status, string? activity, string? squad)
+    {
+        var statusJson = status is null ? "null" : $"\"{status}\"";
+        var activityJson = activity is null ? "null" : $$$"""{"label":"{{{activity}}}"}""";
+        var squads = squad is null ? "[]" : $$$"""[{"id":"s","slug":"s","name":"{{{squad}}}"}]""";
+        var avatar = slug is "kaito" or "fitti" ? "null" : $"\"{Cdn}/avatars/{slug}.png\"";
+        return $$$"""
+            {"id":"{{{id}}}","slug":"{{{slug}}}","name":"{{{name}}}","avatar_url":{{{avatar}}},"rank":{"id":"r","name":"{{{rankName}}}","label":"{{{rankLabel}}}","color":"{{{color}}}"},
+             "status":{{{statusJson}}},"activity":{{{activityJson}}},"last_seen_at":null,"joined_at":"2021-01-01T00:00:00Z","squads":{{{squads}}} }
+            """;
+    }
 
     private static string Event(string id, string title, string starts, string? ends)
     {

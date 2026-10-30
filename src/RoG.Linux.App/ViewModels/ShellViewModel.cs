@@ -30,19 +30,19 @@ public sealed partial class ShellViewModel : ObservableObject
         [
             Item("Nav_Home", "Shell_NavHome.Content", "IconHome", string.Empty, true),
             Item("Nav_News", "Shell_NavNews.Content", "IconNews", "news", true),
-            Item("Nav_Squads", "Shell_NavSquads.Content", "IconSquads", "squads", false),
+            Item("Nav_Squads", "Shell_NavSquads.Content", "IconSquads", "squads", true),
             Item("Nav_Messages", "Shell_NavMessages.Content", "IconMessages", "messages", true),
             Item("Nav_Friends", "Shell_NavFriends.Content", "IconFriends", "friends", false),
-            Item("Nav_Calendar", "Shell_NavCalendar.Content", "IconCalendar", "events", false),
-            Item("Nav_Servers", "Shell_NavServers.Content", "IconServers", "servers", false),
+            Item("Nav_Calendar", "Shell_NavCalendar.Content", "IconCalendar", "events", true),
+            Item("Nav_Servers", "Shell_NavServers.Content", "IconServers", "servers", true),
             Item("Nav_Forum", "Shell_NavForum.Content", "IconForum", "forum", false),
             Item("Nav_Wiki", "Shell_NavWiki.Content", "IconWiki", string.Empty, false),
             Item("Nav_Tools", "Shell_NavTools.Content", "IconTools", "tools", false),
-            Item("Nav_Members", "Shell_NavMembers.Content", "IconMembers", "members", false),
+            Item("Nav_Members", "Shell_NavMembers.Content", "IconMembers", "members", true),
             Item("Nav_Matches", "Shell_NavMatches.Content", "IconMatches", "matches", false),
             Item("Nav_Media", "Shell_NavMedia.Content", "IconMedia", "gallery", false),
             Item("Nav_Uploads", "Shell_NavUploads.Content", "IconUploads", "uploads", false),
-            Item("Nav_Info", "Shell_NavInfo.Content", "IconInfo", "about", false),
+            Item("Nav_Info", "Shell_NavInfo.Content", "IconInfo", "about", true),
         ];
         FooterItems =
         [
@@ -50,6 +50,7 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_Account", "Shell_NavAccount.Content", "IconAccount", "settings/account", true),
             Item("Nav_Settings", "Linux_NavSettings", "IconSettings", "settings", true),
         ];
+        SearchItem = Item("Nav_Search", "Linux_SearchTitle", "IconSearch", "search", true);
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
         _services.Navigator = Navigate;
     }
@@ -57,6 +58,11 @@ public sealed partial class ShellViewModel : ObservableObject
     public ObservableCollection<NavItem> MainItems { get; }
 
     public ObservableCollection<NavItem> FooterItems { get; }
+
+    /// <summary>Globale Suche (Strg+K, Lupe in der Seitenleiste) – eigene Seite, nicht in der Liste der Bereiche.</summary>
+    public NavItem SearchItem { get; }
+
+    public string SearchText => _services.T("Shell_Search.PlaceholderText");
 
     public string MenuToggleText => _services.T("Linux_MenuToggle");
 
@@ -168,9 +174,14 @@ public sealed partial class ShellViewModel : ObservableObject
             return;
         }
 
-        foreach (var i in MainItems.Concat(FooterItems))
+        foreach (var i in AllItems)
         {
             i.IsSelected = ReferenceEquals(i, item);
+        }
+
+        if (CurrentPage is ServersViewModel servers && item.Key != "Nav_Servers")
+        {
+            servers.Pause();
         }
 
         CurrentItem = item;
@@ -193,7 +204,7 @@ public sealed partial class ShellViewModel : ObservableObject
     /// <summary>Bereich per Schlüssel öffnen (Tastenkürzel, Deep Links, Tests).</summary>
     public bool NavigateTo(string key)
     {
-        var item = MainItems.Concat(FooterItems).FirstOrDefault(i => i.Key == key);
+        var item = AllItems.FirstOrDefault(i => i.Key == key);
         Navigate(item);
         return item is not null;
     }
@@ -207,9 +218,9 @@ public sealed partial class ShellViewModel : ObservableObject
             return false;
         }
 
-        if (route.Key is { Length: > 0 } slug && CurrentPage is NewsViewModel news)
+        if (route.Key is { Length: > 0 } key2 && CurrentPage is IRoutablePage page)
         {
-            news.Open(slug);
+            page.Open(key2);
         }
 
         return true;
@@ -239,13 +250,22 @@ public sealed partial class ShellViewModel : ObservableObject
         [AppSection.Notifications] = "Nav_Notifications",
         [AppSection.Account] = "Nav_Account",
         [AppSection.Settings] = "Nav_Settings",
+        [AppSection.Search] = "Nav_Search",
     };
+
+    private IEnumerable<NavItem> AllItems => MainItems.Concat(FooterItems).Append(SearchItem);
 
     private object CreatePage(NavItem item) => item.Key switch
     {
         "Nav_Home" => new HomeViewModel(_services),
         "Nav_Settings" => new SettingsViewModel(_services),
         "Nav_News" => new NewsViewModel(_services),
+        "Nav_Squads" => new SquadsViewModel(_services),
+        "Nav_Members" => new MembersViewModel(_services),
+        "Nav_Servers" => new ServersViewModel(_services),
+        "Nav_Calendar" => new EventsViewModel(_services),
+        "Nav_Info" => new InfoViewModel(_services),
+        "Nav_Search" => new SearchViewModel(_services),
         "Nav_Messages" => new MessagesViewModel(_services, ShowLogin),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
         _ => new PlaceholderViewModel(_services, item),

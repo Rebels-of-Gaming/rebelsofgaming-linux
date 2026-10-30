@@ -60,7 +60,7 @@ public class ScreenshotTests
     public async Task Placeholder_french() =>
         await Shoot("placeholder_fr_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true, language: "fr"), shell =>
         {
-            shell.NavigateTo("Nav_Servers");
+            shell.NavigateTo("Nav_Forum");
             return Settle(100);
         });
 
@@ -125,6 +125,147 @@ public class ScreenshotTests
             shell.NavigateTo("Nav_Account");
             return Settle(400);
         });
+
+    // ---- Stufe 2 ----
+
+    [AvaloniaFact]
+    public async Task Squads_steam_deck() => await Shoot("squads_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenSquad(shell, SquadTab.About));
+
+    [AvaloniaFact]
+    public async Task Squads_lineup() => await Shoot("squads_lineup_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenSquad(shell, SquadTab.Lineup));
+
+    [AvaloniaFact]
+    public async Task Squads_servers() => await Shoot("squads_servers_1440x900", 1440, 900, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenSquad(shell, SquadTab.Servers));
+
+    [AvaloniaFact]
+    public async Task Squads_internal() => await Shoot("squads_internal_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenSquad(shell, SquadTab.Internal));
+
+    [AvaloniaFact]
+    public async Task Squads_narrow() => await Shoot("squads_narrow_480x800", 480, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenSquad(shell, SquadTab.About));
+
+    [AvaloniaFact]
+    public async Task Games() =>
+        await Shoot("games_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), async shell =>
+        {
+            shell.NavigateTo("Nav_Squads");
+            var squads = Assert.IsType<SquadsViewModel>(shell.CurrentPage);
+            await ViewModelTests.WaitUntil(() => squads.ShowContent);
+            squads.GamesMode = true;
+            await ViewModelTests.WaitUntil(() => squads.Games.ShowContent);
+            await Settle(300);
+        });
+
+    [AvaloniaFact]
+    public async Task Members_steam_deck() => await Shoot("members_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenProfile, AssertSidebarFits);
+
+    [AvaloniaFact]
+    public async Task Members_narrow() => await Shoot("members_narrow_480x900", 480, 900, await TestServices.CreateAsync(TestTokens.Wahke), OpenProfile);
+
+    [AvaloniaFact]
+    public async Task Members_list_narrow() =>
+        await Shoot("members_list_narrow_480x800", 480, 800, await TestServices.CreateAsync(TestTokens.Wahke), async shell =>
+        {
+            shell.NavigateTo("Nav_Members");
+            var members = Assert.IsType<MembersViewModel>(shell.CurrentPage);
+            await ViewModelTests.WaitUntil(() => members.ShowContent);
+            await Settle(400);
+        });
+
+    [AvaloniaFact]
+    public async Task Members_light_theme() =>
+        await Shoot("members_light_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), async shell =>
+        {
+            Avalonia.Application.Current!.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Light;
+            await OpenProfile(shell);
+        });
+
+    [AvaloniaFact]
+    public async Task Servers_steam_deck() => await Shoot("servers_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), OpenServers);
+
+    [AvaloniaFact]
+    public async Task Servers_narrow() => await Shoot("servers_narrow_480x900", 480, 900, await TestServices.CreateAsync(guest: true), OpenServers);
+
+    [AvaloniaFact]
+    public async Task Calendar_steam_deck() => await Shoot("calendar_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenEvent);
+
+    [AvaloniaFact]
+    public async Task Calendar_month() =>
+        await Shoot("calendar_month_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), async shell =>
+        {
+            await OpenEvent(shell);
+            var events = Assert.IsType<EventsViewModel>(shell.CurrentPage);
+            events.MonthMode = true;
+            await ViewModelTests.WaitUntil(() => events.MonthDays.Count == 42);
+            await Settle(300);
+        });
+
+    [AvaloniaFact]
+    public async Task Calendar_narrow() => await Shoot("calendar_narrow_480x900", 480, 900, await TestServices.CreateAsync(TestTokens.Wahke), OpenEvent);
+
+    [AvaloniaFact]
+    public async Task Info_steam_deck() =>
+        await Shoot("info_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), async shell =>
+        {
+            Assert.True(shell.OpenDeepLink(new Uri("rog://info/rules")));
+            var info = Assert.IsType<InfoViewModel>(shell.CurrentPage);
+            await ViewModelTests.WaitUntil(() => info.Detail.ShowContent);
+            await Settle(300);
+        });
+
+    [AvaloniaFact]
+    public async Task Search_steam_deck() =>
+        await Shoot("search_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true, language: "en"), async shell =>
+        {
+            Assert.True(shell.OpenDeepLink(new Uri("rog://search?q=et")));
+            var search = Assert.IsType<SearchViewModel>(shell.CurrentPage);
+            await ViewModelTests.WaitUntil(() => search.ShowContent);
+            await Settle(300);
+        });
+
+    private static async Task OpenSquad(ShellViewModel shell, SquadTab tab)
+    {
+        // Profil für „Intern“ (Line-up enthält Wahke)
+        shell.NavigateTo("Nav_Squads");
+        var squads = Assert.IsType<SquadsViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => squads.ShowContent);
+        squads.Selected = squads.Items[0];
+        await ViewModelTests.WaitUntil(() => squads.Detail.ShowContent && squads.Detail.HasHeader);
+        squads.Detail.Tab = tab;
+        if (tab == SquadTab.Internal)
+        {
+            await ViewModelTests.WaitUntil(() => squads.Detail.Internal.ShowContent);
+        }
+
+        await Settle(400);
+    }
+
+    private static async Task OpenProfile(ShellViewModel shell)
+    {
+        shell.NavigateTo("Nav_Members");
+        var members = Assert.IsType<MembersViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => members.ShowContent);
+        members.Selected = members.Items[1];
+        await ViewModelTests.WaitUntil(() => members.Detail.ShowContent && members.Detail.HasBanner);
+        await Settle(400);
+    }
+
+    private static async Task OpenServers(ShellViewModel shell)
+    {
+        shell.NavigateTo("Nav_Servers");
+        var servers = Assert.IsType<ServersViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => servers.ShowContent);
+        await servers.Servers[1].ConnectCommand.ExecuteAsync(null);
+        await Settle(300);
+        servers.Pause();
+    }
+
+    private static async Task OpenEvent(ShellViewModel shell)
+    {
+        Assert.True(shell.OpenDeepLink(new Uri("rog://events/01EV1")));
+        var events = Assert.IsType<EventsViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => events.Detail.ShowContent && events.Detail.HasParticipants);
+        await Settle(300);
+    }
 
     private static async Task WaitForHome(ShellViewModel shell)
     {

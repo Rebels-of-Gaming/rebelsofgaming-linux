@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.SearchView"
+             x:DataType="vm:SearchViewModel">
+  <!-- Lesebreite links ausgerichtet: Spalte mit Höchstbreite, Rest bleibt frei -->
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" MaxWidth="768" />
+      <ColumnDefinition Width="Auto" />
+    </Grid.ColumnDefinitions>
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="12" Margin="24,24,24,12">
+      <TextBlock Classes="display" Text="{l:T Linux_SearchTitle, Upper=True}" />
+      <TextBox x:Name="QueryBox" Text="{Binding Query}" PlaceholderText="{l:T Shell_Search.PlaceholderText}"
+               AutomationProperties.Name="{l:T Shell_Search.AutomationProperties.Name}">
+        <TextBox.InnerLeftContent>
+          <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" Margin="10,0,0,0" Foreground="{DynamicResource RoGMutedBrush}" />
+        </TextBox.InnerLeftContent>
+        <TextBox.KeyBindings>
+          <KeyBinding Gesture="Enter" Command="{Binding SearchNowCommand}" />
+        </TextBox.KeyBindings>
+      </TextBox>
+      <TextBlock Classes="muted" Text="{Binding Header}" />
+    </StackPanel>
+    <Panel>
+      <TextBlock Classes="muted" Text="{l:T Linux_SearchHint}" IsVisible="{Binding ShowHint}" Margin="24,8" />
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding ShowEmpty}"
+                   EmptyText="{l:T SearchPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Rows}" Margin="16,0,24,32">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="4" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:SearchRowViewModel">
+              <Panel>
+                <TextBlock Classes="group" Text="{Binding Title}" IsVisible="{Binding IsGroup}" />
+                <Button Classes="row" Background="{DynamicResource RoGBg2Brush}" Padding="14,10" IsVisible="{Binding IsHit}"
+                        Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding Title}">
+                  <StackPanel Spacing="2">
+                    <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" MaxLines="2" />
+                    <TextBlock Classes="muted small" Text="{Binding Excerpt}" IsVisible="{Binding HasExcerpt}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Classes="kicker" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" />
+                  </StackPanel>
+                </Button>
+              </Panel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+  </Grid>
+</UserControl>

@@ -1,0 +1,124 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.InfoView"
+             x:DataType="vm:InfoViewModel">
+
+  <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}">
+    <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="24,24,16,12">
+          <TextBlock Classes="display" Text="{l:T InfoPage_Title.Text}" />
+          <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                  ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+            <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+          </Button>
+        </Grid>
+        <Panel>
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T InfoPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+          <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Rows}" Margin="12,0,12,12" AutomationProperties.Name="{l:T InfoPage_List.AutomationProperties.Name}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="4" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:InfoRowViewModel">
+                  <Panel>
+                    <TextBlock Classes="group" Text="{Binding Title}" IsVisible="{Binding IsGroup}" />
+                    <Button Classes="row" Classes.selected="{Binding IsSelected}" Background="{DynamicResource RoGBg2Brush}" Padding="14,10"
+                            IsVisible="{Binding IsItem}" Command="{Binding SelectCommand}" AutomationProperties.Name="{Binding Title}">
+                      <Button.Styles>
+                        <Style Selector="Button.row.selected">
+                          <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
+                          <Setter Property="BorderThickness" Value="3,0,0,0" />
+                          <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+                        </Style>
+                      </Button.Styles>
+                      <StackPanel Spacing="2">
+                        <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" MaxLines="2" />
+                        <TextBlock Classes="muted small" Text="{Binding Subtitle}" IsVisible="{Binding HasSubtitle}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                        <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding NeedsAcceptance}">
+                          <PathIcon Data="{StaticResource IconAlert}" Width="12" Height="12" Foreground="{DynamicResource RoGGoldBrush}" />
+                          <TextBlock Classes="small" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding AcceptanceText}" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Button>
+                  </Panel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Panel>
+      </DockPanel>
+    </Border>
+
+    <Panel>
+      <TextBlock Classes="muted" Text="{l:T InfoPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsVisible="{Binding ShowSelectHint}" Margin="32" />
+      <c:StateView DataContext="{Binding Detail}" x:DataType="vm:InfoDetailViewModel"
+                   IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Detail.ShowContent}">
+        <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="32,24,32,40" HorizontalAlignment="Left" Spacing="16"
+                    DataContext="{Binding Detail}" x:DataType="vm:InfoDetailViewModel">
+          <Button Classes="secondary" HorizontalAlignment="Left"
+                  Command="{Binding $parent[UserControl].((vm:InfoViewModel)DataContext).CloseDetailCommand}"
+                  IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+              <TextBlock Text="{l:T Common_Back}" />
+            </StackPanel>
+          </Button>
+          <StackPanel Spacing="4">
+            <SelectableTextBlock Classes="title" Text="{Binding Title}" AutomationProperties.HeadingLevel="1" />
+            <TextBlock Classes="muted" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" />
+          </StackPanel>
+          <Border Classes="hint" IsVisible="{Binding NeedsAcceptance}">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="body" Text="{l:T Linux_RulesAcceptInBrowser}" />
+              <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding OpenInBrowserCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+                  <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Border>
+          <SelectableTextBlock Classes="body" Text="{Binding Intro}" IsVisible="{Binding HasIntro}" FontStyle="Italic" />
+          <ItemsControl ItemsSource="{Binding Sections}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Spacing="20" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:InfoSectionViewModel">
+                <Border BorderBrush="{DynamicResource RoGGoldBrush}" BorderThickness="0" Classes.important="{Binding Important}" Padding="0">
+                  <Border.Styles>
+                    <Style Selector="Border.important">
+                      <Setter Property="BorderThickness" Value="3,0,0,0" />
+                      <Setter Property="Padding" Value="14,0,0,0" />
+                    </Style>
+                  </Border.Styles>
+                  <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasTitle}">
+                      <PathIcon Data="{StaticResource IconStar}" Width="14" Height="14" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Important}" />
+                      <TextBlock Classes="section" Foreground="{DynamicResource RoGInkBrush}" Text="{Binding Title}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <c:RichContentView Document="{Binding Content}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding OpenInBrowserCommand}" IsVisible="{Binding HasWebUrl}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+              <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </c:ListDetailPanel>
+</UserControl>

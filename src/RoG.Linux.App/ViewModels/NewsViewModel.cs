@@ -10,7 +10,7 @@ using RoG.Linux.App.Services;
 namespace RoG.Linux.App.ViewModels;
 
 /// <summary>News: Liste (Cursor, „Mehr laden“) und Artikel daneben bzw. darüber – öffentlich, auch im Gastmodus.</summary>
-public sealed partial class NewsViewModel : LoadableViewModel
+public sealed partial class NewsViewModel : LoadableViewModel, IDetailPage, IRoutablePage
 {
     private readonly NewsService _news;
     private string? _cursor;
@@ -73,23 +73,23 @@ public sealed partial class NewsViewModel : LoadableViewModel
     }
 
     /// <summary>Artikel per Slug öffnen – aus der Liste, sonst direkt (älterer Artikel); vor dem Laden gemerkt.</summary>
-    public void Open(string slug)
+    public void Open(string key)
     {
-        ArgumentException.ThrowIfNullOrEmpty(slug);
-        if (Items.FirstOrDefault(i => i.Slug == slug) is { } item)
+        ArgumentException.ThrowIfNullOrEmpty(key);
+        if (Items.FirstOrDefault(i => i.Slug == key) is { } item)
         {
             IsLinkedDetailOpen = false;
             Selected = item;
         }
         else if (Items.Count == 0 && (IsLoading || !ShowContent))
         {
-            _pendingSlug = slug;
+            _pendingSlug = key;
         }
         else
         {
             Selected = null;
             IsLinkedDetailOpen = true;
-            _ = Detail.ShowAsync(slug);
+            _ = Detail.ShowAsync(key);
         }
     }
 
@@ -108,7 +108,7 @@ public sealed partial class NewsViewModel : LoadableViewModel
 
     /// <summary>Zurück zur Liste (schmales Fenster, Escape).</summary>
     [RelayCommand]
-    private void CloseDetail()
+    public void CloseDetail()
     {
         Selected = null;
         IsLinkedDetailOpen = false;

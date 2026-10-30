@@ -95,7 +95,7 @@ public class Stage1Tests
         var news = Assert.IsType<NewsViewModel>(shell.CurrentPage);
         await ViewModelTests.WaitUntil(() => news.Detail.ShowContent);
         Assert.True(shell.OpenDeepLink(new Uri("rog://servers")));
-        Assert.IsType<PlaceholderViewModel>(shell.CurrentPage);
+        Assert.IsType<ServersViewModel>(shell.CurrentPage);
 
         Assert.False(shell.OpenDeepLink(new Uri("rog://auth/callback?code=x")));
         Assert.False(shell.OpenDeepLink(new Uri("rog://admin")));

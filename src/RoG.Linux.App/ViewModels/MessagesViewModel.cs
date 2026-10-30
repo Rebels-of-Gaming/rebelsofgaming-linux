@@ -11,8 +11,10 @@ namespace RoG.Linux.App.ViewModels;
 /// Nachrichten: Unterhaltungen (Suche, ungelesen) und Verlauf daneben. Im Spike nur lesen; Senden, Echtzeit und
 /// Pop-out-Fenster folgen in Stufe 4 (die Logik dafür steht schon im Kern: <see cref="MessageService.SendAsync"/>).
 /// </summary>
-public sealed partial class MessagesViewModel(AppServices services, Action requestSignIn) : LoadableViewModel(services)
+public sealed partial class MessagesViewModel(AppServices services, Action requestSignIn) : LoadableViewModel(services), IDetailPage, IRoutablePage
 {
+    private string? _pendingId;
+
     private readonly MessageService _messages = new(services.Api.Client);
     private int _searchVersion;
 
@@ -34,9 +36,14 @@ public sealed partial class MessagesViewModel(AppServices services, Action reque
     [ObservableProperty]
     public partial ChatViewModel? Chat { get; set; }
 
-    public bool IsDetailOpen => Selected is not null;
+    /// <summary>Unterhaltung per Link geöffnet, die nicht in der geladenen Liste steht.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDetailOpen), nameof(ShowSelectHint))]
+    public partial bool DetailForced { get; set; }
 
-    public bool ShowSelectHint => Selected is null && !IsGuest;
+    public bool IsDetailOpen => Selected is not null || DetailForced;
+
+    public bool ShowSelectHint => !IsDetailOpen && !IsGuest;
 
     protected override bool HasData => Items.Count > 0;
 
@@ -63,12 +70,46 @@ public sealed partial class MessagesViewModel(AppServices services, Action reque
             Selected = Items.FirstOrDefault(i => i.Id == selected);
             _keepChat = false;
         }
+
+        if (_pendingId is { } pending)
+        {
+            _pendingId = null;
+            Open(pending);
+        }
+    }
+
+    /// <summary>Unterhaltung per ID öffnen (Benachrichtigung, Squad-Intern, <c>rog://messages/id</c>).</summary>
+    public void Open(string key)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(key);
+        if (Items.FirstOrDefault(i => i.Id == key) is { } item)
+        {
+            DetailForced = false;
+            Selected = item;
+        }
+        else if (Items.Count == 0 && (IsLoading || !ShowContent) && !IsGuest)
+        {
+            _pendingId = key;
+        }
+        else if (!IsGuest)
+        {
+            Selected = null;
+            DetailForced = true;
+            Chat = new ChatViewModel(Services, _messages, key, Services.T("MessagesPage_Title.Text"));
+            _ = Chat.LoadAsync();
+            _ = MarkReadAsync(key);
+        }
     }
 
     private bool _keepChat;
 
     partial void OnSelectedChanged(ConversationItemViewModel? value)
     {
+        if (value is not null)
+        {
+            DetailForced = false;
+        }
+
         if (value is null || _keepChat || Chat?.ConversationId == value.Id)
         {
             return;
@@ -96,9 +137,10 @@ public sealed partial class MessagesViewModel(AppServices services, Action reque
     }
 
     [RelayCommand]
-    private void CloseDetail()
+    public void CloseDetail()
     {
         Selected = null;
+        DetailForced = false;
         Chat = null;
     }
 

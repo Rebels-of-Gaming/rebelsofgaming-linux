@@ -1,0 +1,235 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.EventsView"
+             x:DataType="vm:EventsViewModel">
+  <UserControl.Resources>
+    <!-- Terminzeile: Uhrzeit, Typfarbe als Kante, Titel, Untertitel, eigene Antwort -->
+    <DataTemplate x:Key="EventRow" x:DataType="vm:EventRowViewModel">
+      <Grid ColumnDefinitions="56,4,*" Opacity="{Binding Opacity}" AutomationProperties.Name="{Binding AutomationName}">
+        <TextBlock Classes="body strong" Text="{Binding Time}" VerticalAlignment="Top" Margin="0,1,0,0" />
+        <Border Grid.Column="1" Width="4" CornerRadius="2" Background="{Binding TypeBrush}" />
+        <StackPanel Grid.Column="2" Spacing="2" Margin="12,0,0,0">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <PathIcon Data="{StaticResource IconAlert}" Width="13" Height="13" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Mandatory}"
+                      ToolTip.Tip="{l:T Events_Mandatory}" />
+            <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" MaxLines="2"
+                       TextDecorations="{Binding Cancelled, Converter={x:Static c:Converters.Strike}}" />
+          </StackPanel>
+          <TextBlock Classes="muted small" Text="{Binding Subtitle}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+          <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasRsvp}">
+            <PathIcon Data="{StaticResource IconCheck}" Width="12" Height="12" Foreground="{DynamicResource RoGGreenBrush}" />
+            <TextBlock Classes="small" Foreground="{DynamicResource RoGGreenBrush}" Text="{Binding RsvpText}" />
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}" ListWidth="440">
+    <!-- Liste bzw. Monat -->
+    <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,16,12">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="display" Text="{l:T EventsPage_Title.Text}" />
+            <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                    ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+              <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+            </Button>
+          </Grid>
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <ToggleButton Classes="segment" IsChecked="{Binding ListMode}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon Data="{StaticResource IconList}" Width="14" Height="14" />
+                <TextBlock Text="{l:T EventsPage_ModeList.Text, Upper=True}" />
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Classes="segment" IsChecked="{Binding MonthMode}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon Data="{StaticResource IconCalendar}" Width="14" Height="14" />
+                <TextBlock Text="{l:T EventsPage_ModeMonth.Text, Upper=True}" />
+              </StackPanel>
+            </ToggleButton>
+          </StackPanel>
+        </StackPanel>
+
+        <Panel>
+          <!-- Liste -->
+          <Panel IsVisible="{Binding ListMode}">
+            <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                         EmptyText="{l:T EventsPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+            <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                     IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T EventsPage_List.AutomationProperties.Name}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:EventRowViewModel">
+                  <StackPanel Spacing="8">
+                    <TextBlock Classes="group" Margin="0,0,0,2" Text="{Binding DayHeader}" IsVisible="{Binding ShowDayHeader}" />
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource EventRow}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Panel>
+
+          <!-- Monat -->
+          <ScrollViewer IsVisible="{Binding MonthMode}" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="16,0,16,16" Spacing="10">
+              <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                <Button Classes="icon" Command="{Binding PreviousMonthCommand}"
+                        ToolTip.Tip="{l:T EventsPage_PrevMonth.AutomationProperties.Name}" AutomationProperties.Name="{l:T EventsPage_PrevMonth.AutomationProperties.Name}">
+                  <PathIcon Data="{StaticResource IconChevronLeft}" Width="20" Height="20" />
+                </Button>
+                <TextBlock Grid.Column="1" Classes="section" FontSize="20" Foreground="{DynamicResource RoGInkBrush}" Text="{Binding MonthTitle}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Button Grid.Column="2" Classes="icon" Command="{Binding NextMonthCommand}"
+                        ToolTip.Tip="{l:T EventsPage_NextMonth.AutomationProperties.Name}" AutomationProperties.Name="{l:T EventsPage_NextMonth.AutomationProperties.Name}">
+                  <PathIcon Data="{StaticResource IconChevronRight}" Width="20" Height="20" />
+                </Button>
+                <Button Grid.Column="3" Classes="secondary" MinHeight="36" Padding="12,4" FontSize="15" Margin="6,0,0,0"
+                        Command="{Binding TodayCommand}" Content="{l:T Linux_Today}" />
+              </Grid>
+              <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsMonthLoading}" />
+              <Border Classes="error" IsVisible="{Binding HasMonthError}">
+                <TextBlock Classes="body" Text="{Binding MonthError}" />
+              </Border>
+              <ItemsControl ItemsSource="{Binding WeekdayNames}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><UniformGrid Columns="7" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Classes="muted small" Text="{Binding}" HorizontalAlignment="Center" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <ItemsControl ItemsSource="{Binding MonthDays}" AutomationProperties.Name="{Binding MonthTitle}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><UniformGrid Columns="7" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:MonthDayViewModel">
+                    <Button Classes="day" Classes.outside="{Binding IsOutside}" Classes.today="{Binding IsToday}" Classes.selected="{Binding IsSelected}"
+                            Command="{Binding SelectCommand}" AutomationProperties.Name="{Binding AutomationName}">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="{Binding Number}" FontSize="14" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding Dots}">
+                          <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate>
+                          </ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="IBrush">
+                              <Ellipse Width="6" Height="6" Fill="{Binding}" />
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="group" Text="{Binding DayTitle}" />
+              <TextBlock Classes="muted" Text="{l:T Linux_EventsDayEmpty}" IsVisible="{Binding HasNoDayEvents}" Margin="4,0" />
+              <ItemsControl ItemsSource="{Binding DayEvents}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:EventRowViewModel">
+                    <Button Classes="row" Background="{DynamicResource RoGBg2Brush}" Padding="12"
+                            Command="{Binding $parent[UserControl].((vm:EventsViewModel)DataContext).OpenRowCommand}" CommandParameter="{Binding}">
+                      <ContentControl Content="{Binding}" ContentTemplate="{StaticResource EventRow}" />
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </ScrollViewer>
+        </Panel>
+      </DockPanel>
+    </Border>
+
+    <!-- Termin -->
+    <Panel>
+      <TextBlock Classes="muted" Text="{l:T EventsPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsVisible="{Binding ShowSelectHint}" Margin="32" />
+      <c:StateView DataContext="{Binding Detail}" x:DataType="vm:EventDetailViewModel"
+                   IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Detail.ShowContent}">
+        <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="32,24,32,40" HorizontalAlignment="Left" Spacing="16"
+                    DataContext="{Binding Detail}" x:DataType="vm:EventDetailViewModel">
+          <Button Classes="secondary" HorizontalAlignment="Left"
+                  Command="{Binding $parent[UserControl].((vm:EventsViewModel)DataContext).CloseDetailCommand}"
+                  IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+              <TextBlock Text="{l:T Common_Back}" />
+            </StackPanel>
+          </Button>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="kicker" FontSize="14" Foreground="{Binding TypeBrush}" Text="{Binding TypeLabel}" />
+            <SelectableTextBlock Classes="title" Text="{Binding Title}" AutomationProperties.HeadingLevel="1" />
+            <Border Classes="chip red" HorizontalAlignment="Left" IsVisible="{Binding HasFlags}" Margin="0,4,0,0">
+              <TextBlock Text="{Binding Flags}" />
+            </Border>
+          </StackPanel>
+          <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <PathIcon Data="{StaticResource IconClock}" Width="18" Height="18" Foreground="{DynamicResource RoGMutedBrush}" />
+              <TextBlock Classes="body" Text="{Binding When}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasWhere}">
+              <PathIcon Data="{StaticResource IconMapMarker}" Width="18" Height="18" Foreground="{DynamicResource RoGMutedBrush}" />
+              <TextBlock Classes="body" Text="{Binding Where}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <PathIcon Data="{StaticResource IconGroup}" Width="18" Height="18" Foreground="{DynamicResource RoGMutedBrush}" />
+              <TextBlock Classes="body" Text="{Binding Counts}" />
+            </StackPanel>
+          </StackPanel>
+
+          <!-- Eigene Antwort: nur anzeigen (Antworten in der App ab Stufe 4) -->
+          <Border Classes="card" Padding="16,12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="section" Text="{l:T EventsPage_Rsvp.Text}" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconCheckCircle}" Width="18" Height="18" Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding HasMyRsvp}" />
+                <TextBlock Classes="body" Text="{Binding RsvpText}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <WrapPanel ItemSpacing="8" LineSpacing="8">
+            <Button Classes="secondary" Command="{Binding OpenInBrowserCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+                <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
+              </StackPanel>
+            </Button>
+            <Button Classes="secondary" Command="{Binding AddToCalendarCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconCalendar}" Width="16" Height="16" />
+                <TextBlock Text="{l:T EventsPage_AddToCalendar.Content}" />
+              </StackPanel>
+            </Button>
+          </WrapPanel>
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+
+          <SelectableTextBlock Classes="body" Text="{Binding Description}" IsVisible="{Binding HasDescription}" />
+
+          <StackPanel Spacing="8" IsVisible="{Binding HasServer}">
+            <TextBlock Classes="section" Text="{l:T SquadsPage_Servers.Text}" />
+            <ContentControl Content="{Binding Server}" />
+          </StackPanel>
+
+          <StackPanel Spacing="6" IsVisible="{Binding HasParticipants}">
+            <TextBlock Classes="section" Text="{l:T EventsPage_Participants.Text}" />
+            <SelectableTextBlock Classes="body" Text="{Binding ParticipantsText}" />
+          </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </c:ListDetailPanel>
+</UserControl>

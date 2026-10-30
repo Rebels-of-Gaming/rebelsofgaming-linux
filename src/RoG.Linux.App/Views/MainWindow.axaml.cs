@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.VisualTree;
 using RoG.Linux.App.Services;
 using RoG.Linux.App.ViewModels;
 
@@ -8,6 +9,7 @@ namespace RoG.Linux.App.Views;
 
 /// <summary>
 /// Hauptfenster. Tastatur: Strg+1 … Strg+9 öffnen die ersten Bereiche der Seitenleiste, Strg+, die Einstellungen,
+/// Strg+K die Suche, Strg+F das Suchfeld der Mitglieder,
 /// F5 aktualisiert, Escape schließt das Menü (schmale Ansicht) bzw. das Detail (Liste-Detail-Seiten), Tab/Umschalt+Tab
 /// und Pfeile wie gewohnt. Merkt Größe, Lage und „maximiert“ beim Schließen (<see cref="WindowPlacementService"/>).
 /// </summary>
@@ -103,6 +105,16 @@ public sealed partial class MainWindow : Window
         {
             e.Handled = shell.NavigateTo("Nav_Settings");
         }
+        else if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.K)
+        {
+            e.Handled = shell.NavigateTo("Nav_Search");
+            this.GetVisualDescendants().OfType<SearchView>().FirstOrDefault()?.FocusQuery();
+        }
+        else if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.F && shell.CurrentPage is MembersViewModel)
+        {
+            this.GetVisualDescendants().OfType<MembersView>().FirstOrDefault()?.FocusSearch();
+            e.Handled = true;
+        }
         else if (e.Key == Key.F5 && shell.CurrentPage is LoadableViewModel page)
         {
             _ = page.LoadAsync();
@@ -117,16 +129,10 @@ public sealed partial class MainWindow : Window
                 return;
             }
 
-            switch (shell.CurrentPage)
+            if (shell.CurrentPage is IDetailPage { IsDetailOpen: true } detail)
             {
-                case NewsViewModel news when news.IsDetailOpen:
-                    news.CloseDetailCommand.Execute(null);
-                    e.Handled = true;
-                    break;
-                case MessagesViewModel messages when messages.IsDetailOpen:
-                    messages.CloseDetailCommand.Execute(null);
-                    e.Handled = true;
-                    break;
+                detail.CloseDetail();
+                e.Handled = true;
             }
         }
     }

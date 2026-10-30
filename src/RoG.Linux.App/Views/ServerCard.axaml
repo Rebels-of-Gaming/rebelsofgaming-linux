@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ServerCard"
+             x:DataType="vm:ServerItemViewModel">
+  <!-- Server-Karte (Server-Seite, Squad, Termin): Status als Form + Text, Spieler, Adresse, Verbinden, Kopieren -->
+  <Border Classes="card" Padding="18,16" BorderBrush="{DynamicResource RoGLineBrush}"
+          Classes.highlight="{Binding IsHighlighted}" AutomationProperties.Name="{Binding Name}">
+    <Border.Styles>
+      <Style Selector="Border.card.highlight">
+        <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
+      </Style>
+    </Border.Styles>
+    <StackPanel Spacing="10">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="body strong" FontSize="17" Text="{Binding Name}" TextTrimming="CharacterEllipsis" MaxLines="2" />
+          <TextBlock Classes="muted small" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" TextTrimming="CharacterEllipsis" MaxLines="1" />
+        </StackPanel>
+        <!-- Status: grüner Punkt (online), leerer Ring (offline), Fragezeichen-Symbol (unbekannt) + Text -->
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top" Margin="12,2,0,0">
+          <Panel Width="12" Height="12" VerticalAlignment="Center">
+            <Ellipse Width="10" Height="10" Fill="{DynamicResource RoGStatusOnlineBrush}" IsVisible="{Binding IsOnline}" />
+            <Ellipse Width="10" Height="10" Stroke="{DynamicResource RoGStatusOfflineBrush}" StrokeThickness="2" IsVisible="{Binding IsOffline}" />
+            <PathIcon Data="{StaticResource IconAlert}" Width="12" Height="12" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding IsUnknown}" />
+          </Panel>
+          <TextBlock Classes="muted small" Classes.status-online="{Binding IsOnline}" Text="{Binding StatusText}" VerticalAlignment="Center" />
+        </StackPanel>
+      </Grid>
+
+      <StackPanel Spacing="4" IsVisible="{Binding ShowPlayers}">
+        <TextBlock Classes="body" FontSize="14" Text="{Binding PlayersText}" />
+        <ProgressBar Value="{Binding FillPercent}" Maximum="100" Height="4" MinHeight="4" CornerRadius="2" />
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <PathIcon Data="{StaticResource IconLock}" Width="14" Height="14" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Passworded}"
+                  ToolTip.Tip="{l:T Servers_Passworded}" />
+        <SelectableTextBlock Text="{Binding Address}" FontFamily="{StaticResource RoGMonoFont}" FontSize="13"
+                             Foreground="{DynamicResource RoGMutedBrush}" VerticalAlignment="Center" />
+      </StackPanel>
+
+      <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+        <Button Classes="primary" Command="{Binding ConnectCommand}" IsVisible="{Binding CanConnect}"
+                AutomationProperties.Name="{Binding ConnectAutomationName}" ToolTip.Tip="{Binding ConnectAutomationName}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource IconPlay}" Width="16" Height="16" />
+            <TextBlock Text="{l:T ServerCard_Connect.Content}" />
+          </StackPanel>
+        </Button>
+        <Button Classes="secondary" Command="{Binding CopyCommand}"
+                AutomationProperties.Name="{Binding CopyAutomationName}" ToolTip.Tip="{Binding CopyAutomationName}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource IconCopy}" Width="16" Height="16" />
+            <TextBlock Text="{l:T ServerCard_Copy.Content}" />
+          </StackPanel>
+        </Button>
+      </WrapPanel>
+
+      <Expander Header="{Binding PlayersHeader}" IsVisible="{Binding HasPlayerList}" HorizontalAlignment="Stretch">
+        <ItemsControl ItemsSource="{Binding Players}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <TextBlock Classes="body" FontSize="14" Text="{Binding}" Margin="0,2" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Expander>
+    </StackPanel>
+  </Border>
+</UserControl>

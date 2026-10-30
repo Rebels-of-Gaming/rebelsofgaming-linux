@@ -151,12 +151,8 @@ public sealed partial class HomeViewModel : LoadableViewModel
             foreach (var e in events.Items.Where(e => !e.Cancelled).Take(3))
             {
                 var when = e.StartsAt is { } start ? EventTimes.Range(start, e.EndsAt, Services.Culture) : string.Empty;
-                var url = e.WebUrl ?? Services.Environment.WebPage(Services.Language, "events");
-                NextEvents.Add(new HomeLinkItem(e.Title, when, () =>
-                {
-                    _ = Services.Browser.OpenAsync(url);
-                    return true;
-                }));
+                var id = e.Id;
+                NextEvents.Add(new HomeLinkItem(e.Title, when, () => Services.Navigate(new AppRoute(AppSection.Calendar, id))));
             }
         }
         catch (Exception ex) when (IsQuiet(ex))
@@ -287,7 +283,8 @@ public sealed partial class OnboardingStepViewModel(OnboardingStep step, AppServ
     [RelayCommand]
     private async Task OpenAsync()
     {
-        if (step.Url is { } url)
+        // Regeln, Termine … nativ in der App, sonst Website
+        if (step.Url is { } url && (AppRoute.FromWebUrl(url, services.Environment) is not { } route || !services.Navigate(route)))
         {
             await services.Browser.OpenAsync(url);
         }

@@ -1,0 +1,274 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.SquadsView"
+             x:DataType="vm:SquadsViewModel">
+
+  <Panel>
+    <!-- Squads: Liste + Squad-Seite -->
+    <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}" IsVisible="{Binding SquadsMode}">
+      <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,16,12">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Classes="display" Text="{l:T SquadsPage_Title.Text}" />
+              <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                      ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+                <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+              </Button>
+            </Grid>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <ToggleButton Classes="segment" IsChecked="{Binding SquadsMode}" Content="{l:T SquadsPage_ModeSquads.Text, Upper=True}" />
+              <ToggleButton Classes="segment" IsChecked="{Binding GamesMode}" Content="{l:T SquadsPage_ModeGames.Text, Upper=True}" />
+            </StackPanel>
+          </StackPanel>
+          <Panel>
+            <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                         EmptyText="{l:T SquadsPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+            <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                     IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T SquadsPage_List.AutomationProperties.Name}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:SquadItemViewModel">
+                  <Grid ColumnDefinitions="48,*" AutomationProperties.Name="{Binding Name}">
+                    <Border Width="48" Height="48" CornerRadius="{StaticResource RoGControlRadius}" ClipToBounds="True"
+                            Background="{DynamicResource RoGBg3Brush}" VerticalAlignment="Top">
+                      <Panel>
+                        <Image Source="avares://rebelsofgaming/Assets/rog-badge-512.png" Width="26" Height="26" Opacity="0.35" IsVisible="{Binding HasNoLogo}" />
+                        <Image Source="{Binding Logo}" Stretch="UniformToFill" />
+                      </Panel>
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="4" Margin="12,0,0,0" VerticalAlignment="Center">
+                      <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                      <TextBlock Classes="muted small" Text="{Binding Subtitle}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                      <Border Classes="chip" Classes.green="{Binding IsOpen}" Classes.gold="{Binding IsWaitlist}" HorizontalAlignment="Left"
+                              IsVisible="{Binding HasRecruiting}">
+                        <TextBlock Text="{Binding RecruitingText}" />
+                      </Border>
+                    </StackPanel>
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Panel>
+        </DockPanel>
+      </Border>
+
+      <!-- Squad-Seite -->
+      <Panel>
+        <TextBlock Classes="muted" Text="{l:T SquadsPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   IsVisible="{Binding ShowSelectHint}" Margin="32" />
+        <c:StateView DataContext="{Binding Detail}" x:DataType="vm:SquadDetailViewModel"
+                     IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Detail.ShowContent}">
+          <StackPanel Margin="32,24,32,40" Spacing="16" DataContext="{Binding Detail}" x:DataType="vm:SquadDetailViewModel">
+            <Button Classes="secondary" HorizontalAlignment="Left"
+                    Command="{Binding $parent[UserControl].((vm:SquadsViewModel)DataContext).CloseDetailCommand}"
+                    IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+                <TextBlock Text="{l:T Common_Back}" />
+              </StackPanel>
+            </Button>
+            <Border CornerRadius="{StaticResource RoGCardRadius}" ClipToBounds="True" Height="180" IsVisible="{Binding HasHeader}">
+              <Image Source="{Binding Header}" Stretch="UniformToFill" />
+            </Border>
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Border Width="72" Height="72" CornerRadius="{StaticResource RoGCardRadius}" ClipToBounds="True"
+                      Background="{DynamicResource RoGBg3Brush}" VerticalAlignment="Top" Margin="0,0,16,0">
+                <Image Source="{Binding Logo}" Stretch="UniformToFill" />
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                <SelectableTextBlock Classes="title" Text="{Binding Name}" AutomationProperties.HeadingLevel="1" />
+                <TextBlock Classes="muted" Text="{Binding Subtitle}" />
+                <Border Classes="chip" Classes.green="{Binding IsRecruitingOpen}" Classes.gold="{Binding IsRecruitingWaitlist}"
+                        HorizontalAlignment="Left" IsVisible="{Binding HasRecruiting}">
+                  <TextBlock Text="{Binding RecruitingText}" />
+                </Border>
+              </StackPanel>
+              <Button Grid.Column="2" Classes="icon" VerticalAlignment="Top" Command="{Binding OpenInBrowserCommand}"
+                      ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">
+                <PathIcon Data="{StaticResource IconOpenExternal}" Width="18" Height="18" />
+              </Button>
+            </Grid>
+
+            <!-- Reiter -->
+            <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1">
+              <WrapPanel Orientation="Horizontal">
+                <ToggleButton Classes="segment" IsChecked="{Binding IsAboutTab}" Content="{l:T SquadsPage_About.Text, Upper=True}" />
+                <ToggleButton Classes="segment" IsChecked="{Binding IsLineupTab}" Content="{Binding MembersHeader}" />
+                <ToggleButton Classes="segment" IsChecked="{Binding IsServersTab}" Content="{l:T SquadsPage_Servers.Text, Upper=True}" />
+                <ToggleButton Classes="segment" IsChecked="{Binding IsInternalTab}" IsVisible="{Binding CanSeeInternal}">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconShield}" Width="14" Height="14" />
+                    <TextBlock Text="{l:T Linux_SquadInternal, Upper=True}" />
+                  </StackPanel>
+                </ToggleButton>
+              </WrapPanel>
+            </Border>
+            <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+
+            <!-- Vorstellung -->
+            <StackPanel Spacing="16" IsVisible="{Binding IsAboutTab}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+              <SelectableTextBlock Classes="body" Text="{Binding Description}" IsVisible="{Binding HasDescription}" />
+              <StackPanel Spacing="4" IsVisible="{Binding HasTrainingTimes}">
+                <TextBlock Classes="section" Text="{l:T SquadsPage_Training.Text}" />
+                <SelectableTextBlock Classes="body" Text="{Binding TrainingTimes}" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasClanInfo}">
+                <PathIcon Data="{StaticResource IconTrophy}" Width="16" Height="16" Foreground="{DynamicResource RoGGoldBrush}" />
+                <TextBlock Classes="body" Text="{Binding ClanInfo}" />
+              </StackPanel>
+              <StackPanel Spacing="8" IsVisible="{Binding HasLinks}">
+                <TextBlock Classes="section" Text="{l:T SquadsPage_Links.Text}" />
+                <ItemsControl ItemsSource="{Binding Links}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:LinkViewModel">
+                      <Border Classes="card" Padding="14,10">
+                        <Grid ColumnDefinitions="*,Auto,Auto">
+                          <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Classes="body strong" Text="{Binding Label}" />
+                            <TextBlock Classes="muted small" Text="{Binding Code}" IsVisible="{Binding HasCode}" FontFamily="{StaticResource RoGMonoFont}" />
+                          </StackPanel>
+                          <Button Grid.Column="1" Classes="icon" Command="{Binding CopyCommand}"
+                                  ToolTip.Tip="{l:T Common_Copy.Content}" AutomationProperties.Name="{l:T Common_Copy.Content}">
+                            <PathIcon Data="{StaticResource IconCopy}" Width="18" Height="18" />
+                          </Button>
+                          <Button Grid.Column="2" Classes="icon" Command="{Binding OpenCommand}"
+                                  ToolTip.Tip="{Binding Url}" AutomationProperties.Name="{Binding Label}">
+                            <PathIcon Data="{StaticResource IconOpenExternal}" Width="18" Height="18" />
+                          </Button>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </StackPanel>
+
+            <!-- Line-up -->
+            <Panel IsVisible="{Binding IsLineupTab}">
+              <TextBlock Classes="muted" Text="{l:T Linux_SquadNoMembers}" IsVisible="{Binding !HasMembers}" />
+              <ItemsControl ItemsSource="{Binding Members}" IsVisible="{Binding HasMembers}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="240" Spacing="8" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:SquadMemberViewModel">
+                    <Button Classes="row" Command="{Binding OpenCommand}" Background="{DynamicResource RoGBg2Brush}"
+                            AutomationProperties.Name="{Binding Name}">
+                      <Grid ColumnDefinitions="Auto,*">
+                        <c:AvatarView Size="40" Source="{Binding Avatar}" DisplayName="{Binding Name}" />
+                        <StackPanel Grid.Column="1" Spacing="2" Margin="12,0,0,0" VerticalAlignment="Center">
+                          <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Classes="small" Foreground="{Binding RoleBrush}" Text="{Binding Role}" IsVisible="{Binding HasRole}" />
+                        </StackPanel>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Panel>
+
+            <!-- Server -->
+            <Panel IsVisible="{Binding IsServersTab}">
+              <TextBlock Classes="muted" Text="{l:T Linux_SquadNoServers}" IsVisible="{Binding !HasServers}" />
+              <ItemsControl ItemsSource="{Binding Servers}" IsVisible="{Binding HasServers}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="300" Spacing="16" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+            </Panel>
+
+            <!-- Intern (nur Member/Verwalter) -->
+            <Panel IsVisible="{Binding IsInternalTab}">
+            <Panel DataContext="{Binding Internal}" x:DataType="vm:SquadInternalViewModel">
+              <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                           EmptyText="{l:T Linux_InternalEmpty}" RetryCommand="{Binding RefreshCommand}" MinHeight="160" />
+              <StackPanel Spacing="16" IsVisible="{Binding ShowContent}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+                <Border Classes="hint info" IsVisible="{Binding HasScopeHint}">
+                  <TextBlock Classes="body" Text="{Binding ScopeHint}" />
+                </Border>
+                <StackPanel Spacing="6" IsVisible="{Binding HasConversation}">
+                  <TextBlock Classes="section" Text="{l:T Linux_InternalChatTitle}" />
+                  <ContentControl Content="{Binding Conversation}" />
+                </StackPanel>
+                <StackPanel Spacing="6" IsVisible="{Binding HasEvents}">
+                  <TextBlock Classes="section" Text="{l:T Linux_InternalEvents}" />
+                  <ItemsControl ItemsSource="{Binding Events}" />
+                </StackPanel>
+                <StackPanel Spacing="6" IsVisible="{Binding HasThreads}">
+                  <TextBlock Classes="section" Text="{l:T Linux_InternalForum}" />
+                  <ItemsControl ItemsSource="{Binding Threads}" />
+                </StackPanel>
+                <StackPanel Spacing="6" IsVisible="{Binding HasFiles}">
+                  <TextBlock Classes="section" Text="{l:T Linux_InternalFiles}" />
+                  <ItemsControl ItemsSource="{Binding Files}" />
+                </StackPanel>
+              </StackPanel>
+            </Panel>
+            </Panel>
+          </StackPanel>
+        </ScrollViewer>
+      </Panel>
+    </c:ListDetailPanel>
+
+    <!-- Spiele -->
+    <DockPanel IsVisible="{Binding GamesMode}" DataContext="{Binding}">
+      <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,12">
+        <TextBlock Classes="display" Text="{l:T SquadsPage_Title.Text}" />
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <ToggleButton Classes="segment" IsChecked="{Binding SquadsMode}" Content="{l:T SquadsPage_ModeSquads.Text, Upper=True}" />
+          <ToggleButton Classes="segment" IsChecked="{Binding GamesMode}" Content="{l:T SquadsPage_ModeGames.Text, Upper=True}" />
+        </StackPanel>
+        <c:FeedbackBar DataContext="{Binding Games.Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      </StackPanel>
+      <Panel DataContext="{Binding Games}" x:DataType="vm:GamesViewModel">
+        <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                     EmptyText="{l:T SquadsPage_GamesState.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+        <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Items}" Margin="24,4,24,32">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="280" Spacing="16" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:GameItemViewModel">
+                <Border Classes="card" Padding="0" ClipToBounds="True" AutomationProperties.Name="{Binding Name}">
+                  <StackPanel>
+                    <Border Height="110" Background="{DynamicResource RoGBg3Brush}">
+                      <Panel>
+                        <TextBlock Text="{Binding ShortName}" FontFamily="{StaticResource RoGDisplayFont}" FontWeight="Bold" FontSize="40"
+                                   Foreground="{DynamicResource RoGLineBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Image Source="{Binding Header}" Stretch="UniformToFill" IsVisible="{Binding HasHeader}" />
+                      </Panel>
+                    </Border>
+                    <StackPanel Spacing="6" Margin="16,12,16,14">
+                      <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                      <ItemsControl ItemsSource="{Binding Links}" IsVisible="{Binding HasLinks}">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate><WrapPanel ItemSpacing="8" LineSpacing="6" /></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:LinkViewModel">
+                            <Button Classes="link pad" Command="{Binding OpenCommand}" ToolTip.Tip="{Binding Url}">
+                              <TextBlock Text="{Binding Label}" />
+                            </Button>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Panel>
+    </DockPanel>
+  </Panel>
+</UserControl>
