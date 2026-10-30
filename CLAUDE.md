@@ -30,11 +30,13 @@ wird im Windows-Repo umgesetzt – bis dahin im Linux-Repo umgehen (eigene Imple
 ## Stack
 
 - **.NET 10**, C# latest, Nullable an, **Warnungen = Fehler**
-- **Avalonia UI 11.3** (Fluent, Dunkel) + **CommunityToolkit.Mvvm**; kompilierte Bindungen (`x:DataType`)
+- **Avalonia UI 12.1** (Fluent, RoG-Dunkel Standard, Hell/System optional) + `Avalonia.Wayland` (nativ, Rückfall X11)
+  + **CommunityToolkit.Mvvm**; kompilierte Bindungen (`x:DataType`)
 - Kern **RoG.Core** aus dem Submodul (ProjectReference, unverändert): API-Client aus der OpenAPI-Spec, RoGHttpHandler,
   AppLoginFlow (PKCE + Loopback), Reverb-Client, HTML/BBCode-Parser, Einstellungen, `StringKeys`
 - D-Bus über **Tmds.DBus.Protocol** (gleiche Version wie Avalonia.FreeDesktop): Secret Service, Notifications
-- Tests: **xUnit** + **Avalonia.Headless** (Skia-Rendering für Screenshots)
+- Tests: **xUnit v3** + **Avalonia.Headless** (Skia-Rendering für Screenshots); D-Bus-Tests gegen einen privaten
+  `dbus-daemon` (`Support/PrivateBus.cs`, Test-Dienste für Secret Service und Notifications)
 - Paketversionen zentral in `Directory.Packages.props` (fest, Updates bewusst per Commit)
 
 ## Architektur
@@ -70,13 +72,14 @@ Gleiche Identität wie Website und Windows-App, nativ umgesetzt.
 
 - Tokens in `src/RoG.Linux.App/Themes/RoGTheme.axaml`: `bg #1C1F26 · bg2 #242832 · bg3 #2D3240 · line #3A4050 ·
   ink #F1EFEA · muted #A8ACB6 · red #E0324A · action-red #D62C43 · gold #D4AE3C · green #3DDC84` (+ blue #4F8CFF Voice)
-- 90 % dunkel / 8 % Off-White / 2 % Akzent. Rot = Aktion/Status, Gold = Rang/Auszeichnung. Nur Dunkel-Design.
+- 90 % dunkel / 8 % Off-White / 2 % Akzent. Rot = Aktion/Status, Gold = Rang/Auszeichnung. Standard RoG-Dunkel; helle Palette für „Hell“/„Wie das System“ – Farben in Views **nur per `DynamicResource`**.
 - Display: **Barlow Condensed** 600/700 in Versalien (eingebettet aus dem Submodul, SIL OFL), Text: Systemschrift
 - Symbole als Vektorpfade (`Themes/Icons.axaml`), keine Symbolschrift
 - Status-Punkte: grün online · blau Voice · rot auf RoG-Server · gold im Spiel · grau offline
 - Seiten nutzen nur Ressourcen/Klassen aus dem Theme (`display`, `title`, `section`, `kicker`, `body`, `muted`, `card`,
   `primary`, `secondary`, `icon`, `nav`, `cards`) – keine Einweg-Farben in Views
-- Seitenleiste wie die Windows-App: ≥ 840 px aufgeklappt, darunter nur Symbole; Liste-Detail ab 760 px nebeneinander,
+- Seitenleiste wie die Windows-App: ≥ 840 px aufgeklappt, 600–840 px nur Symbole, < 600 px Kopfleiste + Menü als
+  Überlagerung; Liste-Detail ab 760 px nebeneinander,
   Lesebreite max. 720 px. **1280×800 (Steam Deck) muss immer gut aussehen** (Screenshot-Test).
 - Jede Liste hat Lade-, Leer- und Fehlerzustand (`Controls/StateView`), jede Aktion ein Feedback
 - Barrierefreiheit: `AutomationProperties.Name` an Symbol-Knöpfen und Listen, Tastatur vollständig (Tab, Pfeile,
@@ -93,7 +96,7 @@ Gleiche Identität wie Website und Windows-App, nativ umgesetzt.
 ## Datenschutz (wie Website, DSGVO, Betreiber Privatperson in Luxemburg)
 
 - Kein Tracking, keine Analytics, keine fremden Schriften/Skripte; Bilder nur von den Servern/dem CDN der Plattform
-- Lokal: `settings.json` unter `$XDG_CONFIG_HOME/rebelsofgaming/` (Flatpak: `~/.var/app/<App-ID>/config/…`),
+- Lokal: `settings.json` (+ `linux.json` für das Design) unter `$XDG_CONFIG_HOME/rebelsofgaming/` (Flatpak: `~/.var/app/<App-ID>/config/…`),
   Token im Schlüsselbund, Bilder/Antworten nur im Speicher. Abmelden löscht Token und Caches.
 - Jede neue lokale Speicherung oder Übermittlung an Dritte: im Bauplan unter „Datenschutz“ nennen
 
@@ -128,5 +131,7 @@ dotnet build RoG.Linux.sln && dotnet test RoG.Linux.sln
 dotnet test RoG.Linux.sln --filter Category=Screenshots   # nur Screenshots → artifacts/screenshots/
 dotnet run --project src/RoG.Linux.App -- --environment=staging
 xvfb-run -a dotnet run --project src/RoG.Linux.App     # ohne Bildschirm
-flatpak-builder --user --install --force-clean build-dir packaging/flatpak/com.rebelsofgaming.RebelsOfGaming.yml   # nur lokal testen
+dotnet run --project src/RoG.Linux.App -- --x11        # X11 erzwingen (Standard unter Wayland: nativ Wayland)
+packaging/scripts/make-tarball.sh x86_64               # Binärpaket für Flathub nach artifacts/dist/
+flatpak-builder --user --install --force-clean build-dir packaging/flatpak/com.rebelsofgaming.RebelsOfGaming.yml   # nur lokal (url → path)
 ```

@@ -14,9 +14,9 @@ Windows-App, eigene Oberfläche im RoG-Design, **keine WebView**. Ziel: Linux-De
 |---|---|
 | `external/rog-windows` | Git-Submodul des Windows-Repos (fester Commit). Daraus wird **`src/RoG.Core`** gebaut (API-Client, Pipeline, Login, Echtzeit, Parser) – unverändert, nicht kopiert. Außerdem Übersetzungen (`.resw`), Schrift und Logo. |
 | `src/RoG.Linux.Platform` | Linux-Verdrahtung ohne Oberfläche: Token im Schlüsselbund (Secret Service über D-Bus), Desktop-Benachrichtigungen, `xdg-open`, XDG-Ordner, Gerätename, Übersetzungen |
-| `src/RoG.Linux.App` | Avalonia-Oberfläche (MVVM mit CommunityToolkit.Mvvm): Shell, Login, News, Nachrichten, Konto |
+| `src/RoG.Linux.App` | Avalonia-12-Oberfläche (MVVM mit CommunityToolkit.Mvvm): Shell, Start, Login, News, Nachrichten, Konto, Einstellungen |
 | `tests/RoG.Linux.Tests` | xUnit: Plattform-Dienste, ViewModels gegen einen Fake-Server, Headless-Screenshots (`artifacts/screenshots/`) |
-| `packaging/` | Entwürfe: Flatpak-Manifest, `.desktop`-Datei, AppStream-Metadaten |
+| `packaging/` | Entwürfe: Flatpak-Manifest (Binärpakete), `.desktop`-Datei, AppStream-Metadaten, `scripts/make-tarball.sh` |
 
 ## Entwicklung
 
@@ -35,14 +35,16 @@ dotnet run --project src/RoG.Linux.App                 # Produktion
 dotnet run --project src/RoG.Linux.App -- --environment=staging   # bzw. ROG_ENVIRONMENT=staging
 ```
 
-Ohne Bildschirm: `xvfb-run -a dotnet run --project src/RoG.Linux.App`.
+Ohne Bildschirm: `xvfb-run -a dotnet run --project src/RoG.Linux.App`. Fenstersystem erzwingen: `-- --x11` bzw.
+`-- --wayland` (oder `ROG_DISPLAY=x11`). Läuft die App schon, holt ein zweiter Start nur das Fenster nach vorn
+(`rog://…`-Links werden weitergereicht).
 
-Laufzeit-Voraussetzungen: X11 oder XWayland, `libfontconfig1`, ein Secret-Service-Dienst (GNOME Keyring, KWallet,
+Laufzeit-Voraussetzungen: Wayland (nativ, Avalonia 12.1) oder X11/XWayland, `libfontconfig1`, ein Secret-Service-Dienst (GNOME Keyring, KWallet,
 KeePassXC) für dauerhaftes Anmelden – ohne ihn gilt die Anmeldung nur bis zum Beenden (Hinweis in der App).
 
 ## Lizenzen Dritter
 
-- Avalonia UI, CommunityToolkit.Mvvm, Tmds.DBus.Protocol, AngleSharp, .NET – MIT
+- Avalonia UI 12, CommunityToolkit.Mvvm, Tmds.DBus.Protocol, AngleSharp, .NET, xUnit – MIT bzw. Apache 2.0
 - Barlow Condensed – SIL Open Font License 1.1 (`external/rog-windows/src/RoG.App/Fonts/OFL.txt`)
 - Symbole nach Material Design Icons – Apache License 2.0
 - Logo – Rebels of Gaming (aus dem Brand-Kit der Website)

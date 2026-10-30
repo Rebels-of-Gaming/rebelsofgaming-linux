@@ -6,9 +6,28 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 0 – Spike (Version 0.1.0, nicht veröffentlicht).
+Stufe 1 – Konto + Start, Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
 
 ### Hinzugefügt
+
+- Startseite wie in der Windows-App: Begrüßung, Gast-Hinweis mit „Anmelden“, offene Abstimmungen, „Dein Start bei den Rebels“, Live-Ticker (`/v1/live`) als Kacheln, neueste News (öffnen den Artikel in der App) und nächste Termine
+- Einstellungen: Sprache (DE/EN/FR/System, wirkt nach Neustart), Design (RoG-Dunkel als Standard, „Wie das System“, Hell – sofort), Desktop-Benachrichtigungen mit Test-Knopf, „Über die App“ mit Version, Plattform-Version, Umgebung, Paket (Flatpak/direkt), Anzeige (Wayland/X11), Links, Copyright und Lizenzen
+- Natives Wayland (Avalonia 12.1) mit automatischem Rückfall auf X11; `--x11`/`--wayland` bzw. `ROG_DISPLAY`; im Spielmodus des Steam Deck X11
+- Nur eine laufende App: ein zweiter Start holt das Fenster nach vorn und gibt `rog://`-Links weiter (D-Bus `org.freedesktop.Application`, ohne Session-Bus Unix-Socket); `rog://news/…`, `rog://settings` usw. öffnen den Bereich
+- Fenstergröße, -lage und „maximiert“ werden gemerkt (auch beim Beenden per SIGTERM) und passend zum Bildschirm wiederhergestellt
+- Schmale Ansicht unter 600 px: Kopfleiste mit Menü-Knopf, Seitenleiste als Überlagerung (Escape oder Klick daneben schließt); 600–840 px nur Symbole
+- Strg+, öffnet die Einstellungen
+- Tests: D-Bus-Tests gegen einen privaten Bus (Schlüsselbund inkl. Entsperr-Prompt, Benachrichtigungen, Single-Instance), Screenshots von Start, Einstellungen, schmaler Ansicht, Menü und hellem Design
+- `packaging/scripts/make-tarball.sh`: Binärpaket (self-contained) für Flathub
+
+### Geändert
+
+- Avalonia 11.3.22 → **12.1.4**, Tmds.DBus.Protocol 0.21.3 → 0.94.1, xUnit 2 → **xUnit v3**
+- Seitenleiste kompakter (36 px je Eintrag, neuer Eintrag „Einstellungen“) – passt bei 1280×800 ohne Scrollen; App startet auf der Startseite
+- Flatpak-Entwurf: Binärpakete von cdn.rogclan.de mit Prüfsumme statt Quellbau, `--socket=wayland` + `--socket=fallback-x11` statt erzwungenem X11
+- App-ID `com.rebelsofgaming.RebelsOfGaming` endgültig (überall gleich, auch D-Bus und Wayland-App-ID)
+
+### Stufe 0 – Spike
 
 - Lösung `RoG.Linux.sln`: Avalonia-App `RoG.Linux.App`, Linux-Dienste `RoG.Linux.Platform`, Tests `RoG.Linux.Tests`
 - Geteilter Kern `RoG.Core` der Windows-App als Git-Submodul (`external/rog-windows`, fester Commit) – baut unverändert unter Linux
