@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Avalonia-Oberfläche der Linux-App (keine WebView). Logik kommt aus RoG.Core (Submodul), Linux-Verdrahtung aus
+    RoG.Linux.Platform. Schriften und Logo werden aus der Windows-App verlinkt (Submodul), nicht kopiert.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>RoG.Linux.App</RootNamespace>
+    <AssemblyName>rebelsofgaming</AssemblyName>
+    <ApplicationManifest />
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <RuntimeIdentifiers>linux-x64;linux-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../RoG.Linux.Platform/RoG.Linux.Platform.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Barlow Condensed (SIL OFL 1.1) und RoG-Abzeichen aus der Windows-App -->
+    <AvaloniaResource Include="$(RoGWindowsRoot)src/RoG.App/Fonts/BarlowCondensed-Bold.ttf" Link="Assets/Fonts/BarlowCondensed-Bold.ttf" />
+    <AvaloniaResource Include="$(RoGWindowsRoot)src/RoG.App/Fonts/BarlowCondensed-SemiBold.ttf" Link="Assets/Fonts/BarlowCondensed-SemiBold.ttf" />
+    <AvaloniaResource Include="$(RoGWindowsRoot)src/RoG.App/Assets/rog-badge-512.png" Link="Assets/rog-badge-512.png" />
+    <None Include="$(RoGWindowsRoot)src/RoG.App/Fonts/OFL.txt" Link="Licenses/OFL-BarlowCondensed.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RoG.Linux.Tests" />
+  </ItemGroup>
+
+</Project>

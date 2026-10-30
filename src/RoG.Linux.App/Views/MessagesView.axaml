@@ -1,0 +1,151 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MessagesView"
+             x:DataType="vm:MessagesViewModel">
+
+  <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}">
+    <!-- Unterhaltungen -->
+    <Border BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="0,0,1,0">
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Top" Spacing="12" Margin="24,24,16,12">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Classes="display" Text="{l:T MessagesPage_Title.Text}" />
+          <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                  ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+            <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+          </Button>
+        </Grid>
+        <TextBox Text="{Binding SearchText}" Watermark="{l:T MessagesPage_Search.PlaceholderText}"
+                 IsVisible="{Binding ShowConversations}" Margin="0,0,8,0"
+                 AutomationProperties.Name="{l:T MessagesPage_Search.AutomationProperties.Name}" />
+      </StackPanel>
+
+      <Panel>
+        <!-- Gastmodus -->
+        <StackPanel Spacing="16" Margin="24" IsVisible="{Binding IsGuest}" VerticalAlignment="Center" HorizontalAlignment="Center">
+          <TextBlock Classes="muted" Text="{l:T MessagesPage_Guest.Text}" TextAlignment="Center" />
+          <Button Classes="primary" HorizontalAlignment="Center" Command="{Binding SignInCommand}" Content="{l:T Linux_SignIn}" />
+        </StackPanel>
+
+        <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                     EmptyText="{l:T MessagesPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}"
+                     IsVisible="{Binding ShowConversations}" />
+        <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                 IsVisible="{Binding ShowContent}"
+                 AutomationProperties.Name="{l:T MessagesPage_List.AutomationProperties.Name}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:ConversationItemViewModel">
+              <Grid ColumnDefinitions="44,*,Auto" AutomationProperties.Name="{Binding Name}">
+                <Panel Width="44" Height="44" VerticalAlignment="Top">
+                  <Border CornerRadius="22" Background="{StaticResource RoGBg3Brush}" BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="1">
+                    <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource RoGDisplayFont}" FontWeight="Bold" FontSize="20"
+                               Foreground="{StaticResource RoGMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <Border CornerRadius="22" ClipToBounds="True" IsVisible="{Binding !HasNoAvatar}">
+                    <Image Source="{Binding Avatar}" Stretch="UniformToFill" />
+                  </Border>
+                  <Border IsVisible="{Binding IsGroup}" Width="20" Height="20" CornerRadius="10" Background="{StaticResource RoGBg2Brush}"
+                          HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-4,-4">
+                    <PathIcon Data="{StaticResource IconGroup}" Width="12" Height="12" Foreground="{StaticResource RoGMutedBrush}" />
+                  </Border>
+                </Panel>
+                <StackPanel Grid.Column="1" Spacing="2" Margin="12,0,8,0">
+                  <TextBlock Classes="body" Classes.strong="{Binding Unread}" Text="{Binding Name}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Classes="muted small" Text="{Binding Preview}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="6" HorizontalAlignment="Right">
+                  <TextBlock Classes="muted small" Text="{Binding Time}" HorizontalAlignment="Right" />
+                  <Ellipse Width="10" Height="10" Fill="{StaticResource RoGRedBrush}" HorizontalAlignment="Right" IsVisible="{Binding Unread}" />
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Panel>
+    </DockPanel>
+    </Border>
+
+    <!-- Verlauf -->
+    <Panel>
+      <TextBlock Classes="muted" Text="{l:T MessagesPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsVisible="{Binding ShowSelectHint}" Margin="32" />
+      <DockPanel IsVisible="{Binding IsDetailOpen}">
+        <Border DockPanel.Dock="Top" Background="{StaticResource RoGBg2Brush}" BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="0,0,0,1"
+                Padding="16,12">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Button Classes="icon" Command="{Binding CloseDetailCommand}" IsVisible="{Binding #Panel.IsNarrow}"
+                    ToolTip.Tip="{l:T Common_Back}" AutomationProperties.Name="{l:T Common_Back}" Margin="0,0,8,0">
+              <PathIcon Data="{StaticResource IconBack}" Width="18" Height="18" />
+            </Button>
+            <TextBlock Grid.Column="1" Classes="title" FontSize="24" Text="{Binding Chat.Title}" VerticalAlignment="Center"
+                       MaxLines="1" TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="2" Classes="icon" Command="{Binding OpenInBrowserCommand}"
+                    ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">
+              <PathIcon Data="{StaticResource IconOpenExternal}" Width="18" Height="18" />
+            </Button>
+          </Grid>
+        </Border>
+        <!-- Nur lesen im Spike: Hinweis statt Eingabefeld -->
+        <Border DockPanel.Dock="Bottom" Background="{StaticResource RoGBg2Brush}" BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="0,1,0,0"
+                Padding="20,12">
+          <TextBlock Classes="muted small" Text="{Binding ReadOnlyHint}" />
+        </Border>
+        <Panel DataContext="{Binding Chat}" x:DataType="vm:ChatViewModel">
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T ChatView_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+          <ScrollViewer x:Name="ChatScroll" VerticalScrollBarVisibility="Auto" IsVisible="{Binding ShowContent}"
+                        AutomationProperties.Name="{l:T ChatView_List.AutomationProperties.Name}">
+            <StackPanel Margin="20,16" Spacing="10">
+              <Button Classes="secondary" HorizontalAlignment="Center" IsVisible="{Binding HasOlder}"
+                      Command="{Binding LoadOlderCommand}" Content="{l:T ChatView_LoadOlder.Content}" />
+              <ItemsControl ItemsSource="{Binding Messages}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ChatMessageViewModel">
+                    <Panel>
+                      <!-- fremde Nachricht: links, bg2 -->
+                      <Border IsVisible="{Binding IsOther}" HorizontalAlignment="Left" MaxWidth="560"
+                              Background="{StaticResource RoGBg2Brush}" BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="1"
+                              CornerRadius="12,12,12,4" Padding="14,10">
+                        <StackPanel Spacing="4">
+                          <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="body strong" FontSize="14" Text="{Binding Author}" />
+                            <TextBlock Classes="muted small" Text="{Binding Time}" />
+                            <TextBlock Classes="kicker" Text="{Binding MinecraftHint}" IsVisible="{Binding FromMinecraft}" Foreground="{StaticResource RoGGreenBrush}" />
+                          </StackPanel>
+                          <Border IsVisible="{Binding HasQuote}" BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="3,0,0,0" Padding="8,2">
+                            <TextBlock Classes="muted small" Text="{Binding Quote}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                          </Border>
+                          <SelectableTextBlock Classes="body" Classes.muted="{Binding IsDeleted}" Text="{Binding Body}" />
+                          <TextBlock Classes="muted small" Text="{Binding Attachments}" IsVisible="{Binding HasAttachments}" />
+                        </StackPanel>
+                      </Border>
+                      <!-- eigene Nachricht: rechts, bg3 mit roter Kante -->
+                      <Border IsVisible="{Binding IsMine}" HorizontalAlignment="Right" MaxWidth="560"
+                              Background="{StaticResource RoGBg3Brush}" BorderBrush="{StaticResource RoGActionRedBrush}" BorderThickness="0,0,3,0"
+                              CornerRadius="12,12,4,12" Padding="14,10">
+                        <StackPanel Spacing="4">
+                          <TextBlock Classes="muted small" Text="{Binding Time}" HorizontalAlignment="Right" />
+                          <Border IsVisible="{Binding HasQuote}" BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="3,0,0,0" Padding="8,2">
+                            <TextBlock Classes="muted small" Text="{Binding Quote}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                          </Border>
+                          <SelectableTextBlock Classes="body" Classes.muted="{Binding IsDeleted}" Text="{Binding Body}" />
+                          <TextBlock Classes="muted small" Text="{Binding Attachments}" IsVisible="{Binding HasAttachments}" />
+                        </StackPanel>
+                      </Border>
+                    </Panel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </ScrollViewer>
+        </Panel>
+      </DockPanel>
+    </Panel>
+  </c:ListDetailPanel>
+</UserControl>

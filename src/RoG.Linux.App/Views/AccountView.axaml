@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.AccountView"
+             x:DataType="vm:AccountViewModel">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="{StaticResource RoGPagePadding}" Spacing="20" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+      <TextBlock Classes="display" Text="{l:T AccountPage_Title.Text}" />
+
+      <Border Classes="card">
+        <Grid ColumnDefinitions="Auto,*">
+          <Panel Width="80" Height="80" VerticalAlignment="Top">
+            <Border CornerRadius="40" Background="{StaticResource RoGBg3Brush}" BorderBrush="{StaticResource RoGGoldBrush}" BorderThickness="2">
+              <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource RoGDisplayFont}" FontWeight="Bold" FontSize="36"
+                         Foreground="{StaticResource RoGInkBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <Border CornerRadius="40" ClipToBounds="True" IsVisible="{Binding !HasNoAvatar}" BorderBrush="{StaticResource RoGGoldBrush}" BorderThickness="2">
+              <Image Source="{Binding Avatar}" Stretch="UniformToFill" />
+            </Border>
+          </Panel>
+          <StackPanel Grid.Column="1" Spacing="6" Margin="20,0,0,0" VerticalAlignment="Center">
+            <TextBlock Classes="title" Text="{Binding Name}" IsVisible="{Binding IsSignedIn}" />
+            <TextBlock Classes="kicker" Foreground="{StaticResource RoGGoldBrush}" Text="{Binding Rank}" />
+            <TextBlock Classes="muted" Text="{Binding Details}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <PathIcon Data="{StaticResource IconKey}" Width="18" Height="18" Foreground="{StaticResource RoGMutedBrush}" />
+            <TextBlock Classes="body" Text="{Binding StorageText}" />
+          </StackPanel>
+          <TextBlock Classes="muted small" Text="{Binding EnvironmentText}" />
+          <TextBlock Classes="muted small" Text="{Binding VersionText}" />
+        </StackPanel>
+      </Border>
+
+      <StackPanel Spacing="10" IsVisible="{Binding IsSignedIn}">
+        <TextBlock Classes="muted small" Text="{l:T Account_SignOutText}" />
+        <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding SignOutCommand}" IsEnabled="{Binding !IsBusy}">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <PathIcon Data="{StaticResource IconLogout}" Width="18" Height="18" />
+            <TextBlock Text="{l:T AccountPage_SignOut.Content}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+
+      <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding SignInCommand}" IsVisible="{Binding IsGuest}"
+              Content="{l:T Linux_SignIn}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

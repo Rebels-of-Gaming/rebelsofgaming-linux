@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.NewsView"
+             x:DataType="vm:NewsViewModel">
+
+  <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}">
+    <!-- Liste -->
+    <Border BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="0,0,1,0">
+    <DockPanel>
+      <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="24,24,16,12">
+        <TextBlock Classes="display" Text="{l:T NewsPage_Title.Text}" />
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+      <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="12,0,12,12" HorizontalAlignment="Stretch"
+              IsVisible="{Binding HasMore}" IsEnabled="{Binding !IsLoadingMore}"
+              Command="{Binding LoadMoreCommand}" Content="{l:T Common_LoadMore.Content}" />
+      <Panel>
+        <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                     EmptyText="{l:T NewsPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+        <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                 IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T NewsPage_Title.Text}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:NewsItemViewModel">
+              <Grid ColumnDefinitions="96,*" AutomationProperties.Name="{Binding Title}">
+                <Border Width="96" Height="64" VerticalAlignment="Top" Background="{StaticResource RoGBg3Brush}"
+                        CornerRadius="{StaticResource RoGControlRadius}" ClipToBounds="True">
+                  <Panel>
+                    <!-- ohne Titelbild: RoG-Abzeichen statt leerer Fläche -->
+                    <Image Source="avares://rebelsofgaming/Assets/rog-badge-512.png" Width="36" Height="36" Opacity="0.35"
+                           IsVisible="{Binding HasNoCover}" />
+                    <Image Source="{Binding Cover}" Stretch="UniformToFill" />
+                  </Panel>
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="3" Margin="12,0,0,0">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconPin}" Width="12" Height="12" Foreground="{StaticResource RoGGoldBrush}" IsVisible="{Binding Pinned}" />
+                    <TextBlock Classes="kicker" Text="{Binding Category}" IsVisible="{Binding HasCategory}" />
+                  </StackPanel>
+                  <TextBlock Classes="body strong" Text="{Binding Title}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Classes="muted small" Text="{Binding Meta}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Panel>
+    </DockPanel>
+    </Border>
+
+    <!-- Artikel -->
+    <Panel>
+      <TextBlock Classes="muted" Text="{l:T NewsPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsVisible="{Binding ShowSelectHint}" Margin="32" />
+      <c:StateView DataContext="{Binding Detail}" x:DataType="vm:NewsDetailViewModel"
+                   IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer x:Name="ArticleScroll" VerticalScrollBarVisibility="Auto" IsVisible="{Binding Detail.ShowContent}">
+        <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="32,24,32,40" HorizontalAlignment="Left" Spacing="16">
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding CloseDetailCommand}"
+                  IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+              <TextBlock Text="{l:T Common_Back}" />
+            </StackPanel>
+          </Button>
+          <Border CornerRadius="{StaticResource RoGCardRadius}" ClipToBounds="True" HorizontalAlignment="Left"
+                  IsVisible="{Binding Detail.HasCover}">
+            <Image Source="{Binding Detail.Cover}" MaxHeight="360" Stretch="Uniform"
+                   AutomationProperties.Name="{Binding Detail.CoverAlt}" />
+          </Border>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="kicker" FontSize="14" Text="{Binding Detail.Category}" />
+            <SelectableTextBlock Classes="title" Text="{Binding Detail.Title}" AutomationProperties.HeadingLevel="1" />
+            <TextBlock Classes="muted" Text="{Binding Detail.Meta}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Classes="secondary" Command="{Binding Detail.OpenInBrowserCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+                <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+          <c:RichContentView Document="{Binding Detail.Body}" />
+
+          <!-- Kommentare (lesen) -->
+          <StackPanel Spacing="12" IsVisible="{Binding Detail.HasComments}" Margin="0,16,0,0">
+            <TextBlock Classes="section" Text="{Binding Detail.CommentsHeader}" />
+            <ItemsControl ItemsSource="{Binding Detail.Comments}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:NewsCommentViewModel">
+                  <Border Classes="card" Padding="16,12">
+                    <StackPanel Spacing="4">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="body strong" Text="{Binding Author}" />
+                        <TextBlock Classes="muted" Text="{Binding Time}" />
+                      </StackPanel>
+                      <SelectableTextBlock Classes="body" Text="{Binding Body}" />
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </c:ListDetailPanel>
+</UserControl>

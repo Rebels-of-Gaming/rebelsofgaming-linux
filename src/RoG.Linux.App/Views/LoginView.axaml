@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.LoginView"
+             x:DataType="vm:LoginViewModel"
+             Background="{StaticResource RoGBgBrush}">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid MinHeight="520" Margin="24">
+      <Border Classes="card" MaxWidth="440" Padding="0" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True">
+        <StackPanel>
+          <!-- Rote Akzentlinie wie die Login-Karte der Website -->
+          <Border Height="3" Background="{StaticResource RoGRedBrush}" />
+          <StackPanel Spacing="20" Margin="32">
+            <Image Source="avares://rebelsofgaming/Assets/rog-badge-512.png" Width="112" Height="112" HorizontalAlignment="Center" />
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="title" Text="{l:T LoginPage_Title.Text}" HorizontalAlignment="Center" TextAlignment="Center" />
+              <TextBlock Classes="muted" Text="{l:T LoginPage_Subtitle.Text}" HorizontalAlignment="Center" TextAlignment="Center" />
+            </StackPanel>
+
+            <Border Classes="error" IsVisible="{Binding HasError}">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="body strong" Text="{l:T LoginPage_Error.Title}" />
+                <TextBlock Classes="body" Text="{Binding ErrorMessage}" />
+              </StackPanel>
+            </Border>
+
+            <StackPanel Spacing="12" IsVisible="{Binding IsIdle}">
+              <Button Classes="primary" HorizontalAlignment="Stretch" Command="{Binding SignInCommand}"
+                      Content="{l:T LoginPage_SignIn.Content}" />
+              <Button Classes="secondary" HorizontalAlignment="Stretch" Command="{Binding BrowseAsGuestCommand}"
+                      Content="{l:T LoginPage_Guest.Content}" />
+            </StackPanel>
+
+            <StackPanel Spacing="12" IsVisible="{Binding IsBusy}">
+              <ProgressBar IsIndeterminate="True" Foreground="{StaticResource RoGRedBrush}" Width="200" />
+              <TextBlock Classes="muted" Text="{l:T LoginPage_Waiting.Text}" HorizontalAlignment="Center" TextAlignment="Center" />
+              <Button Classes="secondary" HorizontalAlignment="Center" Command="{Binding CancelCommand}"
+                      Content="{l:T LoginPage_Cancel.Content}" />
+            </StackPanel>
+
+            <Border Classes="hint" IsVisible="{Binding ShowKeyringWarning}">
+              <TextBlock Classes="body small" Text="{Binding KeyringWarning}" />
+            </Border>
+
+            <TextBlock Classes="muted small" Text="{l:T LoginPage_Privacy.Text}" HorizontalAlignment="Center" TextAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

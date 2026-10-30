@@ -1,0 +1,302 @@
+<!--
+  RoG-Design für Avalonia – Tokens wie auf der Website (docs/DESIGN.md im Website-Repo) und in der Windows-App
+  (Themes/RoGTheme.xaml): bg #1C1F26 · bg2 #242832 · bg3 #2D3240 · line #3A4050 · ink #F1EFEA · muted #A8ACB6 ·
+  red #E0324A · action-red #D62C43 · gold #D4AE3C · green #3DDC84 (+ blue #4F8CFF für „im Voice“).
+  90 % dunkel / 8 % Off-White / 2 % Akzent. Rot = Aktion/Status, Gold = Rang/Auszeichnung. Nur Dunkel-Design.
+  Seiten verwenden nur diese Schlüssel und Klassen – keine Einweg-Farben in Views.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Styles.Resources>
+    <ResourceDictionary>
+      <!-- Farben -->
+      <Color x:Key="RoGBgColor">#1C1F26</Color>
+      <Color x:Key="RoGBg2Color">#242832</Color>
+      <Color x:Key="RoGBg3Color">#2D3240</Color>
+      <Color x:Key="RoGLineColor">#3A4050</Color>
+      <Color x:Key="RoGInkColor">#F1EFEA</Color>
+      <Color x:Key="RoGMutedColor">#A8ACB6</Color>
+      <Color x:Key="RoGRedColor">#E0324A</Color>
+      <Color x:Key="RoGActionRedColor">#D62C43</Color>
+      <Color x:Key="RoGRedPressedColor">#F04A60</Color>
+      <Color x:Key="RoGGoldColor">#D4AE3C</Color>
+      <Color x:Key="RoGGreenColor">#3DDC84</Color>
+      <Color x:Key="RoGBlueColor">#4F8CFF</Color>
+      <Color x:Key="RoGOfflineColor">#6B7080</Color>
+
+      <SolidColorBrush x:Key="RoGBgBrush" Color="{StaticResource RoGBgColor}" />
+      <SolidColorBrush x:Key="RoGBg2Brush" Color="{StaticResource RoGBg2Color}" />
+      <SolidColorBrush x:Key="RoGBg3Brush" Color="{StaticResource RoGBg3Color}" />
+      <SolidColorBrush x:Key="RoGLineBrush" Color="{StaticResource RoGLineColor}" />
+      <SolidColorBrush x:Key="RoGInkBrush" Color="{StaticResource RoGInkColor}" />
+      <SolidColorBrush x:Key="RoGMutedBrush" Color="{StaticResource RoGMutedColor}" />
+      <SolidColorBrush x:Key="RoGRedBrush" Color="{StaticResource RoGRedColor}" />
+      <SolidColorBrush x:Key="RoGActionRedBrush" Color="{StaticResource RoGActionRedColor}" />
+      <SolidColorBrush x:Key="RoGRedPressedBrush" Color="{StaticResource RoGRedPressedColor}" />
+      <SolidColorBrush x:Key="RoGGoldBrush" Color="{StaticResource RoGGoldColor}" />
+      <SolidColorBrush x:Key="RoGGreenBrush" Color="{StaticResource RoGGreenColor}" />
+      <SolidColorBrush x:Key="RoGBlueBrush" Color="{StaticResource RoGBlueColor}" />
+      <SolidColorBrush x:Key="RoGTransparentBrush" Color="Transparent" />
+
+      <!-- Status-Punkte: grün online · blau Voice · rot auf RoG-Server · gold im Spiel · grau offline -->
+      <SolidColorBrush x:Key="RoGStatusOnlineBrush" Color="{StaticResource RoGGreenColor}" />
+      <SolidColorBrush x:Key="RoGStatusVoiceBrush" Color="{StaticResource RoGBlueColor}" />
+      <SolidColorBrush x:Key="RoGStatusServerBrush" Color="{StaticResource RoGRedColor}" />
+      <SolidColorBrush x:Key="RoGStatusInGameBrush" Color="{StaticResource RoGGoldColor}" />
+      <SolidColorBrush x:Key="RoGStatusOfflineBrush" Color="{StaticResource RoGOfflineColor}" />
+
+      <!-- Schriften: Barlow Condensed (eingebettet, SIL OFL 1.1) für Anzeige-Texte in Versalien; Text = Systemschrift -->
+      <FontFamily x:Key="RoGDisplayFont">avares://rebelsofgaming/Assets/Fonts#Barlow Condensed</FontFamily>
+      <FontFamily x:Key="RoGMonoFont">DejaVu Sans Mono, Liberation Mono, Noto Sans Mono, monospace</FontFamily>
+
+      <!-- Abstände und Radien -->
+      <CornerRadius x:Key="RoGCardRadius">12</CornerRadius>
+      <CornerRadius x:Key="RoGControlRadius">8</CornerRadius>
+      <Thickness x:Key="RoGPagePadding">32,24,32,32</Thickness>
+      <Thickness x:Key="RoGCardPadding">20</Thickness>
+      <x:Double x:Key="RoGReadingWidth">720</x:Double>
+
+      <!-- Fluent-Feinschliff: Eingabefelder und Listen im RoG-Ton -->
+      <SolidColorBrush x:Key="TextControlBackground" Color="{StaticResource RoGBg3Color}" />
+      <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{StaticResource RoGBg3Color}" />
+      <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{StaticResource RoGBg2Color}" />
+      <SolidColorBrush x:Key="TextControlBorderBrush" Color="{StaticResource RoGLineColor}" />
+      <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{StaticResource RoGRedColor}" />
+      <SolidColorBrush x:Key="TextControlForeground" Color="{StaticResource RoGInkColor}" />
+      <SolidColorBrush x:Key="TextControlForegroundFocused" Color="{StaticResource RoGInkColor}" />
+      <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="{StaticResource RoGMutedColor}" />
+      <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="{StaticResource RoGMutedColor}" />
+      <SolidColorBrush x:Key="ScrollBarThumbFill" Color="{StaticResource RoGLineColor}" />
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <!-- Fenster und Grundtext -->
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{StaticResource RoGBgBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+  </Style>
+
+  <!-- Textstile (Klassen) -->
+  <Style Selector="TextBlock.display, SelectableTextBlock.display">
+    <Setter Property="FontFamily" Value="{StaticResource RoGDisplayFont}" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="FontSize" Value="40" />
+    <Setter Property="LetterSpacing" Value="0.8" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style Selector="TextBlock.title, SelectableTextBlock.title">
+    <Setter Property="FontFamily" Value="{StaticResource RoGDisplayFont}" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="FontSize" Value="30" />
+    <Setter Property="LetterSpacing" Value="0.6" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style Selector="TextBlock.section">
+    <Setter Property="FontFamily" Value="{StaticResource RoGDisplayFont}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="18" />
+    <Setter Property="LetterSpacing" Value="1.1" />
+    <Setter Property="Foreground" Value="{StaticResource RoGMutedBrush}" />
+  </Style>
+  <Style Selector="TextBlock.kicker">
+    <Setter Property="FontFamily" Value="{StaticResource RoGDisplayFont}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="LetterSpacing" Value="1.2" />
+    <Setter Property="Foreground" Value="{StaticResource RoGRedBrush}" />
+  </Style>
+  <Style Selector="TextBlock.body, SelectableTextBlock.body">
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="LineHeight" Value="23" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style Selector="TextBlock.muted, SelectableTextBlock.muted">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="LineHeight" Value="21" />
+    <Setter Property="Foreground" Value="{StaticResource RoGMutedBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style Selector="TextBlock.small">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="LineHeight" Value="18" />
+  </Style>
+  <Style Selector="TextBlock.strong">
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <!-- Karte (bg2, Linie, Radius) -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{StaticResource RoGBg2Brush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RoGLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGCardRadius}" />
+    <Setter Property="Padding" Value="{StaticResource RoGCardPadding}" />
+  </Style>
+  <Style Selector="Border.hint">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RoGGoldBrush}" />
+    <Setter Property="BorderThickness" Value="1,1,1,1" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="Padding" Value="14,10" />
+  </Style>
+  <Style Selector="Border.error">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RoGRedBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="Padding" Value="14,10" />
+  </Style>
+
+  <!-- Knöpfe -->
+  <Style Selector="Button.primary, Button.secondary">
+    <Setter Property="FontFamily" Value="{StaticResource RoGDisplayFont}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="17" />
+    <Setter Property="Padding" Value="20,10" />
+    <Setter Property="MinHeight" Value="44" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource RoGActionRedBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+  </Style>
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGRedPressedBrush}" />
+  </Style>
+  <Style Selector="Button.secondary">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RoGLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+  </Style>
+  <Style Selector="Button.secondary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGLineBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RoGMutedBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+  </Style>
+
+  <!-- Link im Fließtext (Inline) -->
+  <Style Selector="Button.link">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource RoGRedBrush}" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource RoGRedPressedBrush}" />
+  </Style>
+  <Style Selector="Button.link TextBlock">
+    <Setter Property="TextDecorations" Value="Underline" />
+  </Style>
+
+  <!-- Symbol-Knopf (quadratisch, ohne Fläche) -->
+  <Style Selector="Button.icon">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Width" Value="40" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="Padding" Value="10" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGMutedBrush}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+  </Style>
+
+  <!-- Sichtbarer Fokus (Tastatur): Off-White-Rahmen auf allen bedienbaren Elementen -->
+  <Style Selector=":is(Control):focus-visible">
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{StaticResource RoGInkBrush}" BorderThickness="2" CornerRadius="{StaticResource RoGControlRadius}" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+  </Style>
+
+  <!-- Seitenleiste -->
+  <Style Selector="Button.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Height" Value="44" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGMutedBrush}" />
+  </Style>
+  <Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+  </Style>
+  <Style Selector="Button.nav.selected">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+    <Setter Property="Foreground" Value="{StaticResource RoGInkBrush}" />
+  </Style>
+  <Style Selector="Button.nav TextBlock.navlabel">
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.nav.selected TextBlock.navlabel">
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Button.nav Border.navmarker">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Button.nav.selected Border.navmarker">
+    <Setter Property="Background" Value="{StaticResource RoGRedBrush}" />
+  </Style>
+  <Style Selector="Button.nav.selected PathIcon">
+    <Setter Property="Foreground" Value="{StaticResource RoGRedBrush}" />
+  </Style>
+
+  <!-- Listen (News, Unterhaltungen): Karte je Eintrag, Auswahl mit roter Kante -->
+  <Style Selector="ListBox.cards">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="12,0,12,12" />
+  </Style>
+  <Style Selector="ListBox.cards ListBoxItem">
+    <Setter Property="Padding" Value="12" />
+    <Setter Property="Margin" Value="0,0,0,6" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="Background" Value="{StaticResource RoGBg2Brush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RoGBg2Brush}" />
+    <Setter Property="BorderThickness" Value="3,0,0,0" />
+  </Style>
+  <Style Selector="ListBox.cards ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+  </Style>
+  <Style Selector="ListBox.cards ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RoGRedBrush}" />
+  </Style>
+  <Style Selector="ListBox.cards ListBoxItem:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGBg3Brush}" />
+  </Style>
+  <Style Selector="ListBox.cards ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource RoGLineBrush}" />
+  </Style>
+
+  <!-- Status-Punkt -->
+  <Style Selector="Ellipse.dot">
+    <Setter Property="Width" Value="10" />
+    <Setter Property="Height" Value="10" />
+    <Setter Property="Stroke" Value="{StaticResource RoGBg2Brush}" />
+    <Setter Property="StrokeThickness" Value="2" />
+  </Style>
+</Styles>

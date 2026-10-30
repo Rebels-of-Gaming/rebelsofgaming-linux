@@ -1,0 +1,103 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using RoG.Core.Api;
+using RoG.Core.Localization;
+using RoG.Linux.App.Services;
+
+namespace RoG.Linux.App.ViewModels;
+
+/// <summary>
+/// Grundlage für Seiten, die Daten laden (wie in der Windows-App): Lade-, Fehler- und Leerzustand, stille Aktualisierung
+/// (Liste bleibt stehen, Fehler nur ohne Daten sichtbar), Fehlertexte über <c>Error_&lt;code&gt;</c>.
+/// </summary>
+public abstract partial class LoadableViewModel(AppServices services) : ObservableObject
+{
+    private bool _running;
+    private bool _pending;
+
+    protected AppServices Services { get; } = services;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmpty), nameof(ShowContent))]
+    public partial bool IsLoading { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasError), nameof(IsEmpty), nameof(ShowContent))]
+    public partial string? ErrorMessage { get; set; }
+
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
+    /// <summary>Geladen, ohne Fehler, aber nichts zu zeigen.</summary>
+    public bool IsEmpty => !IsLoading && !HasError && !HasData;
+
+    public bool ShowContent => HasData && !HasError;
+
+    /// <summary>Gibt es etwas anzuzeigen? (Liste nicht leer, Detail geladen …)</summary>
+    protected abstract bool HasData { get; }
+
+    /// <summary>Lädt die Daten (ohne Fehlerbehandlung – die übernimmt <see cref="LoadAsync"/>).</summary>
+    protected abstract Task LoadCoreAsync(CancellationToken cancellationToken);
+
+    public async Task LoadAsync(bool silent = false)
+    {
+        if (_running)
+        {
+            _pending = true;
+            return;
+        }
+
+        _running = true;
+        IsLoading = !silent || !HasData;
+        try
+        {
+            await LoadCoreAsync(CancellationToken.None);
+            ErrorMessage = null;
+        }
+        catch (ApiProblemException ex)
+        {
+            ShowError(silent, ex.Problem.Code);
+        }
+        catch (RoG.Core.Api.Generated.GeneratedApiException)
+        {
+            ShowError(silent, ApiProblem.Codes.Unknown);
+        }
+        catch (HttpRequestException)
+        {
+            ShowError(silent, "network_error");
+        }
+        catch (TaskCanceledException)
+        {
+            ShowError(silent, "timeout");
+        }
+        finally
+        {
+            _running = false;
+            IsLoading = false;
+            DataChanged();
+        }
+
+        if (_pending)
+        {
+            _pending = false;
+            await LoadAsync(silent: true);
+        }
+    }
+
+    private void ShowError(bool silent, string code)
+    {
+        if (!silent || !HasData)
+        {
+            ErrorMessage = Services.Localizer.GetError(code);
+        }
+    }
+
+    /// <summary>Nach Änderungen an den Daten aufrufen, damit Leer-/Inhaltszustand neu bewertet werden.</summary>
+    protected void DataChanged()
+    {
+        OnPropertyChanged(nameof(IsEmpty));
+        OnPropertyChanged(nameof(ShowContent));
+    }
+
+    [RelayCommand]
+    private Task RefreshAsync() => LoadAsync();
+}

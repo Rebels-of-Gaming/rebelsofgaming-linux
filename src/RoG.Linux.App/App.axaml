@@ -1,0 +1,57 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:views="using:RoG.Linux.App.Views"
+             x:Class="RoG.Linux.App.App"
+             Name="Rebels of Gaming"
+             RequestedThemeVariant="Dark">
+
+  <!-- Seite je ViewModel (kein Reflection-ViewLocator: trim-/AOT-freundlich) -->
+  <Application.DataTemplates>
+    <DataTemplate DataType="vm:LoginViewModel"><views:LoginView /></DataTemplate>
+    <DataTemplate DataType="vm:NewsViewModel"><views:NewsView /></DataTemplate>
+    <DataTemplate DataType="vm:MessagesViewModel"><views:MessagesView /></DataTemplate>
+    <DataTemplate DataType="vm:AccountViewModel"><views:AccountView /></DataTemplate>
+    <DataTemplate DataType="vm:PlaceholderViewModel"><views:PlaceholderView /></DataTemplate>
+  </Application.DataTemplates>
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://rebelsofgaming/Themes/Icons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <!-- Fluent im Dunkel-Design, Akzent = RoG-Rot, Flächen = bg/bg2/bg3 -->
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Dark"
+                               Accent="#E0324A"
+                               RegionColor="#1C1F26"
+                               AltHigh="#1C1F26"
+                               AltLow="#1C1F26"
+                               AltMedium="#1C1F26"
+                               AltMediumHigh="#1C1F26"
+                               AltMediumLow="#1C1F26"
+                               BaseHigh="#F1EFEA"
+                               BaseMediumHigh="#D9D7D2"
+                               BaseMedium="#A8ACB6"
+                               BaseMediumLow="#6B7080"
+                               BaseLow="#3A4050"
+                               ChromeAltLow="#F1EFEA"
+                               ChromeHigh="#3A4050"
+                               ChromeMedium="#2D3240"
+                               ChromeMediumLow="#242832"
+                               ChromeLow="#242832"
+                               ChromeGray="#A8ACB6"
+                               ChromeWhite="#F1EFEA"
+                               ListLow="#2D3240"
+                               ListMedium="#3A4050"
+                               ErrorText="#F04A60" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+    <StyleInclude Source="avares://rebelsofgaming/Themes/RoGTheme.axaml" />
+  </Application.Styles>
+</Application>
