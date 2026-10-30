@@ -58,7 +58,11 @@ public sealed partial class RealtimeService : ObservableObject, IAsyncDisposable
         _hub.LiveChanged += (_, _) => OnUi(() => LiveChanged?.Invoke(this, EventArgs.Empty));
         _hub.FriendsChanged += (_, _) => OnUi(() => FriendsChanged?.Invoke(this, EventArgs.Empty));
         _hub.ServerStatusChanged += (_, s) => OnUi(() => ServerStatusChanged?.Invoke(this, s));
-        _hub.Reconnected += (_, _) => OnUi(() => _ = RefreshCountersAsync());
+        _hub.Reconnected += (_, _) => OnUi(() =>
+        {
+            _ = RefreshCountersAsync();
+            _ = services.OutboxRunner.FlushAsync(); // Netz wieder da
+        });
         _hub.StateChanged += (_, s) => OnUi(() => State = s);
         services.Notifier.Activated += (_, id) => OnUi(() => OnActivated(id));
     }
@@ -193,6 +197,71 @@ public sealed partial class RealtimeService : ObservableObject, IAsyncDisposable
         if (_targets.Remove(id, out var target))
         {
             ActivationRequested?.Invoke(this, target);
+        }
+    }
+
+    /// <summary>
+    /// Unterhaltung live verfolgen (<c>private-conversations.{id}</c>): neue und gelöschte Nachrichten im UI-Thread.
+    /// Ohne Verbindung (Gast, Reverb aus) passiert nichts – der Chat lädt dann beim Öffnen und nach dem Senden.
+    /// </summary>
+    public IDisposable WatchConversation(string conversationId, Action<ChatMessage> sent, Action<string> deleted)
+    {
+        ArgumentNullException.ThrowIfNull(sent);
+        ArgumentNullException.ThrowIfNull(deleted);
+        return WatchChannel($"private-conversations.{conversationId}", (name, json) =>
+        {
+            switch (name)
+            {
+                case "message.sent" when MessageService.FromRealtime(json) is { } message:
+                    sent(message);
+                    break;
+                case "message.deleted" when IdOf(json) is { } id:
+                    deleted(id);
+                    break;
+            }
+        });
+    }
+
+    /// <summary>Beliebigen Kanal verfolgen (z. B. <c>private-forum.threads.{id}</c>); Rückruf im UI-Thread, Ereignis ohne Punkt.</summary>
+    public IDisposable WatchChannel(string channelName, Action<string, string> onEvent)
+    {
+        ArgumentNullException.ThrowIfNull(onEvent);
+        var channel = _hub.Subscribe(channelName);
+        if (channel is null)
+        {
+            return new Subscription(null);
+        }
+
+        void Handler(object? sender, ReverbEvent e) => OnUi(() => onEvent(e.Name.TrimStart('.'), e.DataJson));
+        channel.EventReceived += Handler;
+        return new Subscription(() =>
+        {
+            channel.EventReceived -= Handler;
+            _ = _hub.UnsubscribeAsync(channelName);
+        });
+    }
+
+    private static string? IdOf(string json)
+    {
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            return doc.RootElement.TryGetProperty("id", out var id) && id.ValueKind == System.Text.Json.JsonValueKind.String ? id.GetString() : null;
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return null;
+        }
+    }
+
+    private sealed class Subscription(Action? dispose) : IDisposable
+    {
+        private Action? _dispose = dispose;
+
+        public void Dispose()
+        {
+            _dispose?.Invoke();
+            _dispose = null;
         }
     }
 

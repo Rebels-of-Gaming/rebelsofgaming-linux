@@ -56,6 +56,7 @@ public sealed class TestServices : IDisposable
             Browser = browser,
             Notifier = new SilentNotifier(),
             Autostart = new FakeAutostart(),
+            MemoryOnly = true,
             Clipboard = clipboard,
             Launcher = launcher,
             Environment = "production",

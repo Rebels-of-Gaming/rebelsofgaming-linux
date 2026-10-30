@@ -34,6 +34,20 @@ public sealed record AppServicesOptions
 
     public IDesktopNotifier? Notifier { get; init; }
 
+    /// <summary>
+    /// Verschlüsselung für Plattencaches (Antworten, Warteschlange). Standard: Schlüssel aus dem Schlüsselbund; ohne
+    /// Schlüsselbund bzw. mit <see cref="MemoryOnly"/> bleibt alles im Speicher.
+    /// </summary>
+    public RoG.Core.Security.IPayloadProtector? Protector { get; init; }
+
+    /// <summary>Nichts auf die Platte schreiben (Tests ohne eigenen Schutz).</summary>
+    public bool MemoryOnly { get; init; }
+
+    /// <summary>Ordner für Caches/Warteschlange; Standard XDG (<see cref="LinuxPaths"/>).</summary>
+    public string? CacheDirectory { get; init; }
+
+    public string? DataDirectory { get; init; }
+
     /// <summary>„Beim Anmelden starten“; Standard: Background-Portal in Flatpak, sonst XDG-Autostart-Datei.</summary>
     public IAutostart? Autostart { get; init; }
 
@@ -68,12 +82,14 @@ public sealed class AppServices : IDisposable
         IBrowserLauncher browser,
         IDesktopNotifier notifier,
         ImageLoader images,
+        RoG.Core.Offline.Outbox outbox,
         IAutostart autostart,
         RoG.Core.Features.Servers.IExternalLauncher launcher,
         RoG.Core.Features.Servers.ServerConnector serverConnector)
     {
         Launcher = launcher;
         Autostart = autostart;
+        Outbox = outbox;
         SettingsStore = settingsStore;
         Settings = settings;
         _linuxStore = linuxStore;
@@ -92,7 +108,11 @@ public sealed class AppServices : IDisposable
         Devices = new LinuxDeviceRegistration(api.Client, tokens);
         api.Handler.Unauthorized += (_, _) => Unauthorized?.Invoke(this, EventArgs.Empty);
         Realtime = new RealtimeService(this);
+        OutboxRunner = new OutboxRunner(this);
     }
+
+    /// <summary>Sendet die Offline-Warteschlange (Start, Neuverbindung, jede Minute).</summary>
+    public OutboxRunner OutboxRunner { get; }
 
     /// <summary>Tray-Symbol (nur in der laufenden App, nicht in Tests); <c>null</c> = keins.</summary>
     public TrayService? Tray { get; set; }
@@ -161,6 +181,18 @@ public sealed class AppServices : IDisposable
 
     public ImageLoader Images { get; }
 
+    /// <summary>
+    /// Offline-Warteschlange (Kern): DMs nur im Speicher, Forenantworten und Zusagen verschlüsselt in
+    /// <c>$XDG_DATA_HOME/rebelsofgaming/outbox.dat</c> (nur mit Schlüsselbund).
+    /// </summary>
+    public RoG.Core.Offline.Outbox Outbox { get; }
+
+    /// <summary>Werden Antworten/Warteschlange verschlüsselt auf der Platte gehalten? (Über-Bereich, Diagnose)</summary>
+    public bool PersistentCache { get; private init; }
+
+    /// <summary>Cache-Dateien älter als das werden beim Start gelöscht (zusätzlich zur Obergrenze von 400 Einträgen).</summary>
+    public static readonly TimeSpan CacheRetention = TimeSpan.FromDays(30);
+
     /// <summary>„Beim Anmelden starten“ (Portal in Flatpak, sonst <c>~/.config/autostart</c>).</summary>
     public IAutostart Autostart { get; }
 
@@ -207,12 +239,32 @@ public sealed class AppServices : IDisposable
 
         var language = options.Language ?? LanguageResolver.Resolve(settings.Language, CultureInfo.CurrentUICulture);
         var environment = RoGEnvironment.Get(options.Environment ?? LaunchOptions.Current.Environment ?? settings.Environment);
-        var tokens = options.Tokens ?? new FallbackTokenStore(new SecretServiceTokenStore(new SecretServiceBackend(), environment.Name));
+        var secrets = options.Tokens is null ? new SecretServiceBackend() : null;
+        var tokens = options.Tokens ?? new FallbackTokenStore(new SecretServiceTokenStore(secrets!, environment.Name));
         var apiContext = new ApiContext(language, AppVersion);
 
-        // Antwort-Cache vorerst nur im Speicher: ein verschlüsselter Plattencache braucht einen Schlüssel aus dem
-        // Schlüsselbund (Bauplan Stufe 4, Annahme L6) – DPAPI wie unter Windows gibt es unter Linux nicht.
-        var api = new RoGApi(environment, tokens, apiContext, new InMemoryEtagCache(), options.ApiHandler);
+        // Antwort-Cache und Warteschlange verschlüsselt auf der Platte (AES-GCM, Schlüssel im Schlüsselbund – statt DPAPI
+        // wie unter Windows). Ohne Schlüsselbund bleibt alles im Speicher (Annahme L6/L30).
+        var protector = options.MemoryOnly
+            ? null
+            : options.Protector ?? (secrets is null ? null : await KeyringPayloadProtector.TryCreateAsync(secrets, environment.Name));
+        var cacheDirectory = Path.Combine(options.CacheDirectory ?? paths.CacheDirectory, "http", environment.Name);
+        IEtagCache cache = new InMemoryEtagCache();
+        if (protector is not null)
+        {
+            PruneOld(cacheDirectory, CacheRetention);
+            var persistent = new PersistentEtagCache(cacheDirectory, protector);
+            await persistent.LoadAsync();
+            cache = persistent;
+        }
+
+        var api = new RoGApi(environment, tokens, apiContext, cache, options.ApiHandler);
+        var persistentCache = protector is not null;
+        var outbox = new RoG.Core.Offline.Outbox(
+            api.Http,
+            protector is null ? null : Path.Combine(options.DataDirectory ?? paths.DataDirectory, $"outbox-{environment.Name}.dat"),
+            protector ?? (RoG.Core.Security.IPayloadProtector)RoG.Core.Security.NoPayloadProtection.Instance);
+        await outbox.LoadAsync();
         // RoGHttpHandler setzt „RoG-Windows“ nur, wenn noch kein User-Agent da ist – HttpClient überträgt diesen vorher
         api.Http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(AppIdentity.UserAgentProduct, AppVersion));
 
@@ -232,11 +284,15 @@ public sealed class AppServices : IDisposable
             options.Browser ?? xdg,
             options.Notifier ?? (paths.IsFlatpak ? new PortalNotifier() : new FreedesktopNotifier()),
             images,
+            outbox,
             options.Autostart ?? (paths.IsFlatpak
                 ? new PortalAutostart()
                 : new XdgAutostart(paths.ConfigHome, AutostartExecutable())),
             launcher,
-            connector);
+            connector)
+        {
+            PersistentCache = persistentCache,
+        };
     }
 
     /// <summary>Einstellung ändern und speichern – nacheinander, weil der Speicher über eine feste Temp-Datei schreibt.</summary>
@@ -286,11 +342,34 @@ public sealed class AppServices : IDisposable
         T(StringKeys.LoopbackSuccess),
         T(StringKeys.LoopbackFailure));
 
-    /// <summary>Antwort-Cache leeren (Abmelden: Inhalte gehören zum Konto).</summary>
+    /// <summary>Antwort-Cache und Warteschlange leeren (Abmelden: Inhalte gehören zum Konto) – auch die Dateien.</summary>
     public void ClearCaches()
     {
         Api.Handler.ClearCache();
+        Outbox.Clear();
         Images.Clear();
+    }
+
+    /// <summary>Cache-Dateien, die länger nicht geschrieben wurden, löschen (Speicherdauer wie im Bauplan).</summary>
+    internal static void PruneOld(string folder, TimeSpan maxAge)
+    {
+        try
+        {
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
+
+            var limit = DateTime.UtcNow - maxAge;
+            foreach (var file in new DirectoryInfo(folder).GetFiles("*.dat").Where(f => f.LastWriteTimeUtc < limit))
+            {
+                file.Delete();
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Cache ist Beiwerk
+        }
     }
 
     public void Dispose()
@@ -301,6 +380,8 @@ public sealed class AppServices : IDisposable
         Images.Dispose();
         _settingsGate.Dispose();
         (Notifier as IDisposable)?.Dispose();
+        OutboxRunner.Dispose();
+        Outbox.Dispose();
         (Tokens as IDisposable)?.Dispose();
     }
 
