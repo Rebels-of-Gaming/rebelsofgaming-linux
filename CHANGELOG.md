@@ -6,9 +6,15 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 3 – Echtzeit + Desktop-Integration (Kern), Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
 
 ### Hinzugefügt (Stufe 3)
+
+- Server-Seite mit Reitern wie in der Windows-App: **Minecraft** („So kommst du auf den Server“ für Java, Bedrock und Konsole mit Kopieren, Konsolen-Hinweis, Ressourcenpaket zum Herunterladen, Weltkarte, Bestenlisten, Konto verknüpfen), **TeamSpeak** (wer ist in welchem Kanal, Trenner als Überschriften, stumm/abwesend als Symbol, „Leere Kanäle zeigen“, „TeamSpeak verbinden“ mit deinem RoG-Namen – ohne TeamSpeak wird die Adresse kopiert) und **Discord-Voice** (angemeldet; im Gastmodus Hinweis mit „Anmelden“); Voice aktualisiert sich alle 30 Sekunden und live, F5 lädt den offenen Reiter neu; `rog://servers/minecraft`, `…/teamspeak`, `…/discord`
+- **Tray-Symbol** (StatusNotifierItem: KDE, XFCE, Cinnamon, GNOME mit AppIndicator-Erweiterung, Steam Deck im Desktopmodus): Linksklick öffnet, Menü mit Öffnen, Benachrichtigungen, Nachrichten, Server und Beenden, Tooltip mit der Zahl ungelesener Einträge
+- **Beim Schließen in den Infobereich** (Einstellung, Standard an): Benachrichtigungen kommen weiter; nur, wenn ein Panel das Symbol wirklich zeigt – sonst Hinweis in den Einstellungen und das Fenster beendet die App
+- **Beim Anmelden am Desktop starten**: startet ohne Fenster im Infobereich (`--background`); in Flatpak über das Background-Portal (das System fragt einmal nach)
+- In Flatpak: Desktop-Benachrichtigungen über das Notification-Portal (Klick und „Öffnen“ wie bisher)
 
 - Echtzeit über Reverb (Kern): Live-Ticker der Startseite, Serverstatus und eigene Ereignisse kommen sofort; nach einer Neuverbindung gleicht die App die Zähler ab; „Echtzeit: verbunden“ unter Einstellungen → Über die App
 - Glocke: Benachrichtigungen mit Symbol, „Nur ungelesene“, „Alle gelesen“, „Mehr laden“; ein Eintrag öffnet das Ziel in der App (Termin, Squad, News …) oder genau die Seite der Website; neue Einträge kommen live dazu
@@ -32,6 +38,8 @@ Stufe 3 – Echtzeit + Desktop-Integration (Kern), Stufe 2 – Community lesen; 
 - Tests: ViewModel-Tests für alle neuen Seiten, Deep Links und `xdg-mime`; Screenshots in 1280×800, 1440×900, schmal (480 px) und hell
 
 ### Geändert (Stufe 2 und 3)
+
+- Flatpak-Entwurf: `--talk-name=org.kde.StatusNotifierWatcher` statt `--talk-name=org.freedesktop.Notifications` (Benachrichtigungen und Autostart über Portale)
 
 - CI: `actions/checkout@v7` und `actions/setup-dotnet@v6` (Node 24)
 - Hinweis zu Desktop-Benachrichtigungen in den Einstellungen beschreibt jetzt, was gemeldet wird

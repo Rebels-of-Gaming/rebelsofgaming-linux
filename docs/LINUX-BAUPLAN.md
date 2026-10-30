@@ -5,10 +5,10 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
-**Stufe 3 (Echtzeit + Desktop-Integration, 30.10.2026) – Kern erledigt** (Reverb, Glocke + Zähler,
-Desktop-Benachrichtigungen mit Klick, alle `rog://`-Ziele); offen aus Stufe 3: Tray (StatusNotifierItem), Autostart
-(Background-Portal), TeamSpeak-/Discord-Voice-Ansicht. **Stufe 2 (Community lesen) – erledigt**, davor Stufe 1 (Konto +
-Start) und der Wechsel auf **Avalonia 12** (Owner-Entscheidung F3). Version 0.1.0, nicht veröffentlicht.
+**Stufe 3 (Echtzeit + Desktop-Integration, 30.10.2026) – erledigt** (Reverb, Glocke + Zähler,
+Desktop-Benachrichtigungen mit Klick, alle `rog://`-Ziele, Server-Reiter Minecraft/TeamSpeak/Discord-Voice, Tray,
+Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Community lesen) – erledigt**, davor Stufe 1
+(Konto + Start) und der Wechsel auf **Avalonia 12** (Owner-Entscheidung F3). Version 0.1.0, nicht veröffentlicht.
 
 | Bereich | Stand |
 |---|---|
@@ -38,9 +38,14 @@ Start) und der Wechsel auf **Avalonia 12** (Owner-Entscheidung F3). Version 0.1.
 | **Glocke** (Postfach, „Nur ungelesene“, „Alle gelesen“, Eintrag öffnet das Ziel in der App bzw. die genaue Website-Seite; neue Einträge kommen live dazu; Zähler an Glocke und Nachrichten in der Seitenleiste) | steht |
 | **Desktop-Benachrichtigungen** (neue Benachrichtigungen und neue Direktnachrichten, solange die App läuft und das Fenster nicht im Vordergrund ist; Aktion „Öffnen“ → Fenster nach vorn + Ziel; Kategorie `im.received` für DMs; Einstellung „Desktop-Benachrichtigungen zeigen“) | steht; Protokoll-Test mit `ActionInvoked` gegen privaten D-Bus |
 | **`rog://` vollständig** (alle Ziele der Windows-App: Bereiche mit eigener Seite öffnen nativ, Votes/Verwaltung/Bans/Bestenlisten/Karte und Einträge in Forum/Wiki/Tools/Matches öffnen genau diese Website-Seite; Links während des Logins warten bis nach der Anmeldung; zweite Instanz gibt Links weiter) | steht |
+| **Server-Reiter** wie Windows: Gameserver · **Minecraft** (Java/Bedrock/Konsole mit Kopieren, Ressourcenpaket herunterladen, Weltkarte/Bestenlisten/Konto verknüpfen → Website) · **TeamSpeak** (Kanäle mit Personen, Trenner als Überschriften, stumm/abwesend als Symbol + Screenreader-Text, „Leere Kanäle zeigen“, Verbinden über `ts3server://` mit RoG-Name, ohne TeamSpeak Adresse kopieren) · **Discord-Voice** (nur angemeldet, Gast: Hinweis + Anmelden) | steht; Voice alle 30 s und bei `.live.updated`, nur solange der Reiter offen ist; `rog://servers/minecraft|teamspeak|discord`; gegen die Produktion geprüft (TeamSpeak leer → Leerzustand) |
+| **Tray** (eigenes StatusNotifierItem + dbusmenu über D-Bus, Anmeldung mit eindeutigem Busnamen; Menü Öffnen/Benachrichtigungen/Nachrichten/Server/Beenden, Tooltip mit Ungelesen-Zahl, Linksklick öffnet) | steht; Protokoll-Tests gegen privaten Bus, **echt geprüft mit xfce4-panel 4.20 unter Xvfb** (Symbol im Panel, Menü, Aktivieren, Beenden; `artifacts/screenshots/x11-tray/`) |
+| **Schließen in den Infobereich** (nur wenn ein Panel das Symbol zeigt und „Beim Schließen in den Infobereich“ an ist; einmaliger Hinweis; Abmelden/SIGTERM/„Beenden“ schließen wirklich) | steht |
+| **Autostart** („Beim Anmelden am Desktop starten“: XDG-Autostart-Datei bzw. Background-Portal in Flatpak, Start mit `--background` ohne Fenster im Infobereich, wartet bis 15 s auf das Panel, ohne Panel mit Fenster) | steht; Portal gegen privaten Bus getestet, Hintergrund-Start unter Xvfb + xfce4-panel geprüft |
+| **Notification-Portal in Flatpak** (statt `--talk-name=org.freedesktop.Notifications`; Klick/„Öffnen“ über `ActionInvoked`) | steht; gegen privaten Bus getestet |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -105,8 +110,10 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
   Neu (Stufe 2): **`SquadInternalService`** für `GET /v1/squads/{squad}/intern` (Forum, Squad-Gruppe, Termine, Downloads,
   Alben, `missing_scopes`) – liegt bis dahin in `src/RoG.Linux.App/Services/SquadInternalService.cs`; die Windows-App
   zeigt „Intern“ noch nicht. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
-  Neu (Stufe 3): **Origin für Reverb** (`ClientWebSocketConnection` mit `WebBaseUrl` der Umgebung, F6) und
-  `client=rog-<plattform>` statt fest `rog-windows` in `RealtimeConfig.BuildSocketUri`.
+  Neu (Stufe 3): `client=rog-<plattform>` statt fest `rog-windows` in `RealtimeConfig.BuildSocketUri` (der Origin
+  ist seit Website v0.53.1 nicht mehr nötig, F6 erledigt). **Hinweis an die Windows-App (kein Kern-Thema):** In
+  `VoiceViewModel.Add` beendet `channel.Spacer` die Rekursion – Unterkanäle unter Trennern (so liefert die Produktion
+  alle Squad-Kanäle) erscheinen dort nie; Linux zeigt Trenner als Überschrift (L29).
 - **Kern anheben:** `git -C external/rog-windows fetch && git -C external/rog-windows checkout <commit>`, bauen,
   testen, Commit `chore: bump core to <hash>`.
 
@@ -127,11 +134,13 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    Monat, Zusagen nur anzeigen), Regeln/Seiten/Rechtstexte, globale Suche, Deep Links in alle diese Bereiche.
    *Verschoben:* TeamSpeak-/Discord-Voice-Ansicht und Minecraft-Reiter der Server (Stufe 3, zusammen mit der Echtzeit
    über `.live.updated`), Matches/Hall of Fame (Stufe 6 mit Stats), Zusagen/Regeln bestätigen (Stufe 4 bzw. 6).
-3. **Echtzeit + Desktop-Integration** *(Kern erledigt)* – Reverb (Kern) im Betrieb, Glocke + Zähler,
+3. **Echtzeit + Desktop-Integration** *(erledigt)* – Reverb (Kern) im Betrieb, Glocke + Zähler,
    Desktop-Benachrichtigungen mit Klick, **Deep Links `rog://`** für alle Bereiche (Weitergabe per Single-Instance seit
-   Stufe 1). *Offen:* Tray über StatusNotifierItem (KDE/GNOME-Erweiterung, optional), Autostart (Background-Portal),
-   Notification-Portal statt D-Bus-Dienst in Flatpak, TeamSpeak-/Discord-Voice- und Minecraft-Reiter der Server
-   (Live über `.live.updated`), Fokus unter Wayland mit xdg-activation-Token (Avalonia wertet ihn noch nicht aus).
+   Stufe 1), Server-Reiter Minecraft/TeamSpeak/Discord-Voice (Live über `.live.updated`), Tray über
+   StatusNotifierItem (eigene Umsetzung), Schließen in den Infobereich, Autostart (XDG bzw. Background-Portal),
+   Notification-Portal in Flatpak. *Bleibt offen (Avalonia):* Fokus unter Wayland mit xdg-activation-Token – Avalonia
+   12.1 wertet ihn nicht aus, das Fenster meldet sich dann nur in der Taskleiste. *Verschoben:* Minecraft-Beitrittsdaten
+   bearbeiten und Ressourcenpaket hochladen (`minecraft.manage`) → Stufe 9 (Verwaltung).
 4. **Kommunikation** – DMs schreiben (Antworten, Anhänge, Pop-out-Fenster), Forum lesen + schreiben (BBCode), Zusagen,
    Offline-Warteschlange und verschlüsselter Plattencache (Schlüssel im Schlüsselbund), Tastenkürzel.
 5. **Medien** – Uploads (Drag & Drop, Strg+V, Datei-Dialog über das FileChooser-Portal), Galerie, Downloads, Kurzlinks,
@@ -160,7 +169,8 @@ Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
 - App-ID **`com.rebelsofgaming.RebelsOfGaming`** (Owner-Entscheidung F2). Flathub verlangt den Nachweis, dass die
   Domain uns gehört (`https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt`).
 - Manifest-Entwurf `packaging/flatpak/com.rebelsofgaming.RebelsOfGaming.yml` (freedesktop 25.08, Binärpakete von
-  cdn.rogclan.de mit sha256 – F1, Rechte: Netz, Wayland + X11-Rückfall, IPC, DRI, Secret Service, Notifications)
+  cdn.rogclan.de mit sha256 – F1, Rechte: Netz, Wayland + X11-Rückfall, IPC, DRI, Secret Service,
+  StatusNotifierWatcher; Benachrichtigungen, Autostart, Farbschema und Links über Portale ohne Zusatzrecht)
 - `.desktop` (inkl. `x-scheme-handler/rog`) und AppStream-Metadaten unter `packaging/linux/` (Entwürfe, validiert:
   `desktop-file-validate` ok, XML wohlgeformt; `appstreamcli validate` vor Einreichung)
 - Kein Offline-NuGet-Restore nötig: Flathub bekommt fertige Pakete (F1)
@@ -193,6 +203,17 @@ trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehob
    Workflow warnt, wenn sie fehlen.
 
 ## Datenschutz (Stand Stufe 3)
+
+- **Neu in Stufe 3 (Abschluss):** Server-Reiter laden `/v1/minecraft/join`, `/v1/minecraft/resource-pack`,
+  `/v1/teamspeak/viewer` (öffentlich) und angemeldet `/v1/discord/voice` (Namen + Avatare der Personen im Voice, nur im
+  Speicher, Avatare nur vom CDN der Plattform). „TeamSpeak verbinden“ übergibt Adresse und den eigenen RoG-Namen als
+  Spitznamen an das lokale TeamSpeak (`ts3server://` über `xdg-open`). „Herunterladen“ des Ressourcenpakets öffnet die
+  Adresse der Plattform im Browser. **Tray:** Titel, Tooltip (Zahl ungelesener Einträge) und Menü gehen nur an das
+  lokale Panel (Session-Bus). **Autostart:** neue lokale Datei `~/.config/autostart/com.rebelsofgaming.RebelsOfGaming.desktop`
+  (nur Programmpfad + `--background`, keine personenbezogenen Daten) bzw. in Flatpak Eintrag über das Background-Portal;
+  `linux.json` merkt sich zusätzlich „Autostart an/aus“. Abschalten entfernt den Eintrag. **Notification-Portal:**
+  Titel/Text der Benachrichtigung gehen an den lokalen Portal-Dienst (wie vorher an den Benachrichtigungsdienst).
+  Nichts davon verlässt den Rechner außer den genannten API-Aufrufen an die eigene Plattform.
 
 - **Lokal:** `settings.json` (Sprache, Umgebung, Gastmodus, zuletzt geöffneter Bereich, Benachrichtigungen an/aus,
   Fenstergröße/-lage – keine personenbezogenen Daten) und `linux.json` (Design) unter
@@ -269,25 +290,39 @@ docs/                       LINUX-BAUPLAN.md
   Scrollen passen. Für Touch/Controller (Stufe 10) wird das mit dem Spielmodus noch einmal bewertet.
 - **L15 – Startseite:** Abstimmungen öffnen vorerst die Website (Votes nativ in Stufe 6); Termine, News und
   Onboarding-Schritte (Regeln, Termine …) öffnen seit Stufe 2 die Seite in der App.
-- **L22 – Reverb mit Origin:** Die Produktion lehnt WebSocket-Verbindungen ohne erlaubten `Origin` mit
-  `pusher:error 4009 „Origin not allowed“` ab (geprüft 30.10.2026). Die Linux-App sendet als Origin die Website ihrer
-  Umgebung (`WebBaseUrl` aus `environments.json`, keine feste Domain). Siehe offene Frage F6.
+- **L22 – Reverb mit Origin:** Die Produktion lehnte bis Website v0.53.0 WebSocket-Verbindungen ohne erlaubten
+  `Origin` ab (`4009`). Die Linux-App sendet als Origin die Website ihrer Umgebung (`WebBaseUrl` aus
+  `environments.json`, keine feste Domain) – seit v0.53.1 geht es auch ohne, der Origin bleibt (F6 erledigt).
 - **L23 – Desktop-Benachrichtigungen nur im Hintergrund:** Hat das Fenster den Fokus, zeigt die App nichts zusätzlich
   (Zähler und Glocke aktualisieren sich trotzdem). Direktnachrichten erzeugen serverseitig keine Glocken-Einträge
   (`messages.received` nie in der Glocke) – die App holt bei steigendem `.messages.unread` die Unterhaltungen und meldet
   neue Nachrichten seit dem Start (je Nachricht einmal, höchstens drei auf einmal).
 - **L24 – Ziele ohne eigene Seite:** Benachrichtigungen, Suche und Links öffnen Ziele, die die App noch nicht nativ hat
   (Forum-Thema, Wiki-Seite, Votes …), mit genau der Adresse im Browser statt nur des Platzhalters.
+- **L25 – Tray selbst gebaut:** Avalonias `TrayIcon` besitzt unter Linux einen eigenen Busnamen
+  (`org.kde.StatusNotifierItem-<pid>-<n>`), den Flatpak ohne `--own-name` nicht erlaubt, und sagt nicht, ob ein Panel
+  das Symbol zeigt. Die eigene Umsetzung (`StatusNotifierTray`, ~600 Zeilen, Tmds.DBus.Protocol) meldet sich mit dem
+  eindeutigen Busnamen an und liest `IsStatusNotifierHostRegistered` – nur dann geht „Schließen“ in den Infobereich.
+  Symbol: `IconName` = App-ID (Icon-Theme, Flatpak exportiert es) plus `IconPixmap` aus dem RoG-Abzeichen (16–64 px).
+- **L26 – Schließen in den Infobereich** ist wie unter Windows standardmäßig an (`CloseToTray` des Kerns), wirkt aber
+  nur mit sichtbarem Tray. GNOME ohne AppIndicator-Erweiterung: Hinweis in den Einstellungen, Fenster schließt die App.
+- **L27 – Autostart:** außerhalb von Flatpak die XDG-Autostart-Datei
+  `~/.config/autostart/com.rebelsofgaming.RebelsOfGaming.desktop` (`Exec="<Programm>" --background`); in Flatpak das
+  Background-Portal (fragt einmal nach, Eintrag außerhalb der Sandbox, Stand wird in `linux.json` gemerkt, weil er von
+  innen nicht lesbar ist). Hintergrund-Start wartet bis zu 15 s auf das Panel (startet beim Anmelden oft später).
+- **L28 – Portale in Flatpak:** Benachrichtigungen über das Notification-Portal (Text-IDs `rog-<n>`, Klick und
+  „Öffnen“ über `ActionInvoked`), außerhalb von Flatpak weiter `org.freedesktop.Notifications` (mit Kategorie
+  `im.received`; das Portal bekommt keine Kategorie, weil ältere Portale unbekannte Werte ablehnen).
+- **L29 – TeamSpeak-Trenner** (`spacer`) sind Überschriften, ihre Unterkanäle bleiben sichtbar (die Website liefert
+  Kanäle unter Trennern als Kinder, siehe Produktion). Die Windows-App blendet Trenner samt Unterkanälen aus – Hinweis
+  an das Windows-Repo (siehe „Wünsche an den Kern“).
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
 ## Offene Fragen (an Wahke)
 
-- **F6 – Reverb und Apps (wichtig, betrifft auch die Windows-App):** Reverb der Produktion antwortet Verbindungen
-  **ohne** `Origin`-Kopf mit `4009 Origin not allowed`. Die Windows-App (`ClientWebSocketConnection` ohne Origin) bekommt
-  damit vermutlich keine Echtzeit. Die Linux-App sendet die Website ihrer Umgebung als Origin und ist verbunden.
-  Vorschlag: im Kern `RealtimeService`/`ClientWebSocketConnection` den Origin der Umgebung mitgeben (Wunsch an den Kern)
-  oder auf der Website Verbindungen ohne Origin für Apps zulassen.
+- ~~F6 – Reverb und Apps~~ **erledigt** (Website v0.53.1, Commit 606f1c40): Reverb nimmt Verbindungen ohne und mit
+  Origin an. Die Linux-App sendet weiter die Website ihrer Umgebung als Origin (L22).
 
 - **F5 – Wayland-Test:** Bitte die App einmal unter einer Wayland-Sitzung (GNOME oder KDE, gern auch Steam Deck im
   Desktopmodus) starten und unter Einstellungen → Über die App „Anzeige: Wayland“ prüfen; bei Problemen hilft
