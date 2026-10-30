@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: Build + Tests (Linux)
+    runs-on: [self-hosted, Linux, rog]
+    timeout-minutes: 30
+    env:
+      # Eigene Runner ohne root: .NET ins Benutzerverzeichnis statt /usr/share/dotnet (wie im Windows-Repo)
+      DOTNET_INSTALL_DIR: ${{ github.workspace }}/../.dotnet
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      # Der geteilte Kern liegt im privaten Repo rebelsofgaming-windows. GITHUB_TOKEN darf nur dieses Repo lesen –
+      # deshalb ein Deploy-Key (nur lesen, nur rebelsofgaming-windows) als Secret ROG_WINDOWS_DEPLOY_KEY.
+      # Einrichtung: docs/LINUX-BAUPLAN.md, Abschnitt „CI“.
+      - name: Geteilten Kern holen (Submodul external/rog-windows)
+        env:
+          DEPLOY_KEY: ${{ secrets.ROG_WINDOWS_DEPLOY_KEY }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "::error::Secret ROG_WINDOWS_DEPLOY_KEY fehlt – Deploy-Key für rebelsofgaming-windows anlegen (docs/LINUX-BAUPLAN.md, Abschnitt CI)"
+            exit 1
+          fi
+          keyfile="$RUNNER_TEMP/rog-windows-deploy-key"
+          (umask 077 && printf '%s\n' "$DEPLOY_KEY" > "$keyfile")
+          trap 'rm -f "$keyfile"' EXIT
+          export GIT_SSH_COMMAND="ssh -i $keyfile -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          git -c url."git@github.com:".insteadOf="https://github.com/" submodule update --init external/rog-windows
+          git -C external/rog-windows log -1 --format='Kern: %h %s'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Bibliotheken für Headless-Rendering prüfen
+        run: |
+          # SkiaSharp (Screenshots/Rauchtests) braucht libfontconfig; ohne Schriften rendert Text mit Ersatzschrift
+          if ! ldconfig -p | grep -q libfontconfig.so.1; then
+            echo "::warning::libfontconfig1 fehlt auf dem Runner – Screenshot-Tests könnten scheitern (apt install libfontconfig1 fonts-dejavu-core)"
+          fi
+
+      - run: dotnet build RoG.Linux.sln -c Release
+      - run: dotnet test RoG.Linux.sln -c Release --no-build --blame-hang-timeout 5m --blame-hang-dump-type none
