@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RoG.Linux.App.ViewModels"
              xmlns:l="using:RoG.Linux.App.Localization"
+             xmlns:c="using:RoG.Linux.App.Controls"
              x:Class="RoG.Linux.App.Views.AccountView"
              x:DataType="vm:AccountViewModel">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -37,6 +38,51 @@
           <TextBlock Classes="muted small" Text="{Binding VersionText}" />
         </StackPanel>
       </Border>
+
+      <!-- Profil bearbeiten -->
+      <Expander IsVisible="{Binding IsSignedIn}" IsExpanded="{Binding Editor.IsExpanded}" HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T AccountPage_EditProfile.Header}">
+        <Expander.Header>
+          <TextBlock Classes="section" Text="{l:T AccountPage_EditProfile.Header, Upper=True}" />
+        </Expander.Header>
+        <StackPanel Spacing="12" DataContext="{Binding Editor}" x:DataType="vm:ProfileEditViewModel">
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" MinHeight="80"
+                       IsVisible="{Binding !ShowContent}" />
+          <StackPanel Spacing="12" IsVisible="{Binding ShowContent}">
+            <WrapPanel Orientation="Horizontal">
+              <Button Classes="secondary" Margin="0,0,12,8" Click="OnAvatarClick" Content="{l:T AccountPage_ChangeAvatar.Content}" />
+              <Button Classes="secondary" Margin="0,0,12,8" Click="OnBannerClick" Content="{l:T AccountPage_ChangeBanner.Content}" />
+            </WrapPanel>
+            <StackPanel>
+              <TextBlock Classes="label" Text="{l:T AccountPage_Motto.Header}" />
+              <TextBox Text="{Binding Motto}" MaxLength="120" AutomationProperties.Name="{l:T AccountPage_Motto.Header}" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Classes="label" Text="{l:T AccountPage_Bio.Header}" />
+              <TextBox Text="{Binding Bio}" MaxLength="2000" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="100"
+                       AutomationProperties.Name="{l:T AccountPage_Bio.Header}" />
+            </StackPanel>
+            <WrapPanel Orientation="Horizontal">
+              <StackPanel Margin="0,0,12,0">
+                <TextBlock Classes="label" Text="{l:T AccountPage_City.Header}" />
+                <TextBox Text="{Binding City}" MinWidth="220" AutomationProperties.Name="{l:T AccountPage_City.Header}" />
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Classes="label" Text="{l:T AccountPage_Country.Header}" />
+                <TextBox Text="{Binding Country}" MinWidth="160" AutomationProperties.Name="{l:T AccountPage_Country.Header}" />
+              </StackPanel>
+            </WrapPanel>
+            <ToggleSwitch IsChecked="{Binding ShowOnMap}" Content="{l:T AccountPage_ShowOnMap.Header}" OnContent="" OffContent=""
+                          AutomationProperties.Name="{l:T AccountPage_ShowOnMap.Header}" />
+            <ToggleSwitch IsChecked="{Binding ShowOnlineStatus}" Content="{l:T AccountPage_ShowOnline.Header}" OnContent="" OffContent=""
+                          AutomationProperties.Name="{l:T AccountPage_ShowOnline.Header}" />
+            <ToggleSwitch IsChecked="{Binding HallOfFameConsent}" Content="{l:T AccountPage_HallOfFame.Header}" OnContent="" OffContent=""
+                          AutomationProperties.Name="{l:T AccountPage_HallOfFame.Header}" />
+            <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding SaveCommand}" Content="{l:T AccountPage_SaveProfile.Content}" />
+          </StackPanel>
+        </StackPanel>
+      </Expander>
 
       <StackPanel Spacing="10" IsVisible="{Binding IsSignedIn}">
         <TextBlock Classes="muted small" Text="{l:T Account_SignOutText}" />

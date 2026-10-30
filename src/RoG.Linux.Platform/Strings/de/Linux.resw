@@ -313,4 +313,7 @@
   <data name="Linux_Video" xml:space="preserve">
     <value>Video</value>
   </data>
+  <data name="Linux_ImageTooLarge" xml:space="preserve">
+    <value>Das Bild ist zu groß – höchstens {0} MB.</value>
+  </data>
 </root>

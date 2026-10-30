@@ -236,6 +236,17 @@ public class ScreenshotTests
     public async Task Media_album_narrow() => await Shoot("media_album_narrow_480x900", 480, 900, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenMedia(shell, 1));
 
     [AvaloniaFact]
+    public async Task Account_edit_profile() =>
+        await Shoot("account_edit_1280x1300", 1280, 1300, await TestServices.CreateAsync(TestTokens.Wahke), async shell =>
+        {
+            shell.NavigateTo("Nav_Account");
+            var account = Assert.IsType<AccountViewModel>(shell.CurrentPage);
+            account.Editor.IsExpanded = true;
+            await ViewModelTests.WaitUntil(() => account.Editor.ShowContent);
+            await Settle(400);
+        });
+
+    [AvaloniaFact]
     public async Task Settings_full() =>
         await Shoot("settings_full_1280x2000", 1280, 2000, await TestServices.CreateAsync(guest: true), shell =>
         {

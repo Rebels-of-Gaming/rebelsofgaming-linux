@@ -14,6 +14,7 @@ public sealed partial class AccountViewModel : ObservableObject
 
     public AccountViewModel(AppServices services, Func<Task> signOut, Action signIn)
     {
+        Editor = new ProfileEditViewModel(services);
         _services = services;
         _signOut = signOut;
         _signIn = signIn;
@@ -26,6 +27,9 @@ public sealed partial class AccountViewModel : ObservableObject
     public partial bool IsSignedIn { get; set; }
 
     public bool IsGuest => !IsSignedIn;
+
+    /// <summary>„Profil bearbeiten“ (lädt beim Aufklappen).</summary>
+    public ProfileEditViewModel Editor { get; }
 
     [ObservableProperty]
     public partial string Name { get; set; } = string.Empty;
