@@ -145,7 +145,7 @@ public sealed class SingleInstance : IDisposable
             connection.Dispose();
             return new SingleInstance(false, "dbus");
         }
-        catch (Exception ex) when (ex is DBusExceptionBase or IOException or TimeoutException or SocketException)
+        catch (Exception ex) when (ex is DBusExceptionBase or IOException or TimeoutException or SocketException or ArgumentException or NotSupportedException or FormatException)
         {
             // Bus kaputt oder laufende Instanz hängt: lieber selbst starten als gar nicht
             connection.Dispose();
@@ -313,8 +313,9 @@ public sealed class SingleInstance : IDisposable
             _ = instance.AcceptLoopAsync(listener);
             return instance;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SocketException or OperationCanceledException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SocketException or OperationCanceledException or ArgumentException)
         {
+            // ArgumentException: Socket-Pfad länger als 108 Zeichen (sehr langes XDG_RUNTIME_DIR) → ohne Single-Instance starten
             return null;
         }
     }

@@ -166,6 +166,25 @@ public class DBusIntegrationTests
     }
 
     [Fact]
+    public async Task Broken_bus_address_or_too_long_runtime_dir_still_starts()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "rog-instance-" + new string('x', 120));
+        try
+        {
+            using var instance = await SingleInstance.AcquireAsync(null, "disabled:", dir);
+            Assert.True(instance.IsPrimary);
+            Assert.Equal("none", instance.Mechanism);
+        }
+        finally
+        {
+            if (Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public async Task Stale_socket_after_a_crash_is_taken_over()
     {
         var dir = Path.Combine(Path.GetTempPath(), "rog-instance-" + Guid.NewGuid().ToString("N")[..8]);
