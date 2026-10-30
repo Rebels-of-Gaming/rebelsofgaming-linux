@@ -817,4 +817,82 @@
   <data name="Linux_MatchAttachmentTypes" xml:space="preserve">
     <value>Images, PDF, ZIP/7z</value>
   </data>
+  <data name="Linux_ControllerTitle" xml:space="preserve">
+    <value>CONTROLLER</value>
+  </data>
+  <data name="Linux_ControllerToggle" xml:space="preserve">
+    <value>Use a controller</value>
+  </data>
+  <data name="Linux_ControllerHint" xml:space="preserve">
+    <value>Steam Deck, Xbox, PlayStation and other controllers via SDL. Input only counts while the window is in the foreground – nothing leaves your computer.</value>
+  </data>
+  <data name="Linux_ControllerConnected" xml:space="preserve">
+    <value>Connected: {0}</value>
+  </data>
+  <data name="Linux_ControllerUnknownName" xml:space="preserve">
+    <value>Controller</value>
+  </data>
+  <data name="Linux_ControllerNone" xml:space="preserve">
+    <value>No controller connected</value>
+  </data>
+  <data name="Linux_ControllerOff" xml:space="preserve">
+    <value>Controller turned off</value>
+  </data>
+  <data name="Linux_ControllerLibrary" xml:space="preserve">
+    <value>via {0}</value>
+  </data>
+  <data name="Linux_ControllerUnavailable" xml:space="preserve">
+    <value>Controller support unavailable: SDL (libSDL3 or libSDL2) was not found. You can still use mouse, touch and keyboard.</value>
+  </data>
+  <data name="Linux_ControllerMappingTitle" xml:space="preserve">
+    <value>Button mapping</value>
+  </data>
+  <data name="Linux_GameModeActive" xml:space="preserve">
+    <value>Game mode active: full screen and larger controls.</value>
+  </data>
+  <data name="Linux_PadDirectionsKey" xml:space="preserve">
+    <value>D-pad · left stick</value>
+  </data>
+  <data name="Linux_PadMove" xml:space="preserve">
+    <value>Move focus (hold to repeat)</value>
+  </data>
+  <data name="Linux_PadActivate" xml:space="preserve">
+    <value>Select / activate</value>
+  </data>
+  <data name="Linux_PadBack" xml:space="preserve">
+    <value>Back / close</value>
+  </data>
+  <data name="Linux_PadSections" xml:space="preserve">
+    <value>Previous / next section</value>
+  </data>
+  <data name="Linux_PadMenuKey" xml:space="preserve">
+    <value>Menu (Start)</value>
+  </data>
+  <data name="Linux_PadMenu" xml:space="preserve">
+    <value>Open sidebar / back to content</value>
+  </data>
+  <data name="Linux_PadViewKey" xml:space="preserve">
+    <value>View (Select)</value>
+  </data>
+  <data name="Linux_PadSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Linux_PadRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Linux_PadRightStickKey" xml:space="preserve">
+    <value>Right stick</value>
+  </data>
+  <data name="Linux_PadScroll" xml:space="preserve">
+    <value>Scroll the page</value>
+  </data>
+  <data name="Linux_PadKeyboard" xml:space="preserve">
+    <value>On-screen keyboard (Steam Deck, game mode)</value>
+  </data>
+  <data name="Linux_KeyboardHint" xml:space="preserve">
+    <value>Tip: press Steam + X to open the on-screen keyboard.</value>
+  </data>
+  <data name="Linux_KeyboardHintClose" xml:space="preserve">
+    <value>Close hint</value>
+  </data>
 </root>

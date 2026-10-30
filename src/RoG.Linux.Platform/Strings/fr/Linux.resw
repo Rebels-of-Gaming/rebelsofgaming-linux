@@ -817,4 +817,82 @@
   <data name="Linux_MatchAttachmentTypes" xml:space="preserve">
     <value>Images, PDF, ZIP/7z</value>
   </data>
+  <data name="Linux_ControllerTitle" xml:space="preserve">
+    <value>MANETTE</value>
+  </data>
+  <data name="Linux_ControllerToggle" xml:space="preserve">
+    <value>Utiliser une manette</value>
+  </data>
+  <data name="Linux_ControllerHint" xml:space="preserve">
+    <value>Steam Deck, manettes Xbox, PlayStation et autres via SDL. Les commandes ne sont prises en compte que lorsque la fenêtre est au premier plan – rien ne quitte l’ordinateur.</value>
+  </data>
+  <data name="Linux_ControllerConnected" xml:space="preserve">
+    <value>Connectée : {0}</value>
+  </data>
+  <data name="Linux_ControllerUnknownName" xml:space="preserve">
+    <value>Manette</value>
+  </data>
+  <data name="Linux_ControllerNone" xml:space="preserve">
+    <value>Aucune manette connectée</value>
+  </data>
+  <data name="Linux_ControllerOff" xml:space="preserve">
+    <value>Manette désactivée</value>
+  </data>
+  <data name="Linux_ControllerLibrary" xml:space="preserve">
+    <value>via {0}</value>
+  </data>
+  <data name="Linux_ControllerUnavailable" xml:space="preserve">
+    <value>Prise en charge des manettes indisponible : SDL (libSDL3 ou libSDL2) est introuvable. Souris, écran tactile et clavier restent utilisables.</value>
+  </data>
+  <data name="Linux_ControllerMappingTitle" xml:space="preserve">
+    <value>Affectation des touches</value>
+  </data>
+  <data name="Linux_GameModeActive" xml:space="preserve">
+    <value>Mode jeu actif : plein écran et commandes plus grandes.</value>
+  </data>
+  <data name="Linux_PadDirectionsKey" xml:space="preserve">
+    <value>Croix · stick gauche</value>
+  </data>
+  <data name="Linux_PadMove" xml:space="preserve">
+    <value>Déplacer le focus (maintenir pour répéter)</value>
+  </data>
+  <data name="Linux_PadActivate" xml:space="preserve">
+    <value>Sélectionner / activer</value>
+  </data>
+  <data name="Linux_PadBack" xml:space="preserve">
+    <value>Retour / fermer</value>
+  </data>
+  <data name="Linux_PadSections" xml:space="preserve">
+    <value>Section précédente / suivante</value>
+  </data>
+  <data name="Linux_PadMenuKey" xml:space="preserve">
+    <value>Menu (Start)</value>
+  </data>
+  <data name="Linux_PadMenu" xml:space="preserve">
+    <value>Ouvrir la barre latérale / revenir au contenu</value>
+  </data>
+  <data name="Linux_PadViewKey" xml:space="preserve">
+    <value>Affichage (Select)</value>
+  </data>
+  <data name="Linux_PadSearch" xml:space="preserve">
+    <value>Recherche</value>
+  </data>
+  <data name="Linux_PadRefresh" xml:space="preserve">
+    <value>Actualiser</value>
+  </data>
+  <data name="Linux_PadRightStickKey" xml:space="preserve">
+    <value>Stick droit</value>
+  </data>
+  <data name="Linux_PadScroll" xml:space="preserve">
+    <value>Faire défiler la page</value>
+  </data>
+  <data name="Linux_PadKeyboard" xml:space="preserve">
+    <value>Clavier virtuel (Steam Deck, mode jeu)</value>
+  </data>
+  <data name="Linux_KeyboardHint" xml:space="preserve">
+    <value>Astuce : Steam + X ouvre le clavier virtuel.</value>
+  </data>
+  <data name="Linux_KeyboardHintClose" xml:space="preserve">
+    <value>Fermer l’astuce</value>
+  </data>
 </root>

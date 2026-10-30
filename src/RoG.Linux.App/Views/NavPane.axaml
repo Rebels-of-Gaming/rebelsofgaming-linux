@@ -45,6 +45,10 @@
     <Style Selector="views|NavPane.dense Button.nav">
       <Setter Property="Height" Value="34" />
     </Style>
+    <!-- Spielmodus (Steam Deck, Controller/Touch): 44 px je Eintrag statt kompakt – die Liste scrollt dann (L14) -->
+    <Style Selector="Window.gamemode views|NavPane Button.nav">
+      <Setter Property="Height" Value="44" />
+    </Style>
   </UserControl.Styles>
 
   <Border Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">

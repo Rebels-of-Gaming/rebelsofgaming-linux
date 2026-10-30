@@ -84,6 +84,12 @@ public sealed record AppServicesOptions
     /// <summary>Uhr der App-Sperre (Tests); Standard UTC jetzt.</summary>
     public Func<DateTimeOffset>? Clock { get; init; }
 
+    /// <summary>Controller-Quelle (Tests: Fake); Standard SDL3/SDL2, zur Laufzeit geladen.</summary>
+    public Func<RoG.Linux.Platform.Input.IGamepadBackend?>? GamepadBackend { get; init; }
+
+    /// <summary>Spielmodus erzwingen (Tests); sonst <see cref="LaunchOptions.GameMode"/>.</summary>
+    public bool? GameMode { get; init; }
+
     /// <summary>PBKDF2-Iterationen für neue PINs (Tests: wenige); Standard <see cref="RoG.Linux.Platform.Security.PinHash.DefaultIterations"/>.</summary>
     public int? PinIterations { get; init; }
 }
@@ -143,6 +149,12 @@ public sealed class AppServices : IDisposable
 
     /// <summary>Tray-Symbol (nur in der laufenden App, nicht in Tests); <c>null</c> = keins.</summary>
     public TrayService? Tray { get; set; }
+
+    /// <summary>Controller (SDL) – Abfrage-Thread startet die App; ohne SDL ein stiller No-Op.</summary>
+    public RoG.Linux.Platform.Input.GamepadService Gamepad { get; private init; } = null!;
+
+    /// <summary>Spielmodus (Gamescope/Steam Deck oder <c>--gamemode</c>): Vollbild, große Ziele, Tastatur-Hinweis.</summary>
+    public bool GameMode { get; set; }
 
     /// <summary>Echtzeit (Reverb), Zähler für Glocke/Nachrichten, Desktop-Benachrichtigungen.</summary>
     public RealtimeService Realtime { get; }
@@ -353,6 +365,8 @@ public sealed class AppServices : IDisposable
             Screenshots = options.Screenshots ?? new ScreenshotPortal(),
             DownloadDirectory = options.DownloadDirectory ?? paths.DownloadDirectory,
             PersistentCache = persistentCache,
+            Gamepad = new RoG.Linux.Platform.Input.GamepadService(options.GamepadBackend),
+            GameMode = options.GameMode ?? LaunchOptions.Current.GameMode,
             WikiOffline = protector is null ? null : new RoG.Core.Features.Wiki.WikiOfflineStore(wikiFolder, protector),
             StorageHttp = options.StorageHandler is null
                 ? new HttpClient { Timeout = TimeSpan.FromMinutes(15) }
@@ -364,6 +378,7 @@ public sealed class AppServices : IDisposable
             options.Fingerprint ?? new RoG.Linux.Platform.Security.FprintdVerifier(),
             options.Clock ?? (static () => DateTimeOffset.UtcNow),
             options.PinIterations ?? RoG.Linux.Platform.Security.PinHash.DefaultIterations);
+        services.Gamepad.Enabled = services.LinuxSettings.Controller;
         return services;
     }
 
@@ -475,6 +490,7 @@ public sealed class AppServices : IDisposable
         _settingsGate.Dispose();
         (Notifier as IDisposable)?.Dispose();
         OutboxRunner.Dispose();
+        Gamepad.Dispose();
         Outbox.Dispose();
         StorageHttp.Dispose();
         (Tokens as IDisposable)?.Dispose();

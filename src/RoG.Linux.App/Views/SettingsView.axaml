@@ -110,6 +110,37 @@
         </StackPanel>
       </Border>
 
+      <!-- Controller (Steam Deck, Gamepads über SDL) -->
+      <Border x:Name="ControllerCard" Classes="card" DataContext="{Binding Controller}" x:DataType="vm:ControllerSettingsViewModel">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="section" Text="{l:T Linux_ControllerTitle}" />
+          <ToggleSwitch IsChecked="{Binding Enabled}" IsEnabled="{Binding !IsUnavailable}"
+                        OnContent="" OffContent="" AutomationProperties.Name="{l:T Linux_ControllerToggle}">
+            <TextBlock Text="{l:T Linux_ControllerToggle}" TextWrapping="Wrap" />
+          </ToggleSwitch>
+          <TextBlock Classes="body strong" Text="{Binding StatusText}" TextWrapping="Wrap" IsVisible="{Binding !IsUnavailable}" />
+          <Border Classes="hint" IsVisible="{Binding IsUnavailable}">
+            <Grid ColumnDefinitions="Auto,*">
+              <PathIcon Data="{StaticResource IconInfo}" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Top" Foreground="{DynamicResource RoGGoldBrush}" />
+              <TextBlock Grid.Column="1" Classes="body" Text="{Binding StatusText}" TextWrapping="Wrap" />
+            </Grid>
+          </Border>
+          <TextBlock Classes="muted small" Text="{l:T Linux_ControllerHint}" TextWrapping="Wrap" />
+          <TextBlock Classes="muted small" Text="{l:T Linux_GameModeActive}" TextWrapping="Wrap" IsVisible="{Binding IsGameMode}" />
+          <TextBlock Classes="label" Text="{l:T Linux_ControllerMappingTitle}" Margin="0,4,0,0" />
+          <ItemsControl ItemsSource="{Binding Mapping}" AutomationProperties.Name="{l:T Linux_ControllerMappingTitle}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ShortcutRow">
+                <Grid ColumnDefinitions="*,2*" Margin="0,3" AutomationProperties.Name="{Binding Description}">
+                  <TextBlock Classes="body strong" Text="{Binding Keys}" TextWrapping="Wrap" Margin="0,0,12,0" />
+                  <TextBlock Grid.Column="1" Classes="body" Text="{Binding Description}" TextWrapping="Wrap" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
       <!-- App-Sperre (Windows: „App-Sperre mit Windows Hello“) – PIN im Schlüsselbund, optional Fingerabdruck -->
       <Border Classes="card" DataContext="{Binding AppLock}" x:DataType="vm:AppLockSettingsViewModel">
         <StackPanel Spacing="12">

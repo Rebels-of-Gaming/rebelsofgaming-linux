@@ -6,7 +6,7 @@ internal static class Program
 {
     /// <summary>
     /// Einstieg. Argumente: <c>--environment=&lt;production|staging|local&gt;</c> (nur Entwicklung), <c>--x11</c> /
-    /// <c>--wayland</c> und ein <c>rog://…</c>-Link (von der .desktop-Datei übergeben). Läuft die App schon, gehen die
+    /// <c>--wayland</c>, <c>--gamemode</c> (Spielmodus erzwingen) und ein <c>rog://…</c>-Link (von der .desktop-Datei übergeben). Läuft die App schon, gehen die
     /// Argumente an die laufende Instanz (Single-Instance, siehe <see cref="Platform.Desktop.SingleInstance"/>) und dieser
     /// Prozess endet sofort.
     /// </summary>

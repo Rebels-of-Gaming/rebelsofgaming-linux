@@ -8,6 +8,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>RoG.Linux.Platform</RootNamespace>
     <AssemblyName>RoG.Linux.Platform</AssemblyName>
+    <!-- SDL (Controller) über Funktionszeiger, zur Laufzeit geladen (Input/SdlGamepadBackend) -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

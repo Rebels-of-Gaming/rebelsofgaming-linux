@@ -89,7 +89,7 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        if (_services is not null && _normalSize.Width > 0)
+        if (_services is not null && _normalSize.Width > 0 && !_services.GameMode) // Spielmodus: Vollbild, nichts merken
         {
             var placement = WindowPlacementService.Capture(_normalPosition, _normalSize, WindowState == WindowState.Maximized);
             _services.UpdateSettingsNow(s => s with { Window = placement });

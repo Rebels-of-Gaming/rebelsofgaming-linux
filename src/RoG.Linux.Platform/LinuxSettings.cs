@@ -32,6 +32,9 @@ public sealed record LinuxSettings
 
     public DateTimeOffset? AppLockBlockedUntil { get; init; }
 
+    /// <summary>Mit Controller bedienen (SDL) – Standard an.</summary>
+    public bool Controller { get; init; } = true;
+
     /// <summary>Unbekannte Werte (Hand-Edit, ältere Version) → Standard.</summary>
     public string EffectiveTheme => Themes.Contains(Theme) ? Theme : ThemeDark;
 }

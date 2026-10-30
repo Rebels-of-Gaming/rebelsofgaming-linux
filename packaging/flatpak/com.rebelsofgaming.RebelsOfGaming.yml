@@ -31,6 +31,13 @@ finish-args:
   - --share=ipc
   # GPU-Beschleunigung (EGL/OpenGL)
   - --device=dri
+  # Controller (Steam Deck, Gamepads) über SDL: /dev/input (evdev; Hot-Plug per inotify, udev gibt es in der Sandbox
+  # nicht). Bewusst nicht --device=all: das gäbe Zugriff auf alle Geräte (Kamera, USB …) und zeigt auf Flathub
+  # „potenziell unsicher“. Folge: SDL-HIDAPI über /dev/hidraw* fällt weg (Sonderfunktionen einzelner Controller wie
+  # Gyro/Touchpad); Tasten und Sticks gehen über evdev. Im Spielmodus des Steam Deck liefert Steam Input ohnehin einen
+  # virtuellen Controller unter /dev/input. Braucht Flatpak ≥ 1.15.6 – ältere Versionen ignorieren das Recht, dann
+  # bleibt die App ohne Controller bedienbar. SDL selbst bringt die Runtime mit (freedesktop 25.08: SDL3 + sdl2-compat).
+  - --device=input
   # Geräte-Token im Schlüsselbund (Secret Service); später ggf. Secret-Portal
   - --talk-name=org.freedesktop.secrets
   # App-Sperre: optional Entsperren per Fingerabdruck über fprintd (System-Bus). Die Berechtigung prüft fprintd selbst

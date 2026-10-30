@@ -48,6 +48,18 @@
       <views:NavPane x:Name="OverlayPane" Width="272" HorizontalAlignment="Left" ShowLabels="True" />
     </Panel>
 
+    <!-- Spielmodus: einmaliger, dezenter Hinweis auf die Bildschirmtastatur von Steam, sobald ein Eingabefeld den Fokus hat -->
+    <Border Classes="keyboardhint" IsVisible="{Binding IsKeyboardHintVisible}">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <PathIcon Data="{StaticResource IconInfo}" Width="18" Height="18" Margin="0,0,10,0" Foreground="{DynamicResource RoGGoldBrush}" />
+        <TextBlock Grid.Column="1" Classes="body" Text="{Binding KeyboardHintText}" TextWrapping="Wrap" VerticalAlignment="Center" />
+        <Button Grid.Column="2" Classes="icon" Margin="8,0,0,0" Command="{Binding CloseKeyboardHintCommand}"
+                ToolTip.Tip="{Binding KeyboardHintCloseText}" AutomationProperties.Name="{Binding KeyboardHintCloseText}">
+          <PathIcon Data="{StaticResource IconClose}" Width="14" Height="14" />
+        </Button>
+      </Grid>
+    </Border>
+
     <!-- Login liegt über allem, solange weder Token noch Gastmodus da sind -->
     <ContentControl Content="{Binding Login}" IsVisible="{Binding IsLoginVisible}" />
     </Panel>

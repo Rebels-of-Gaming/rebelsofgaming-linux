@@ -36,6 +36,14 @@ public sealed partial class App : Application
         System.Globalization.CultureInfo.CurrentUICulture = services.Culture;
         var window = CreateMainWindow(services);
         WindowPlacementService.Restore(window, services.Settings.Window);
+        if (services.GameMode)
+        {
+            // Spielmodus (Gamescope): Vollbild ohne Dekoration statt gemerkter Fenstergröße
+            window.WindowDecorations = WindowDecorations.None;
+            window.WindowState = WindowState.FullScreen;
+        }
+
+        services.Gamepad.Start(); // Controller (SDL); ohne SDL endet der Thread sofort
         desktop.Exit += (_, _) => services.Dispose();
 
         // Tray (StatusNotifierItem): nur wenn ein Panel es zeigt, geht „Schließen“ in den Infobereich
@@ -170,7 +178,10 @@ public sealed partial class App : Application
         ThemeService.Apply(services.LinuxSettings.EffectiveTheme);
         services.LinuxSettingsChanged += (_, _) => Dispatcher.UIThread.Post(() => ThemeService.Apply(services.LinuxSettings.EffectiveTheme));
         services.ServerControlOpener = server => Views.ServerControlWindow.Open(services, server);
-        return new MainWindow(services) { DataContext = new ShellViewModel(services) };
+        var window = new MainWindow(services) { DataContext = new ShellViewModel(services) };
+        window.Classes.Set("gamemode", services.GameMode); // große Ziele (Theme: Window.gamemode …)
+        GamepadNavigator.Attach(window, services);
+        return window;
     }
 
     /// <summary>

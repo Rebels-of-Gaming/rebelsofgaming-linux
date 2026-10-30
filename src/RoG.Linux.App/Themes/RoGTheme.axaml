@@ -654,4 +654,43 @@
     <Setter Property="Foreground" Value="{DynamicResource RoGMutedBrush}" />
     <Setter Property="Margin" Value="4,10,0,4" />
   </Style>
+
+  <!-- Hinweis Bildschirmtastatur (Spielmodus): dezent unten mittig über dem Inhalt -->
+  <Style Selector="Border.keyboardhint">
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="Padding" Value="14,6,6,6" />
+    <Setter Property="Margin" Value="16,0,16,20" />
+    <Setter Property="MaxWidth" Value="560" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Bottom" />
+  </Style>
+
+  <!--
+    Spielmodus (Steam Deck/Gamescope, Klasse „gamemode“ am Hauptfenster): Ziele ≥ 44 px für Controller und Touch,
+    Schrift ≥ 14 px. Steht am Ende, damit es die normalen Stile überschreibt; Seiten brauchen nichts Eigenes.
+  -->
+  <Style Selector="Window.gamemode Button.icon, Window.gamemode ToggleButton.icon">
+    <Setter Property="Width" Value="44" />
+    <Setter Property="Height" Value="44" />
+  </Style>
+  <Style Selector="Window.gamemode Button.primary, Window.gamemode Button.secondary, Window.gamemode ToggleButton.secondary, Window.gamemode Button.row, Window.gamemode ToggleButton.segment, Window.gamemode Button.choice, Window.gamemode Button.reaction, Window.gamemode Button.day">
+    <Setter Property="MinHeight" Value="44" />
+  </Style>
+  <Style Selector="Window.gamemode Button.format">
+    <Setter Property="MinWidth" Value="44" />
+    <Setter Property="MinHeight" Value="44" />
+  </Style>
+  <Style Selector="Window.gamemode Button.link.pad">
+    <Setter Property="MinHeight" Value="44" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Window.gamemode TextBox, Window.gamemode ComboBox, Window.gamemode CheckBox, Window.gamemode RadioButton, Window.gamemode ToggleSwitch, Window.gamemode ListBox.cards ListBoxItem">
+    <Setter Property="MinHeight" Value="44" />
+  </Style>
+  <Style Selector="Window.gamemode TextBlock.small, Window.gamemode TextBlock.kicker, Window.gamemode Border.chip TextBlock, Window.gamemode TextBlock.label">
+    <Setter Property="FontSize" Value="14" />
+  </Style>
 </Styles>
