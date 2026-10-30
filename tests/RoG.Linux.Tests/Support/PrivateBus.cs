@@ -539,3 +539,109 @@ public sealed class FakeDesktopPortal : IPathMethodHandler
         return ValueTask.CompletedTask;
     }
 }
+
+/// <summary>
+/// fprintd (<c>net.reactivated.Fprint</c>) wie auf dem System-Bus: Manager mit Standardgerät, Gerät mit eingelernten
+/// Fingern, Claim/Release, VerifyStart sendet die vorgegebenen <c>VerifyStatus</c>-Signale, VerifyStop.
+/// </summary>
+public sealed class FakeFprintd : IPathMethodHandler
+{
+    public const string DevicePath = "/net/reactivated/Fprint/Device/0";
+
+    /// <summary>Gibt es ein Lesegerät?</summary>
+    public bool HasDevice { get; set; } = true;
+
+    /// <summary>Eingelernte Finger der Person (leer → <c>NoEnrolledPrints</c>).</summary>
+    public string[] Fingers { get; set; } = ["right-index-finger"];
+
+    /// <summary>Gerät gerade von einem anderen Programm belegt (<c>AlreadyInUse</c>).</summary>
+    public bool InUse { get; set; }
+
+    /// <summary>Signale nach VerifyStart; leer = keine Antwort (Zeitüberschreitung).</summary>
+    public List<(string Result, bool Done)> Statuses { get; } = [("verify-match", true)];
+
+    /// <summary>Aufgerufene Methoden in Reihenfolge (z. B. „Claim:“, „VerifyStart:any“, „VerifyStop“, „Release“).</summary>
+    public List<string> Calls { get; } = [];
+
+    public string Path => "/net/reactivated/Fprint";
+
+    public bool HandlesChildPaths => true;
+
+    public ValueTask HandleMethodAsync(MethodContext context)
+    {
+        var request = context.Request;
+        var reader = request.GetBodyReader();
+        switch (request.InterfaceAsString, request.MemberAsString)
+        {
+            case ("net.reactivated.Fprint.Manager", "GetDefaultDevice"):
+                Calls.Add("GetDefaultDevice");
+                if (!HasDevice)
+                {
+                    context.ReplyError("net.reactivated.Fprint.Error.NoSuchDevice", "No devices available");
+                    break;
+                }
+
+                Replies.Send(context, "o", static (ref MessageWriter w) => w.WriteObjectPath(DevicePath));
+                break;
+
+            case ("net.reactivated.Fprint.Device", "ListEnrolledFingers"):
+            {
+                Calls.Add("ListEnrolledFingers:" + reader.ReadString());
+                var fingers = Fingers;
+                if (fingers.Length == 0)
+                {
+                    context.ReplyError("net.reactivated.Fprint.Error.NoEnrolledPrints", "No fingerprints enrolled");
+                    break;
+                }
+
+                Replies.Send(context, "as", (ref MessageWriter w) => w.WriteArray(fingers));
+                break;
+            }
+
+            case ("net.reactivated.Fprint.Device", "Claim"):
+                Calls.Add("Claim:" + reader.ReadString());
+                if (InUse)
+                {
+                    context.ReplyError("net.reactivated.Fprint.Error.AlreadyInUse", "Device was already claimed");
+                    break;
+                }
+
+                Replies.Send(context, null);
+                break;
+
+            case ("net.reactivated.Fprint.Device", "VerifyStart"):
+            {
+                Calls.Add("VerifyStart:" + reader.ReadString());
+                Replies.Send(context, null);
+                foreach (var (result, done) in Statuses)
+                {
+                    var writer = context.Connection.GetMessageWriter();
+                    try
+                    {
+                        writer.WriteSignalHeader(null, DevicePath, "net.reactivated.Fprint.Device", "VerifyStatus", "sb");
+                        writer.WriteString(result);
+                        writer.WriteBool(done);
+                        context.Connection.TrySendMessage(writer.CreateMessage());
+                    }
+                    finally
+                    {
+                        writer.Dispose();
+                    }
+                }
+
+                break;
+            }
+
+            case ("net.reactivated.Fprint.Device", "VerifyStop" or "Release"):
+                Calls.Add(request.MemberAsString!);
+                Replies.Send(context, null);
+                break;
+
+            default:
+                context.ReplyUnknownMethodError();
+                break;
+        }
+
+        return ValueTask.CompletedTask;
+    }
+}

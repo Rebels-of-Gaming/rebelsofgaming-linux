@@ -526,4 +526,121 @@
   <data name="Linux_BackupDownloadOpened" xml:space="preserve">
     <value>Téléchargement lancé dans le navigateur – le lien n’est valable que peu de temps.</value>
   </data>
+  <data name="Linux_LockText" xml:space="preserve">
+    <value>Saisis ton code PIN pour déverrouiller Rebels of Gaming.</value>
+  </data>
+  <data name="Linux_LockPinLabel" xml:space="preserve">
+    <value>Code PIN</value>
+  </data>
+  <data name="Linux_LockUnlock" xml:space="preserve">
+    <value>Déverrouiller</value>
+  </data>
+  <data name="Linux_LockFingerprint" xml:space="preserve">
+    <value>Déverrouiller par empreinte</value>
+  </data>
+  <data name="Linux_LockForgot" xml:space="preserve">
+    <value>Code PIN oublié ? Se déconnecter</value>
+  </data>
+  <data name="Linux_LockWrongPin" xml:space="preserve">
+    <value>Code PIN incorrect – réessaie.</value>
+  </data>
+  <data name="Linux_LockTooManyAttempts" xml:space="preserve">
+    <value>Trop de tentatives échouées.</value>
+  </data>
+  <data name="Linux_LockBlockedSeconds" xml:space="preserve">
+    <value>Prochain essai possible dans {0} s.</value>
+  </data>
+  <data name="Linux_LockBlockedMinutes" xml:space="preserve">
+    <value>Prochain essai possible dans {0} min.</value>
+  </data>
+  <data name="Linux_LockPinMissing" xml:space="preserve">
+    <value>Aucun code PIN dans le trousseau – déconnecte-toi puis reconnecte-toi.</value>
+  </data>
+  <data name="Linux_LockKeyringUnavailable" xml:space="preserve">
+    <value>Trousseau inaccessible – le code PIN ne peut pas être vérifié pour le moment.</value>
+  </data>
+  <data name="Linux_LockFingerprintScan" xml:space="preserve">
+    <value>Pose ton doigt sur le capteur …</value>
+  </data>
+  <data name="Linux_LockFingerprintRetry" xml:space="preserve">
+    <value>Non reconnu – pose à nouveau ton doigt.</value>
+  </data>
+  <data name="Linux_LockFingerprintNoMatch" xml:space="preserve">
+    <value>Empreinte non reconnue.</value>
+  </data>
+  <data name="Linux_LockFingerprintTimeout" xml:space="preserve">
+    <value>Délai dépassé – réessaie.</value>
+  </data>
+  <data name="Linux_LockFingerprintUnavailable" xml:space="preserve">
+    <value>Empreinte indisponible pour le moment (lecteur occupé ou aucun doigt enregistré).</value>
+  </data>
+  <data name="Linux_LockFingerprintFailed" xml:space="preserve">
+    <value>La vérification de l'empreinte a échoué.</value>
+  </data>
+  <data name="Linux_AppLockTitle" xml:space="preserve">
+    <value>VERROUILLAGE</value>
+  </data>
+  <data name="Linux_AppLockToggle" xml:space="preserve">
+    <value>Verrouillage par code PIN (au démarrage et après une absence)</value>
+  </data>
+  <data name="Linux_AppLockHint" xml:space="preserve">
+    <value>Le code PIN (4 à 8 chiffres) n'est stocké que sous forme de hachage dans le trousseau du système. Oublié ? Déconnecte-toi depuis l'écran de verrouillage.</value>
+  </data>
+  <data name="Linux_AppLockNoKeyring" xml:space="preserve">
+    <value>Le verrouillage nécessite un trousseau (Secret Service, p. ex. GNOME Keyring ou KWallet).</value>
+  </data>
+  <data name="Linux_AppLockSetPinTitle" xml:space="preserve">
+    <value>Définir un code PIN pour le verrouillage</value>
+  </data>
+  <data name="Linux_AppLockChangePin" xml:space="preserve">
+    <value>Modifier le code PIN</value>
+  </data>
+  <data name="Linux_AppLockCurrentPin" xml:space="preserve">
+    <value>Code PIN actuel</value>
+  </data>
+  <data name="Linux_AppLockNewPin" xml:space="preserve">
+    <value>Nouveau code PIN (4 à 8 chiffres)</value>
+  </data>
+  <data name="Linux_AppLockConfirmPin" xml:space="preserve">
+    <value>Répéter le code PIN</value>
+  </data>
+  <data name="Linux_AppLockSavePin" xml:space="preserve">
+    <value>Enregistrer le code PIN</value>
+  </data>
+  <data name="Linux_AppLockPinFormat" xml:space="preserve">
+    <value>Le code PIN doit comporter 4 à 8 chiffres.</value>
+  </data>
+  <data name="Linux_AppLockPinMismatch" xml:space="preserve">
+    <value>Les deux codes PIN ne correspondent pas.</value>
+  </data>
+  <data name="Linux_AppLockSaveFailed" xml:space="preserve">
+    <value>Impossible d'enregistrer le code PIN dans le trousseau.</value>
+  </data>
+  <data name="Linux_AppLockEnabled" xml:space="preserve">
+    <value>Verrouillage activé.</value>
+  </data>
+  <data name="Linux_AppLockDisabled" xml:space="preserve">
+    <value>Verrouillage désactivé – code PIN supprimé.</value>
+  </data>
+  <data name="Linux_AppLockPinChanged" xml:space="preserve">
+    <value>Code PIN modifié.</value>
+  </data>
+  <data name="Linux_AppLockMinutes" xml:space="preserve">
+    <value>Verrouiller après une absence de</value>
+  </data>
+  <data name="Linux_Minute1" xml:space="preserve">
+    <value>1 minute</value>
+  </data>
+  <data name="Linux_MinutesN" xml:space="preserve">
+    <value>{0} minutes</value>
+  </data>
+  <data name="Linux_AppLockFingerprintToggle" xml:space="preserve">
+    <value>Déverrouiller aussi par empreinte</value>
+  </data>
+  <data name="Linux_AppLockFingerprintHint" xml:space="preserve">
+    <value>Via fprintd – les doigts s'enregistrent dans les paramètres du système.</value>
+  </data>
+  <data name="Linux_AppLockFingerprintNone" xml:space="preserve">
+    <value>Aucun lecteur d'empreintes avec un doigt enregistré (fprintd) – déverrouillage par code PIN uniquement.</value>
+  </data>
 </root>

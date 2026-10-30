@@ -37,6 +37,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _services = services;
         _startLanguage = services.Settings.Language;
         NotificationSettings = new NotificationSettingsViewModel(services);
+        AppLock = new AppLockSettingsViewModel(services);
         Languages =
         [
             new(LanguageResolver.System, services.T(StringKeys.SettingsLanguageSystem)),
@@ -79,7 +80,11 @@ public sealed partial class SettingsViewModel : ObservableObject
         _loaded = true;
         _ = LoadPlatformAsync();
         _ = LoadAutostartAsync();
+        _ = AppLock.LoadAsync();
     }
+
+    /// <summary>App-Sperre (PIN, Fingerabdruck, Minuten) – Gegenstück zu „App-Sperre mit Windows Hello“.</summary>
+    public AppLockSettingsViewModel AppLock { get; }
 
     /// <summary>„Beim Schließen in den Infobereich“ (wirkt nur, wenn ein Panel das Tray-Symbol zeigt).</summary>
     [ObservableProperty]

@@ -24,6 +24,14 @@ public sealed record LinuxSettings
     /// </summary>
     public bool Autostart { get; init; }
 
+    /// <summary>App-Sperre: auch per Fingerabdruck (fprintd) entsperren, wenn ein Finger eingelernt ist.</summary>
+    public bool AppLockFingerprint { get; init; } = true;
+
+    /// <summary>App-Sperre: Fehlversuche in Folge und Ende der Wartezeit – ein Neustart setzt sie nicht zurück.</summary>
+    public int AppLockFailures { get; init; }
+
+    public DateTimeOffset? AppLockBlockedUntil { get; init; }
+
     /// <summary>Unbekannte Werte (Hand-Edit, ältere Version) → Standard.</summary>
     public string EffectiveTheme => Themes.Contains(Theme) ? Theme : ThemeDark;
 }

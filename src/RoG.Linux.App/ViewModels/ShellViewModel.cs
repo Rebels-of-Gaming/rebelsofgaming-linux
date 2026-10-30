@@ -60,6 +60,7 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_Bans", "BansPage_Title.Text", "IconShield", "bans", true),
         ];
         Acceptance = new AcceptanceViewModel(services);
+        LockScreen = new LockScreenViewModel(services, SignOutAsync);
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
         _services.Navigator = Navigate;
         _services.IsNative = route => s_sections.TryGetValue(route.Section, out var key) && AllItems.FirstOrDefault(i => i.Key == key)?.Implemented == true;
@@ -116,6 +117,9 @@ public sealed partial class ShellViewModel : ObservableObject
 
     /// <summary>Offene Pflicht-Bestätigungen (Regeln, Rechtstexte) – Hinweisbalken über der Seite.</summary>
     public AcceptanceViewModel Acceptance { get; }
+
+    /// <summary>App-Sperre: Sperrbildschirm über allem (PIN, Fingerabdruck, Abmelden).</summary>
+    public LockScreenViewModel LockScreen { get; }
 
     public string SearchText => _services.T("Shell_Search.PlaceholderText");
 
@@ -192,6 +196,7 @@ public sealed partial class ShellViewModel : ObservableObject
     public async Task InitializeAsync()
     {
         var token = await _services.Tokens.GetAsync();
+        _services.AppLock.OnStart(token is not null);
         if (token is null && !_services.Settings.GuestMode)
         {
             ShowLogin();
@@ -469,6 +474,7 @@ public sealed partial class ShellViewModel : ObservableObject
             }
 
             var token = await _services.Tokens.GetAsync();
+            _services.AppLock.SignedIn = token is not null;
             if (token is not null)
             {
                 await LoadUserAsync();
@@ -513,6 +519,7 @@ public sealed partial class ShellViewModel : ObservableObject
         _services.OutboxRunner.Stop();
         await _services.Realtime.StopAsync();
         await _services.Account.LogoutAsync();
+        _services.AppLock.SignedIn = false;
         _services.CurrentUser = null;
         _services.ClearCaches();
         await _services.UpdateSettingsAsync(s => s with { GuestMode = false });
@@ -525,6 +532,7 @@ public sealed partial class ShellViewModel : ObservableObject
     {
         await _services.Realtime.StopAsync();
         await _services.Tokens.ClearAsync();
+        _services.AppLock.SignedIn = false;
         _services.CurrentUser = null;
         _services.ClearCaches();
         if (!_services.Settings.GuestMode)

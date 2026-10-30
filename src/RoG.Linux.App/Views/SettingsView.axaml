@@ -110,6 +110,76 @@
         </StackPanel>
       </Border>
 
+      <!-- App-Sperre (Windows: „App-Sperre mit Windows Hello“) – PIN im Schlüsselbund, optional Fingerabdruck -->
+      <Border Classes="card" DataContext="{Binding AppLock}" x:DataType="vm:AppLockSettingsViewModel">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="section" Text="{l:T Linux_AppLockTitle}" />
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+          <ToggleSwitch IsChecked="{Binding Enabled}" IsEnabled="{Binding CanUseAppLock}"
+                        OnContent="" OffContent="" AutomationProperties.Name="{l:T Linux_AppLockToggle}">
+            <TextBlock Text="{l:T Linux_AppLockToggle}" TextWrapping="Wrap" />
+          </ToggleSwitch>
+          <TextBlock Classes="muted small" Text="{l:T Linux_AppLockHint}" TextWrapping="Wrap" />
+          <Border Classes="hint" IsVisible="{Binding ShowKeyringHint}">
+            <Grid ColumnDefinitions="Auto,*">
+              <PathIcon Data="{StaticResource IconKey}" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Top" Foreground="{DynamicResource RoGGoldBrush}" />
+              <TextBlock Grid.Column="1" Classes="body" Text="{l:T Linux_AppLockNoKeyring}" TextWrapping="Wrap" />
+            </Grid>
+          </Border>
+
+          <!-- PIN setzen bzw. ändern (im Inhalt, Escape bricht ab) -->
+          <Border Classes="hint info" IsVisible="{Binding IsPinFormOpen}">
+            <StackPanel Spacing="10">
+              <StackPanel.KeyBindings>
+                <KeyBinding Gesture="Escape" Command="{Binding CancelPinCommand}" />
+                <KeyBinding Gesture="Enter" Command="{Binding SavePinCommand}" />
+              </StackPanel.KeyBindings>
+              <TextBlock Classes="body strong" Text="{l:T Linux_AppLockSetPinTitle}" IsVisible="{Binding !IsChangingPin}" />
+              <TextBlock Classes="body strong" Text="{l:T Linux_AppLockChangePin}" IsVisible="{Binding IsChangingPin}" />
+              <WrapPanel Orientation="Horizontal">
+                <StackPanel Margin="0,0,12,8" IsVisible="{Binding IsChangingPin}">
+                  <TextBlock Classes="label" Text="{l:T Linux_AppLockCurrentPin}" />
+                  <TextBox Width="170" Text="{Binding CurrentPin}" PasswordChar="•" MaxLength="8" AutomationProperties.Name="{l:T Linux_AppLockCurrentPin}" />
+                </StackPanel>
+                <StackPanel Margin="0,0,12,8">
+                  <TextBlock Classes="label" Text="{l:T Linux_AppLockNewPin}" />
+                  <TextBox Width="170" Text="{Binding NewPin}" PasswordChar="•" MaxLength="8" AutomationProperties.Name="{l:T Linux_AppLockNewPin}" />
+                </StackPanel>
+                <StackPanel Margin="0,0,12,8">
+                  <TextBlock Classes="label" Text="{l:T Linux_AppLockConfirmPin}" />
+                  <TextBox Width="170" Text="{Binding ConfirmPin}" PasswordChar="•" MaxLength="8" AutomationProperties.Name="{l:T Linux_AppLockConfirmPin}" />
+                </StackPanel>
+              </WrapPanel>
+              <TextBlock Classes="body" Foreground="{DynamicResource RoGRedBrush}" Text="{Binding FormError}" IsVisible="{Binding HasFormError}" TextWrapping="Wrap" />
+              <WrapPanel Orientation="Horizontal">
+                <Button Classes="primary" Margin="0,0,12,0" Command="{Binding SavePinCommand}" Content="{l:T Linux_AppLockSavePin, Upper=True}" />
+                <Button Classes="secondary" Command="{Binding CancelPinCommand}" Content="{l:T Common_Cancel, Upper=True}" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+
+          <StackPanel Spacing="12" IsVisible="{Binding ShowOptions}">
+            <StackPanel>
+              <TextBlock Classes="label" Text="{l:T Linux_AppLockMinutes}" />
+              <ComboBox MinWidth="200" ItemsSource="{Binding MinutesOptions}" SelectedItem="{Binding SelectedMinutes}"
+                        AutomationProperties.Name="{l:T Linux_AppLockMinutes}" />
+            </StackPanel>
+            <ToggleSwitch IsChecked="{Binding Fingerprint}" IsVisible="{Binding FingerprintAvailable}"
+                          OnContent="" OffContent="" AutomationProperties.Name="{l:T Linux_AppLockFingerprintToggle}">
+              <TextBlock Text="{l:T Linux_AppLockFingerprintToggle}" TextWrapping="Wrap" />
+            </ToggleSwitch>
+            <TextBlock Classes="muted small" Text="{l:T Linux_AppLockFingerprintHint}" IsVisible="{Binding FingerprintAvailable}" TextWrapping="Wrap" />
+            <TextBlock Classes="muted small" Text="{l:T Linux_AppLockFingerprintNone}" IsVisible="{Binding !FingerprintAvailable}" TextWrapping="Wrap" />
+            <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding ChangePinCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconKey}" Width="16" Height="16" />
+                <TextBlock Text="{l:T Linux_AppLockChangePin, Upper=True}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
       <!-- Tastenkürzel (F1) -->
       <Border x:Name="ShortcutsCard" Classes="card">
         <StackPanel Spacing="10">

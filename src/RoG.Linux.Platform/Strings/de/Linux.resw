@@ -526,4 +526,121 @@
   <data name="Linux_BackupDownloadOpened" xml:space="preserve">
     <value>Download im Browser gestartet – der Link gilt nur kurz.</value>
   </data>
+  <data name="Linux_LockText" xml:space="preserve">
+    <value>Gib deine PIN ein, um Rebels of Gaming zu entsperren.</value>
+  </data>
+  <data name="Linux_LockPinLabel" xml:space="preserve">
+    <value>PIN</value>
+  </data>
+  <data name="Linux_LockUnlock" xml:space="preserve">
+    <value>Entsperren</value>
+  </data>
+  <data name="Linux_LockFingerprint" xml:space="preserve">
+    <value>Mit Fingerabdruck entsperren</value>
+  </data>
+  <data name="Linux_LockForgot" xml:space="preserve">
+    <value>PIN vergessen? Abmelden</value>
+  </data>
+  <data name="Linux_LockWrongPin" xml:space="preserve">
+    <value>Falsche PIN – bitte erneut versuchen.</value>
+  </data>
+  <data name="Linux_LockTooManyAttempts" xml:space="preserve">
+    <value>Zu viele Fehlversuche.</value>
+  </data>
+  <data name="Linux_LockBlockedSeconds" xml:space="preserve">
+    <value>Nächster Versuch in {0} s möglich.</value>
+  </data>
+  <data name="Linux_LockBlockedMinutes" xml:space="preserve">
+    <value>Nächster Versuch in {0} Min. möglich.</value>
+  </data>
+  <data name="Linux_LockPinMissing" xml:space="preserve">
+    <value>Keine PIN im Schlüsselbund gefunden – bitte abmelden und neu anmelden.</value>
+  </data>
+  <data name="Linux_LockKeyringUnavailable" xml:space="preserve">
+    <value>Schlüsselbund nicht erreichbar – die PIN kann gerade nicht geprüft werden.</value>
+  </data>
+  <data name="Linux_LockFingerprintScan" xml:space="preserve">
+    <value>Finger auf den Sensor legen …</value>
+  </data>
+  <data name="Linux_LockFingerprintRetry" xml:space="preserve">
+    <value>Nicht erkannt – Finger erneut auflegen.</value>
+  </data>
+  <data name="Linux_LockFingerprintNoMatch" xml:space="preserve">
+    <value>Fingerabdruck nicht erkannt.</value>
+  </data>
+  <data name="Linux_LockFingerprintTimeout" xml:space="preserve">
+    <value>Zeit abgelaufen – bitte erneut versuchen.</value>
+  </data>
+  <data name="Linux_LockFingerprintUnavailable" xml:space="preserve">
+    <value>Fingerabdruck gerade nicht verfügbar (Gerät belegt oder kein Finger eingelernt).</value>
+  </data>
+  <data name="Linux_LockFingerprintFailed" xml:space="preserve">
+    <value>Fingerabdruck-Prüfung fehlgeschlagen.</value>
+  </data>
+  <data name="Linux_AppLockTitle" xml:space="preserve">
+    <value>APP-SPERRE</value>
+  </data>
+  <data name="Linux_AppLockToggle" xml:space="preserve">
+    <value>App-Sperre mit PIN (beim Start und nach Abwesenheit)</value>
+  </data>
+  <data name="Linux_AppLockHint" xml:space="preserve">
+    <value>Die PIN (4–8 Ziffern) liegt nur als Hash im Schlüsselbund des Systems. PIN vergessen? Auf dem Sperrbildschirm abmelden.</value>
+  </data>
+  <data name="Linux_AppLockNoKeyring" xml:space="preserve">
+    <value>Ohne Schlüsselbund (Secret Service, z. B. GNOME Keyring oder KWallet) lässt sich die App-Sperre nicht einschalten.</value>
+  </data>
+  <data name="Linux_AppLockSetPinTitle" xml:space="preserve">
+    <value>PIN für die App-Sperre festlegen</value>
+  </data>
+  <data name="Linux_AppLockChangePin" xml:space="preserve">
+    <value>PIN ändern</value>
+  </data>
+  <data name="Linux_AppLockCurrentPin" xml:space="preserve">
+    <value>Aktuelle PIN</value>
+  </data>
+  <data name="Linux_AppLockNewPin" xml:space="preserve">
+    <value>Neue PIN (4–8 Ziffern)</value>
+  </data>
+  <data name="Linux_AppLockConfirmPin" xml:space="preserve">
+    <value>PIN wiederholen</value>
+  </data>
+  <data name="Linux_AppLockSavePin" xml:space="preserve">
+    <value>PIN speichern</value>
+  </data>
+  <data name="Linux_AppLockPinFormat" xml:space="preserve">
+    <value>Die PIN muss aus 4 bis 8 Ziffern bestehen.</value>
+  </data>
+  <data name="Linux_AppLockPinMismatch" xml:space="preserve">
+    <value>Die beiden PINs stimmen nicht überein.</value>
+  </data>
+  <data name="Linux_AppLockSaveFailed" xml:space="preserve">
+    <value>Die PIN konnte nicht im Schlüsselbund gespeichert werden.</value>
+  </data>
+  <data name="Linux_AppLockEnabled" xml:space="preserve">
+    <value>App-Sperre eingeschaltet.</value>
+  </data>
+  <data name="Linux_AppLockDisabled" xml:space="preserve">
+    <value>App-Sperre ausgeschaltet – PIN gelöscht.</value>
+  </data>
+  <data name="Linux_AppLockPinChanged" xml:space="preserve">
+    <value>PIN geändert.</value>
+  </data>
+  <data name="Linux_AppLockMinutes" xml:space="preserve">
+    <value>Sperren nach Abwesenheit von</value>
+  </data>
+  <data name="Linux_Minute1" xml:space="preserve">
+    <value>1 Minute</value>
+  </data>
+  <data name="Linux_MinutesN" xml:space="preserve">
+    <value>{0} Minuten</value>
+  </data>
+  <data name="Linux_AppLockFingerprintToggle" xml:space="preserve">
+    <value>Auch mit Fingerabdruck entsperren</value>
+  </data>
+  <data name="Linux_AppLockFingerprintHint" xml:space="preserve">
+    <value>Über fprintd – Finger werden in den Systemeinstellungen eingelernt.</value>
+  </data>
+  <data name="Linux_AppLockFingerprintNone" xml:space="preserve">
+    <value>Kein Fingerabdruck-Lesegerät mit eingelerntem Finger gefunden (fprintd) – Entsperren nur per PIN.</value>
+  </data>
 </root>

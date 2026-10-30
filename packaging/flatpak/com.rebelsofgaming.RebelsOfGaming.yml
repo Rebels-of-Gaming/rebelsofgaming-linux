@@ -33,6 +33,9 @@ finish-args:
   - --device=dri
   # Geräte-Token im Schlüsselbund (Secret Service); später ggf. Secret-Portal
   - --talk-name=org.freedesktop.secrets
+  # App-Sperre: optional Entsperren per Fingerabdruck über fprintd (System-Bus). Die Berechtigung prüft fprintd selbst
+  # per Polkit (net.reactivated.fprint.device.verify, aktive Sitzung ohne Rückfrage) – die App bringt keine Polkit-Regel mit.
+  - --system-talk-name=net.reactivated.Fprint
   # Downloads (Medien → Downloads) landen im Downloads-Ordner des Benutzers (Uploads/Einreichen laufen über das
   # FileChooser-Portal und brauchen kein Dateisystem-Recht)
   - --filesystem=xdg-download

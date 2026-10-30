@@ -74,6 +74,18 @@ public sealed record AppServicesOptions
 
     /// <summary>Sprache erzwingen (Tests); sonst Einstellungen bzw. Systemsprache.</summary>
     public string? Language { get; init; }
+
+    /// <summary>Schlüsselbund für die PIN der App-Sperre; Standard Secret Service (wie der Token).</summary>
+    public ISecretBackend? Secrets { get; init; }
+
+    /// <summary>Fingerabdruck für die App-Sperre; Standard fprintd auf dem System-Bus.</summary>
+    public RoG.Linux.Platform.Security.IFingerprintVerifier? Fingerprint { get; init; }
+
+    /// <summary>Uhr der App-Sperre (Tests); Standard UTC jetzt.</summary>
+    public Func<DateTimeOffset>? Clock { get; init; }
+
+    /// <summary>PBKDF2-Iterationen für neue PINs (Tests: wenige); Standard <see cref="RoG.Linux.Platform.Security.PinHash.DefaultIterations"/>.</summary>
+    public int? PinIterations { get; init; }
 }
 
 /// <summary>
@@ -125,6 +137,9 @@ public sealed class AppServices : IDisposable
 
     /// <summary>Sendet die Offline-Warteschlange (Start, Neuverbindung, jede Minute).</summary>
     public OutboxRunner OutboxRunner { get; }
+
+    /// <summary>App-Sperre (PIN im Schlüsselbund, Fingerabdruck über fprintd).</summary>
+    public AppLockService AppLock { get; private set; } = null!;
 
     /// <summary>Tray-Symbol (nur in der laufenden App, nicht in Tests); <c>null</c> = keins.</summary>
     public TrayService? Tray { get; set; }
@@ -269,7 +284,7 @@ public sealed class AppServices : IDisposable
 
         var language = options.Language ?? LanguageResolver.Resolve(settings.Language, CultureInfo.CurrentUICulture);
         var environment = RoGEnvironment.Get(options.Environment ?? LaunchOptions.Current.Environment ?? settings.Environment);
-        var secrets = options.Tokens is null ? new SecretServiceBackend() : null;
+        var secrets = options.Secrets ?? (options.Tokens is null ? new SecretServiceBackend() : null);
         var tokens = options.Tokens ?? new FallbackTokenStore(new SecretServiceTokenStore(secrets!, environment.Name));
         var apiContext = new ApiContext(language, AppVersion);
 
@@ -302,7 +317,7 @@ public sealed class AppServices : IDisposable
         var xdg = new XdgLauncher();
         var launcher = options.Launcher ?? xdg;
         var connector = new RoG.Core.Features.Servers.ServerConnector(launcher, options.Clipboard ?? new AvaloniaClipboard());
-        return new AppServices(
+        var services = new AppServices(
             settingsStore,
             settings,
             new LinuxSettingsStore(Path.Combine(settingsDirectory, "linux.json")),
@@ -329,6 +344,13 @@ public sealed class AppServices : IDisposable
                 ? new HttpClient { Timeout = TimeSpan.FromMinutes(15) }
                 : new HttpClient(options.StorageHandler, disposeHandler: false) { Timeout = TimeSpan.FromMinutes(15) },
         };
+        services.AppLock = new AppLockService(
+            services,
+            secrets,
+            options.Fingerprint ?? new RoG.Linux.Platform.Security.FprintdVerifier(),
+            options.Clock ?? (static () => DateTimeOffset.UtcNow),
+            options.PinIterations ?? RoG.Linux.Platform.Security.PinHash.DefaultIterations);
+        return services;
     }
 
     /// <summary>Einstellung ändern und speichern – nacheinander, weil der Speicher über eine feste Temp-Datei schreibt.</summary>

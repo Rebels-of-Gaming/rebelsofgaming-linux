@@ -29,7 +29,13 @@ public sealed partial class MainWindow : Window
         _services = services;
         InitializeComponent();
         PositionChanged += (_, e) => RememberNormal(e.Point, null);
+        // App-Sperre: Vordergrund verloren → Zeit merken; zurück → ggf. sperren (wie OnWindowActivated unter Windows)
+        Deactivated += (_, _) => services?.AppLock.OnLeft();
+        Activated += (_, _) => services?.AppLock.OnReturned();
     }
+
+    /// <summary>Vor dem Zeigen (Tray, Deep Link, zweiter Start): sperren, falls lange genug weg – kein Aufblitzen.</summary>
+    public void CheckAppLock() => _services?.AppLock.OnReturned();
 
     private ShellViewModel? Shell => DataContext as ShellViewModel;
 
@@ -94,6 +100,7 @@ public sealed partial class MainWindow : Window
         if (!ExitRequested && e.CloseReason is WindowCloseReason.WindowClosing or WindowCloseReason.Undefined && CloseToTray?.Invoke() == true)
         {
             e.Cancel = true;
+            _services?.AppLock.OnLeft();
             Hide();
             HiddenToTray?.Invoke(this, EventArgs.Empty);
         }
@@ -108,7 +115,25 @@ public sealed partial class MainWindow : Window
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        if (e.Handled || Shell is not { IsShellVisible: true } shell)
+        if (e.Handled)
+        {
+            return;
+        }
+
+        // Gesperrt: Tastatur bleibt auf dem Sperrbildschirm – nur Schließen/Beenden
+        if (_services?.AppLock.IsLocked == true)
+        {
+            if (e.KeyModifiers == KeyModifiers.Control && e.Key is Key.W or Key.Q)
+            {
+                ExitRequested = e.Key == Key.Q;
+                Close();
+                e.Handled = true;
+            }
+
+            return;
+        }
+
+        if (Shell is not { IsShellVisible: true } shell)
         {
             return;
         }

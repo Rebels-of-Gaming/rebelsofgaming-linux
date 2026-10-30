@@ -38,6 +38,12 @@ public sealed class TestServices : IDisposable
 
     public FakeScreenshots Screenshots { get; private init; } = new();
 
+    /// <summary>Fingerabdruck der App-Sperre (Standard: kein Gerät).</summary>
+    public FakeFingerprint Fingerprint { get; private init; } = new();
+
+    /// <summary>Uhr der App-Sperre (vorstellbar per <see cref="TestClock.Advance"/>).</summary>
+    public TestClock Clock { get; private init; } = new();
+
     public static async Task<TestServices> CreateAsync(StoredToken? token = null, bool guest = false, string language = "de", bool keyring = true)
     {
         var folder = Path.Combine(Path.GetTempPath(), "rog-linux-tests", Guid.NewGuid().ToString("N"));
@@ -56,6 +62,8 @@ public sealed class TestServices : IDisposable
         var storage = new FakeStorage();
         var files = new RecordingFileManager();
         var screenshots = new FakeScreenshots();
+        var fingerprint = new FakeFingerprint();
+        var clock = new TestClock();
         var services = await AppServices.CreateAsync(new AppServicesOptions
         {
             SettingsDirectory = folder,
@@ -74,13 +82,17 @@ public sealed class TestServices : IDisposable
             Launcher = launcher,
             Environment = "production",
             Language = language,
+            Secrets = secrets,
+            Fingerprint = fingerprint,
+            Clock = () => clock.Now,
+            PinIterations = 1_000,
         });
         if (guest)
         {
             await services.UpdateSettingsAsync(s => s with { GuestMode = true });
         }
 
-        return new TestServices(services, api, secrets, browser, folder, clipboard, launcher) { Storage = storage, Files = files, Screenshots = screenshots };
+        return new TestServices(services, api, secrets, browser, folder, clipboard, launcher) { Storage = storage, Files = files, Screenshots = screenshots, Fingerprint = fingerprint, Clock = clock };
     }
 
     public void Dispose()

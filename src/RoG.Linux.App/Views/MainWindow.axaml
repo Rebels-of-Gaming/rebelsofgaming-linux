@@ -11,6 +11,8 @@
         WindowStartupLocation="CenterScreen">
 
   <Panel>
+    <!-- Alles unter der App-Sperre: unsichtbar und nicht fokussierbar, solange gesperrt -->
+    <Panel IsVisible="{Binding !LockScreen.IsLocked}">
     <!-- Shell: Seitenleiste wie die NavigationView der Windows-App + aktuelle Seite -->
     <DockPanel IsVisible="{Binding IsShellVisible}">
       <!-- Schmale Ansicht (< 600 px): Kopfleiste mit Menü-Knopf statt fester Seitenleiste -->
@@ -48,5 +50,9 @@
 
     <!-- Login liegt über allem, solange weder Token noch Gastmodus da sind -->
     <ContentControl Content="{Binding Login}" IsVisible="{Binding IsLoginVisible}" />
+    </Panel>
+
+    <!-- App-Sperre (PIN/Fingerabdruck) liegt über allem -->
+    <views:LockScreenView DataContext="{Binding LockScreen}" />
   </Panel>
 </Window>

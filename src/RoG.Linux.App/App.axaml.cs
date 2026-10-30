@@ -172,6 +172,7 @@ public sealed partial class App : Application
     /// </summary>
     internal static void BringToFront(Window window)
     {
+        (window as MainWindow)?.CheckAppLock(); // Tray/Deep Link landen hinter der Sperre
         if (!window.IsVisible)
         {
             window.Show();

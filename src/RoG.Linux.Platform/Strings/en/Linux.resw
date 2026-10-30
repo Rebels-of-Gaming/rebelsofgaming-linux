@@ -526,4 +526,121 @@
   <data name="Linux_BackupDownloadOpened" xml:space="preserve">
     <value>Download started in the browser – the link is only valid briefly.</value>
   </data>
+  <data name="Linux_LockText" xml:space="preserve">
+    <value>Enter your PIN to unlock Rebels of Gaming.</value>
+  </data>
+  <data name="Linux_LockPinLabel" xml:space="preserve">
+    <value>PIN</value>
+  </data>
+  <data name="Linux_LockUnlock" xml:space="preserve">
+    <value>Unlock</value>
+  </data>
+  <data name="Linux_LockFingerprint" xml:space="preserve">
+    <value>Unlock with fingerprint</value>
+  </data>
+  <data name="Linux_LockForgot" xml:space="preserve">
+    <value>Forgot your PIN? Sign out</value>
+  </data>
+  <data name="Linux_LockWrongPin" xml:space="preserve">
+    <value>Wrong PIN – please try again.</value>
+  </data>
+  <data name="Linux_LockTooManyAttempts" xml:space="preserve">
+    <value>Too many failed attempts.</value>
+  </data>
+  <data name="Linux_LockBlockedSeconds" xml:space="preserve">
+    <value>Next attempt possible in {0} s.</value>
+  </data>
+  <data name="Linux_LockBlockedMinutes" xml:space="preserve">
+    <value>Next attempt possible in {0} min.</value>
+  </data>
+  <data name="Linux_LockPinMissing" xml:space="preserve">
+    <value>No PIN found in the keyring – please sign out and sign in again.</value>
+  </data>
+  <data name="Linux_LockKeyringUnavailable" xml:space="preserve">
+    <value>Keyring not reachable – the PIN can't be checked right now.</value>
+  </data>
+  <data name="Linux_LockFingerprintScan" xml:space="preserve">
+    <value>Place your finger on the sensor …</value>
+  </data>
+  <data name="Linux_LockFingerprintRetry" xml:space="preserve">
+    <value>Not recognised – place your finger again.</value>
+  </data>
+  <data name="Linux_LockFingerprintNoMatch" xml:space="preserve">
+    <value>Fingerprint not recognised.</value>
+  </data>
+  <data name="Linux_LockFingerprintTimeout" xml:space="preserve">
+    <value>Timed out – please try again.</value>
+  </data>
+  <data name="Linux_LockFingerprintUnavailable" xml:space="preserve">
+    <value>Fingerprint not available right now (device busy or no finger enrolled).</value>
+  </data>
+  <data name="Linux_LockFingerprintFailed" xml:space="preserve">
+    <value>Fingerprint check failed.</value>
+  </data>
+  <data name="Linux_AppLockTitle" xml:space="preserve">
+    <value>APP LOCK</value>
+  </data>
+  <data name="Linux_AppLockToggle" xml:space="preserve">
+    <value>App lock with PIN (at start and after being away)</value>
+  </data>
+  <data name="Linux_AppLockHint" xml:space="preserve">
+    <value>The PIN (4–8 digits) is only stored as a hash in the system keyring. Forgot it? Sign out on the lock screen.</value>
+  </data>
+  <data name="Linux_AppLockNoKeyring" xml:space="preserve">
+    <value>The app lock needs a keyring (Secret Service, e.g. GNOME Keyring or KWallet).</value>
+  </data>
+  <data name="Linux_AppLockSetPinTitle" xml:space="preserve">
+    <value>Set a PIN for the app lock</value>
+  </data>
+  <data name="Linux_AppLockChangePin" xml:space="preserve">
+    <value>Change PIN</value>
+  </data>
+  <data name="Linux_AppLockCurrentPin" xml:space="preserve">
+    <value>Current PIN</value>
+  </data>
+  <data name="Linux_AppLockNewPin" xml:space="preserve">
+    <value>New PIN (4–8 digits)</value>
+  </data>
+  <data name="Linux_AppLockConfirmPin" xml:space="preserve">
+    <value>Repeat PIN</value>
+  </data>
+  <data name="Linux_AppLockSavePin" xml:space="preserve">
+    <value>Save PIN</value>
+  </data>
+  <data name="Linux_AppLockPinFormat" xml:space="preserve">
+    <value>The PIN must be 4 to 8 digits.</value>
+  </data>
+  <data name="Linux_AppLockPinMismatch" xml:space="preserve">
+    <value>The two PINs don't match.</value>
+  </data>
+  <data name="Linux_AppLockSaveFailed" xml:space="preserve">
+    <value>The PIN couldn't be saved in the keyring.</value>
+  </data>
+  <data name="Linux_AppLockEnabled" xml:space="preserve">
+    <value>App lock turned on.</value>
+  </data>
+  <data name="Linux_AppLockDisabled" xml:space="preserve">
+    <value>App lock turned off – PIN deleted.</value>
+  </data>
+  <data name="Linux_AppLockPinChanged" xml:space="preserve">
+    <value>PIN changed.</value>
+  </data>
+  <data name="Linux_AppLockMinutes" xml:space="preserve">
+    <value>Lock after being away for</value>
+  </data>
+  <data name="Linux_Minute1" xml:space="preserve">
+    <value>1 minute</value>
+  </data>
+  <data name="Linux_MinutesN" xml:space="preserve">
+    <value>{0} minutes</value>
+  </data>
+  <data name="Linux_AppLockFingerprintToggle" xml:space="preserve">
+    <value>Also unlock with fingerprint</value>
+  </data>
+  <data name="Linux_AppLockFingerprintHint" xml:space="preserve">
+    <value>Via fprintd – fingers are enrolled in the system settings.</value>
+  </data>
+  <data name="Linux_AppLockFingerprintNone" xml:space="preserve">
+    <value>No fingerprint reader with an enrolled finger found (fprintd) – unlock with PIN only.</value>
+  </data>
 </root>
