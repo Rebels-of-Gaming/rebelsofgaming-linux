@@ -244,6 +244,41 @@ public sealed partial class UploadsViewModel : LoadableViewModel
         }
     }
 
+    /// <summary>
+    /// „Bildschirmfoto hochladen“ (F8): Aufnahme über das Screenshot-Portal des Desktops (fragt nach Bereich/Fenster),
+    /// danach wie jede andere Datei hochladen. Die Datei legt der Desktop an (z. B. „Bilder/Bildschirmfotos“) – sie
+    /// gehört dem Benutzer und bleibt liegen.
+    /// </summary>
+    [RelayCommand]
+    private async Task ScreenshotAsync()
+    {
+        if (IsUploading || IsGuest)
+        {
+            return;
+        }
+
+        Feedback.Close();
+        var result = await Services.Screenshots.TakeAsync(interactive: true);
+        switch (result.Status)
+        {
+            case RoG.Linux.Platform.Desktop.ScreenshotStatus.Taken when result.Path is { } path && File.Exists(path):
+                IsUploadsTab = true;
+                var name = Path.GetFileName(path);
+                if (UploadService.MimeFor(name) is null)
+                {
+                    name = $"screenshot-{DateTime.Now:yyyyMMdd-HHmmss}.png";
+                }
+
+                await UploadFilesAsync([new UploadSource(name, new FileInfo(path).Length, () => Task.FromResult<Stream>(File.OpenRead(path)))]);
+                break;
+            case RoG.Linux.Platform.Desktop.ScreenshotStatus.Cancelled:
+                break;
+            default:
+                Feedback.Show(Services.T("Linux_ScreenshotUnavailable"), MessageTone.Info);
+                break;
+        }
+    }
+
     internal void Copied(bool ok) =>
         Feedback.Show(Services.T(ok ? StringKeys.CommonLinkCopied : StringKeys.CommonCopyFailed), ok ? MessageTone.Success : MessageTone.Error);
 

@@ -420,6 +420,11 @@ public sealed class FakeDesktopPortal : IPathMethodHandler
 
     public DBusConnection? Connection { get; set; }
 
+    /// <summary>Antwort auf Screenshot: Code (0 ok, 1 abgebrochen) und <c>uri</c>.</summary>
+    public (uint Code, string? Uri) ScreenshotResponse { get; set; } = (0, "file:///tmp/shot.png");
+
+    public List<bool> ScreenshotRequests { get; } = [];
+
     public string Path => "/org/freedesktop/portal/desktop";
 
     public bool HandlesChildPaths => false;
@@ -481,6 +486,40 @@ public sealed class FakeDesktopPortal : IPathMethodHandler
                     writer.WriteDictionaryEntryStart();
                     writer.WriteString("autostart");
                     writer.WriteVariantBool(code == 0 && autostart);
+                    writer.WriteDictionaryEnd(dict);
+                    context.Connection.TrySendMessage(writer.CreateMessage());
+                }
+                finally
+                {
+                    writer.Dispose();
+                }
+
+                break;
+            }
+
+            case ("org.freedesktop.portal.Screenshot", "Screenshot"):
+            {
+                reader.ReadString();
+                var options = reader.ReadDictionaryOfStringToVariantValue();
+                var token = options["handle_token"].GetString();
+                ScreenshotRequests.Add(options["interactive"].GetBool());
+                var sender = request.SenderAsString!.TrimStart(':').Replace('.', '_');
+                var handle = $"/org/freedesktop/portal/desktop/request/{sender}/{token}";
+                Replies.Send(context, "o", (ref MessageWriter w) => w.WriteObjectPath(handle));
+                var (code, uri) = ScreenshotResponse;
+                var writer = context.Connection.GetMessageWriter();
+                try
+                {
+                    writer.WriteSignalHeader(null, handle, "org.freedesktop.portal.Request", "Response", "ua{sv}");
+                    writer.WriteUInt32(code);
+                    var dict = writer.WriteDictionaryStart();
+                    if (uri is not null)
+                    {
+                        writer.WriteDictionaryEntryStart();
+                        writer.WriteString("uri");
+                        writer.WriteVariantString(uri);
+                    }
+
                     writer.WriteDictionaryEnd(dict);
                     context.Connection.TrySendMessage(writer.CreateMessage());
                 }

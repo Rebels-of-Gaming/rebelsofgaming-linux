@@ -63,6 +63,35 @@ public class PortalTests
     }
 
     [Fact]
+    public async Task Screenshot_portal_returns_the_local_file_or_cancel()
+    {
+        await using var bus = await PrivateBus.StartAsync();
+        var portal = new FakeDesktopPortal { ScreenshotResponse = (0, "file:///home/rebel/Bilder/Bildschirmfoto%20vom%2030.png") };
+        await bus.ServeAsync("org.freedesktop.portal.Desktop", portal);
+        var screenshots = new ScreenshotPortal(bus.Address) { Timeout = TimeSpan.FromSeconds(5) };
+
+        var taken = await screenshots.TakeAsync();
+        Assert.Equal(ScreenshotStatus.Taken, taken.Status);
+        Assert.Equal("/home/rebel/Bilder/Bildschirmfoto vom 30.png", taken.Path);
+        Assert.True(Assert.Single(portal.ScreenshotRequests));
+
+        portal.ScreenshotResponse = (1, null);
+        Assert.Equal(ScreenshotStatus.Cancelled, (await screenshots.TakeAsync()).Status);
+
+        // Nur lokale Dateien
+        portal.ScreenshotResponse = (0, "https://example.test/a.png");
+        Assert.Equal(ScreenshotStatus.Unavailable, (await screenshots.TakeAsync()).Status);
+    }
+
+    [Fact]
+    public async Task Screenshot_portal_missing_is_unavailable()
+    {
+        await using var bus = await PrivateBus.StartAsync();
+        var screenshots = new ScreenshotPortal(bus.Address) { Timeout = TimeSpan.FromSeconds(2) };
+        Assert.Equal(ScreenshotStatus.Unavailable, (await screenshots.TakeAsync()).Status);
+    }
+
+    [Fact]
     public async Task Background_portal_missing_is_a_failure_not_an_exception()
     {
         await using var bus = await PrivateBus.StartAsync();

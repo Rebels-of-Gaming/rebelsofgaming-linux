@@ -36,6 +36,8 @@ public sealed class TestServices : IDisposable
 
     public RecordingFileManager Files { get; private init; } = new();
 
+    public FakeScreenshots Screenshots { get; private init; } = new();
+
     public static async Task<TestServices> CreateAsync(StoredToken? token = null, bool guest = false, string language = "de", bool keyring = true)
     {
         var folder = Path.Combine(Path.GetTempPath(), "rog-linux-tests", Guid.NewGuid().ToString("N"));
@@ -53,6 +55,7 @@ public sealed class TestServices : IDisposable
         var launcher = new FakeLauncher();
         var storage = new FakeStorage();
         var files = new RecordingFileManager();
+        var screenshots = new FakeScreenshots();
         var services = await AppServices.CreateAsync(new AppServicesOptions
         {
             SettingsDirectory = folder,
@@ -61,6 +64,7 @@ public sealed class TestServices : IDisposable
             ImageHandler = new FakeImages(),
             StorageHandler = storage,
             FileManager = files,
+            Screenshots = screenshots,
             DownloadDirectory = Path.Combine(folder, "Downloads"),
             Browser = browser,
             Notifier = new SilentNotifier(),
@@ -76,7 +80,7 @@ public sealed class TestServices : IDisposable
             await services.UpdateSettingsAsync(s => s with { GuestMode = true });
         }
 
-        return new TestServices(services, api, secrets, browser, folder, clipboard, launcher) { Storage = storage, Files = files };
+        return new TestServices(services, api, secrets, browser, folder, clipboard, launcher) { Storage = storage, Files = files, Screenshots = screenshots };
     }
 
     public void Dispose()

@@ -316,4 +316,13 @@
   <data name="Linux_ImageTooLarge" xml:space="preserve">
     <value>The image is too large – at most {0} MB.</value>
   </data>
+  <data name="Linux_UploadScreenshot" xml:space="preserve">
+    <value>Upload screenshot</value>
+  </data>
+  <data name="Linux_ScreenshotUnavailable" xml:space="preserve">
+    <value>Screenshots are not available here – the desktop offers no screenshot portal. Take the picture with your system tool and paste it with Ctrl+V.</value>
+  </data>
+  <data name="Linux_ScreenshotHint" xml:space="preserve">
+    <value>Your desktop asks which area to share. The app only sees the finished picture.</value>
+  </data>
 </root>

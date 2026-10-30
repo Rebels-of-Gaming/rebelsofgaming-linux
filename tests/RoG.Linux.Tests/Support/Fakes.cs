@@ -195,3 +195,17 @@ public sealed class RecordingFileManager : RoG.Linux.Platform.Desktop.IFileManag
         return Task.FromResult(true);
     }
 }
+
+/// <summary>Screenshot-Portal ohne Desktop: liefert das eingestellte Ergebnis.</summary>
+public sealed class FakeScreenshots : RoG.Linux.Platform.Desktop.IScreenshotService
+{
+    public RoG.Linux.Platform.Desktop.ScreenshotResult Result { get; set; } = new(RoG.Linux.Platform.Desktop.ScreenshotStatus.Unavailable);
+
+    public int Calls { get; private set; }
+
+    public Task<RoG.Linux.Platform.Desktop.ScreenshotResult> TakeAsync(bool interactive = true, CancellationToken cancellationToken = default)
+    {
+        Calls++;
+        return Task.FromResult(Result);
+    }
+}

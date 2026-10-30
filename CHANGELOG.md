@@ -10,6 +10,8 @@ Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-In
 
 ### Hinzugefügt (Stufe 5)
 
+- **Bildschirmfoto hochladen** (Upload-Seite): der Desktop fragt über das Screenshot-Portal, welcher Bereich geteilt wird, danach geht das Bild wie jede andere Datei hoch
+
 - **Uploads**: Bilder und kurze Videos per Drag & Drop, „Dateien wählen“ oder Strg+V (kopierte Dateien oder ein Screenshot) hochladen, mit Fortschritt und Sichtbarkeit; der Link wird danach kopiert; eigene Uploads mit Vorschau und Knöpfen für Link, BBCode und Markdown
 - **Kurzlinks** (Reiter auf der Upload-Seite): anlegen, Klicks sehen, kopieren
 - **Galerie**: Alben, Bilder und Clips, Großansicht mit Pfeiltasten, Einreichen mit Bildunterschrift und Bestätigung der Rechte

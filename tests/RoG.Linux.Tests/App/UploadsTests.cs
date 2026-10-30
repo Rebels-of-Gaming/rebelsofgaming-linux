@@ -110,4 +110,33 @@ public class UploadsTests
         links.Items[1].CopyCommand.Execute(null);
         Assert.Equal("https://rogclan.de/scrim", t.Clipboard.Text);
     }
+
+    [AvaloniaFact]
+    public async Task Screenshot_from_the_portal_is_uploaded_and_cancel_or_missing_portal_is_handled()
+    {
+        using var t = await TestServices.CreateAsync(TestTokens.Wahke);
+        var uploads = new UploadsViewModel(t.Services, () => { });
+        await uploads.LoadAsync();
+
+        await uploads.ScreenshotCommand.ExecuteAsync(null);
+        Assert.Equal(t.Services.T("Linux_ScreenshotUnavailable"), uploads.Feedback.Message);
+        Assert.Empty(t.Storage.Puts);
+
+        t.Screenshots.Result = new(RoG.Linux.Platform.Desktop.ScreenshotStatus.Cancelled);
+        await uploads.ScreenshotCommand.ExecuteAsync(null);
+        Assert.False(uploads.Feedback.IsOpen);
+        Assert.Empty(t.Storage.Puts);
+
+        var file = Path.Combine(t.Folder, "Bildschirmfoto vom 2026-10-30.png");
+        await File.WriteAllBytesAsync(file, new byte[1500]);
+        t.Screenshots.Result = new(RoG.Linux.Platform.Desktop.ScreenshotStatus.Taken, file);
+        uploads.IsLinksTab = true;
+        await uploads.ScreenshotCommand.ExecuteAsync(null);
+        Assert.True(uploads.IsUploadsTab);
+        var put = Assert.Single(t.Storage.Puts);
+        Assert.Equal(1500, put.Length);
+        Assert.Contains(t.Api.Writes, w => w.Path == "/v1/uploads/presign" && w.Body.Contains("Bildschirmfoto vom 2026-10-30.png", StringComparison.Ordinal));
+        Assert.True(File.Exists(file)); // gehört dem Benutzer, bleibt liegen
+        Assert.Equal(3, t.Screenshots.Calls);
+    }
 }

@@ -58,6 +58,7 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Kurzlinks** (Reiter auf der Upload-Seite: anlegen mit Wunsch-Kürzel und Titel, Klicks, gesperrt/inaktiv, kopieren) | steht |
 | **Galerie** (Alben mit Titelbild, Bilder/Clips, Großansicht mit Pfeiltasten und Escape, Clips öffnen im Browser, Einreichen mit Bildunterschrift + Rechte-Bestätigung) | steht; gegen die Produktion geprüft (noch keine Alben) |
 | **Downloads** (Version, Spiel, Größe, Zähler, Änderungen; Laden mit Fortschritt in den Downloads-Ordner nach xdg-user-dirs, SHA-256-Prüfung, „Im Ordner zeigen“ über `org.freedesktop.FileManager1`, sonst `xdg-open`) | steht |
+| **Bildschirmfoto hochladen** (F8: Knopf auf der Upload-Seite, Screenshot-Portal, interaktiv; ohne Portal Hinweis auf Strg+V) | steht; Protokoll-Test gegen privaten Bus (Aufnahme, Abbruch, nur `file://`) |
 | **Profil bearbeiten** (Konto: Motto, Über mich, Stadt/Land, Einwilligungen Karte/Online-Status/Hall of Fame, Avatar/Banner mit Größengrenze der Plattform) | steht |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
@@ -232,6 +233,8 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
 
 ## Datenschutz (Stand Stufe 5)
 
+- **Neu (F8):** „Bildschirmfoto hochladen“ – die Aufnahme macht der Desktop (Screenshot-Portal, lokal), die App liest
+  nur das freigegebene Bild und lädt es wie andere Uploads hoch; die Datei bleibt beim Benutzer. Keine neue Speicherung.
 - **Neu in Stufe 5:** Uploads gehen direkt an den Speicher der Plattform (vorab signierte Adresse aus
   `POST /v1/uploads/presign`, ohne Token), danach `POST /v1/uploads/{id}/complete`; Galerie-Einreichungen ebenso plus
   `POST /v1/gallery/albums/{album}/items` (Rechte-Bestätigung, Bildunterschrift). Downloads kommen über einen
@@ -382,19 +385,20 @@ docs/                       LINUX-BAUPLAN.md
   Dateisystem-Recht nötig. Strg+V nimmt kopierte Dateien oder ein Bild (als PNG, Name `screenshot-<Zeit>.png`).
 - **L37 – Neues in den Kern?** Nein: Uploads, Kurzlinks, Galerie, Downloads und Profil nutzen unverändert die Dienste des
   Kerns (`UploadService`, `ShortLinkService`, `MediaService`, `ProfileService`).
+- **L38 – Bildschirmfoto (F8):** Die Datei legt der Desktop an (GNOME: „Bilder/Bildschirmfotos“) und sie bleibt dort –
+  die App liest sie nur zum Hochladen. Kein Elternfenster-Handle (bräuchte xdg-foreign unter Wayland), Dialog `modal`.
+  Ohne Portal (z. B. reines X11 ohne xdg-desktop-portal) erklärt ein Hinweis den Weg über Strg+V.
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
 ## Offene Fragen (an Wahke)
 
-- **F8 – Screenshot-Kürzel?** Das Pflichtenheft nennt ein optionales globales Kürzel „Bildschirmausschnitt hochladen“.
-  Unter Linux geht das sauber nur über das Screenshot-Portal (`org.freedesktop.portal.Screenshot`, der Desktop fragt
-  nach) und ein globales Kürzel über das GlobalShortcuts-Portal (GNOME 48+/KDE). Soll die App das bekommen (Vorschlag:
-  Knopf „Bildschirmfoto hochladen“ auf der Upload-Seite über das Portal, ohne globales Kürzel)?
+- ~~F8 – Screenshot-Kürzel~~ **entschieden (30.10.2026): ja, Knopf ohne globales Kürzel.** Umgesetzt: „Bildschirmfoto
+  hochladen“ auf der Upload-Seite über `org.freedesktop.portal.Screenshot` (interaktiv – der Desktop fragt nach
+  Bereich/Fenster), danach normaler Upload. Kein GlobalShortcuts-Portal.
 
-- **F7 – Emoji-Schrift mitliefern?** Forum-Reaktionen sind Unicode-Emojis. Auf Desktops mit Noto Color Emoji (Standard bei
-  GNOME/KDE/Steam Deck) sehen sie richtig aus, sonst erscheinen Ersatzzeichen. Soll das Paket eine eigene Emoji-Schrift
-  (Noto Color Emoji, SIL OFL, rund 10 MB) mitbringen? Vorschlag: nein, erst wenn Mitglieder es melden.
+- ~~F7 – Emoji-Schrift mitliefern?~~ **entschieden (30.10.2026): nein**, vorerst keine eigene Emoji-Schrift; erst wenn
+  Mitglieder fehlende Zeichen melden (L34 bleibt).
 
 - ~~F6 – Reverb und Apps~~ **erledigt** (Website v0.53.1, Commit 606f1c40): Reverb nimmt Verbindungen ohne und mit
   Origin an. Die Linux-App sendet weiter die Website ihrer Umgebung als Origin (L22).

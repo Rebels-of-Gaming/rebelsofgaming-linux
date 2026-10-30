@@ -60,6 +60,9 @@ public sealed record AppServicesOptions
     /// <summary>„Beim Anmelden starten“; Standard: Background-Portal in Flatpak, sonst XDG-Autostart-Datei.</summary>
     public IAutostart? Autostart { get; init; }
 
+    /// <summary>Bildschirmfoto über das Screenshot-Portal (F8); Standard <see cref="ScreenshotPortal"/>.</summary>
+    public IScreenshotService? Screenshots { get; init; }
+
     /// <summary>Spiele-Links (<c>steam://</c>, <c>et://</c> …); Standard <c>xdg-open</c>.</summary>
     public RoG.Core.Features.Servers.IExternalLauncher? Launcher { get; init; }
 
@@ -205,6 +208,9 @@ public sealed class AppServices : IDisposable
     /// <summary>„Beim Anmelden starten“ (Portal in Flatpak, sonst <c>~/.config/autostart</c>).</summary>
     public IAutostart Autostart { get; }
 
+    /// <summary>Bildschirmfoto über das System (Screenshot-Portal) – für „Bildschirmfoto hochladen“.</summary>
+    public IScreenshotService Screenshots { get; private init; } = new ScreenshotPortal();
+
     /// <summary>„Im Ordner zeigen“ nach einem Download.</summary>
     public IFileManager FileManager { get; private init; } = new FreedesktopFileManager();
 
@@ -313,6 +319,7 @@ public sealed class AppServices : IDisposable
             connector)
         {
             FileManager = options.FileManager ?? new FreedesktopFileManager(),
+            Screenshots = options.Screenshots ?? new ScreenshotPortal(),
             DownloadDirectory = options.DownloadDirectory ?? paths.DownloadDirectory,
             PersistentCache = persistentCache,
             StorageHttp = options.StorageHandler is null

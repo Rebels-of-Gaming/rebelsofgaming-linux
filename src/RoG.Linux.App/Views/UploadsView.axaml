@@ -45,6 +45,9 @@
               <WrapPanel Orientation="Horizontal">
                 <Button Classes="primary" Margin="0,0,12,8" Click="OnPickClick" IsEnabled="{Binding !IsUploading}" Content="{l:T UploadsPage_Pick.Content}" />
                 <Button Classes="secondary" Margin="0,0,12,8" Click="OnPasteClick" IsEnabled="{Binding !IsUploading}" Content="{l:T UploadsPage_Paste.Content}" />
+                <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding ScreenshotCommand}" IsEnabled="{Binding !IsUploading}"
+                        Content="{l:T Linux_UploadScreenshot, Upper=True}" ToolTip.Tip="{l:T Linux_ScreenshotHint}"
+                        AutomationProperties.HelpText="{l:T Linux_ScreenshotHint}" />
                 <StackPanel Margin="0,0,16,8">
                   <TextBlock Classes="label" Text="{l:T UploadsPage_Visibility.Header}" />
                   <ComboBox MinWidth="220" ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}"

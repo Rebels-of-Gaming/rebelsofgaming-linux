@@ -316,4 +316,13 @@
   <data name="Linux_ImageTooLarge" xml:space="preserve">
     <value>L’image est trop grande – {0} Mo au maximum.</value>
   </data>
+  <data name="Linux_UploadScreenshot" xml:space="preserve">
+    <value>Téléverser une capture d’écran</value>
+  </data>
+  <data name="Linux_ScreenshotUnavailable" xml:space="preserve">
+    <value>Les captures d’écran ne sont pas disponibles ici – le bureau ne propose pas de portail de capture. Prends l’image avec l’outil du système et colle-la avec Ctrl+V.</value>
+  </data>
+  <data name="Linux_ScreenshotHint" xml:space="preserve">
+    <value>Le bureau te demande quelle zone partager. L’application ne voit que l’image finale.</value>
+  </data>
 </root>
