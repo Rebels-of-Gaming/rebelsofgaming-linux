@@ -6,7 +6,15 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 9 – Verwaltung + Moderation, Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 10 – Feinschliff und Steam Deck, Stufe 9 – Verwaltung + Moderation, Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+
+### Hinzugefügt (Stufe 10)
+
+- **Controller**: mit Gamepad oder Steam Deck bedienen (Steuerkreuz, A/B, Schultertasten wechseln den Bereich); Belegung unter Einstellungen → Controller
+- **Spielmodus** auf dem Steam Deck: Vollbild, größere Knöpfe und Schrift, Hinweis auf die Bildschirmtastatur
+- **Barrierefreiheit**: besser lesbare rote Schrift (Kontrast AA), deutlich sichtbarer Fokusrahmen, Escape schließt jedes Fenster, „Bewegung reduzieren“ des Desktops wird beachtet
+- **Schneller Start** (rund 0,8 s bis zum Fenster)
+- Paket: AppStream-Beschreibung DE/EN/FR, Starter mit Schnellzugriffen, Flatpak-Manifest für Flathub vorbereitet (nicht eingereicht)
 
 ### Hinzugefügt (Stufe 9)
 

@@ -5,6 +5,10 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
+**Stufe 10 (Feinschliff, Steam Deck, Flathub-Vorbereitung, 30.10.2026) – im Repo erledigt** (Controller über SDL,
+Spielmodus, Barrierefreiheits- und Kontrastprüfungen als Tests, „Bewegung reduzieren“ vom Desktop, Start in ~0,8 s mit
+ReadyToRun, AppStream/Desktop/Manifest Flathub-fertig und geprüft, lokaler Flatpak-Probebau, Release-Workflow-Entwurf).
+**Offen nur für den Owner:** Lizenz, Uploads/Secrets, Einreichung, Tests auf echter Hardware (siehe „Offene Fragen“).
 **Stufe 9 (Verwaltung + Moderation, 30.10.2026) – erledigt** (Seite „Verwaltung“ mit allen Reitern der Windows-App:
 Übersicht, Mitglieder, Bewerbungen, Meldungen, Sperren, Einsprüche, Minecraft, Coins, Netzwerk, Mod-Log, Wortfilter,
 Galerie, Uploads, Website + Editor-Fenster; Squad-, News- und Match-Editor; „Melden“ an Inhalten; Minecraft-Weltkarte;
@@ -92,9 +96,14 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Editoren** (eigene Fenster: Squad verwalten – Profil, Line-up, Archiv; News schreiben – Sprachen DE/EN/FR, Titelbild, Planen, Vorschau; Match eintragen – Maps, Line-up, Anhänge; Social-Media-Karte wie Windows) | steht |
 | **Melden** (Forum-Beitrag, Profil, Galerie-Bild, Wiki-Seite/-Version, Direktnachricht, News-Kommentar; Formular im Inhalt, Gründe des Kerns, nur mit Scope `reports:write`) | steht |
 | **Minecraft-Weltkarte** (`rog://map`, eigene Kachelkarte, Warps, Spawn, Live-Spieler alle 5 s wenn erlaubt; Verwaltung mit `minecraft.manage`) und im Server-Reiter Minecraft **Beitrittsdaten bearbeiten** + **Ressourcenpaket hochladen** | steht; Karte gegen die Produktion geprüft |
+| **Controller** (SDL3 bzw. SDL2 zur Laufzeit geladen, ohne SDL still aus; Steuerkreuz/Stick = Pfeile mit XY-Fokus, A = Enter, B = Escape/zurück, LB/RB = Bereich, Menü = Seitenleiste, Ansicht = Suche, Y = F5, rechter Stick scrollt; Einstellungen → Controller mit Belegung; Flatpak `--device=input`) | steht; SDL2 lokal echt geladen, Gerät und SDL3 vom Owner zu prüfen |
+| **Spielmodus** (Gamescope bzw. `--gamemode`/`ROG_GAMEMODE=1`: Vollbild ohne Dekoration, Ziele ≥ 44 px, Schrift ≥ 14 px über Theme-Klasse `Window.gamemode`, einmaliger Hinweis auf Steam+X) | steht |
+| **Barrierefreiheit** (Tests: Namen an Symbol-Knöpfen/Listen/Feldern, keine festen Farben in Views, Tab-Durchgang mit sichtbarem Fokusrahmen per Pixelprüfung, Escape in allen Fenstern; Kontrast WCAG AA beider Paletten, eigenes Text-Rot `RoGRedTextBrush`; „Bewegung reduzieren“ aus dem Settings-Portal: freedesktop/GNOME/KDE) | steht |
+| **Leistung** (Start bis Fenster ~0,83 s statt ~1,48 s mit ReadyToRun; Fenster wartet nicht mehr auf den Tray; `ROG_STARTUP_TRACE=1`) | steht; Paket 62,7 MB (vorher 49,2 MB) |
+| **Flathub-Vorbereitung** (AppStream EN/DE/FR mit OARS, Branding, Screenshots-Platzhaltern, Releases; `.desktop` mit Übersetzungen + Schnellzugriffen; Manifest freedesktop 26.08 mit begründeten Rechten; `appstreamcli validate --pedantic`, `desktop-file-validate`, `flatpak-builder-lint` geprüft; lokaler Probebau startet; `release.yml` nur bei Tag `v*` auf `main`, Upload/PR auskommentiert; Anleitung `packaging/README.md`) | steht; nichts veröffentlicht |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 609 xUnit-Tests (Stufe 9); 474 xUnit-Tests (Stufe 8); 457 xUnit-Tests (Stufe 7); 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 685 xUnit-Tests (Stufe 10, auch unter `LANG=C` grün); 609 xUnit-Tests (Stufe 9); 474 xUnit-Tests (Stufe 8); 457 xUnit-Tests (Stufe 7); 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -226,7 +235,9 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    Spezialseiten des Wikis öffnen im Browser.
 9. **Verwaltung + Moderation** *(erledigt)* – alle Reiter der Windows-Verwaltungsseite, Editor-Fenster (Website-Bereiche,
    Squad, News, Match), Melden an Inhalten, Minecraft-Weltkarte, Minecraft-Beitrittsdaten/Ressourcenpaket (aus Stufe 3).
-10. **Feinschliff, Steam Deck, Flathub** – siehe unten.
+10. **Feinschliff, Steam Deck, Flathub** *(im Repo erledigt)* – Controller, Spielmodus, Barrierefreiheit, Kontrast,
+    Bewegung, Startzeit, Paket- und Store-Metadaten, Release-Workflow-Entwurf. *Wartet auf den Owner:* Lizenz,
+    Upload-Zugang, Domain-Verifikation, Einreichung, Hardware-Tests (Steam Deck, Wayland, Controller).
 
 Später, außerhalb der Stufen: **Clan-„Tools“** in einem eingebetteten, abgeschotteten WebKitGTK-Fenster (einzige
 Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
@@ -244,7 +255,7 @@ Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
 
 - App-ID **`com.rebelsofgaming.RebelsOfGaming`** (Owner-Entscheidung F2). Flathub verlangt den Nachweis, dass die
   Domain uns gehört (`https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt`).
-- Manifest-Entwurf `packaging/flatpak/com.rebelsofgaming.RebelsOfGaming.yml` (freedesktop 25.08, Binärpakete von
+- Manifest-Entwurf `packaging/flatpak/com.rebelsofgaming.RebelsOfGaming.yml` (freedesktop 26.08 seit Stufe 10, Binärpakete von
   cdn.rogclan.de mit sha256 – F1, Rechte: Netz, Wayland + X11-Rückfall, IPC, DRI, Secret Service,
   StatusNotifierWatcher, `xdg-download`; Benachrichtigungen, Autostart, Dateiauswahl, Farbschema und Links über Portale
   ohne Zusatzrecht)
@@ -284,7 +295,13 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 9)
+## Datenschutz (Stand Stufe 10)
+
+- **Neu in Stufe 10:** keine neuen API-Aufrufe. Lokal neu in `linux.json`: „Controller an/aus“. Controller-Eingaben
+  werden nur verarbeitet, solange das Fenster den Fokus hat, nie gespeichert. „Bewegung reduzieren“ wird vom lokalen
+  Settings-Portal gelesen. Zeitmessung nur mit `ROG_STARTUP_TRACE=1` auf stderr. **Vertrieb über Flathub** (später):
+  Flathub spiegelt Screenshots und Metadaten auf eigene Server; die Datenschutzerklärung der Website sollte einen
+  Abschnitt zu Flathub als Vertriebsweg bekommen (Owner/Website).
 
 - **Neu in Stufe 9:** nur Aufrufe an die eigene API (Verwaltung: `admin/dashboard`, `system/status`, `audit-log`,
   `moderation/*`, `admin/members` – E-Mail nur mit globalem Recht –, `roles`, Rollen vergeben/entziehen,
@@ -525,6 +542,21 @@ docs/                       LINUX-BAUPLAN.md
 - **L54 – Melden** nur mit Scope `reports:write` (Guide 28; Windows prüft das nicht); Gründe aus dem Kern
   (`ModerationService.ReportReasons`, entspricht dem `reason`-Enum der API – die API hat keinen Endpunkt dafür).
 - **L55 – Rebel-Coins-Zeichen ⛃** wird überall durch „Coins“ ersetzt (fehlt in üblichen Linux-Schriften).
+- **L56 – Spielmodus** nur unter Gamescope (der Desktopmodus des Deck ist KDE); dort Seitenleiste 44 px je Eintrag –
+  sie darf bei 1280×800 scrollen (Fokus holt den Eintrag ins Bild), am Desktop bleibt sie kompakt (L14 neu bewertet).
+  Tastatur-Hinweis einmal je Sitzung. Erster Controller zählt; X-Taste frei.
+- **L57 – Controller in Flatpak:** `--device=input` statt `--device=all` (Flathub: „potenziell unsicher“); ohne
+  `/dev/hidraw*` fehlen Sonderfunktionen (Gyro/Touchpad), Tasten und Sticks gehen über evdev; Steam Input liefert im
+  Spielmodus ohnehin einen virtuellen Controller.
+- **L58 – Kontrast:** Markenrot #E0324A bleibt für Flächen, Kanten, Punkte; rote **Schrift** nutzt
+  `RoGRedTextBrush` (Dunkel #FF6A7D, Hell #BF263E) für WCAG AA; Schrift auf roten Flächen weiß. Rand-Kontrast der
+  Eingabefelder (3:1) nicht erreicht – erkennbar über Beschriftung, Fläche, Fokus-Kante.
+- **L59 – Bewegung:** keine eigene Einstellung, der Wunsch des Desktops gilt (Settings-Portal, live); der Gleit-Übergang
+  des Schalterknopfs setzt Avalonia im Code und lässt sich nicht abschalten.
+- **L60 – ReadyToRun ja, Trimming nein** (Reflexion in Kern/System.Text.Json/Avalonia – Risiko stiller Laufzeitfehler).
+- **L61 – AppStream:** Englisch als Standard mit DE/FR; Screenshots EN Standard + DE; OARS ehrlich streng (Chat
+  moderiert, Profil/Ort/verknüpfte Konten für Mitglieder sichtbar); Release 0.1.0 als `development`; Runtime 26.08;
+  kein öffentlicher Bugtracker eingetragen.
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
@@ -533,6 +565,17 @@ docs/                       LINUX-BAUPLAN.md
 - **Nur vom Owner zu erledigen/testen (blockiert nichts):** F5 Wayland-Test + Tray unter GNOME/KDE · `libfontconfig1`
   und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · Einreichung
   bei Flathub (nur auf Auftrag).
+
+- **F10 – Lizenz für Flathub?** Flathub verlangt `project_license`; der Quelltext ist privat. Vorschlag:
+  `LicenseRef-proprietary=<URL>` mit einer kurzen Nutzungslizenz auf der Website, die die Weitergabe über Flathub
+  erlaubt (ohne URL lehnt Flathub ab).
+- **F11 – Upload-Zugang für Releases?** Für die Pipeline (F1) braucht die CI Schreibrecht nur auf `rog-public/apps/linux/`
+  (Secrets `ROG_PUBLIC_APPS_KEY_ID`/`ROG_PUBLIC_APPS_SECRET`). Vorschlag: anlegen, sobald die erste Veröffentlichung
+  ansteht – bis dahin bleiben Upload und Flathub-PR im Workflow auskommentiert.
+- **F12 – Rotton für Schrift?** Für AA-Kontrast nutzt rote Schrift im Dunkel-Design #FF6A7D statt #E0324A (wirkt etwas
+  heller/rosa). Vorschlag: so lassen (Barrierefreiheit), Markenrot bleibt für Flächen und Kanten.
+- **F13 – Altersbewertung (OARS) und Bugtracker?** Die Bewertung ist streng (Chat, sichtbare Profile/Orte). Vorschlag:
+  so lassen; dazu einen Forenbereich „Linux-App“ anlegen und als `bugtracker` eintragen.
 
 - **F9 – Datei-Upload auf Gameserver?** Die API kennt für Server-Dateien kein Hochladen (nur Configs über den Editor).
   Soll die Website das anbieten (z. B. Maps, Mapscripts, Plugins), damit Windows- und Linux-App es nachziehen können?
