@@ -27,7 +27,7 @@ Version 0.1.0, nicht veröffentlicht.
 | `xdg-open` (Browser, Spiele-Links), XDG-Ordner, Gerätename (PC/Steam Deck) | steht |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), F5, Escape (Menü, Detail); sichtbarer Fokusrahmen |
 | Tests | 84 xUnit-Tests inkl. 21 Headless-Screenshots (`artifacts/screenshots/`) und 7 D-Bus-Tests gegen einen privaten Bus |
-| CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]`; Secret `ROG_WINDOWS_DEPLOY_KEY` ist eingerichtet, Runner-Freigabe offen (siehe „CI“) |
+| CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
 ## Owner-Entscheidungen (30.10.2026)
@@ -149,8 +149,9 @@ Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
 `.github/workflows/ci.yml`: Build + Tests auf den eigenen Linux-Runnern (`[self-hosted, Linux, rog]`, wie das
 Windows-Repo), .NET über `actions/setup-dotnet` ins Benutzerverzeichnis.
 
-**Stand 30.10.2026:** Secret `ROG_WINDOWS_DEPLOY_KEY` hat der Owner angelegt. Ob die Runner-Gruppe das Repo schon
-zulässt, zeigt der erste Lauf (bleibt er „queued“, fehlt die Freigabe – Punkt 2).
+**Stand 30.10.2026:** Secret `ROG_WINDOWS_DEPLOY_KEY` und Runner-Freigabe stehen – CI läuft grün (Build + 94 Tests in
+rund 7 Minuten inkl. Wartezeit). Hinweise im Lauf: `libfontconfig1` fehlt auf dem Runner (Screenshots rendern
+trotzdem), `actions/checkout@v4`/`setup-dotnet@v4` laufen auf Node 20 (veraltet) → bei Gelegenheit auf v5 anheben.
 
 **Einrichtung (zum Nachlesen):**
 
@@ -162,7 +163,7 @@ zulässt, zeigt der erste Lauf (bleibt er „queued“, fehlt die Freigabe – P
      **nur lesen** (kein Schreibzugriff).
    - Privaten Schlüssel (`rog-windows-deploy`) in **rebelsofgaming-linux → Settings → Secrets and variables → Actions**
      als Secret **`ROG_WINDOWS_DEPLOY_KEY`** speichern. Danach beide Dateien lokal löschen.
-2. **Runner freigeben:** Die Runner-Gruppe der Organisation muss das neue Repo `rebelsofgaming-linux` zulassen (falls
+2. **Runner freigeben** *(erledigt)*: Die Runner-Gruppe der Organisation muss das neue Repo `rebelsofgaming-linux` zulassen (falls
    die Runner nicht für alle Repos freigegeben sind). Konnte ich nicht prüfen (kein `admin:org`-Recht).
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
@@ -236,8 +237,6 @@ docs/                       LINUX-BAUPLAN.md
 
 ## Offene Fragen (an Wahke)
 
-- **F4 – Runner-Zugriff:** Darf die Runner-Gruppe der Organisation `rebelsofgaming-linux` bedienen? (Deploy-Key ist
-  da.) Bleibt der CI-Lauf „queued“, fehlt diese Freigabe.
 - **F5 – Wayland-Test:** Bitte die App einmal unter einer Wayland-Sitzung (GNOME oder KDE, gern auch Steam Deck im
   Desktopmodus) starten und unter Einstellungen → Über die App „Anzeige: Wayland“ prüfen; bei Problemen hilft
   `--x11` sofort.
