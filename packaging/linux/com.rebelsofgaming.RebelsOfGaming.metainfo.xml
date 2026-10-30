@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ENTWURF – AppStream-Metadaten für Flathub/GNOME Software/KDE Discover. Nicht eingereicht.
-  Vor einer Einreichung: Screenshots (öffentliche URLs), Lizenz (siehe Bauplan, offene Frage F1), Release-Daten.
+  App-ID endgültig (Owner-Entscheidung F2). Quelltext privat, Flathub bekommt Binärpakete (F1) → proprietäre Lizenz.
+  Vor einer Einreichung: Screenshots (öffentliche URLs unter cdn.rogclan.de), Release-Daten.
   Prüfen: flatpak run org.freedesktop.appstream-glib validate <datei>  bzw.  appstreamcli validate <datei>
 -->
 <component type="desktop-application">
@@ -83,7 +84,7 @@
   <releases>
     <release version="0.1.0" date="2026-10-30" type="development">
       <description>
-        <p>First preview: sign-in, news, messages (read-only).</p>
+        <p>First preview: start page with live ticker, settings (language, theme), sign-in, news, messages (read-only), native Wayland.</p>
       </description>
     </release>
   </releases>

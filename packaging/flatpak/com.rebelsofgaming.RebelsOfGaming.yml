@@ -1,66 +1,60 @@
 # ENTWURF – Flatpak-Manifest der Linux-App. Nicht bei Flathub eingereicht (nur auf Auftrag des Owners).
 #
-# Offene Punkte vor einer Einreichung (docs/LINUX-BAUPLAN.md, Stufe 10 und offene Fragen):
-#  - F1: Flathub baut nur aus öffentlich abrufbaren Quellen. Dieses Repo und das Submodul rebelsofgaming-windows sind
-#        privat → entweder Quellen veröffentlichen oder fertige Binärpakete (Tarball je Architektur aus der CI) öffentlich
-#        ablegen (z. B. cdn.rogclan.de) und hier als `type: archive` mit sha256 einbinden (proprietäre Apps erlaubt).
-#  - Offline-Build: Flathub erlaubt kein Netz beim Bauen → NuGet-Pakete vorab mit flatpak-dotnet-generator.py
-#        (flatpak-builder-tools) in nuget-sources.json erfassen und mit `--source ./nuget-sources` restoren.
-#  - Avalonia 11 nutzt X11 (unter Wayland über XWayland) → `--socket=x11` statt `fallback-x11`.
+# Owner-Entscheidungen (30.10.2026, docs/LINUX-BAUPLAN.md):
+#  - F1: Der Quelltext bleibt privat. Flathub baut aus fertigen Binärpaketen, die die CI öffentlich unter
+#        https://cdn.rogclan.de/apps/linux/<version>/ (Bucket rog-public der Website) ablegt; hier nur URL + sha256.
+#        Paket bauen: packaging/scripts/make-tarball.sh <x86_64|aarch64> (self-contained .NET, kein SDK im Flatpak).
+#        Upload und automatisches Eintragen von URL/sha256 folgen mit der Release-Pipeline (noch nicht umgesetzt).
+#  - F2: App-ID com.rebelsofgaming.RebelsOfGaming (endgültig) – gleich in .desktop, AppStream, Symbol, D-Bus-Namen
+#        (Single-Instance), Schlüsselbund-Attribut, WM-Klasse (X11) und xdg_toplevel-App-ID (Wayland).
+#  - F3: Avalonia 12 mit nativem Wayland → wayland + fallback-x11 statt erzwungenem X11.
 #
-# Lokal bauen (mit Netz, nur zum Testen):
+# Vor einer Einreichung: echte Prüfsummen (CI), Screenshots unter cdn.rogclan.de, appstreamcli validate,
+# flatpak-builder-lint, Domain-Nachweis https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt.
+#
+# Lokal testen (Paket vorher mit make-tarball.sh bauen, dann url → path: ../../artifacts/dist/<datei> ersetzen):
 #   flatpak-builder --user --install --force-clean build-dir packaging/flatpak/com.rebelsofgaming.RebelsOfGaming.yml
 #   flatpak run com.rebelsofgaming.RebelsOfGaming
 id: com.rebelsofgaming.RebelsOfGaming
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
-sdk-extensions:
-  - org.freedesktop.Sdk.Extension.dotnet10
 command: rebelsofgaming
 
 finish-args:
   # API, Bilder vom CDN, Loopback-Rücksprung des Logins (127.0.0.1)
   - --share=network
-  # Avalonia 11: X11 (XWayland unter Wayland); GPU-Beschleunigung
-  - --socket=x11
+  # Avalonia 12: natives Wayland; ohne Wayland-Sitzung (oder im Spielmodus des Steam Deck) X11/XWayland
+  - --socket=wayland
+  - --socket=fallback-x11
+  # X11-Rückfall: gemeinsamer Speicher (MIT-SHM) für schnelles Zeichnen
   - --share=ipc
+  # GPU-Beschleunigung (EGL/OpenGL)
   - --device=dri
   # Geräte-Token im Schlüsselbund (Secret Service); später ggf. Secret-Portal
   - --talk-name=org.freedesktop.secrets
   # Desktop-Benachrichtigungen (später ggf. Notification-Portal)
   - --talk-name=org.freedesktop.Notifications
-  # Steam Deck: Steam-Overlay/Gamescope-Eingaben brauchen nichts weiter; Controller über SDL folgt in Stufe 10
-
-build-options:
-  prepend-path: /usr/lib/sdk/dotnet10/bin
-  append-ld-library-path: /usr/lib/sdk/dotnet10/lib
-  env:
-    DOTNET_CLI_TELEMETRY_OPTOUT: '1'
-    DOTNET_NOLOGO: '1'
-  arch:
-    x86_64:
-      env:
-        RUNTIME: linux-x64
-    aarch64:
-      env:
-        RUNTIME: linux-arm64
+  # Single-Instance: Die App besitzt ihre eigene App-ID als D-Bus-Namen – das erlaubt Flatpak ohne weiteres Recht.
+  # Farbschema („Wie das System“) kommt über das Settings-Portal – ebenfalls ohne weiteres Recht.
 
 modules:
   - name: rebelsofgaming
     buildsystem: simple
     sources:
-      - type: git
-        url: https://github.com/Rebels-of-Gaming/rebelsofgaming-linux.git
-        branch: develop
-        # Für Releases: tag + commit statt branch
-      # - nuget-sources.json   # erzeugt mit flatpak-dotnet-generator.py (Offline-Build)
+      # Self-contained Publish + share/ (Desktop-Datei, AppStream, Symbol, Lizenzen) je Architektur
+      - type: archive
+        only-arches: [x86_64]
+        url: https://cdn.rogclan.de/apps/linux/0.1.0/rebelsofgaming-0.1.0-linux-x86_64.tar.gz
+        sha256: 0000000000000000000000000000000000000000000000000000000000000000  # setzt die Release-Pipeline
+        dest: dist
+      - type: archive
+        only-arches: [aarch64]
+        url: https://cdn.rogclan.de/apps/linux/0.1.0/rebelsofgaming-0.1.0-linux-aarch64.tar.gz
+        sha256: 0000000000000000000000000000000000000000000000000000000000000000  # setzt die Release-Pipeline
+        dest: dist
     build-commands:
-      - dotnet publish src/RoG.Linux.App/RoG.Linux.App.csproj -c Release -r $RUNTIME --self-contained true
-        -p:PublishTrimmed=false -o /app/lib/rebelsofgaming
-      - mkdir -p /app/bin && printf '#!/bin/sh\nexec /app/lib/rebelsofgaming/rebelsofgaming "$@"\n' > /app/bin/rebelsofgaming
-        && chmod 755 /app/bin/rebelsofgaming
-      - install -Dm644 packaging/linux/com.rebelsofgaming.RebelsOfGaming.desktop -t /app/share/applications
-      - install -Dm644 packaging/linux/com.rebelsofgaming.RebelsOfGaming.metainfo.xml -t /app/share/metainfo
-      - install -Dm644 external/rog-windows/src/RoG.App/Assets/rog-badge-512.png /app/share/icons/hicolor/512x512/apps/com.rebelsofgaming.RebelsOfGaming.png
-      - install -Dm644 external/rog-windows/src/RoG.App/Fonts/OFL.txt /app/share/licenses/com.rebelsofgaming.RebelsOfGaming/OFL-BarlowCondensed.txt
+      - mkdir -p /app/lib /app/bin
+      - cp -a dist/rebelsofgaming /app/lib/rebelsofgaming
+      - printf '#!/bin/sh\nexec /app/lib/rebelsofgaming/rebelsofgaming "$@"\n' > /app/bin/rebelsofgaming && chmod 755 /app/bin/rebelsofgaming
+      - cp -a dist/share/. /app/share/
