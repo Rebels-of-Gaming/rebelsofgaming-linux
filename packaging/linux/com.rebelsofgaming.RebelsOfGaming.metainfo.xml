@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   AppStream-Metadaten für Flathub, GNOME Software und KDE Discover (Stufe 10). NICHT eingereicht.
-  App-ID endgültig (Owner-Entscheidung F2); Flathub bekommt Binärpakete, der Quelltext bleibt privat (F1).
+  App-ID endgültig (Owner-Entscheidung F2). Lizenz GPL-3.0-or-later (Owner 30.10.2026, F10); der Quelltext wird
+  öffentlich – bis dahin bekommt Flathub Binärpakete (F1), danach baut Flathub aus dem Quelltext.
 
   Vor einer Einreichung (Checkliste: packaging/README.md):
-   - project_license: Owner-Entscheidung (Platzhalter LicenseRef-proprietary, Optionen in packaging/README.md)
    - Screenshots unter https://cdn.rogclan.de/apps/linux/screenshots/ hochladen (Dateien: packaging/screenshots/)
    - Release-Eintrag: Version, Datum und type="stable" zum Tag vX.Y.Z setzen (neuester Eintrag zuerst)
   Prüfen: „appstreamcli validate“ (pedantisch) und „flatpak-builder-lint appstream“ – Befehle in packaging/README.md
@@ -12,8 +12,8 @@
 <component type="desktop-application">
   <id>com.rebelsofgaming.RebelsOfGaming</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <!-- PLATZHALTER – Owner-Entscheidung offen, siehe packaging/README.md „Lizenz“ -->
-  <project_license>LicenseRef-proprietary</project_license>
+  <!-- Owner-Entscheidung F10 (30.10.2026); Name und Logo sind ausgenommen, siehe TRADEMARKS.md -->
+  <project_license>GPL-3.0-or-later</project_license>
 
   <name>Rebels of Gaming</name>
   <!-- Flathub: höchstens 35 Zeichen, ohne App-Namen, ohne Punkt am Ende -->

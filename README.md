@@ -42,6 +42,10 @@ Ohne Bildschirm: `xvfb-run -a dotnet run --project src/RoG.Linux.App`. Fenstersy
 Laufzeit-Voraussetzungen: Wayland (nativ, Avalonia 12.1) oder X11/XWayland, `libfontconfig1`, ein Secret-Service-Dienst (GNOME Keyring, KWallet,
 KeePassXC) für dauerhaftes Anmelden – ohne ihn gilt die Anmeldung nur bis zum Beenden (Hinweis in der App).
 
+## Lizenz
+
+GPL-3.0-or-later (`LICENSE`). Name „Rebels of Gaming“, Logo und Grafiken sind ausgenommen – siehe `TRADEMARKS.md`.
+
 ## Lizenzen Dritter
 
 - Avalonia UI 12, CommunityToolkit.Mvvm, Tmds.DBus.Protocol, AngleSharp, .NET, xUnit – MIT bzw. Apache 2.0

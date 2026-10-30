@@ -570,9 +570,11 @@ docs/                       LINUX-BAUPLAN.md
   WebKitGTK-Fenster. Das braucht im Flatpak die GNOME-Runtime (WebKitGTK ist nicht in freedesktop) – Paket deutlich
   größer, Runtime-Wechsel schwer umkehrbar. Vorschlag: Tools vorerst im System-Browser öffnen (heute schon so) und
   WebKitGTK erst angehen, wenn einzelne Tools nachweislich in der App gebraucht werden.
-- **F10 – Lizenz für Flathub?** Flathub verlangt `project_license`; der Quelltext ist privat. Vorschlag:
-  `LicenseRef-proprietary=<URL>` mit einer kurzen Nutzungslizenz auf der Website, die die Weitergabe über Flathub
-  erlaubt (ohne URL lehnt Flathub ab).
+- **F10 – Lizenz – entschieden (Owner 30.10.2026):** **GPL-3.0-or-later**, der Quelltext wird später öffentlich
+  („später ist der Code öffentlich“). `LICENSE`, `TRADEMARKS.md` (Name/Logo ausgenommen), `project_license` gesetzt.
+  Folgen: Flathub baut nach der Veröffentlichung aus dem Quelltext (F1 nur bis dahin), F11 entfällt dann; vorher muss
+  `RoG.Core` im Windows-Repo öffentlich und GPL-verträglich lizenziert werden und die Historie beider Repos auf
+  Geheimnisse geprüft sein (Aufgabe vor dem Umschalten, nicht im Linux-Repo).
 - **F11 – Upload-Zugang für Releases?** Für die Pipeline (F1) braucht die CI Schreibrecht nur auf `rog-public/apps/linux/`
   (Secrets `ROG_PUBLIC_APPS_KEY_ID`/`ROG_PUBLIC_APPS_SECRET`). Vorschlag: anlegen, sobald die erste Veröffentlichung
   ansteht – bis dahin bleiben Upload und Flathub-PR im Workflow auskommentiert.

@@ -48,7 +48,7 @@ Erwartet (Stand 30.10.2026):
   hat Großbuchstaben – ist mit F2 so entschieden und bei Flathub erlaubt).
 - `flatpak-builder-lint manifest`: ohne Befund.
 - `flatpak-builder-lint appstream`/`builddir`: nur `screenshot-image-not-found`/`appstream-missing-screenshots`
-  (Bilder noch nicht hochgeladen) und `appstream-proprietary-license-missing-url` (Lizenz offen, siehe unten).
+  (Bilder noch nicht hochgeladen).
 
 Werkzeuge ohne root (so lief die Prüfung in Stufe 10): `apt-get download appstream libappstream5 libxmlb2
 libstemmer0d appstream-compose libappstream-compose0 gir1.2-appstream-1.0 gir1.2-ostree-1.0 libostree-1-1
@@ -121,8 +121,7 @@ nicht aus). Ablauf heute:
 
 ## Checkliste Flathub-Einreichung
 
-- [ ] **Lizenz** (`project_license`) entschieden – siehe unten; Flathub verlangt bei `LicenseRef-proprietary` eine
-      URL zum Lizenztext (`LicenseRef-proprietary=https://…`), und die Lizenz muss Flathub die Weitergabe erlauben.
+- [x] **Lizenz** (`project_license`) entschieden: GPL-3.0-or-later (F10, siehe unten).
 - [ ] **Domain-Nachweis:** Flathub gibt nach der Annahme im Entwickler-Portal einen Token aus; er muss unter
       `https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt` stehen (Datei in der Website, eigene
       Route oder `public/.well-known/`). Erst dann erscheint die App als „verifiziert“.
@@ -138,16 +137,13 @@ nicht aus). Ablauf heute:
 - [ ] Datenschutzerklärung der Website: Abschnitt zur Linux-App/Flathub ergänzen (Flathub ist ein eigener Anbieter,
       der Download läuft über Flathub, Updates ebenfalls).
 
-## Lizenz – Optionen (Owner-Entscheidung, noch offen)
+## Lizenz (Owner-Entscheidung F10, 30.10.2026)
 
-Der Quelltext ist privat (F1). Flathub verteilt die Binärpakete weiter, die Lizenz muss das erlauben.
-
-1. **`LicenseRef-proprietary=https://rebelsofgaming.com/<seite>`** – eigene kurze Endnutzer-Lizenz (Nutzung und
-   Weitergabe der unveränderten App erlaubt, kein Quelltext, keine Änderung). Flathub zeigt „Proprietär“. Am
-   ehrlichsten zum Stand „Quelltext privat“; braucht eine Seite auf der Website (z. B. unter den Rechtstexten).
-2. **Freie Lizenz mit öffentlichem Quelltext** (z. B. `GPL-3.0-or-later` oder `MIT`) – widerspricht F1, ginge nur
-   mit Veröffentlichung des Linux-Repos und des Kerns (RoG.Core); dann könnte Flathub auch aus dem Quelltext bauen.
-3. **`LicenseRef-proprietary` ohne URL** – lehnt der Flathub-Linter ab (Fehler), keine Option.
+**GPL-3.0-or-later** (`LICENSE` im Repo-Wurzelverzeichnis, `project_license` in der AppStream-Datei). Der Quelltext wird
+öffentlich; ab dann baut Flathub aus dem Quelltext statt aus Binärpaketen (F1 entfällt, ebenso der Upload-Zugang F11).
+Vorher nötig: `RoG.Core` (Submodul aus `rebelsofgaming-windows`) ebenfalls öffentlich unter einer GPL-verträglichen
+Lizenz, Git-Historie beider Repos auf Geheimnisse geprüft. **Name „Rebels of Gaming“, Faust-Logo und Grafiken sind
+nicht Teil der Lizenz** (`TRADEMARKS.md`).
 
 Schriftlizenz (Barlow Condensed, OFL) liegt im Paket unter `share/licenses/com.rebelsofgaming.RebelsOfGaming/`.
 

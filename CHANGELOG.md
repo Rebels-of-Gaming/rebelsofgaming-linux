@@ -8,6 +8,10 @@ Version sammelt `## [Unveröffentlicht]`.
 
 Stufe 10 – Feinschliff und Steam Deck, Stufe 9 – Verwaltung + Moderation, Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
 
+### Lizenz
+
+- GPL-3.0-or-later (`LICENSE`); Name „Rebels of Gaming“, Logo und Grafiken sind ausgenommen (`TRADEMARKS.md`). Die AppStream-Metadaten nennen die Lizenz für Flathub
+
 ### Hinzugefügt (Stufe 10)
 
 - **Controller**: mit Gamepad oder Steam Deck bedienen (Steuerkreuz, A/B, Schultertasten wechseln den Bereich); Belegung unter Einstellungen → Controller
