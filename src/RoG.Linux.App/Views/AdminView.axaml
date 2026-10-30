@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.AdminView"
+             x:DataType="vm:AdminViewModel">
+  <!-- Verwaltung wie AdminPage der Windows-App: Reiter je Recht + Scope, Inhalt je Reiter per DataTemplate (App.axaml) -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="display" Text="{l:T AdminPage_Title.Text}" TextWrapping="Wrap" />
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshTabCommand}" IsVisible="{Binding HasAccess}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+
+      <!-- Reiter (umbrechend statt waagrecht scrollen) -->
+      <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" IsVisible="{Binding HasAccess}">
+        <ItemsControl ItemsSource="{Binding Tabs}" AutomationProperties.Name="{l:T Linux_AdminTabs}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:AdminTabItem">
+              <ToggleButton Classes="segment" IsChecked="{Binding IsSelected}" Content="{Binding Label}" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Border>
+
+      <!-- Rückfrage und Rückmeldung für alle Reiter -->
+      <c:ConfirmBar DataContext="{Binding Confirm}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <Panel>
+      <!-- Ohne Rechte bzw. Scopes -->
+      <TextBlock Classes="muted" Text="{l:T AdminPage_NoAccess.Text}" IsVisible="{Binding NoAccess}" Margin="24,8" TextWrapping="Wrap"
+                 MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+
+      <!-- Offener Reiter; noch nicht gebaut → „kommt“ -->
+      <ContentControl Content="{Binding SelectedContent}" />
+      <TextBlock Classes="muted" Text="{l:T Linux_ServerTabSoon}" IsVisible="{Binding SelectedPending}" Margin="24,8" TextWrapping="Wrap"
+                 VerticalAlignment="Top" />
+    </Panel>
+  </DockPanel>
+</UserControl>

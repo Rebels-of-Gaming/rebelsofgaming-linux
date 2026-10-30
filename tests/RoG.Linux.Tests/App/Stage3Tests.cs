@@ -162,7 +162,6 @@ public class Stage3Tests
     }
 
     [AvaloniaTheory]
-    [InlineData("rog://admin", "https://admin.rebelsofgaming.com/")]
     [InlineData("rog://open?url=https://rebelsofgaming.com/de/tools/zeitrechner", "https://rebelsofgaming.com/de/tools/zeitrechner")]
     public async Task Deep_links_without_a_native_page_open_the_exact_website_page(string link, string web)
     {

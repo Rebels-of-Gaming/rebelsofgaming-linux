@@ -703,4 +703,13 @@
   <data name="Linux_WikiStatusRejected" xml:space="preserve">
     <value>REFUSÉE</value>
   </data>
+  <data name="Linux_AdminTabs" xml:space="preserve">
+    <value>Sections de l’administration</value>
+  </data>
+  <data name="Linux_AdminAuditEmpty" xml:space="preserve">
+    <value>Aucune entrée dans le journal d’audit.</value>
+  </data>
+  <data name="Linux_AdminLogEmpty" xml:space="preserve">
+    <value>Aucune action de modération pour l’instant.</value>
+  </data>
 </root>

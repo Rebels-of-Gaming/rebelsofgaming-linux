@@ -1,0 +1,62 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.AdminWebsiteView"
+             x:DataType="vm:AdminWebsiteViewModel">
+  <!-- Verwaltung – Website: Bereiche im eigenen Editor-Fenster, übrige Bereiche im Browser (Admin-Domain) -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Spacing="12" Margin="24,8,24,24">
+      <StackPanel Spacing="12" IsVisible="{Binding HasNativeAreas}">
+        <TextBlock Classes="section" Text="{l:T AdminPage_NativeTitle.Text}" />
+        <TextBlock Classes="muted" Text="{l:T AdminPage_NativeHint.Text}" TextWrapping="Wrap" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+        <ItemsControl ItemsSource="{Binding NativeAreas}" Focusable="False" AutomationProperties.Name="{l:T AdminPage_NativeTitle.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <c:AdaptiveGrid MinItemWidth="220" Spacing="8" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:AdminAreaButtonViewModel">
+              <Button Classes="row tile" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" MinHeight="64" Padding="14,10"
+                      Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding Label}" ToolTip.Tip="{Binding Label}">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Classes="body strong" Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Classes="muted small" Text="{Binding Group}" />
+                  </StackPanel>
+                  <PathIcon Grid.Column="1" Data="{StaticResource IconPopOut}" Width="16" Height="16" Foreground="{DynamicResource RoGMutedBrush}"
+                            VerticalAlignment="Center" Margin="8,0,0,0" />
+                </Grid>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <StackPanel Spacing="12" IsVisible="{Binding HasWebLinks}" Margin="0,12,0,0">
+        <TextBlock Classes="section" Text="{l:T AdminPage_BrowserTitle.Text}" />
+        <TextBlock Classes="muted" Text="{l:T AdminPage_WebsiteHint.Text}" TextWrapping="Wrap" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+        <ItemsControl ItemsSource="{Binding WebLinks}" Focusable="False" AutomationProperties.Name="{l:T AdminPage_BrowserTitle.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <c:AdaptiveGrid MinItemWidth="220" Spacing="8" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:AdminWebLinkViewModel">
+              <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{Binding OpenCommand}"
+                      ToolTip.Tip="{Binding Address}" AutomationProperties.Name="{Binding Label}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{StaticResource IconOpenExternal}" Width="14" Height="14" />
+                  <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

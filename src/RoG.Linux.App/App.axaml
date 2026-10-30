@@ -35,6 +35,10 @@
     <DataTemplate DataType="vm:ServerBackupsViewModel"><views:ServerBackupsView /></DataTemplate>
     <DataTemplate DataType="vm:BansViewModel"><views:BansView /></DataTemplate>
     <DataTemplate DataType="vm:WikiViewModel"><views:WikiView /></DataTemplate>
+    <DataTemplate DataType="vm:AdminViewModel"><views:AdminView /></DataTemplate>
+    <DataTemplate DataType="vm:AdminOverviewViewModel"><views:AdminOverviewView /></DataTemplate>
+    <DataTemplate DataType="vm:ModerationLogViewModel"><views:ModerationLogView /></DataTemplate>
+    <DataTemplate DataType="vm:AdminWebsiteViewModel"><views:AdminWebsiteView /></DataTemplate>
     <!-- Bausteine, die mehrere Seiten zeigen -->
     <DataTemplate DataType="vm:ServerItemViewModel"><views:ServerCard /></DataTemplate>
     <DataTemplate DataType="vm:ServerGameBansViewModel"><views:ServerGameBansView /></DataTemplate>

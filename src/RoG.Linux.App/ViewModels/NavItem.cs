@@ -21,6 +21,10 @@ public sealed partial class NavItem(string key, string label, Geometry? icon, st
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
 
+    /// <summary>In der Seitenleiste sichtbar (z. B. „Verwaltung“ nur mit Verwaltungsrecht).</summary>
+    [ObservableProperty]
+    public partial bool IsVisible { get; set; } = true;
+
     /// <summary>Zähler (Ungelesenes), 0 = ausgeblendet.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasBadge), nameof(BadgeText))]

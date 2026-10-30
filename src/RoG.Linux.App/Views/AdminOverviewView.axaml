@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             xmlns:admin="using:RoG.Core.Features.Admin"
+             x:Class="RoG.Linux.App.Views.AdminOverviewView"
+             x:DataType="vm:AdminOverviewViewModel">
+  <!-- Verwaltung – Übersicht: Kennzahlen, Systemstatus (Ampel), Audit-Log mit Suche -->
+  <Panel>
+    <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding ShowContent}">
+      <StackPanel Spacing="20" Margin="24,8,24,24">
+        <!-- Kennzahlen -->
+        <StackPanel Spacing="8" IsVisible="{Binding CanKpis}">
+          <Border Classes="error" IsVisible="{Binding HasKpiError}">
+            <TextBlock Text="{Binding KpiError}" TextWrapping="Wrap" />
+          </Border>
+          <ItemsControl ItemsSource="{Binding Kpis}" IsVisible="{Binding HasKpis}" Focusable="False">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <c:AdaptiveGrid MinItemWidth="200" Spacing="12" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="admin:Kpi">
+                <Border Classes="card" MinHeight="104" AutomationProperties.Name="{Binding Label}">
+                  <StackPanel Spacing="4">
+                    <TextBlock Classes="muted" Text="{Binding Label}" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                    <TextBlock FontFamily="{StaticResource RoGDisplayFont}" FontWeight="SemiBold" FontSize="32"
+                               Foreground="{DynamicResource RoGInkBrush}" Text="{Binding Value}" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- Systemstatus -->
+        <StackPanel Spacing="8" IsVisible="{Binding CanSystem}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+          <TextBlock Classes="section" Text="{l:T AdminPage_SystemTitle.Text}" />
+          <Border Classes="error" IsVisible="{Binding HasSystemError}">
+            <TextBlock Text="{Binding SystemError}" TextWrapping="Wrap" />
+          </Border>
+          <TextBlock Classes="body strong" Foreground="{Binding SystemBrush}" Text="{Binding SystemText}" TextWrapping="Wrap"
+                     IsVisible="{Binding !HasSystemError}" />
+          <ItemsControl ItemsSource="{Binding Checks}" Focusable="False" AutomationProperties.Name="{l:T AdminPage_SystemTitle.Text}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SystemCheckViewModel">
+                <Grid ColumnDefinitions="20,*" ColumnSpacing="10" Margin="0,4" AutomationProperties.Name="{Binding AutomationName}">
+                  <TextBlock Classes="body strong" Foreground="{Binding IconBrush}" Text="{Binding Icon}" />
+                  <StackPanel Grid.Column="1" Spacing="2">
+                    <TextBlock Classes="body" TextWrapping="Wrap">
+                      <Run FontWeight="SemiBold" Text="{Binding Label}" /><Run Text="  " /><Run Foreground="{DynamicResource RoGMutedBrush}" Text="{Binding Value}" />
+                    </TextBlock>
+                    <TextBlock Classes="muted small" Text="{Binding Help}" IsVisible="{Binding HasHelp}" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- Audit-Log -->
+        <StackPanel Spacing="8" IsVisible="{Binding CanAudit}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+          <TextBlock Classes="section" Text="{l:T AdminPage_AuditTitle.Text}" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" MaxWidth="420" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+          <TextBox Text="{Binding AuditSearch}"
+                   PlaceholderText="{l:T AdminPage_AuditSearch.PlaceholderText}" AutomationProperties.Name="{l:T AdminPage_AuditSearch.PlaceholderText}">
+            <TextBox.InnerRightContent>
+              <Button Classes="icon" Command="{Binding SearchAuditCommand}" Width="32" Height="32" Padding="7"
+                      ToolTip.Tip="{l:T AdminPage_AuditSearch.PlaceholderText}" AutomationProperties.Name="{l:T AdminPage_AuditSearch.PlaceholderText}">
+                <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" />
+              </Button>
+            </TextBox.InnerRightContent>
+            <TextBox.KeyBindings>
+              <KeyBinding Gesture="Enter" Command="{Binding SearchAuditCommand}" />
+            </TextBox.KeyBindings>
+          </TextBox>
+          </Grid>
+          <Border Classes="error" IsVisible="{Binding HasAuditError}">
+            <TextBlock Text="{Binding AuditError}" TextWrapping="Wrap" />
+          </Border>
+          <TextBlock Classes="muted" Text="{l:T Linux_AdminAuditEmpty}" IsVisible="{Binding IsAuditEmpty}" TextWrapping="Wrap" />
+          <ItemsControl ItemsSource="{Binding Audit}" AutomationProperties.Name="{l:T AdminPage_AuditTitle.Text}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="x:String">
+                <SelectableTextBlock Classes="body" FontSize="13" Padding="0,3" Text="{Binding}" TextWrapping="Wrap" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding MoreAuditCommand}" IsVisible="{Binding HasMoreAudit}"
+                  Content="{l:T Common_LoadMore.Content}" />
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Panel>
+</UserControl>

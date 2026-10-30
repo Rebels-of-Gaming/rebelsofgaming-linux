@@ -703,4 +703,13 @@
   <data name="Linux_WikiStatusRejected" xml:space="preserve">
     <value>ABGELEHNT</value>
   </data>
+  <data name="Linux_AdminTabs" xml:space="preserve">
+    <value>Bereiche der Verwaltung</value>
+  </data>
+  <data name="Linux_AdminAuditEmpty" xml:space="preserve">
+    <value>Keine Einträge im Audit-Log.</value>
+  </data>
+  <data name="Linux_AdminLogEmpty" xml:space="preserve">
+    <value>Noch keine Moderationsaktionen.</value>
+  </data>
 </root>

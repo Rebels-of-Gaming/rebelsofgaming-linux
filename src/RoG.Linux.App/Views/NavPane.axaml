@@ -5,6 +5,7 @@
              xmlns:l="using:RoG.Linux.App.Localization"
              x:Class="RoG.Linux.App.Views.NavPane"
              x:Name="Root"
+             Classes.dense="{Binding IsNavDense}"
              x:DataType="vm:ShellViewModel">
   <UserControl.Resources>
     <!-- Eintrag der Seitenleiste: Markierung, Symbol, Beschriftung, Zähler -->
@@ -14,6 +15,7 @@
               CommandParameter="{Binding}"
               ToolTip.Tip="{Binding Label}"
               AutomationProperties.Name="{Binding Label}"
+              IsVisible="{Binding IsVisible}"
               Margin="0,1">
         <Grid ColumnDefinitions="3,41,*,Auto">
           <Border Classes="navmarker" Width="3" Height="18" CornerRadius="2" VerticalAlignment="Center" />
@@ -38,6 +40,12 @@
       </Button>
     </DataTemplate>
   </UserControl.Resources>
+  <UserControl.Styles>
+    <!-- Mit „Verwaltung“ ein Eintrag mehr: etwas enger, damit 1280×800 ohne Scrollen passt -->
+    <Style Selector="views|NavPane.dense Button.nav">
+      <Setter Property="Height" Value="34" />
+    </Style>
+  </UserControl.Styles>
 
   <Border Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
     <DockPanel>

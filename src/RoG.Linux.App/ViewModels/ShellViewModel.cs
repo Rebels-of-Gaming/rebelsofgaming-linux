@@ -47,6 +47,7 @@ public sealed partial class ShellViewModel : ObservableObject
         FooterItems =
         [
             Item("Nav_Notifications", "Shell_NavNotifications.Content", "IconBell", "notifications", true),
+            Item("Nav_Admin", "Shell_NavAdmin.Content", "IconAdmin", "admin", true),
             Item("Nav_Account", "Shell_NavAccount.Content", "IconAccount", "settings/account", true),
             Item("Nav_Settings", "Linux_NavSettings", "IconSettings", "settings", true),
         ];
@@ -59,6 +60,8 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_Leaderboards", "LeaderboardsPage_Title.Text", "IconTrophy", "minecraft/leaderboards", true),
             Item("Nav_Bans", "BansPage_Title.Text", "IconShield", "bans", true),
         ];
+        UpdateAdminEntry();
+        _services.CurrentUserChanged += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(UpdateAdminEntry);
         Acceptance = new AcceptanceViewModel(services);
         LockScreen = new LockScreenViewModel(services, SignOutAsync);
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
@@ -96,6 +99,18 @@ public sealed partial class ShellViewModel : ObservableObject
     }
 
     private object? Page(string key) => _pages.GetValueOrDefault(key);
+
+    /// <summary>„Verwaltung“ nur mit einem Verwaltungsrecht aus <c>/v1/me</c> (wie Windows); dann Seitenleiste enger.</summary>
+    private void UpdateAdminEntry()
+    {
+        var admin = FooterItems.First(i => i.Key == "Nav_Admin");
+        admin.IsVisible = AdminAccess.ShowsNavEntry(_services.CurrentUser);
+        IsNavDense = admin.IsVisible;
+    }
+
+    /// <summary>Seitenleiste mit einem Eintrag mehr (Verwaltung): Einträge etwas niedriger, 1280×800 ohne Scrollen.</summary>
+    [ObservableProperty]
+    public partial bool IsNavDense { get; set; }
 
     private void SetBadge(string key, int count)
     {
@@ -337,7 +352,7 @@ public sealed partial class ShellViewModel : ObservableObject
             return false;
         }
 
-        // Bereiche ohne eigene Seite (Verwaltung, Karte) bzw. Einträge in Bereichen, die die
+        // Bereiche ohne eigene Seite (Karte) bzw. Einträge in Bereichen, die die
         // App noch nicht nativ hat (Tools …): genau diese Seite der Website öffnen
         var web = WebFallback(route);
         if (!s_sections.TryGetValue(route.Section, out var key))
@@ -415,6 +430,7 @@ public sealed partial class ShellViewModel : ObservableObject
         [AppSection.Votes] = "Nav_Votes",
         [AppSection.Leaderboards] = "Nav_Leaderboards",
         [AppSection.Bans] = "Nav_Bans",
+        [AppSection.Admin] = "Nav_Admin",
     };
 
     /// <summary>Adresse der Website für Ziele, die die App (noch) nicht nativ zeigt; <c>null</c> = nativ bzw. ohne Eintrag.</summary>
@@ -425,7 +441,6 @@ public sealed partial class ShellViewModel : ObservableObject
         string Escaped(string k) => string.Join('/', k.Split('/').Select(Uri.EscapeDataString));
         return route.Section switch
         {
-            AppSection.Admin => env.AdminBaseUrl ?? env.WebPage(lang, "admin"),
             AppSection.MinecraftMap => env.WebPage(lang, "minecraft/karte"),
             AppSection.Tools when route.Key is { } k => env.WebPage(lang, "tools/" + Escaped(k)),
             _ => null,
@@ -457,6 +472,7 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Bans" => new BansViewModel(_services),
         "Nav_Wiki" => new WikiViewModel(_services, ShowLogin),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
+        "Nav_Admin" => new AdminViewModel(_services),
         _ => new PlaceholderViewModel(_services, item),
     };
 

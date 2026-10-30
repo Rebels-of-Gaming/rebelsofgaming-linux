@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ModerationLogView"
+             x:DataType="vm:ModerationLogViewModel">
+  <!-- Verwaltung – Mod-Log: eine Zeile je Eintrag (Zeit · Wer · Aktion · Wen), „Mehr laden“ über den Cursor -->
+  <Panel>
+    <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                 EmptyText="{l:T Linux_AdminLogEmpty}" RetryCommand="{Binding RefreshCommand}" />
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding ShowContent}">
+      <Grid Margin="24,8,24,24">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" MaxWidth="{StaticResource RoGReadingWidth}" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+      <StackPanel Spacing="8">
+        <ItemsControl ItemsSource="{Binding Items}" AutomationProperties.Name="{l:T AdminPage_LogList.AutomationProperties.Name}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                <SelectableTextBlock Classes="body" Text="{Binding}" TextWrapping="Wrap" />
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding LoadMoreCommand}" IsVisible="{Binding HasMore}"
+                IsEnabled="{Binding !IsLoadingMore}" Content="{l:T Common_LoadMore.Content}" />
+      </StackPanel>
+      </Grid>
+    </ScrollViewer>
+  </Panel>
+</UserControl>
