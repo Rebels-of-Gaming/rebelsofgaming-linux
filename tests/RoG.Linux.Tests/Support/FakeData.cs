@@ -40,7 +40,7 @@ public static class FakeData
 
     public static string Messages => """
         {"data":[
-          {"id":"01M6","conversation_id":"01CONV1","author":{"id":"01U2","slug":"nyx","name":"Nyx"},"body":"Scrim heute 20 Uhr? Wir bräuchten noch einen fünften.","deleted":false,"quote":null,"attachments":[],"source":null,"created_at":"2026-10-30T07:58:00Z"},
+          {"id":"01M6","conversation_id":"01CONV1","author":{"id":"01U2","slug":"nyx","name":"Nyx"},"body":"Scrim heute 20 Uhr? Wir bräuchten noch einen fünften.","deleted":false,"quote":null,"attachments":[{"id":"01A2","name":"aufstellung.png","mime":"image/png","size":48213,"image":true}],"source":null,"created_at":"2026-10-30T07:58:00Z"},
           {"id":"01M5","conversation_id":"01CONV1","author":{"id":"01USERWAHKE","slug":"wahke","name":"Wahke"},"body":"Server läuft, Passwort steht im Squad-Chat.","deleted":false,"quote":{"id":"01M4","author":"Nyx","body":"Ist der Server schon oben?"},"attachments":[],"source":null,"created_at":"2026-10-29T22:10:00Z"},
           {"id":"01M4","conversation_id":"01CONV1","author":{"id":"01U2","slug":"nyx","name":"Nyx"},"body":"Ist der Server schon oben?","deleted":false,"quote":null,"attachments":[],"source":"minecraft","created_at":"2026-10-29T22:05:00Z"},
           {"id":"01M3","conversation_id":"01CONV1","author":{"id":"01USERWAHKE","slug":"wahke","name":"Wahke"},"body":"Hier die neue Config für den Scrim-Server.","deleted":false,"quote":null,"attachments":[{"id":"01A1","name":"server.cfg","mime":"text/plain","size":2048,"image":false}],"source":null,"created_at":"2026-10-29T21:50:00Z"},
@@ -352,4 +352,15 @@ public static class FakeData
     public static string MinecraftResourcePack => $$$"""
         {"data":{"url":"{{{Cdn}}}/minecraft/pack-3f2a.zip","latest_url":"{{{Cdn}}}/minecraft/pack.zip","sha1":"3f2a9c0e5b7d1a4c8e6f0b2d4a6c8e0f1a3b5c7d","size":7340032,"updated_at":"2026-10-25T12:00:00Z"}}
         """;
+
+    /// <summary>Antwort auf „Nachricht senden“ – Text und Zitat aus der Anfrage.</summary>
+    public static string SentMessage(string request)
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse(request);
+        var body = doc.RootElement.GetProperty("body").GetString();
+        var quote = doc.RootElement.TryGetProperty("quote_id", out var q) && q.ValueKind == System.Text.Json.JsonValueKind.String
+            ? $$"""{"id":"{{q.GetString()}}","author":"Nyx","body":"Scrim heute 20 Uhr? Wir bräuchten noch einen fünften."}"""
+            : "null";
+        return $$$"""{"data":{"id":"01M9","conversation_id":"01CONV1","author":{"id":"01USERWAHKE","slug":"wahke","name":"Wahke"},"body":{{{System.Text.Json.JsonSerializer.Serialize(body)}}},"deleted":false,"quote":{{{quote}}},"attachments":[],"source":null,"created_at":"2026-10-30T08:05:00Z"}}""";
+    }
 }

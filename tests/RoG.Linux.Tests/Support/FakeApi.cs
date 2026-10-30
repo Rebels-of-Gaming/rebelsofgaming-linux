@@ -14,12 +14,38 @@ public sealed class FakeApi : HttpMessageHandler
     /// <summary>Eigene Antworten je Pfad (z. B. leere Listen) – gehen den Standardantworten vor.</summary>
     public Dictionary<string, string> Overrides { get; } = new(StringComparer.Ordinal);
 
+    /// <summary>Kein Netz: jede Anfrage scheitert mit <see cref="HttpRequestException"/>.</summary>
+    public bool Offline { get; set; }
+
+    /// <summary>Bodies schreibender Anfragen (Pfad → JSON), zum Prüfen.</summary>
+    public List<(string Method, string Path, string Body)> Writes { get; } = [];
+
     /// <summary>Alle Antworten als Fehler (Fehlerzustand testen).</summary>
     public HttpStatusCode? FailWith { get; set; }
 
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         Requests.Add(request);
+        if (Offline)
+        {
+            throw new HttpRequestException("offline (Test)");
+        }
+
+        var sentBody = request.Content is null ? string.Empty : request.Content.ReadAsStringAsync(cancellationToken).GetAwaiter().GetResult();
+        if (request.Method != HttpMethod.Get)
+        {
+            Writes.Add((request.Method.Method, request.RequestUri!.AbsolutePath, sentBody));
+        }
+
+        if (request.Method == HttpMethod.Get && request.RequestUri!.AbsolutePath.StartsWith("/v1/attachments/", StringComparison.Ordinal))
+        {
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(FakeImages.Png(320, 200, 200)),
+                RequestMessage = request,
+            });
+        }
+
         if (FailWith is { } status)
         {
             return Task.FromResult(Json(Problem((int)status, "server_error"), status, "application/problem+json"));
@@ -35,6 +61,8 @@ public sealed class FakeApi : HttpMessageHandler
             ("GET", "/v1/conversations") => FakeData.Conversations,
             ("GET", var p) when p.EndsWith("/messages", StringComparison.Ordinal) => FakeData.Messages,
             ("POST", var p) when p.EndsWith("/read", StringComparison.Ordinal) => """{"data":{"unread":1}}""",
+            ("POST", var p) when p.StartsWith("/v1/conversations/", StringComparison.Ordinal) && p.EndsWith("/messages", StringComparison.Ordinal) => FakeData.SentMessage(sentBody),
+            ("POST", "/v1/conversations") => """{"data":{"id":"01CONV1","type":"direct"}}""",
             ("GET", "/v1/me") => FakeData.Me,
             ("GET", "/v1") => FakeData.Platform,
             ("GET", "/v1/live") => FakeData.Live,
@@ -96,6 +124,9 @@ public sealed class FakeImages : HttpMessageHandler
         var png = avatar ? Draw(96, 96, hue, true) : Draw(1280, 720, hue, false);
         return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(png) });
     }
+
+    /// <summary>Platzhalterbild als PNG (z. B. Bild-Anhänge).</summary>
+    public static byte[] Png(int width, int height, uint hue) => Draw(width, height, hue, false);
 
     private static byte[] Draw(int width, int height, uint hue, bool avatar)
     {

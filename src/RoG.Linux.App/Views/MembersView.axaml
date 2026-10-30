@@ -131,12 +131,20 @@
             </ItemsControl>
           </StackPanel>
 
-          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding OpenInBrowserCommand}">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
-              <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
-            </StackPanel>
-          </Button>
+          <WrapPanel Orientation="Horizontal">
+            <Button Classes="primary" Margin="0,0,12,8" Command="{Binding SendMessageCommand}" IsVisible="{Binding CanMessage}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconMessages}" Width="16" Height="16" />
+                <TextBlock Text="{l:T MembersPage_SendMessage.Content}" />
+              </StackPanel>
+            </Button>
+            <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding OpenInBrowserCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+                <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
+              </StackPanel>
+            </Button>
+          </WrapPanel>
         </StackPanel>
       </ScrollViewer>
     </Panel>

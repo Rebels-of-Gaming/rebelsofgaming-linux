@@ -160,6 +160,10 @@
     <Setter Property="LetterSpacing" Value="1.2" />
     <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
   </Style>
+  <!-- Kicker in Grün (z. B. „aus Minecraft“) -->
+  <Style Selector="TextBlock.kicker.green">
+    <Setter Property="Foreground" Value="{DynamicResource RoGGreenBrush}" />
+  </Style>
   <Style Selector="TextBlock.body, SelectableTextBlock.body">
     <Setter Property="FontSize" Value="15" />
     <Setter Property="LineHeight" Value="23" />
@@ -260,7 +264,7 @@
   </Style>
 
   <!-- Symbol-Knopf (quadratisch, ohne Fläche) -->
-  <Style Selector="Button.icon">
+  <Style Selector="Button.icon, ToggleButton.icon">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Width" Value="40" />
@@ -271,9 +275,13 @@
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
-  <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
     <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.icon:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
   </Style>
 
   <!-- Sichtbarer Fokus (Tastatur): Off-White-Rahmen auf allen bedienbaren Elementen -->
@@ -501,6 +509,31 @@
   </Style>
   <Style Selector="ToggleButton.segment:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+  </Style>
+
+  <!-- Sprechblase im Chat: fremde links (bg2), eigene rechts (bg3, rote Kante) -->
+  <Style Selector="Border.bubble">
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="MaxWidth" Value="560" />
+    <Setter Property="Background" Value="{DynamicResource RoGBg2Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="12,12,12,4" />
+    <Setter Property="Padding" Value="14,10" />
+  </Style>
+  <Style Selector="Border.bubble.mine">
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGActionRedBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,3,0" />
+    <Setter Property="CornerRadius" Value="12,12,4,12" />
+  </Style>
+  <Style Selector="Border.bubble:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGInkBrush}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+  <Style Selector="TextBlock.error">
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
   </Style>
 
   <!-- Status-Text eines Servers -->

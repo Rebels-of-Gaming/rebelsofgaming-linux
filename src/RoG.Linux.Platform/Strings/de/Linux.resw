@@ -37,9 +37,6 @@
   <data name="Linux_Refresh" xml:space="preserve">
     <value>Aktualisieren (F5)</value>
   </data>
-  <data name="Linux_ChatReadOnly" xml:space="preserve">
-    <value>Antworten geht in dieser Vorschau noch nicht – öffne die Unterhaltung dafür auf der Website.</value>
-  </data>
   <data name="Linux_KeyringStored" xml:space="preserve">
     <value>Dein Geräte-Token liegt im Schlüsselbund des Systems.</value>
   </data>
@@ -228,5 +225,11 @@
   </data>
   <data name="Linux_AutostartFailed" xml:space="preserve">
     <value>Der Autostart ließ sich nicht ändern.</value>
+  </data>
+  <data name="Linux_TextCopied" xml:space="preserve">
+    <value>Text kopiert.</value>
+  </data>
+  <data name="Linux_CopyFailed" xml:space="preserve">
+    <value>Kopieren nicht möglich – die Zwischenablage ist gerade belegt.</value>
   </data>
 </root>

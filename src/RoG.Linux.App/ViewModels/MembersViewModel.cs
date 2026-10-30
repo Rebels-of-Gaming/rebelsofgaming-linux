@@ -338,6 +338,9 @@ public sealed partial class MemberDetailViewModel(AppServices services, MemberSe
         }
 
         var s = p.Summary;
+        _id = s.Id;
+        var me = Services.CurrentUser?.Id ?? (await Services.Tokens.GetAsync(cancellationToken))?.UserId;
+        CanMessage = me is not null && me != s.Id;
         Rank = s.RankLabel?.ToUpper(Services.Culture);
         RankBrush = UiResources.FromHex(s.RankColor, "RoGGoldBrush");
         Presence = s.Presence;
@@ -402,6 +405,36 @@ public sealed partial class MemberDetailViewModel(AppServices services, MemberSe
     [RelayCommand]
     private Task OpenInBrowserAsync() =>
         _slug is null ? Task.CompletedTask : Services.Browser.OpenAsync(Services.Environment.ProfilePage(Services.Language, _slug));
+
+    private string? _id;
+
+    /// <summary>Angemeldet und nicht das eigene Profil: „Nachricht senden“.</summary>
+    [ObservableProperty]
+    public partial bool CanMessage { get; set; }
+
+    /// <summary>1:1-Unterhaltung öffnen bzw. starten und in „Nachrichten“ zeigen.</summary>
+    [RelayCommand]
+    private async Task SendMessageAsync()
+    {
+        if (_id is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var conversation = await new RoG.Core.Features.Messages.MessageService(Services.Api.Client).StartDirectAsync(_id);
+            Services.Navigate(new RoG.Core.Navigation.AppRoute(RoG.Core.Navigation.AppSection.Messages, conversation));
+        }
+        catch (RoG.Core.Api.ApiProblemException ex)
+        {
+            ErrorMessage = Services.Localizer.GetError(ex.Problem.Code);
+        }
+        catch (Exception ex) when (ex is RoG.Core.Api.Generated.GeneratedApiException or HttpRequestException)
+        {
+            ErrorMessage = Services.Localizer.GetError(RoG.Core.Api.ApiProblem.Codes.Unknown);
+        }
+    }
 }
 
 /// <summary>Abzeichen als Chip mit farbiger Kante (Farbe aus der API).</summary>

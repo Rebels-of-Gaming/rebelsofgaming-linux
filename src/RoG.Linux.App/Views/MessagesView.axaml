@@ -3,6 +3,7 @@
              xmlns:vm="using:RoG.Linux.App.ViewModels"
              xmlns:c="using:RoG.Linux.App.Controls"
              xmlns:l="using:RoG.Linux.App.Localization"
+             xmlns:v="using:RoG.Linux.App.Views"
              x:Class="RoG.Linux.App.Views.MessagesView"
              x:DataType="vm:MessagesViewModel">
 
@@ -82,69 +83,19 @@
             </Button>
             <TextBlock Grid.Column="1" Classes="title" FontSize="24" Text="{Binding Chat.Title}" VerticalAlignment="Center"
                        MaxLines="1" TextTrimming="CharacterEllipsis" />
-            <Button Grid.Column="2" Classes="icon" Command="{Binding OpenInBrowserCommand}"
-                    ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">
-              <PathIcon Data="{StaticResource IconOpenExternal}" Width="18" Height="18" />
-            </Button>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+              <Button Classes="icon" Command="{Binding PopOutCommand}"
+                      ToolTip.Tip="{l:T MessagesPage_PopOut.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T MessagesPage_PopOut.AutomationProperties.Name}">
+                <PathIcon Data="{StaticResource IconPopOut}" Width="18" Height="18" />
+              </Button>
+              <Button Classes="icon" Command="{Binding OpenInBrowserCommand}"
+                      ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">
+                <PathIcon Data="{StaticResource IconOpenExternal}" Width="18" Height="18" />
+              </Button>
+            </StackPanel>
           </Grid>
         </Border>
-        <!-- Nur lesen im Spike: Hinweis statt Eingabefeld -->
-        <Border DockPanel.Dock="Bottom" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,1,0,0"
-                Padding="20,12">
-          <TextBlock Classes="muted small" Text="{Binding ReadOnlyHint}" />
-        </Border>
-        <Panel DataContext="{Binding Chat}" x:DataType="vm:ChatViewModel">
-          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
-                       EmptyText="{l:T ChatView_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
-          <ScrollViewer x:Name="ChatScroll" VerticalScrollBarVisibility="Auto" IsVisible="{Binding ShowContent}"
-                        AutomationProperties.Name="{l:T ChatView_List.AutomationProperties.Name}">
-            <StackPanel Margin="20,16" Spacing="10">
-              <Button Classes="secondary" HorizontalAlignment="Center" IsVisible="{Binding HasOlder}"
-                      Command="{Binding LoadOlderCommand}" Content="{l:T ChatView_LoadOlder.Content}" />
-              <ItemsControl ItemsSource="{Binding Messages}">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate x:DataType="vm:ChatMessageViewModel">
-                    <Panel>
-                      <!-- fremde Nachricht: links, bg2 -->
-                      <Border IsVisible="{Binding IsOther}" HorizontalAlignment="Left" MaxWidth="560"
-                              Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="1"
-                              CornerRadius="12,12,12,4" Padding="14,10">
-                        <StackPanel Spacing="4">
-                          <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="body strong" FontSize="14" Text="{Binding Author}" />
-                            <TextBlock Classes="muted small" Text="{Binding Time}" />
-                            <TextBlock Classes="kicker" Text="{Binding MinecraftHint}" IsVisible="{Binding FromMinecraft}" Foreground="{DynamicResource RoGGreenBrush}" />
-                          </StackPanel>
-                          <Border IsVisible="{Binding HasQuote}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="3,0,0,0" Padding="8,2">
-                            <TextBlock Classes="muted small" Text="{Binding Quote}" MaxLines="2" TextTrimming="CharacterEllipsis" />
-                          </Border>
-                          <SelectableTextBlock Classes="body" Classes.muted="{Binding IsDeleted}" Text="{Binding Body}" />
-                          <TextBlock Classes="muted small" Text="{Binding Attachments}" IsVisible="{Binding HasAttachments}" />
-                        </StackPanel>
-                      </Border>
-                      <!-- eigene Nachricht: rechts, bg3 mit roter Kante -->
-                      <Border IsVisible="{Binding IsMine}" HorizontalAlignment="Right" MaxWidth="560"
-                              Background="{DynamicResource RoGBg3Brush}" BorderBrush="{DynamicResource RoGActionRedBrush}" BorderThickness="0,0,3,0"
-                              CornerRadius="12,12,4,12" Padding="14,10">
-                        <StackPanel Spacing="4">
-                          <TextBlock Classes="muted small" Text="{Binding Time}" HorizontalAlignment="Right" />
-                          <Border IsVisible="{Binding HasQuote}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="3,0,0,0" Padding="8,2">
-                            <TextBlock Classes="muted small" Text="{Binding Quote}" MaxLines="2" TextTrimming="CharacterEllipsis" />
-                          </Border>
-                          <SelectableTextBlock Classes="body" Classes.muted="{Binding IsDeleted}" Text="{Binding Body}" />
-                          <TextBlock Classes="muted small" Text="{Binding Attachments}" IsVisible="{Binding HasAttachments}" />
-                        </StackPanel>
-                      </Border>
-                    </Panel>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-            </StackPanel>
-          </ScrollViewer>
-        </Panel>
+        <v:ChatView DataContext="{Binding Chat}" />
       </DockPanel>
     </Panel>
   </c:ListDetailPanel>

@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ChatView"
+             x:DataType="vm:ChatViewModel">
+  <!-- Chat (Seite „Nachrichten“ und eigenes Fenster): Verlauf, Antwort-Leiste, Eingabe. Enter sendet, Umschalt+Enter = neue Zeile. -->
+  <DockPanel>
+    <!-- Eingabe -->
+    <Border DockPanel.Dock="Bottom" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,1,0,0"
+            Padding="16,10">
+      <StackPanel Spacing="8">
+        <c:FeedbackBar DataContext="{Binding Feedback}" />
+        <Border IsVisible="{Binding HasQuote}" BorderBrush="{DynamicResource RoGActionRedBrush}" BorderThickness="3,0,0,0" Padding="10,4"
+                Background="{DynamicResource RoGBg3Brush}" CornerRadius="4">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="muted small" Text="{Binding QuoteTarget.ReplyPreview}" MaxLines="2" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="icon" Width="28" Height="28" Padding="6" Command="{Binding ClearQuoteCommand}"
+                    ToolTip.Tip="{l:T ChatView_ClearQuote.AutomationProperties.Name}" AutomationProperties.Name="{l:T ChatView_ClearQuote.AutomationProperties.Name}">
+              <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+            </Button>
+          </Grid>
+        </Border>
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBox x:Name="Composer" Text="{Binding Draft}" AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="160" MinHeight="40"
+                   PlaceholderText="{l:T ChatView_Composer.PlaceholderText}" KeyDown="OnComposerKeyDown"
+                   AutomationProperties.Name="{l:T ChatView_Composer.AutomationProperties.Name}" />
+          <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Bottom" Spacing="2">
+            <TextBlock Classes="muted small" Text="{Binding RemainingText}" HorizontalAlignment="Center" Classes.error="{Binding IsTooLong}" />
+            <Button Classes="primary" Width="44" Height="40" Padding="0" Command="{Binding SendCommand}"
+                    ToolTip.Tip="{l:T ChatView_Send.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T ChatView_Send.AutomationProperties.Name}">
+              <PathIcon Data="{StaticResource IconSend}" Width="18" Height="18" />
+            </Button>
+          </StackPanel>
+        </Grid>
+      </StackPanel>
+    </Border>
+
+    <Panel>
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                   EmptyText="{l:T ChatView_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer x:Name="Scroll" VerticalScrollBarVisibility="Auto" IsVisible="{Binding ShowContent}"
+                    AutomationProperties.Name="{l:T ChatView_List.AutomationProperties.Name}">
+        <StackPanel Margin="20,16" Spacing="10">
+          <Button Classes="secondary" HorizontalAlignment="Center" IsVisible="{Binding HasOlder}"
+                  Command="{Binding LoadOlderCommand}" Content="{l:T ChatView_LoadOlder.Content}" />
+          <ItemsControl ItemsSource="{Binding Messages}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ChatMessageViewModel">
+                <!-- eigene Nachricht rechts (bg3, rote Kante), fremde links (bg2); Kontextmenü: Antworten, Text kopieren -->
+                <Border Classes="bubble" Classes.mine="{Binding IsMine}" Focusable="True"
+                        AutomationProperties.Name="{Binding AutomationName}">
+                  <Border.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="{l:T ChatView_Reply.Text}" Command="{Binding ReplyCommand}" IsEnabled="{Binding CanReply}" />
+                      <MenuItem Header="{l:T ChatView_CopyText.Text}" Command="{Binding CopyCommand}" IsEnabled="{Binding !IsDeleted}" />
+                    </ContextMenu>
+                  </Border.ContextMenu>
+                  <StackPanel Spacing="4">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="body strong" FontSize="14" Text="{Binding Author}" IsVisible="{Binding IsOther}" />
+                        <TextBlock Classes="muted small" Text="{Binding Time}" VerticalAlignment="Center" />
+                        <TextBlock Classes="kicker green" Text="{Binding MinecraftHint}" IsVisible="{Binding FromMinecraft}" VerticalAlignment="Center" />
+                      </StackPanel>
+                      <Button Grid.Column="1" Classes="icon" Width="26" Height="26" Padding="5" Margin="8,-4,-6,0" Command="{Binding ReplyCommand}"
+                              IsVisible="{Binding CanReply}" ToolTip.Tip="{l:T ChatView_Reply.Text}" AutomationProperties.Name="{l:T ChatView_Reply.Text}">
+                        <PathIcon Data="{StaticResource IconReply}" Width="14" Height="14" />
+                      </Button>
+                    </Grid>
+                    <Border IsVisible="{Binding HasQuote}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="3,0,0,0" Padding="8,2">
+                      <TextBlock Classes="muted small" Text="{Binding Quote}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                    </Border>
+                    <SelectableTextBlock Classes="body" Classes.muted="{Binding IsDeleted}" Text="{Binding Body}" IsVisible="{Binding HasBody}" />
+                    <ItemsControl ItemsSource="{Binding Attachments}" IsVisible="{Binding HasAttachments}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ChatAttachmentViewModel">
+                          <Button Classes="row" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding AutomationName}"
+                                  ToolTip.Tip="{Binding AutomationName}" Loaded="OnAttachmentLoaded" Padding="0" HorizontalAlignment="Left">
+                            <Panel>
+                              <Border IsVisible="{Binding HasPreview}" CornerRadius="6" ClipToBounds="True" MaxWidth="320" MaxHeight="240">
+                                <Image Source="{Binding Preview}" Stretch="Uniform" />
+                              </Border>
+                              <StackPanel Orientation="Horizontal" Spacing="8" Margin="10,6" IsVisible="{Binding !HasPreview}">
+                                <PathIcon Data="{StaticResource IconAttachment}" Width="16" Height="16" />
+                                <TextBlock Classes="body" Text="{Binding Name}" MaxWidth="240" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Classes="muted small" Text="{Binding SizeText}" VerticalAlignment="Center" />
+                              </StackPanel>
+                            </Panel>
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</UserControl>

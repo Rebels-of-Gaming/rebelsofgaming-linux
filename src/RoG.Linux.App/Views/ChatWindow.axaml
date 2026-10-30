@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RoG.Linux.App.ViewModels"
+        xmlns:v="using:RoG.Linux.App.Views"
+        xmlns:l="using:RoG.Linux.App.Localization"
+        x:Class="RoG.Linux.App.Views.ChatWindow"
+        x:DataType="vm:ChatViewModel"
+        Width="460" Height="680" MinWidth="360" MinHeight="420"
+        Background="{DynamicResource RoGBgBrush}"
+        Title="{Binding Title}">
+  <!-- Herausgelöster Chat (wie ChatWindow der Windows-App), optional immer im Vordergrund -->
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1"
+            Padding="16,6">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock x:Name="TitleText" Classes="section" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        <ToggleButton Grid.Column="1" x:Name="OnTop" Classes="icon" IsCheckedChanged="OnTopChanged"
+                      ToolTip.Tip="{l:T ChatWindow_OnTop.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T ChatWindow_OnTop.AutomationProperties.Name}">
+          <PathIcon Data="{StaticResource IconPinTop}" Width="16" Height="16" />
+        </ToggleButton>
+      </Grid>
+    </Border>
+    <v:ChatView x:Name="Chat" />
+  </DockPanel>
+</Window>

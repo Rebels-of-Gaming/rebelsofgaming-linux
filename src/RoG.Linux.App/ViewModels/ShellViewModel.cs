@@ -186,6 +186,7 @@ public sealed partial class ShellViewModel : ObservableObject
         if (token is not null)
         {
             await LoadUserAsync();
+            _ = _services.OutboxRunner.StartAsync();
         }
 
         await _services.Realtime.StartAsync(token?.UserId);
@@ -398,6 +399,7 @@ public sealed partial class ShellViewModel : ObservableObject
             if (token is not null)
             {
                 await LoadUserAsync();
+                _ = _services.OutboxRunner.StartAsync();
             }
 
             await _services.Realtime.StartAsync(token?.UserId);
@@ -432,6 +434,7 @@ public sealed partial class ShellViewModel : ObservableObject
     /// <summary>Abmelden: Token auf dem Server widerrufen und lokal löschen, Caches leeren, Login zeigen.</summary>
     public async Task SignOutAsync()
     {
+        _services.OutboxRunner.Stop();
         await _services.Realtime.StopAsync();
         await _services.Account.LogoutAsync();
         _services.CurrentUser = null;

@@ -8,8 +8,8 @@ using RoG.Linux.App.Services;
 namespace RoG.Linux.App.ViewModels;
 
 /// <summary>
-/// Nachrichten: Unterhaltungen (Suche, ungelesen) und Verlauf daneben. Im Spike nur lesen; Senden, Echtzeit und
-/// Pop-out-Fenster folgen in Stufe 4 (die Logik dafür steht schon im Kern: <see cref="MessageService.SendAsync"/>).
+/// Nachrichten: Unterhaltungen (Suche, ungelesen) und daneben der Chat (<see cref="ChatViewModel"/>: schreiben,
+/// zitieren, live, Anhänge) – auch als eigenes Fenster (<see cref="PopOutRequested"/>).
 /// </summary>
 public sealed partial class MessagesViewModel(AppServices services, Action requestSignIn) : LoadableViewModel(services), IDetailPage, IRoutablePage
 {
@@ -95,8 +95,7 @@ public sealed partial class MessagesViewModel(AppServices services, Action reque
         {
             Selected = null;
             DetailForced = true;
-            Chat = new ChatViewModel(Services, _messages, key, Services.T("MessagesPage_Title.Text"));
-            _ = Chat.LoadAsync();
+            ReplaceChat(new ChatViewModel(Services, key, Services.T("MessagesPage_Title.Text")));
             _ = MarkReadAsync(key);
         }
     }
@@ -115,8 +114,7 @@ public sealed partial class MessagesViewModel(AppServices services, Action reque
             return;
         }
 
-        Chat = new ChatViewModel(Services, _messages, value.Id, value.Name);
-        _ = Chat.LoadAsync();
+        ReplaceChat(new ChatViewModel(Services, value.Id, value.Name));
         if (value.Unread)
         {
             value.Unread = false;
@@ -141,7 +139,30 @@ public sealed partial class MessagesViewModel(AppServices services, Action reque
     {
         Selected = null;
         DetailForced = false;
-        Chat = null;
+        ReplaceChat(null);
+    }
+
+    private void ReplaceChat(ChatViewModel? chat)
+    {
+        Chat?.Dispose();
+        Chat = chat;
+        if (chat is not null)
+        {
+            chat.Sent += (_, _) => _ = LoadAsync(silent: true); // Vorschau und Reihenfolge der Liste
+            _ = chat.LoadAsync();
+        }
+    }
+
+    /// <summary>Chat in eigenem Fenster öffnen (vom Hauptfenster umgesetzt).</summary>
+    public event EventHandler<ChatViewModel>? PopOutRequested;
+
+    [RelayCommand]
+    private void PopOut()
+    {
+        if (Chat is { } chat)
+        {
+            PopOutRequested?.Invoke(this, new ChatViewModel(Services, chat.ConversationId, chat.Title));
+        }
     }
 
     partial void OnSearchTextChanged(string? value) => _ = ReloadDelayedAsync();
@@ -158,9 +179,6 @@ public sealed partial class MessagesViewModel(AppServices services, Action reque
 
     [RelayCommand]
     private void SignIn() => requestSignIn();
-
-    /// <summary>Hinweis im Chat: Antworten folgt in Stufe 4.</summary>
-    public string ReadOnlyHint => Services.T("Linux_ChatReadOnly");
 
     [RelayCommand]
     private Task OpenInBrowserAsync() => Services.Browser.OpenAsync(Services.Environment.WebPage(Services.Language, "messages"));
@@ -214,93 +232,4 @@ public sealed partial class ConversationItemViewModel : ObservableObject
 
     private async Task LoadAvatarAsync(AppServices services, Uri? avatar) =>
         Avatar = await services.Images.LoadAsync(avatar, 96);
-}
-
-/// <summary>Verlauf einer Unterhaltung (älteste oben), „Ältere laden“ über den Cursor.</summary>
-public sealed partial class ChatViewModel(AppServices services, MessageService messages, string conversationId, string title) : LoadableViewModel(services)
-{
-    private string? _cursor;
-
-    public string ConversationId { get; } = conversationId;
-
-    public string Title { get; } = title;
-
-    public ObservableCollection<ChatMessageViewModel> Messages { get; } = [];
-
-    [ObservableProperty]
-    public partial bool HasOlder { get; set; }
-
-    protected override bool HasData => Messages.Count > 0;
-
-    protected override async Task LoadCoreAsync(CancellationToken cancellationToken)
-    {
-        var page = await messages.GetMessagesAsync(ConversationId, null, cancellationToken);
-        var me = await MyIdAsync(cancellationToken);
-        Messages.Clear();
-        foreach (var m in page.Items)
-        {
-            Messages.Add(new ChatMessageViewModel(m, m.AuthorId is not null && m.AuthorId == me, Services));
-        }
-
-        _cursor = page.NextCursor;
-        HasOlder = page.HasMore;
-    }
-
-    [RelayCommand]
-    private async Task LoadOlderAsync()
-    {
-        if (_cursor is null)
-        {
-            return;
-        }
-
-        try
-        {
-            var page = await messages.GetMessagesAsync(ConversationId, _cursor);
-            var me = await MyIdAsync(CancellationToken.None);
-            for (var i = page.Items.Count - 1; i >= 0; i--)
-            {
-                var m = page.Items[i];
-                Messages.Insert(0, new ChatMessageViewModel(m, m.AuthorId is not null && m.AuthorId == me, Services));
-            }
-
-            _cursor = page.NextCursor;
-            HasOlder = page.HasMore;
-        }
-        catch (Exception ex) when (ex is RoG.Core.Api.ApiProblemException or HttpRequestException)
-        {
-            // Knopf bleibt – erneut versuchen genügt
-        }
-    }
-
-    private async Task<string?> MyIdAsync(CancellationToken cancellationToken) =>
-        Services.CurrentUser?.Id ?? (await Services.Tokens.GetAsync(cancellationToken))?.UserId;
-}
-
-public sealed class ChatMessageViewModel(ChatMessage message, bool mine, AppServices services)
-{
-    public string Author { get; } = message.AuthorName;
-
-    public bool IsMine { get; } = mine;
-
-    public bool IsOther => !IsMine;
-
-    public string Body { get; } = message.Deleted ? services.T("Messages_Deleted") : message.Body ?? string.Empty;
-
-    public bool IsDeleted { get; } = message.Deleted;
-
-    public string Time { get; } = message.CreatedAt?.ToLocalTime().ToString("g", services.Culture) ?? string.Empty;
-
-    public bool HasQuote { get; } = message.QuoteBody is not null;
-
-    public string Quote { get; } = message.QuoteBody is null ? string.Empty : $"{message.QuoteAuthor}: {message.QuoteBody}";
-
-    public bool HasAttachments { get; } = message.Attachments.Count > 0;
-
-    /// <summary>Anhänge im Spike nur als Namen (Vorschau/Download folgen in Stufe 4).</summary>
-    public string Attachments { get; } = string.Join(", ", message.Attachments.Select(a => a.Name));
-
-    public bool FromMinecraft { get; } = message.FromMinecraft;
-
-    public string MinecraftHint { get; } = services.T("Messages_FromMinecraft");
 }

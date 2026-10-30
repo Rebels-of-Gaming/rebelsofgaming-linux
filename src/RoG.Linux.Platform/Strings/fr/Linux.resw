@@ -37,9 +37,6 @@
   <data name="Linux_Refresh" xml:space="preserve">
     <value>Actualiser (F5)</value>
   </data>
-  <data name="Linux_ChatReadOnly" xml:space="preserve">
-    <value>Répondre n’est pas encore possible dans cet aperçu – ouvre la conversation sur le site.</value>
-  </data>
   <data name="Linux_KeyringStored" xml:space="preserve">
     <value>Ton jeton d’appareil est conservé dans le trousseau du système.</value>
   </data>
@@ -228,5 +225,11 @@
   </data>
   <data name="Linux_AutostartFailed" xml:space="preserve">
     <value>Impossible de modifier le démarrage automatique.</value>
+  </data>
+  <data name="Linux_TextCopied" xml:space="preserve">
+    <value>Texte copié.</value>
+  </data>
+  <data name="Linux_CopyFailed" xml:space="preserve">
+    <value>Copie impossible – le presse-papiers est occupé.</value>
   </data>
 </root>

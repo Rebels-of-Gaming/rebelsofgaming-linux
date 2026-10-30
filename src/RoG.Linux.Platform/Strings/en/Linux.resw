@@ -37,9 +37,6 @@
   <data name="Linux_Refresh" xml:space="preserve">
     <value>Refresh (F5)</value>
   </data>
-  <data name="Linux_ChatReadOnly" xml:space="preserve">
-    <value>Replying is not available in this preview yet – open the conversation on the website.</value>
-  </data>
   <data name="Linux_KeyringStored" xml:space="preserve">
     <value>Your device token is stored in the system keyring.</value>
   </data>
@@ -228,5 +225,11 @@
   </data>
   <data name="Linux_AutostartFailed" xml:space="preserve">
     <value>Could not change the autostart.</value>
+  </data>
+  <data name="Linux_TextCopied" xml:space="preserve">
+    <value>Text copied.</value>
+  </data>
+  <data name="Linux_CopyFailed" xml:space="preserve">
+    <value>Could not copy – the clipboard is busy.</value>
   </data>
 </root>
