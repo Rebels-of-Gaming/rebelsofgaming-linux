@@ -186,6 +186,24 @@ public class ScreenshotTests
     public async Task Servers_narrow() => await Shoot("servers_narrow_480x900", 480, 900, await TestServices.CreateAsync(guest: true), OpenServers);
 
     [AvaloniaFact]
+    public async Task Servers_minecraft() => await Shoot("servers_minecraft_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenServerTab(shell, "minecraft"));
+
+    [AvaloniaFact]
+    public async Task Servers_minecraft_narrow() => await Shoot("servers_minecraft_narrow_480x900", 480, 900, await TestServices.CreateAsync(guest: true), shell => OpenServerTab(shell, "minecraft"));
+
+    [AvaloniaFact]
+    public async Task Servers_teamspeak() => await Shoot("servers_teamspeak_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenServerTab(shell, "teamspeak"));
+
+    [AvaloniaFact]
+    public async Task Servers_teamspeak_narrow() => await Shoot("servers_teamspeak_narrow_480x800", 480, 800, await TestServices.CreateAsync(guest: true), shell => OpenServerTab(shell, "teamspeak"));
+
+    [AvaloniaFact]
+    public async Task Servers_discord() => await Shoot("servers_discord_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenServerTab(shell, "discord"));
+
+    [AvaloniaFact]
+    public async Task Servers_discord_guest() => await Shoot("servers_discord_guest_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), shell => OpenServerTab(shell, "discord"));
+
+    [AvaloniaFact]
     public async Task Calendar_steam_deck() => await Shoot("calendar_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenEvent);
 
     [AvaloniaFact]
@@ -282,6 +300,27 @@ public class ScreenshotTests
         await ViewModelTests.WaitUntil(() => servers.ShowContent);
         await servers.Servers[1].ConnectCommand.ExecuteAsync(null);
         await Settle(300);
+        servers.Pause();
+    }
+
+    private static async Task OpenServerTab(ShellViewModel shell, string tab)
+    {
+        Assert.True(shell.OpenDeepLink(new Uri("rog://servers/" + tab)));
+        var servers = Assert.IsType<ServersViewModel>(shell.CurrentPage);
+        if (tab == "minecraft")
+        {
+            await ViewModelTests.WaitUntil(() => servers.Join.ShowContent && servers.Join.HasPack);
+        }
+        else
+        {
+            await ViewModelTests.WaitUntil(() => servers.Voice.ShowContent);
+            if (tab == "teamspeak")
+            {
+                await servers.Voice.ConnectCommand.ExecuteAsync(null);
+            }
+        }
+
+        await Settle(400);
         servers.Pause();
     }
 

@@ -193,4 +193,16 @@
   <data name="Linux_RealtimeFailed" xml:space="preserve">
     <value>refusé – l’app fonctionne sans mises à jour en direct</value>
   </data>
+  <data name="Linux_VoiceChannelAutomation" xml:space="preserve">
+    <value>Salon {0}</value>
+  </data>
+  <data name="Linux_VoiceMuted" xml:space="preserve">
+    <value>muet</value>
+  </data>
+  <data name="Linux_VoiceAway" xml:space="preserve">
+    <value>absent</value>
+  </data>
+  <data name="Linux_DiscordVoiceGuest" xml:space="preserve">
+    <value>Connecte-toi pour voir qui est en vocal sur Discord.</value>
+  </data>
 </root>

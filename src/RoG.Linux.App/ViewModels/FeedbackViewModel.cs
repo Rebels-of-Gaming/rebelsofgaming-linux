@@ -52,3 +52,9 @@ public interface IRoutablePage
 {
     void Open(string key);
 }
+
+/// <summary>Seite mit eigener Aktualisierung (F5), z. B. je nach offenem Reiter.</summary>
+public interface IRefreshablePage
+{
+    Task RefreshAsync();
+}

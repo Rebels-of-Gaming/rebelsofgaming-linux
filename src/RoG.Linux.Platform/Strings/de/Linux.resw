@@ -193,4 +193,16 @@
   <data name="Linux_RealtimeFailed" xml:space="preserve">
     <value>abgelehnt – die App lädt ohne Live-Aktualisierung</value>
   </data>
+  <data name="Linux_VoiceChannelAutomation" xml:space="preserve">
+    <value>Kanal {0}</value>
+  </data>
+  <data name="Linux_VoiceMuted" xml:space="preserve">
+    <value>stumm</value>
+  </data>
+  <data name="Linux_VoiceAway" xml:space="preserve">
+    <value>abwesend</value>
+  </data>
+  <data name="Linux_DiscordVoiceGuest" xml:space="preserve">
+    <value>Melde dich an, um zu sehen, wer gerade im Discord-Voice ist.</value>
+  </data>
 </root>

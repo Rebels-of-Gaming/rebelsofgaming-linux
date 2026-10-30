@@ -115,6 +115,11 @@ public sealed partial class MainWindow : Window
             this.GetVisualDescendants().OfType<MembersView>().FirstOrDefault()?.FocusSearch();
             e.Handled = true;
         }
+        else if (e.Key == Key.F5 && shell.CurrentPage is IRefreshablePage refreshable)
+        {
+            _ = refreshable.RefreshAsync();
+            e.Handled = true;
+        }
         else if (e.Key == Key.F5 && shell.CurrentPage is LoadableViewModel page)
         {
             _ = page.LoadAsync();

@@ -62,6 +62,10 @@ public sealed class FakeApi : HttpMessageHandler
             ("GET", "/v1/messages/unread-count") => """{"data":{"unread":2}}""",
             ("POST", "/v1/notifications/read-all") => """{"data":{"unread":0}}""",
             ("POST", var p) when p.StartsWith("/v1/notifications/", StringComparison.Ordinal) && p.EndsWith("/read", StringComparison.Ordinal) => """{"data":{"unread":2}}""",
+            ("GET", "/v1/teamspeak/viewer") => FakeData.TeamSpeak,
+            ("GET", "/v1/discord/voice") => request.Headers.Authorization is null ? null : FakeData.DiscordVoice,
+            ("GET", "/v1/minecraft/join") => FakeData.MinecraftJoin,
+            ("GET", "/v1/minecraft/resource-pack") => FakeData.MinecraftResourcePack,
             _ => null,
         };
         return Task.FromResult(body is null

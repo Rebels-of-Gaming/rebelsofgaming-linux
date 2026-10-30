@@ -126,7 +126,7 @@ public class Stage2Tests
     public async Task Servers_connect_launches_known_handlers_and_copies_otherwise()
     {
         using var t = await TestServices.CreateAsync(guest: true);
-        var servers = new ServersViewModel(t.Services);
+        var servers = new ServersViewModel(t.Services, () => { });
         await servers.LoadAsync();
         Assert.Equal(4, servers.Servers.Count);
 
@@ -175,7 +175,7 @@ public class Stage2Tests
     {
         using var t = await TestServices.CreateAsync(guest: true);
         t.Api.FailWith = System.Net.HttpStatusCode.ServiceUnavailable;
-        var servers = new ServersViewModel(t.Services);
+        var servers = new ServersViewModel(t.Services, () => { });
         await servers.LoadAsync();
         Assert.True(servers.HasError);
         t.Api.FailWith = null;

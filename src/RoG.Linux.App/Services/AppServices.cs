@@ -65,8 +65,10 @@ public sealed class AppServices : IDisposable
         IBrowserLauncher browser,
         IDesktopNotifier notifier,
         ImageLoader images,
+        RoG.Core.Features.Servers.IExternalLauncher launcher,
         RoG.Core.Features.Servers.ServerConnector serverConnector)
     {
+        Launcher = launcher;
         SettingsStore = settingsStore;
         Settings = settings;
         _linuxStore = linuxStore;
@@ -151,6 +153,9 @@ public sealed class AppServices : IDisposable
 
     public ImageLoader Images { get; }
 
+    /// <summary>Spiele- und Voice-Links (<c>steam://</c>, <c>ts3server://</c> …) über <c>xdg-open</c>.</summary>
+    public RoG.Core.Features.Servers.IExternalLauncher Launcher { get; }
+
     /// <summary>„Verbinden“ und „Adresse kopieren“ für Gameserver (Kern) mit <c>xdg-open</c> und Zwischenablage.</summary>
     public RoG.Core.Features.Servers.ServerConnector ServerConnector { get; }
 
@@ -202,7 +207,8 @@ public sealed class AppServices : IDisposable
 
         var images = new ImageLoader(options.ImageHandler);
         var xdg = new XdgLauncher();
-        var connector = new RoG.Core.Features.Servers.ServerConnector(options.Launcher ?? xdg, options.Clipboard ?? new AvaloniaClipboard());
+        var launcher = options.Launcher ?? xdg;
+        var connector = new RoG.Core.Features.Servers.ServerConnector(launcher, options.Clipboard ?? new AvaloniaClipboard());
         return new AppServices(
             settingsStore,
             settings,
@@ -215,6 +221,7 @@ public sealed class AppServices : IDisposable
             options.Browser ?? xdg,
             options.Notifier ?? new FreedesktopNotifier(),
             images,
+            launcher,
             connector);
     }
 

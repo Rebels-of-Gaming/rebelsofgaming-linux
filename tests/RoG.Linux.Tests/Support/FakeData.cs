@@ -318,4 +318,38 @@ public static class FakeData
              "last_message":{"id":"01L{{{id}}}","author":{"id":"01X","slug":"x","name":"{{{author}}}"},"body":"{{{preview}}}","deleted":false,"attachments":0,"created_at":"{{{at}}}"}}
             """;
     }
+
+    public static string TeamSpeak => """
+        {"data":{"online":true,"server":{"name":"Rebels of Gaming","clients_online":5,"max_clients":32,"address":"ts.example.test"},"channels":[
+          {"id":1,"name":"Lobby","spacer":false,"default":true,"clients":[
+            {"nickname":"Wahke","away":false,"muted":false,"member":{"name":"Wahke","slug":"wahke"}},
+            {"nickname":"Nyx | AFK","away":true,"muted":false,"member":{"name":"Nyx","slug":"nyx"}}],"children":[]},
+          {"id":2,"name":"RoG ET","spacer":true,"default":false,"clients":[],"children":[
+            {"id":3,"name":"Training","spacer":false,"default":false,"clients":[
+              {"nickname":"Kaito","away":false,"muted":true,"member":{"name":"Kaito","slug":"kaito"}},
+              {"nickname":"Gast_42","away":false,"muted":false,"member":null}],"children":[]},
+            {"id":4,"name":"Clanwar","spacer":false,"default":false,"clients":[],"children":[]}]},
+          {"id":5,"name":"[cspacer]RoG CS2","spacer":true,"default":false,"clients":[],"children":[
+            {"id":6,"name":"Lobby","spacer":false,"default":false,"clients":[
+              {"nickname":"Sera","away":false,"muted":false,"member":{"name":"Sera","slug":"sera"}}],"children":[
+              {"id":7,"name":"Taktik","spacer":false,"default":false,"clients":[],"children":[]}]}]},
+          {"id":9,"name":"[*spacer1]---","spacer":true,"default":false,"clients":[],"children":[]},
+          {"id":8,"name":"AFK","spacer":false,"default":false,"clients":[],"children":[]}
+        ]}}
+        """;
+
+    public static string DiscordVoice => $$$"""
+        {"data":[
+          {"channel":"Gaming 1","private":false,"members":[{"name":"Wahke","avatar":"{{{Cdn}}}/avatars/wahke.png"},{"name":"Kaito","avatar":"{{{Cdn}}}/avatars/kaito.png"}]},
+          {"channel":"Squad-Leitung","private":true,"members":[{"name":"Sera","avatar":null}]}
+        ]}
+        """;
+
+    public static string MinecraftJoin => """
+        {"data":{"java":{"address":"mc.example.test","port":25565},"bedrock":{"address":"mc.example.test","port":19132},"console":{"enabled":true,"gamertag":"RoG6328","hint":"Der Konsolen-Beitritt kann am Wochenende kurz ausfallen."}}}
+        """;
+
+    public static string MinecraftResourcePack => $$$"""
+        {"data":{"url":"{{{Cdn}}}/minecraft/pack-3f2a.zip","latest_url":"{{{Cdn}}}/minecraft/pack.zip","sha1":"3f2a9c0e5b7d1a4c8e6f0b2d4a6c8e0f1a3b5c7d","size":7340032,"updated_at":"2026-10-25T12:00:00Z"}}
+        """;
 }

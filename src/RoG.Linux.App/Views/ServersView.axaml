@@ -5,28 +5,224 @@
              xmlns:l="using:RoG.Linux.App.Localization"
              x:Class="RoG.Linux.App.Views.ServersView"
              x:DataType="vm:ServersViewModel">
+  <!-- Server wie ServersPage der Windows-App: Reiter Gameserver · Minecraft · TeamSpeak · Discord-Voice -->
+  <UserControl.DataTemplates>
+    <!-- Zeile im Voice-Baum: Überschrift (Trenner), Kanal oder Person -->
+    <DataTemplate x:DataType="vm:VoiceRow">
+      <Panel Margin="{Binding Indent}" AutomationProperties.Name="{Binding AutomationName}" MinHeight="28">
+        <TextBlock Classes="kicker" Text="{Binding Text}" IsVisible="{Binding IsSection}" VerticalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsChannel}" VerticalAlignment="Center">
+          <PathIcon Data="{StaticResource IconSpeaker}" Width="16" Height="16" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding !IsLocked}" />
+          <PathIcon Data="{StaticResource IconLock}" Width="16" Height="16" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding IsLocked}" />
+          <TextBlock Classes="muted" Text="{Binding Text}" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsPerson}" VerticalAlignment="Center">
+          <Panel Width="24" Height="24">
+            <c:AvatarView Size="24" Source="{Binding Avatar}" DisplayName="{Binding Text}" IsVisible="{Binding Avatar, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            <Panel IsVisible="{Binding Avatar, Converter={x:Static ObjectConverters.IsNull}}">
+              <PathIcon Data="{StaticResource IconMicOff}" Width="16" Height="16" Foreground="{DynamicResource RoGRedBrush}" IsVisible="{Binding IsMuted}" />
+              <PathIcon Data="{StaticResource IconAway}" Width="16" Height="16" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding ShowAwayIcon}" />
+              <PathIcon Data="{StaticResource IconPerson}" Width="16" Height="16" Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding ShowActiveIcon}" />
+            </Panel>
+          </Panel>
+          <TextBlock Classes="body" Classes.muted="{Binding IsAway}" Text="{Binding Text}" VerticalAlignment="Center" />
+          <TextBlock Classes="body" Text="{Binding Detail}" IsVisible="{Binding HasDetail}" Foreground="{DynamicResource RoGGoldBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+      </Panel>
+    </DataTemplate>
+  </UserControl.DataTemplates>
+
   <DockPanel>
-    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,12">
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,8">
       <Grid ColumnDefinitions="*,Auto">
         <TextBlock Classes="display" Text="{l:T ServersPage_Title.Text}" />
-        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCurrentCommand}"
                 ToolTip.Tip="{l:T ServersPage_Refresh.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T Linux_Refresh}">
           <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
         </Button>
       </Grid>
-      <TextBlock Classes="muted" Text="{l:T ServersPage_Intro.Text}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <!-- Reiter -->
+      <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1">
+        <WrapPanel Orientation="Horizontal">
+          <ToggleButton Classes="segment" IsChecked="{Binding IsGameTab}" Content="{l:T ServersPage_TabGame.Text, Upper=True}" />
+          <ToggleButton Classes="segment" IsChecked="{Binding IsMinecraftTab}" Content="{l:T ServersPage_TabMinecraft.Text, Upper=True}" />
+          <ToggleButton Classes="segment" IsChecked="{Binding IsTeamSpeakTab}" Content="{l:T ServersPage_TabTeamSpeak.Text, Upper=True}" />
+          <ToggleButton Classes="segment" IsChecked="{Binding IsDiscordTab}" Content="{l:T ServersPage_TabDiscord.Text, Upper=True}" />
+        </WrapPanel>
+      </Border>
+      <TextBlock Classes="muted" Text="{l:T ServersPage_Intro.Text}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left"
+                 IsVisible="{Binding IsGameTab}" />
       <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <c:FeedbackBar DataContext="{Binding Voice.Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
     </StackPanel>
+
     <Panel>
-      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
-                   EmptyText="{l:T ServersPage_Empty.Text}" RetryCommand="{Binding RefreshCommand}" />
-      <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
-        <ItemsControl ItemsSource="{Binding Servers}" Margin="24,4,24,32" AutomationProperties.Name="{l:T ServersPage_Title.Text}">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="320" Spacing="16" /></ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-        </ItemsControl>
-      </ScrollViewer>
+      <!-- Gameserver -->
+      <Panel IsVisible="{Binding IsGameTab}">
+        <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                     EmptyText="{l:T ServersPage_Empty.Text}" RetryCommand="{Binding RefreshCommand}" />
+        <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Servers}" Margin="24,4,24,32" AutomationProperties.Name="{l:T ServersPage_Title.Text}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="320" Spacing="16" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+          </ItemsControl>
+        </ScrollViewer>
+      </Panel>
+
+      <!-- Minecraft: So kommst du auf den Server -->
+      <Panel IsVisible="{Binding IsMinecraftTab}">
+        <Panel DataContext="{Binding Join}" x:DataType="vm:MinecraftJoinViewModel">
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T ServersPage_McState.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+          <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24,8,24,32" Spacing="16" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="title" Text="{l:T McJoin_Title.Text}" />
+                <TextBlock Classes="muted" Text="{l:T McJoin_Lead.Text}" />
+              </StackPanel>
+
+              <!-- Java -->
+              <Border Classes="card">
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="section" Text="{l:T McJoin_JavaTitle.Text}" />
+                  <TextBlock Classes="muted" Text="{l:T McJoin_JavaPlatforms.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_JavaStep1.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_JavaStep2.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_JavaStep3.Text}" />
+                  <WrapPanel Orientation="Horizontal">
+                    <TextBlock Classes="muted" Text="{l:T McJoin_Address.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <SelectableTextBlock Classes="body strong" Text="{Binding JavaAddress}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <Button Classes="secondary" Command="{Binding CopyJavaCommand}" Content="{l:T McJoin_CopyJava.Content}"
+                            AutomationProperties.Name="{l:T McJoin_CopyJava.AutomationProperties.Name}" />
+                  </WrapPanel>
+                  <TextBlock Classes="muted small" Text="{l:T McJoin_DefaultPort.Text}" IsVisible="{Binding ShowDefaultPortNote}" />
+                </StackPanel>
+              </Border>
+
+              <!-- Ressourcenpaket (Java) -->
+              <Border Classes="card" IsVisible="{Binding HasPack}">
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="section" Text="{l:T McJoin_PackTitle.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_PackText.Text}" />
+                  <TextBlock Classes="muted" Text="{Binding PackInfo}" />
+                  <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding DownloadPackCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16" />
+                      <TextBlock Text="{l:T McJoin_PackDownload.Content}" />
+                    </StackPanel>
+                  </Button>
+                </StackPanel>
+              </Border>
+
+              <!-- Bedrock -->
+              <Border Classes="card">
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="section" Text="{l:T McJoin_BedrockTitle.Text}" />
+                  <TextBlock Classes="muted" Text="{l:T McJoin_BedrockPlatforms.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep1.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep2.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep3.Text}" />
+                  <WrapPanel Orientation="Horizontal">
+                    <TextBlock Classes="muted" Text="{l:T McJoin_Address.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <SelectableTextBlock Classes="body strong" Text="{Binding BedrockAddress}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <Button Classes="secondary" Command="{Binding CopyBedrockAddressCommand}" Content="{l:T McJoin_CopyBedrockAddress.Content}"
+                            AutomationProperties.Name="{l:T McJoin_CopyBedrockAddress.AutomationProperties.Name}" />
+                  </WrapPanel>
+                  <WrapPanel Orientation="Horizontal">
+                    <TextBlock Classes="muted" Text="{l:T McJoin_Port.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <SelectableTextBlock Classes="body strong" Text="{Binding BedrockPort}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <Button Classes="secondary" Command="{Binding CopyBedrockPortCommand}" Content="{l:T McJoin_CopyBedrockPort.Content}"
+                            AutomationProperties.Name="{l:T McJoin_CopyBedrockPort.AutomationProperties.Name}" />
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+
+              <!-- Konsole -->
+              <Border Classes="card" IsVisible="{Binding ShowConsole}">
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="section" Text="{l:T McJoin_ConsoleTitle.Text}" />
+                  <TextBlock Classes="muted" Text="{l:T McJoin_ConsolePlatforms.Text}" />
+                  <Border Classes="hint" IsVisible="{Binding HasHint}">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Margin="0,0,10,0" Foreground="{DynamicResource RoGGoldBrush}" VerticalAlignment="Top" />
+                      <TextBlock Grid.Column="1" Classes="body" Text="{Binding Hint}" />
+                    </Grid>
+                  </Border>
+                  <TextBlock Classes="body" Text="{l:T McJoin_ConsoleIntro.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep1.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep2.Text}" />
+                  <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep3.Text}" />
+                  <WrapPanel Orientation="Horizontal">
+                    <TextBlock Classes="muted" Text="{l:T McJoin_Gamertag.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <SelectableTextBlock Classes="body strong" Text="{Binding Gamertag}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <Button Classes="secondary" Command="{Binding CopyGamertagCommand}" Content="{l:T McJoin_CopyGamertag.Content}"
+                            AutomationProperties.Name="{l:T McJoin_CopyGamertag.AutomationProperties.Name}" />
+                  </WrapPanel>
+                  <TextBlock Classes="muted" Text="{l:T McJoin_ConsoleTrouble.Text}" />
+                </StackPanel>
+              </Border>
+
+              <TextBlock Classes="muted" Text="{l:T McJoin_LinkTip.Text}" />
+              <WrapPanel Orientation="Horizontal">
+                <Button Classes="primary" Margin="0,0,12,8" Command="{Binding OpenMapCommand}" Content="{l:T McJoin_Map.Content}" />
+                <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding OpenLeaderboardsCommand}" Content="{l:T McJoin_Leaderboards.Content}" />
+                <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding LinkAccountCommand}" Content="{l:T McJoin_LinkAccount.Content}"
+                        IsVisible="{Binding IsSignedIn}" />
+              </WrapPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </Panel>
+      </Panel>
+
+      <!-- TeamSpeak -->
+      <Panel IsVisible="{Binding IsTeamSpeakTab}">
+        <DockPanel DataContext="{Binding Voice}" x:DataType="vm:VoiceViewModel">
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="24,8,24,8" IsVisible="{Binding ShowContent}">
+            <StackPanel Spacing="2">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Ellipse Width="10" Height="10" Fill="{DynamicResource RoGGreenBrush}" IsVisible="{Binding IsTeamSpeakOnline}" VerticalAlignment="Center" />
+                <Ellipse Width="10" Height="10" Stroke="{DynamicResource RoGMutedBrush}" StrokeThickness="2" IsVisible="{Binding !IsTeamSpeakOnline}" VerticalAlignment="Center" />
+                <TextBlock Classes="title" Text="{Binding TeamSpeakTitle}" />
+              </StackPanel>
+              <TextBlock Classes="muted" Text="{Binding TeamSpeakStatus}" />
+              <ToggleSwitch IsChecked="{Binding ShowEmptyChannels}" Content="{l:T ServersPage_ShowEmptyChannels.Header}"
+                            OnContent="" OffContent="" AutomationProperties.Name="{l:T ServersPage_ShowEmptyChannels.Header}" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="primary" VerticalAlignment="Top" Command="{Binding ConnectCommand}" IsEnabled="{Binding CanConnect}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconHeadset}" Width="16" Height="16" />
+                <TextBlock Text="{l:T ServersPage_TsConnect.Content}" />
+              </StackPanel>
+            </Button>
+          </Grid>
+          <Panel>
+            <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding ShowTeamSpeakEmpty}"
+                         EmptyText="{l:T ServersPage_TsState.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+            <ScrollViewer IsVisible="{Binding HasTeamSpeakRows}" VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding TeamSpeakRows}" Margin="24,0,24,32" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left"
+                            AutomationProperties.Name="{l:T ServersPage_TsList.AutomationProperties.Name}" />
+            </ScrollViewer>
+          </Panel>
+        </DockPanel>
+      </Panel>
+
+      <!-- Discord-Voice -->
+      <Panel IsVisible="{Binding IsDiscordTab}">
+        <Panel DataContext="{Binding Voice}" x:DataType="vm:VoiceViewModel">
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding ShowDiscordEmpty}"
+                       EmptyText="{l:T ServersPage_DiscordState.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+          <StackPanel Spacing="16" Margin="24" IsVisible="{Binding DiscordNeedsLogin}" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <PathIcon Data="{StaticResource IconHeadset}" Width="48" Height="48" Foreground="{DynamicResource RoGMutedBrush}" />
+            <TextBlock Classes="muted" Text="{l:T Linux_DiscordVoiceGuest}" TextAlignment="Center" MaxWidth="420" />
+            <Button Classes="primary" HorizontalAlignment="Center" Command="{Binding SignInCommand}" Content="{l:T Linux_SignIn}" />
+          </StackPanel>
+          <ScrollViewer IsVisible="{Binding ShowDiscordList}" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding DiscordRows}" Margin="24,8,24,32" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left"
+                          AutomationProperties.Name="{l:T ServersPage_DiscordList.AutomationProperties.Name}" />
+          </ScrollViewer>
+        </Panel>
+      </Panel>
     </Panel>
   </DockPanel>
 </UserControl>

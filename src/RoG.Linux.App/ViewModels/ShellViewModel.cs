@@ -76,6 +76,11 @@ public sealed partial class ShellViewModel : ObservableObject
             {
                 _ = home.LoadAsync(silent: true);
             }
+
+            if (CurrentPage is ServersViewModel servers)
+            {
+                servers.OnLiveChanged();
+            }
         };
     }
 
@@ -229,6 +234,11 @@ public sealed partial class ShellViewModel : ObservableObject
         }
 
         CurrentPage = page;
+        if (page is ServersViewModel resumed)
+        {
+            resumed.Resume();
+        }
+
         if (page is LoadableViewModel loadable && !loadable.ShowContent && !loadable.IsLoading)
         {
             _ = loadable.LoadAsync();
@@ -361,7 +371,7 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_News" => new NewsViewModel(_services),
         "Nav_Squads" => new SquadsViewModel(_services),
         "Nav_Members" => new MembersViewModel(_services),
-        "Nav_Servers" => new ServersViewModel(_services),
+        "Nav_Servers" => new ServersViewModel(_services, ShowLogin),
         "Nav_Calendar" => new EventsViewModel(_services),
         "Nav_Info" => new InfoViewModel(_services),
         "Nav_Search" => new SearchViewModel(_services),

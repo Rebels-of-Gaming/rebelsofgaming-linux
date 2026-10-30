@@ -9,23 +9,148 @@ using RoG.Linux.App.Services;
 
 namespace RoG.Linux.App.ViewModels;
 
+/// <summary>Reiter der Server-Seite (wie die Windows-App).</summary>
+public enum ServersTab
+{
+    Game,
+    Minecraft,
+    TeamSpeak,
+    Discord,
+}
+
 /// <summary>
-/// Gameserver mit Live-Stand (auch im Gastmodus), „Verbinden“ über <c>xdg-open</c> (<c>steam://</c>, <c>et://</c> …,
-/// sonst Adresse kopieren) und „Adresse kopieren“. Lädt jede Minute still nach (der Query-Worker der Website fragt
-/// minütlich ab); mit Echtzeit kommen Statusänderungen sofort (<see cref="Apply"/>).
+/// Server-Seite mit Reitern wie in der Windows-App: <b>Gameserver</b> mit Live-Stand (auch im Gastmodus), „Verbinden“
+/// über <c>xdg-open</c> (<c>steam://</c>, <c>et://</c> …, sonst Adresse kopieren) und „Adresse kopieren“;
+/// <b>Minecraft</b> (Beitritts-Anleitung, <see cref="MinecraftJoinViewModel"/>); <b>TeamSpeak</b> und
+/// <b>Discord-Voice</b> (wer ist wo, <see cref="VoiceViewModel"/>). Gameserver laden jede Minute still nach, Voice alle
+/// 30 Sekunden und bei <c>.live.updated</c> – jeweils nur, solange der Reiter offen ist.
 /// </summary>
-public sealed partial class ServersViewModel : LoadableViewModel, IRoutablePage
+public sealed partial class ServersViewModel : LoadableViewModel, IRoutablePage, IRefreshablePage
 {
     private readonly ServerService _service;
     private readonly DispatcherTimer _timer;
+    private readonly DispatcherTimer _voiceTimer;
     private string? _highlight;
+    private bool _active = true;
 
-    public ServersViewModel(AppServices services)
+    public ServersViewModel(AppServices services, Action requestSignIn)
         : base(services)
     {
         _service = new ServerService(services.Api.Client);
+        Join = new MinecraftJoinViewModel(services, Feedback);
+        Voice = new VoiceViewModel(services, requestSignIn);
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
         _timer.Tick += (_, _) => _ = LoadAsync(silent: true);
+        _voiceTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        _voiceTimer.Tick += (_, _) => _ = Voice.LoadAsync(silent: true);
+    }
+
+    public MinecraftJoinViewModel Join { get; }
+
+    public VoiceViewModel Voice { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGameTab), nameof(IsMinecraftTab), nameof(IsTeamSpeakTab), nameof(IsDiscordTab))]
+    public partial ServersTab Tab { get; set; }
+
+    public bool IsGameTab
+    {
+        get => Tab == ServersTab.Game;
+        set => SelectTab(value, ServersTab.Game);
+    }
+
+    public bool IsMinecraftTab
+    {
+        get => Tab == ServersTab.Minecraft;
+        set => SelectTab(value, ServersTab.Minecraft);
+    }
+
+    public bool IsTeamSpeakTab
+    {
+        get => Tab == ServersTab.TeamSpeak;
+        set => SelectTab(value, ServersTab.TeamSpeak);
+    }
+
+    public bool IsDiscordTab
+    {
+        get => Tab == ServersTab.Discord;
+        set => SelectTab(value, ServersTab.Discord);
+    }
+
+    /// <summary>ToggleButtons: nur das Einschalten wählt einen Reiter (Ausschalten des aktiven bleibt wirkungslos).</summary>
+    private void SelectTab(bool value, ServersTab tab)
+    {
+        if (value)
+        {
+            Tab = tab;
+        }
+        else if (Tab == tab)
+        {
+            OnPropertyChanged(tab switch
+            {
+                ServersTab.Game => nameof(IsGameTab),
+                ServersTab.Minecraft => nameof(IsMinecraftTab),
+                ServersTab.TeamSpeak => nameof(IsTeamSpeakTab),
+                _ => nameof(IsDiscordTab),
+            });
+        }
+    }
+
+    partial void OnTabChanged(ServersTab value)
+    {
+        Feedback.Close();
+        Voice.Feedback.Close();
+        UpdateTimers();
+        switch (value)
+        {
+            case ServersTab.Minecraft when !Join.ShowContent && !Join.IsLoading:
+                _ = Join.LoadAsync();
+                break;
+            case ServersTab.TeamSpeak or ServersTab.Discord:
+                _ = Voice.LoadAsync(silent: Voice.ShowContent);
+                break;
+        }
+    }
+
+    private void UpdateTimers()
+    {
+        if (_active && Tab == ServersTab.Game && Servers.Count > 0)
+        {
+            _timer.Start();
+        }
+        else
+        {
+            _timer.Stop();
+        }
+
+        if (_active && Tab is ServersTab.TeamSpeak or ServersTab.Discord)
+        {
+            _voiceTimer.Start();
+        }
+        else
+        {
+            _voiceTimer.Stop();
+        }
+    }
+
+    /// <summary>F5 bzw. Aktualisieren-Knopf: den offenen Reiter neu laden.</summary>
+    public Task RefreshAsync() => Tab switch
+    {
+        ServersTab.Minecraft => Join.LoadAsync(),
+        ServersTab.TeamSpeak or ServersTab.Discord => Voice.LoadAsync(),
+        _ => LoadAsync(),
+    };
+
+    [RelayCommand]
+    private Task RefreshCurrentAsync() => RefreshAsync();
+
+    /// <summary><c>.live.updated</c> (Voice-Zahlen ändern sich): offenen Voice-Reiter still nachladen.</summary>
+    public void OnLiveChanged()
+    {
+        if (_active && Tab is ServersTab.TeamSpeak or ServersTab.Discord && Voice.ShowContent)
+        {
+            _ = Voice.LoadAsync(silent: true);
+        }
     }
 
     public ObservableCollection<ServerItemViewModel> Servers { get; } = [];
@@ -43,12 +168,30 @@ public sealed partial class ServersViewModel : LoadableViewModel, IRoutablePage
             Servers.Add(new ServerItemViewModel(server, Services, Feedback) { IsHighlighted = server.Slug == _highlight });
         }
 
-        _timer.Start();
+        UpdateTimers();
     }
 
-    /// <summary><c>rog://servers/{slug}</c>: Server hervorheben (Liste zeigt alle).</summary>
+    /// <summary>
+    /// <c>rog://servers/{slug}</c>: Server hervorheben (Liste zeigt alle); <c>minecraft</c>, <c>teamspeak</c> und
+    /// <c>discord</c> öffnen den Reiter.
+    /// </summary>
     public void Open(string key)
     {
+        ArgumentNullException.ThrowIfNull(key);
+        switch (key.ToLowerInvariant())
+        {
+            case RoG.Core.Navigation.AppRoute.MinecraftKey:
+                Tab = ServersTab.Minecraft;
+                return;
+            case "teamspeak" or "ts":
+                Tab = ServersTab.TeamSpeak;
+                return;
+            case "discord" or "voice":
+                Tab = ServersTab.Discord;
+                return;
+        }
+
+        Tab = ServersTab.Game;
         _highlight = key;
         foreach (var s in Servers)
         {
@@ -72,7 +215,18 @@ public sealed partial class ServersViewModel : LoadableViewModel, IRoutablePage
     }
 
     /// <summary>Seite verlassen: kein Nachladen im Hintergrund.</summary>
-    public void Pause() => _timer.Stop();
+    public void Pause()
+    {
+        _active = false;
+        UpdateTimers();
+    }
+
+    /// <summary>Seite wieder geöffnet: Nachladen des offenen Reiters weiter.</summary>
+    public void Resume()
+    {
+        _active = true;
+        UpdateTimers();
+    }
 }
 
 /// <summary>Eine Server-Karte (Server-Seite, Squad-Detail, Termin): Status, Spieler, Map, Verbinden, Kopieren.</summary>
