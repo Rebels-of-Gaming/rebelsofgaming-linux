@@ -581,6 +581,16 @@ docs/                       LINUX-BAUPLAN.md
   Forum der Website (`bugtracker` = Forum; sobald ein eigener Bereich „Linux-App“ existiert, dessen Adresse eintragen).
 - **F9 – Datei-Upload auf Gameserver – entschieden (30.10.2026):** die Website bekommt einen Upload-Endpunkt mit festen
   Zielordnern je Spiel und Größenlimit (Website-Repo); Windows- und Linux-App ziehen danach nach.
+
+- ~~F8 – Screenshot-Kürzel~~ **entschieden (30.10.2026): ja, Knopf ohne globales Kürzel.** Umgesetzt: „Bildschirmfoto
+  hochladen“ auf der Upload-Seite über `org.freedesktop.portal.Screenshot` (interaktiv – der Desktop fragt nach
+  Bereich/Fenster), danach normaler Upload. Kein GlobalShortcuts-Portal.
+
+- ~~F7 – Emoji-Schrift mitliefern?~~ **entschieden (30.10.2026): nein**, vorerst keine eigene Emoji-Schrift; erst wenn
+  Mitglieder fehlende Zeichen melden (L34 bleibt).
+
+- ~~F6 – Reverb und Apps~~ **erledigt** (Website v0.53.1, Commit 606f1c40): Reverb nimmt Verbindungen ohne und mit
+  Origin an. Die Linux-App sendet weiter die Website ihrer Umgebung als Origin (L22).
 - **F5 – Wayland-Test:** Bitte die App einmal unter einer Wayland-Sitzung (GNOME oder KDE, gern auch Steam Deck im
   Desktopmodus) starten und unter Einstellungen → Über die App „Anzeige: Wayland“ prüfen; bei Problemen hilft
   `--x11` sofort.
