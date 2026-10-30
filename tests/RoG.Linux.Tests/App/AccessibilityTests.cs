@@ -328,11 +328,18 @@ public partial class AccessibilityTests
         Assert.NotNull(last.FocusAdorner);
 
         // … und er ist wirklich zu sehen: am linken Rand des Elements (1 px innen) liegt die Rahmenfarbe
-        await ScreenshotTests.Settle(50);
+        last.BringIntoView();
+        await ScreenshotTests.Settle(150);
         AvaloniaHeadlessPlatform.ForceRenderTimerTick();
         using var frame = window.CaptureRenderedFrame()!;
-        var edge = last.TranslatePoint(new Point(1, last.Bounds.Height / 2), window)!.Value;
-        var pixel = PixelAt(frame, (int)edge.X, (int)edge.Y);
+        // Schalter: Kopfzeile darüber gehört zum Element, der Rahmen liegt um den Schalter selbst
+        var target = last is ToggleSwitch && last.GetVisualDescendants().OfType<Control>().FirstOrDefault(c => c.Name == "SwitchKnobBounds") is { } knob
+            ? knob
+            : last;
+        var edge = target.TranslatePoint(new Point(1, target.Bounds.Height / 2), window)!.Value;
+        // ein paar Pixel Spielraum (Kantenglättung, abgerundete Ecken wie beim Schalter)
+        var pixel = Enumerable.Range(-1, 5).Select(dx => PixelAt(frame, (int)edge.X + dx, (int)edge.Y))
+            .OrderByDescending(c => Math.Min(c.R, Math.Min(c.G, c.B))).First();
         Assert.True(pixel.R > 200 && pixel.G > 200 && pixel.B > 200, $"{key}: Fokusrahmen an {Describe(last)} nicht sichtbar ({pixel})");
         window.Close();
     }
