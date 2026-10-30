@@ -6,7 +6,23 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+
+### Hinzugefügt (Stufe 6)
+
+- **Abstimmungen** in der App: Bewerber, Antworten, Trial-Aufgaben, Beteiligung mit Quorum; Dafür, Dagegen oder Enthaltung
+- **Bewerben** direkt auf der Squad-Seite mit allen Fragen des Squads, Regelwerken und Probezeit
+- **Regeln und Rechtstexte bestätigen**: Knopf unter dem Text; was noch bestätigt werden muss, zeigt ein Hinweis über jeder Seite
+- **Matches**: Ergebnisse mit Maps, Line-up und Bericht, Hall of Fame, Statistiken mit Ranglisten und Wochen-Awards, Turniere
+- **Minecraft-Bestenlisten** (auch aus dem Minecraft-Reiter der Server)
+- **Freunde**: Anfragen, hinzufügen, entfernen, Nachricht schreiben, live aktualisiert; „Als Freund hinzufügen“ im Profil
+- **Mitgliederkarte** in eigenem Fenster (nur Stadt-Genauigkeit und nur, wer zugestimmt hat; Kacheln nur über die Plattform)
+- **Konto**: Meine Bewerbungen (Verlauf, Trial-Aufgaben, Nachrichten, Zurückziehen), Abwesenheit melden, Minecraft-Konten und Rebel-Coins, Geräte abmelden, Datenexport herunterladen, Konto löschen
+- **Einstellungen → Benachrichtigungen**: je Ereignis Glocke, E-Mail und Discord, Sammel-Mail und Ruhezeit
+
+### Behoben (Stufe 6)
+
+- Start ohne Absturz, wenn die Adresse des Session-Bus kaputt oder `XDG_RUNTIME_DIR` sehr lang ist
 
 ### Hinzugefügt (Stufe 5)
 

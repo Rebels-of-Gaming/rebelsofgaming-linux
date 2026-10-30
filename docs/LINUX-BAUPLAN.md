@@ -5,6 +5,9 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
+**Stufe 6 (Clan-Prozesse, 30.10.2026) – erledigt** (Votes, Bewerben, Regeln/Rechtstexte bestätigen mit Hinweisbalken,
+Matches/Hall of Fame/Stats/Turniere, Minecraft-Bestenlisten, Freunde, Mitgliederkarte, Konto: Bewerbungen, Abwesenheit,
+Minecraft + Rebel-Coins, Geräte, Datenexport, Konto löschen; Benachrichtigungen je Kanal; dazu „Bildschirmfoto hochladen“, F8).
 **Stufe 5 (Medien, 30.10.2026) – erledigt** (Uploads mit Drag & Drop, Dateiauswahl über das Portal und Strg+V,
 Kurzlinks, Galerie mit Großansicht und Einreichen, Downloads mit Prüfsumme, Profil bearbeiten).
 **Stufe 4 (Kommunikation) – erledigt** (Direktnachrichten schreiben mit Zitat, live, Anhängen und
@@ -60,9 +63,17 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Downloads** (Version, Spiel, Größe, Zähler, Änderungen; Laden mit Fortschritt in den Downloads-Ordner nach xdg-user-dirs, SHA-256-Prüfung, „Im Ordner zeigen“ über `org.freedesktop.FileManager1`, sonst `xdg-open`) | steht |
 | **Bildschirmfoto hochladen** (F8: Knopf auf der Upload-Seite, Screenshot-Portal, interaktiv; ohne Portal Hinweis auf Strg+V) | steht; Protokoll-Test gegen privaten Bus (Aufnahme, Abbruch, nur `file://`) |
 | **Profil bearbeiten** (Konto: Motto, Über mich, Stadt/Land, Einwilligungen Karte/Online-Status/Hall of Fame, Avatar/Banner mit Größengrenze der Plattform) | steht |
+| **Votes** (eigene Seite ohne Eintrag in der Seitenleiste: Bewerber → Squad, Alter, Ende, Beteiligung mit Quorum, Antworten, Trial-Aufgaben, eigene Stimme, Dafür/Dagegen/Enthaltung; Startseite und `rog://votes` öffnen sie) | steht |
+| **Bewerben** auf der Squad-Seite (Formular aus `GET /v1/squads/{slug}/application-form`: Warteliste, Geburtsdatum mit Mindestalter, Fragen je Typ, Regelwerke bestätigen mit „lesen“ → Info, Probezeit, Werber; API-Fehler im Formular) | steht |
+| **Regeln und Rechtstexte bestätigen** (Knopf unter dem Text auf der Info-Seite; offene Pflicht-Bestätigungen als nicht wegklickbarer Hinweisbalken über jeder Seite mit „Jetzt lesen“; Fehler `rules_acceptance_required` mit eigenem Text) | steht |
+| **Matches** (Reiter Matches mit Liste-Detail: Ergebnis, Maps, Line-up, Links, Bericht · Hall of Fame · Statistiken mit Spiel/Zeitraum/Wertung, eigener Platz, Wochen-Awards · Turniere; `rog://matches/{id}` nativ) und **Minecraft-Bestenlisten** (`rog://leaderboards`) | steht; gegen die Produktion geprüft (keine Matches → Leerzustand, Bestenliste) |
+| **Freunde** (Freunde mit Status, Anfragen annehmen/ablehnen/zurückziehen, hinzufügen per Name oder Profil-Link, entfernen mit Rückfrage im Inhalt, „Nachricht“, live über `.friends.changed`; „Als Freund hinzufügen“ im Profil) | steht |
+| **Mitgliederkarte** (eigenes Fenster über „Karte“ auf der Mitglieder-Seite, nur angemeldet: Kacheln nur über den Kachel-Proxy der Plattform (`/v1/map/tiles`, signiert, ohne Token), Ziehen/Mausrad/Tastatur, Zusammenfassen naher Orte, Namen → Profil, © OpenStreetMap) | steht |
+| **Konto** (aufklappbar, lädt beim Öffnen): Meine Bewerbungen (Schritte, Verlauf, Trial-Aufgaben, Nachrichten, Zurückziehen) · Abwesenheit (melden, löschen) · Minecraft (Code prüfen → „bist das du?“, verknüpfen, trennen, Website-Nachrichten, Rebel-Coins, Sichtbarkeit; `rog://account/minecraft?code=…` füllt nur vor) · Geräte & Daten (Geräte abmelden, Datenexport in den Downloads-Ordner, Konto löschen zweistufig mit Austritt aus dem Clan) | steht |
+| **Benachrichtigungen je Kanal** (Einstellungen, angemeldet: Glocke/E-Mail/Discord je Ereignis, Sammel-Mail, Ruhezeit) | steht |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -127,6 +138,12 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
   Neu (Stufe 2): **`SquadInternalService`** für `GET /v1/squads/{squad}/intern` (Forum, Squad-Gruppe, Termine, Downloads,
   Alben, `missing_scopes`) – liegt bis dahin in `src/RoG.Linux.App/Services/SquadInternalService.cs`; die Windows-App
   zeigt „Intern“ noch nicht. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
+  Neu (Stufe 6): `MatchService.GetAsync(id)` mit Line-up/Bericht/Web-Adresse (liegt in `MatchDetailService`), ein
+  Dienst für offene Bestätigungen (Regeln + Rechtstexte) und `InfoService.AcceptLegalAsync`/`CanAccept` für Rechtstexte
+  (liegt in `AcceptanceViewModel`), `VoteService` Ja/Nein als bool, `MemberMapService` prüft die Kachel-Vorlage auf die
+  eigene Umgebung, Clustering der Karte in den Kern, plattformneutrale Formatter statt `InfoBarSeverity` in den
+  Konto-ViewModels (Vorschau-Texte, Buchungen, Lösch-Hinweise), `NotificationSettingsService` meldet API-Fehler als
+  `ApiProblemException`.
   Neu (Stufe 3): `client=rog-<plattform>` statt fest `rog-windows` in `RealtimeConfig.BuildSocketUri` (der Origin
   ist seit Website v0.53.1 nicht mehr nötig, F6 erledigt). **Hinweis an die Windows-App (kein Kern-Thema):** In
   `VoiceViewModel.Add` beendet `channel.Spacer` die Rekursion – Unterkanäle unter Trennern (so liefert die Produktion
@@ -168,7 +185,10 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    Windows-App nur teilweise):* Likes/Kommentare an Galerie-Alben (Social-Karte, Stufe 6), Melden von Bildern
    (Moderation, Stufe 9), globales Screenshot-Kürzel (Pflichtenheft „optional“, unter Wayland nur über das
    Screenshot-Portal – F8).
-6. **Clan-Prozesse** – Bewerbung, Votes, Regeln bestätigen, Mitgliederkarte, Stats, Abwesenheit, Konto/Sicherheit.
+6. **Clan-Prozesse** *(erledigt)* – Votes, Bewerbung + „Meine Bewerbungen“ (Status, Trial, Nachrichten), Regeln und
+   Rechtstexte bestätigen, Mitgliederkarte, Matches/Hall of Fame/Stats/Turniere, Minecraft-Bestenlisten, Freunde,
+   Abwesenheit, Konto/Sicherheit (Geräte, Export, Löschen), Minecraft-Konten + Rebel-Coins, Benachrichtigungen je Kanal.
+   Onboarding gab es schon auf der Startseite (Stufe 1). *Nicht enthalten:* Match-Bearbeitung (Stufe 9).
 7. **Server-Steuerung** – Pterodactyl (Power, Ressourcen, Konsole im eigenen Fenster, Configs, Dateien, Backups, RCON);
    App-Sperre (statt Windows Hello: Polkit/fprintd prüfen, sonst PIN).
 8. **Wiki** – lesen, offline, bearbeiten, Versionen.
@@ -231,7 +251,20 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 5)
+## Datenschutz (Stand Stufe 6)
+
+- **Neu in Stufe 6:** Neue Aufrufe nur an die eigene API: Votes (`GET /v1/votes`, `PUT /v1/applications/{id}/vote`),
+  Bewerbung (`GET /v1/squads/{slug}/application-form`, `POST /v1/squads/{slug}/applications` – enthält das
+  Geburtsdatum, wird nicht lokal gespeichert), eigene Bewerbungen (lesen, Nachricht, zurückziehen), Bestätigungen
+  (`GET /v1/me/rules/pending`, `GET /v1/me/legal`, `POST /v1/rules/{set}/accept`, `POST /v1/me/legal/{type}/accept`),
+  Matches/Hall of Fame/Turniere/Stats/Minecraft-Bestenlisten, Freunde (`/v1/me/friends…`), Mitgliederkarte
+  (`GET /v1/map` + Kacheln über die signierte Vorlage der API **ohne Token**; die App verwirft Vorlagen, die nicht auf API
+  oder Website der Umgebung zeigen – keine Anfrage an OpenStreetMap o. ä.), Abwesenheiten, Minecraft-Konten/Wallet,
+  Sichtbarkeit in `/v1/me/profile`, Benachrichtigungs-Einstellungen, Geräte (abmelden widerruft den Token),
+  Datenexport, Konto löschen (`DELETE /v1/me`, vorher ggf. `POST /v1/me/leave-clan`; die Bestätigung – Passwort bzw.
+  Anzeigename – wird nur gesendet, nie gespeichert). **Lokal:** nur die Export-ZIP im Downloads-Ordner
+  (`rog-datenexport-<Datum>.zip`, gehört danach dem Benutzer); Kacheln, Avatare und alle Antworten nur im Speicher bzw.
+  im bestehenden verschlüsselten Cache. Nach dem Löschen des Kontos werden Token und Caches wie beim Abmelden gelöscht.
 
 - **Neu (F8):** „Bildschirmfoto hochladen“ – die Aufnahme macht der Desktop (Screenshot-Portal, lokal), die App liest
   nur das freigegebene Bild und lädt es wie andere Uploads hoch; die Datei bleibt beim Benutzer. Keine neue Speicherung.
@@ -333,7 +366,7 @@ docs/                       LINUX-BAUPLAN.md
   verwirft und der Kern nicht geändert wird (Wunsch an den Kern: Feld `Theme`).
 - **L14 – Seitenleiste kompakt (36 px je Eintrag)** statt 44 px, damit alle 15 + 3 Bereiche bei 1280×800 ohne
   Scrollen passen. Für Touch/Controller (Stufe 10) wird das mit dem Spielmodus noch einmal bewertet.
-- **L15 – Startseite:** Abstimmungen öffnen vorerst die Website (Votes nativ in Stufe 6); Termine, News und
+- **L15 – Startseite:** Abstimmungen öffnen seit Stufe 6 die Votes-Seite der App; Termine, News und
   Onboarding-Schritte (Regeln, Termine …) öffnen seit Stufe 2 die Seite in der App.
 - **L22 – Reverb mit Origin:** Die Produktion lehnte bis Website v0.53.0 WebSocket-Verbindungen ohne erlaubten
   `Origin` ab (`4009`). Die Linux-App sendet als Origin die Website ihrer Umgebung (`WebBaseUrl` aus
@@ -388,10 +421,32 @@ docs/                       LINUX-BAUPLAN.md
 - **L38 – Bildschirmfoto (F8):** Die Datei legt der Desktop an (GNOME: „Bilder/Bildschirmfotos“) und sie bleibt dort –
   die App liest sie nur zum Hochladen. Kein Elternfenster-Handle (bräuchte xdg-foreign unter Wayland), Dialog `modal`.
   Ohne Portal (z. B. reines X11 ohne xdg-desktop-portal) erklärt ein Hinweis den Weg über Strg+V.
+- **L39 – Seiten ohne Eintrag in der Seitenleiste** (`HiddenItems`): Votes und Minecraft-Bestenlisten wie in der
+  Windows-App (dort eigene Seiten ohne Navigationseintrag); erreichbar über Startseite, Server-Reiter, Konto und Links.
+- **L40 – „Blockierende“ Bestätigung:** Offene Pflicht-Bestätigungen (Regeln mit `requires_acceptance`/`enforced`,
+  Rechtstexte mit `pending` aus `/v1/me/legal`) zeigen einen Hinweisbalken über jeder Seite, der sich nicht wegklicken
+  lässt; die App bleibt lesbar wie die Website (die nur das Schreiben sperrt). Abfrage nach dem Login und bei
+  Kontowechsel – wird eine Regel während der Sitzung neu durchgesetzt, erscheint der Balken beim nächsten Start bzw.
+  der Fehler `rules_acceptance_required` erklärt es.
+- **L41 – Formulare und Rückfragen im Inhalt** (Bewerbung ersetzt den Detailbereich der Squad-Seite, Rückfragen als
+  `ConfirmBar` mit Fokus auf „Abbrechen“, Escape schließt) – Avalonia hat keinen ContentDialog (wie L31).
+- **L42 – Match-Detail** lädt zusätzlich `GET /v1/matches/{id}` (Line-up mit Positionen, Links, Bericht – Windows zeigt
+  nur die Listendaten); Anhänge eines Matches werden nicht gezeigt. Website-Links auf Hall of Fame/Turniere öffnen die
+  Matches-Seite ohne den Reiter (der Kern liefert dafür keinen Schlüssel).
+- **L43 – Mitgliederkarte:** Kacheln laut Guide 36 über die API (`/v1/map/tiles/…`, signierte Vorlage) statt
+  `/map/tiles` der Website; Orte näher als 44 px werden zusammengefasst (Windows: ein Punkt je Ort); höchstens 384
+  Kacheln im Speicher; kein `rog://`-Ziel (`rog://map` ist die Minecraft-Karte).
+- **L44 – Konto:** Abmelden des eigenen Geräts fragt vorher nach (danach ist man abgemeldet), fremde Geräte ohne Rückfrage
+  wie Windows; Rebel-Coins-Buchungen ohne das Zeichen ⛃ (in üblichen Linux-Schriften ein Kästchen); Export-Hinweis ohne
+  „Prüfsumme stimmt“ (der Export hat keine).
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
 ## Offene Fragen (an Wahke)
+
+- **Nur vom Owner zu erledigen/testen (blockiert nichts):** F5 Wayland-Test + Tray unter GNOME/KDE · `libfontconfig1`
+  und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · Einreichung
+  bei Flathub (nur auf Auftrag).
 
 - ~~F8 – Screenshot-Kürzel~~ **entschieden (30.10.2026): ja, Knopf ohne globales Kürzel.** Umgesetzt: „Bildschirmfoto
   hochladen“ auf der Upload-Seite über `org.freedesktop.portal.Screenshot` (interaktiv – der Desktop fragt nach
