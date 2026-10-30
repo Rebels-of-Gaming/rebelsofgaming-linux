@@ -36,6 +36,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         _services = services;
         _startLanguage = services.Settings.Language;
+        NotificationSettings = new NotificationSettingsViewModel(services);
         Languages =
         [
             new(LanguageResolver.System, services.T(StringKeys.SettingsLanguageSystem)),
@@ -161,6 +162,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     public IReadOnlyList<SettingsOption> Languages { get; }
+
+    /// <summary>Benachrichtigungen je Ereignis und Kanal (Glocke, E-Mail, Discord) – nur angemeldet.</summary>
+    public NotificationSettingsViewModel NotificationSettings { get; }
 
     /// <summary>Tastenkürzel (F1 springt hierher).</summary>
     public IReadOnlyList<ShortcutRow> Shortcuts { get; } = BuildShortcuts();

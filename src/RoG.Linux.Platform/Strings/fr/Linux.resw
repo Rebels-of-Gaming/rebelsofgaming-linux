@@ -373,4 +373,46 @@
   <data name="Linux_MapOpenProfile" xml:space="preserve">
     <value>Ouvrir le profil de {0}</value>
   </data>
+  <data name="Linux_ApplicationWithdrawTitle" xml:space="preserve">
+    <value>Retirer la candidature ?</value>
+  </data>
+  <data name="Linux_ApplicationWithdrawText" xml:space="preserve">
+    <value>Ta candidature chez {0} sera retirée. C'est irréversible – tu pourras postuler à nouveau plus tard.</value>
+  </data>
+  <data name="Linux_ApplicationWithdrawn" xml:space="preserve">
+    <value>Candidature retirée.</value>
+  </data>
+  <data name="Linux_ApplicationTimeline" xml:space="preserve">
+    <value>Historique</value>
+  </data>
+  <data name="Linux_ApplicationTasks" xml:space="preserve">
+    <value>Tâches d'essai</value>
+  </data>
+  <data name="Linux_ApplicationMessages" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="Linux_ApplicationStep" xml:space="preserve">
+    <value>Étape {0} sur 4</value>
+  </data>
+  <data name="Linux_AbsencesEmpty" xml:space="preserve">
+    <value>Aucune absence signalée.</value>
+  </data>
+  <data name="Linux_AbsenceDeleted" xml:space="preserve">
+    <value>Absence supprimée.</value>
+  </data>
+  <data name="Linux_AbsenceRange" xml:space="preserve">
+    <value>La fin ne peut pas précéder le début.</value>
+  </data>
+  <data name="Linux_ExportSaved" xml:space="preserve">
+    <value>{0} se trouve dans ton dossier Téléchargements.</value>
+  </data>
+  <data name="Linux_ExportsEmpty" xml:space="preserve">
+    <value>Aucun export de données demandé pour l'instant.</value>
+  </data>
+  <data name="Linux_DeviceRemoveTitle" xml:space="preserve">
+    <value>Déconnecter cet appareil ?</value>
+  </data>
+  <data name="Linux_DeviceRemoveText" xml:space="preserve">
+    <value>C'est l'appareil que tu utilises actuellement – tu seras déconnecté de l'application.</value>
+  </data>
 </root>

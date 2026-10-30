@@ -137,7 +137,9 @@ public sealed class FakeApi : HttpMessageHandler
         };
         return Task.FromResult(body is null
             ? Json(Problem(404, "not_found"), HttpStatusCode.NotFound, "application/problem+json")
-            : Json(body, HttpStatusCode.OK, "application/json"));
+            : body.StartsWith("{\"type\":", StringComparison.Ordinal) // Fehler (RFC 9457) aus Routen/Overrides: Status aus „status“
+                ? Json(body, (HttpStatusCode)System.Text.Json.JsonDocument.Parse(body).RootElement.GetProperty("status").GetInt32(), "application/problem+json")
+                : Json(body, HttpStatusCode.OK, "application/json"));
     }
 
     private static string Problem(int status, string code) =>

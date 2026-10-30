@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             x:Class="RoG.Linux.App.Controls.ConfirmBar"
+             x:DataType="vm:InlineConfirmViewModel"
+             IsVisible="{Binding IsOpen}">
+  <!-- Rückfrage im Inhalt (statt ContentDialog): rote Kante, „Abbrechen“ hat den Fokus (Standard wie in Windows) -->
+  <Border Classes="hint error" Background="{DynamicResource RoGBg3Brush}">
+    <StackPanel Spacing="10">
+      <Grid ColumnDefinitions="Auto,*">
+        <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Foreground="{DynamicResource RoGRedBrush}" VerticalAlignment="Top" Margin="0,2,10,0" />
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Classes="body strong" Text="{Binding Title}" IsVisible="{Binding HasTitle}" />
+          <SelectableTextBlock Classes="body" Text="{Binding Text}" />
+        </StackPanel>
+      </Grid>
+      <WrapPanel Orientation="Horizontal">
+        <Button Classes="primary" Margin="0,0,12,0" Command="{Binding AcceptCommand}" Content="{Binding ConfirmLabel}"
+                AutomationProperties.Name="{Binding ConfirmLabel}" />
+        <Button x:Name="CancelButton" Classes="secondary" Command="{Binding CancelCommand}" Content="{Binding CancelLabel}"
+                AutomationProperties.Name="{Binding CancelLabel}" />
+      </WrapPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

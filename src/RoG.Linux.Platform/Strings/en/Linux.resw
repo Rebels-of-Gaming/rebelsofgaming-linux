@@ -373,4 +373,46 @@
   <data name="Linux_MapOpenProfile" xml:space="preserve">
     <value>Open {0}'s profile</value>
   </data>
+  <data name="Linux_ApplicationWithdrawTitle" xml:space="preserve">
+    <value>Withdraw application?</value>
+  </data>
+  <data name="Linux_ApplicationWithdrawText" xml:space="preserve">
+    <value>Your application to {0} will be withdrawn. This cannot be undone – you can apply again later.</value>
+  </data>
+  <data name="Linux_ApplicationWithdrawn" xml:space="preserve">
+    <value>Application withdrawn.</value>
+  </data>
+  <data name="Linux_ApplicationTimeline" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Linux_ApplicationTasks" xml:space="preserve">
+    <value>Trial tasks</value>
+  </data>
+  <data name="Linux_ApplicationMessages" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="Linux_ApplicationStep" xml:space="preserve">
+    <value>Step {0} of 4</value>
+  </data>
+  <data name="Linux_AbsencesEmpty" xml:space="preserve">
+    <value>No absence reported.</value>
+  </data>
+  <data name="Linux_AbsenceDeleted" xml:space="preserve">
+    <value>Absence deleted.</value>
+  </data>
+  <data name="Linux_AbsenceRange" xml:space="preserve">
+    <value>The end must not be before the start.</value>
+  </data>
+  <data name="Linux_ExportSaved" xml:space="preserve">
+    <value>{0} is in your Downloads folder.</value>
+  </data>
+  <data name="Linux_ExportsEmpty" xml:space="preserve">
+    <value>No data export requested yet.</value>
+  </data>
+  <data name="Linux_DeviceRemoveTitle" xml:space="preserve">
+    <value>Sign out this device?</value>
+  </data>
+  <data name="Linux_DeviceRemoveText" xml:space="preserve">
+    <value>This is the device you are using right now – you will be signed out of the app.</value>
+  </data>
 </root>

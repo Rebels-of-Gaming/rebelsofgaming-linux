@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RoG.Linux.App.ViewModels"
              xmlns:l="using:RoG.Linux.App.Localization"
+             xmlns:c="using:RoG.Linux.App.Controls"
              x:Class="RoG.Linux.App.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
   <!-- Einstellungen wie SettingsPage der Windows-App; „Windows“-Karte wird „Linux-Desktop“ -->
@@ -29,6 +30,51 @@
           </StackPanel>
         </StackPanel>
       </Border>
+
+      <!-- Benachrichtigungen (Website, E-Mail, Discord) – nur angemeldet, lädt beim Aufklappen -->
+      <Expander IsVisible="{Binding NotificationSettings.IsSignedIn}" IsExpanded="{Binding NotificationSettings.IsExpanded}"
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T SettingsPage_Notifications.Header}">
+        <Expander.Header>
+          <TextBlock Classes="section" Text="{l:T SettingsPage_Notifications.Header, Upper=True}" TextWrapping="Wrap" />
+        </Expander.Header>
+        <StackPanel Spacing="12" DataContext="{Binding NotificationSettings}" x:DataType="vm:NotificationSettingsViewModel">
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T SettingsPage_Digest.Header}" />
+            <ComboBox MinWidth="260" ItemsSource="{Binding DigestOptions}" SelectedItem="{Binding SelectedDigest}"
+                      AutomationProperties.Name="{l:T SettingsPage_Digest.Header}" />
+          </StackPanel>
+          <WrapPanel Orientation="Horizontal">
+            <StackPanel Margin="0,0,12,8">
+              <TextBlock Classes="label" Text="{l:T SettingsPage_QuietFrom.Header}" />
+              <TextBox Width="110" Text="{Binding QuietFrom}" PlaceholderText="22:00" AutomationProperties.Name="{l:T SettingsPage_QuietFrom.Header}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,12,8">
+              <TextBlock Classes="label" Text="{l:T SettingsPage_QuietUntil.Header}" />
+              <TextBox Width="110" Text="{Binding QuietUntil}" PlaceholderText="08:00" AutomationProperties.Name="{l:T SettingsPage_QuietUntil.Header}" />
+            </StackPanel>
+            <Button Classes="secondary" VerticalAlignment="Bottom" Margin="0,0,0,8" Command="{Binding SaveQuietHoursCommand}"
+                    Content="{l:T SettingsPage_QuietSave.Content}" />
+          </WrapPanel>
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" MinHeight="60" />
+          <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T SettingsPage_Notifications.Header}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:NotificationTypeRowViewModel">
+                <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" Padding="0,6">
+                  <Grid ColumnDefinitions="*,Auto" AutomationProperties.Name="{Binding Label}">
+                    <TextBlock Classes="body" Text="{Binding Label}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                      <CheckBox IsChecked="{Binding Bell}" IsVisible="{Binding ShowBell}" Margin="0,0,12,0" Content="{l:T SettingsPage_ChannelBell.Content}" />
+                      <CheckBox IsChecked="{Binding Mail}" IsVisible="{Binding ShowMail}" Margin="0,0,12,0" Content="{l:T SettingsPage_ChannelMail.Content}" />
+                      <CheckBox IsChecked="{Binding Discord}" IsVisible="{Binding ShowDiscord}" Content="{l:T SettingsPage_ChannelDiscord.Content}" />
+                    </WrapPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Expander>
 
       <!-- Linux-Desktop -->
       <Border Classes="card">

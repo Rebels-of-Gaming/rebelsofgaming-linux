@@ -84,6 +84,329 @@
         </StackPanel>
       </Expander>
 
+      <!-- Meine Bewerbungen -->
+      <Expander IsVisible="{Binding IsSignedIn}" IsExpanded="{Binding Applications.IsExpanded}" HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T AccountPage_Applications.Header}">
+        <Expander.Header>
+          <TextBlock Classes="section" Text="{l:T AccountPage_Applications.Header, Upper=True}" />
+        </Expander.Header>
+        <StackPanel Spacing="12" DataContext="{Binding Applications}" x:DataType="vm:MyApplicationsViewModel">
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+          <c:ConfirmBar DataContext="{Binding Confirm}" />
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T AccountPage_ApplicationsEmpty.Text}" RetryCommand="{Binding RefreshCommand}" MinHeight="80" />
+          <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AccountPage_Applications.Header}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:MyApplicationViewModel">
+                <Border Classes="card" Background="{DynamicResource RoGBg3Brush}" Margin="0,0,0,12" AutomationProperties.Name="{Binding Title}">
+                  <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Classes="title" FontSize="20" Text="{Binding Title}" TextWrapping="Wrap" />
+                      <TextBlock Grid.Column="1" Classes="kicker" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding StepText}"
+                                 VerticalAlignment="Center" Margin="12,0,0,0" />
+                    </Grid>
+                    <ProgressBar Maximum="100" Value="{Binding Progress}" Height="6" MinHeight="6" />
+                    <TextBlock Classes="muted" Text="{Binding Details}" IsVisible="{Binding HasDetails}" />
+
+                    <!-- Verlauf -->
+                    <StackPanel Spacing="6" IsVisible="{Binding HasTimeline}">
+                      <TextBlock Classes="label" Text="{l:T Linux_ApplicationTimeline}" />
+                      <ItemsControl ItemsSource="{Binding Timeline}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:ApplicationTimelineRow">
+                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2">
+                              <Ellipse Width="8" Height="8" Fill="{DynamicResource RoGRedBrush}" VerticalAlignment="Center" Margin="2,0,10,0" />
+                              <TextBlock Grid.Column="1" Classes="body" Text="{Binding Label}" />
+                              <TextBlock Grid.Column="2" Classes="muted small" Text="{Binding When}" IsVisible="{Binding HasWhen}"
+                                         VerticalAlignment="Center" Margin="12,0,0,0" />
+                            </Grid>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Trial-Aufgaben -->
+                    <StackPanel Spacing="6" IsVisible="{Binding HasTasks}">
+                      <TextBlock Classes="label" Text="{l:T Linux_ApplicationTasks}" />
+                      <ItemsControl ItemsSource="{Binding Tasks}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:ApplicationTaskRow">
+                            <Grid ColumnDefinitions="Auto,*" Margin="0,3">
+                              <Border Classes="check" Classes.done="{Binding Done}" VerticalAlignment="Center" />
+                              <TextBlock Grid.Column="1" Classes="body" Classes.muted="{Binding Done}" Text="{Binding Title}" Margin="10,0,0,0" />
+                            </Grid>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Nachrichten -->
+                    <StackPanel Spacing="6" IsVisible="{Binding HasMessages}">
+                      <TextBlock Classes="label" Text="{l:T Linux_ApplicationMessages}" />
+                      <ItemsControl ItemsSource="{Binding Messages}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:ApplicationMessageRow">
+                            <Border Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="1"
+                                    CornerRadius="{StaticResource RoGControlRadius}" Padding="12,8" Margin="0,0,0,6">
+                              <StackPanel Spacing="2">
+                                <WrapPanel Orientation="Horizontal">
+                                  <TextBlock Classes="body strong" Text="{Binding Author}" Margin="0,0,10,0" />
+                                  <TextBlock Classes="muted small" Text="{Binding When}" VerticalAlignment="Center" />
+                                </WrapPanel>
+                                <SelectableTextBlock Classes="body" Text="{Binding Body}" TextWrapping="Wrap" />
+                              </StackPanel>
+                            </Border>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Nachricht an den Squad, zurückziehen -->
+                    <StackPanel Spacing="8" IsVisible="{Binding IsOpen}">
+                      <TextBox Text="{Binding Draft}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" MaxLength="2000"
+                               PlaceholderText="{l:T AccountPage_ApplicationMessage.PlaceholderText}"
+                               AutomationProperties.Name="{l:T AccountPage_ApplicationMessage.PlaceholderText}" />
+                      <WrapPanel Orientation="Horizontal">
+                        <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding SendCommand}" Content="{l:T AccountPage_ApplicationSend.Content}" />
+                        <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding WithdrawCommand}" Content="{l:T AccountPage_ApplicationWithdraw.Content}" />
+                      </WrapPanel>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Expander>
+
+      <!-- Abwesenheit -->
+      <Expander IsVisible="{Binding IsSignedIn}" IsExpanded="{Binding Absences.IsExpanded}" HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T AccountPage_Absences.Header}">
+        <Expander.Header>
+          <TextBlock Classes="section" Text="{l:T AccountPage_Absences.Header, Upper=True}" />
+        </Expander.Header>
+        <StackPanel Spacing="12" DataContext="{Binding Absences}" x:DataType="vm:AbsencesViewModel">
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+          <WrapPanel Orientation="Horizontal">
+            <StackPanel Margin="0,0,12,8">
+              <TextBlock Classes="label" Text="{l:T AccountPage_AbsenceFrom.Header}" />
+              <CalendarDatePicker SelectedDate="{Binding From}" MinWidth="180" AutomationProperties.Name="{l:T AccountPage_AbsenceFrom.Header}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,12,8">
+              <TextBlock Classes="label" Text="{l:T AccountPage_AbsenceTo.Header}" />
+              <CalendarDatePicker SelectedDate="{Binding To}" MinWidth="180" AutomationProperties.Name="{l:T AccountPage_AbsenceTo.Header}" />
+            </StackPanel>
+          </WrapPanel>
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T AccountPage_AbsenceReason.Header}" />
+            <TextBox Text="{Binding Reason}" MaxLength="500" AutomationProperties.Name="{l:T AccountPage_AbsenceReason.Header}" />
+          </StackPanel>
+          <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding ReportCommand}" Content="{l:T AccountPage_AbsenceReport.Content}" />
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T Linux_AbsencesEmpty}" RetryCommand="{Binding RefreshCommand}" MinHeight="60" />
+          <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AccountPage_Absences.Header}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:AbsenceItemViewModel">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,6" AutomationProperties.Name="{Binding Period}">
+                  <!-- laufend gold, geplant grau (gleiche Spalte, damit die Zeilen bündig bleiben) -->
+                  <Panel VerticalAlignment="Center" Margin="0,0,10,0">
+                    <Ellipse Classes="dot" Fill="{DynamicResource RoGMutedBrush}" />
+                    <Ellipse Classes="dot" Fill="{DynamicResource RoGGoldBrush}" IsVisible="{Binding IsCurrent}" />
+                  </Panel>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Classes="body strong" Text="{Binding Period}" />
+                    <TextBlock Classes="muted small" Text="{Binding Detail}" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="2" Classes="secondary" VerticalAlignment="Center" Margin="12,0,0,0" Command="{Binding DeleteCommand}"
+                          Content="{l:T AccountPage_AbsenceDelete.Content}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Expander>
+
+      <!-- Minecraft: Code aus /link prüfen und bestätigen (nie automatisch einlösen), Rebel-Coins, Statistiken -->
+      <Expander IsVisible="{Binding IsSignedIn}" IsExpanded="{Binding Minecraft.IsExpanded}" HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T AccountPage_Minecraft.Header}">
+        <Expander.Header>
+          <TextBlock Classes="section" Text="{l:T AccountPage_Minecraft.Header, Upper=True}" />
+        </Expander.Header>
+        <StackPanel Spacing="12" DataContext="{Binding Minecraft}" x:DataType="vm:MinecraftAccountsViewModel">
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+          <TextBlock Classes="muted" Text="{l:T AccountPage_MinecraftIntro.Text}" />
+          <Border Classes="hint" IsVisible="{Binding NeedsSignIn}">
+            <TextBlock Classes="body" Text="{l:T AccountPage_MinecraftSignIn.Text}" />
+          </Border>
+          <WrapPanel Orientation="Horizontal" IsVisible="{Binding CanLink}">
+            <StackPanel Margin="0,0,12,8">
+              <TextBlock Classes="label" Text="{l:T AccountPage_MinecraftCode.Header}" />
+              <TextBox x:Name="MinecraftCodeBox" Text="{Binding Code}" Width="200" MaxLength="12" FontFamily="{StaticResource RoGMonoFont}"
+                       PlaceholderText="{l:T AccountPage_MinecraftCode.PlaceholderText}" AutomationProperties.Name="{l:T AccountPage_MinecraftCode.Header}"
+                       KeyDown="OnCodeKeyDown" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Bottom" Margin="0,0,0,8">
+              <Button Classes="primary" Command="{Binding CheckCommand}" Content="{l:T AccountPage_MinecraftCheck.Content}" />
+              <ProgressBar IsIndeterminate="True" Width="80" IsVisible="{Binding IsBusy}" VerticalAlignment="Center" />
+            </StackPanel>
+          </WrapPanel>
+          <c:ConfirmBar DataContext="{Binding Confirm}" />
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" MinHeight="60" />
+          <TextBlock Classes="muted" Text="{l:T AccountPage_MinecraftEmpty.Text}" IsVisible="{Binding ShowEmpty}" />
+          <ItemsControl ItemsSource="{Binding Items}" AutomationProperties.Name="{l:T AccountPage_Minecraft.Header}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:MinecraftAccountItemViewModel">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,6" AutomationProperties.Name="{Binding Name}">
+                  <StackPanel>
+                    <TextBlock Classes="body strong" Text="{Binding Name}" />
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                    <SelectableTextBlock Classes="muted" FontSize="12" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding Uuid}" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center" Margin="12,0,0,0" Command="{Binding UnlinkCommand}"
+                          IsVisible="{Binding CanUnlink}" Content="{l:T AccountPage_MinecraftUnlink.Content}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Spacing="4" IsVisible="{Binding HasAccounts}">
+            <ToggleSwitch IsChecked="{Binding ShowWebsiteMessages}" IsEnabled="{Binding CanLink}" OnContent="" OffContent=""
+                          Content="{l:T AccountPage_MinecraftWebsiteMessages.Header}" AutomationProperties.Name="{l:T AccountPage_MinecraftWebsiteMessages.Header}" />
+            <TextBlock Classes="muted small" Text="{l:T AccountPage_MinecraftWebsiteMessagesHint.Text}" />
+          </StackPanel>
+
+          <!-- Rebel-Coins: nur Anzeige, verdient und ausgegeben wird im Spiel -->
+          <Border Classes="card" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding HasWallet}">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="section" Text="{l:T AccountPage_Coins.Text, Upper=True}" />
+              <TextBlock Classes="muted small" Text="{l:T AccountPage_CoinsHint.Text}" />
+              <TextBlock Classes="title" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding BalanceText}" />
+              <TextBlock Classes="body" Text="{Binding DailyText}" />
+              <StackPanel IsVisible="{Binding CanEditVisibility}">
+                <TextBlock Classes="label" Text="{l:T AccountPage_CoinsVisibility.Header}" />
+                <ComboBox MinWidth="240" ItemsSource="{Binding VisibilityOptions}" SelectedItem="{Binding SelectedCoinsVisibility}"
+                          AutomationProperties.Name="{l:T AccountPage_CoinsVisibility.Header}" />
+              </StackPanel>
+              <TextBlock Classes="body strong" Margin="0,8,0,0" Text="{l:T AccountPage_CoinsRecent.Text}" />
+              <TextBlock Classes="muted" Text="{l:T AccountPage_CoinsEmpty.Text}" IsVisible="{Binding NoTransactions}" />
+              <ItemsControl ItemsSource="{Binding Transactions}" AutomationProperties.Name="{l:T AccountPage_CoinsRecent.Text}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:CoinTransactionViewModel">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,4" AutomationProperties.Name="{Binding Title}">
+                      <StackPanel>
+                        <TextBlock Classes="body" Text="{Binding Title}" />
+                        <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="1" Classes="body strong" VerticalAlignment="Center" Margin="12,0,0,0" Text="{Binding Amount}"
+                                 Foreground="{DynamicResource RoGInkBrush}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+
+          <!-- Minecraft-Statistiken: Opt-in, Standard nur ich -->
+          <StackPanel Spacing="8">
+            <TextBlock Classes="section" Text="{l:T AccountPage_Stats.Text, Upper=True}" />
+            <TextBlock Classes="muted small" Text="{l:T AccountPage_StatsHint.Text}" />
+            <StackPanel IsVisible="{Binding CanEditVisibility}">
+              <TextBlock Classes="label" Text="{l:T AccountPage_StatsVisibility.Header}" />
+              <ComboBox MinWidth="240" ItemsSource="{Binding VisibilityOptions}" SelectedItem="{Binding SelectedStatsVisibility}"
+                        AutomationProperties.Name="{l:T AccountPage_StatsVisibility.Header}" />
+            </StackPanel>
+            <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding OpenLeaderboardsCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconTrophy}" Width="16" Height="16" />
+                <TextBlock Text="{l:T AccountPage_OpenLeaderboards.Content}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </StackPanel>
+      </Expander>
+
+      <!-- Geräte & Daten -->
+      <Expander IsVisible="{Binding IsSignedIn}" IsExpanded="{Binding Data.IsExpanded}" HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T AccountPage_Data.Header}">
+        <Expander.Header>
+          <TextBlock Classes="section" Text="{l:T AccountPage_Data.Header, Upper=True}" />
+        </Expander.Header>
+        <StackPanel Spacing="12" DataContext="{Binding Data}" x:DataType="vm:AccountDataViewModel">
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+          <TextBlock Classes="section" Text="{l:T AccountPage_DevicesTitle.Text, Upper=True}" />
+          <c:ConfirmBar DataContext="{Binding Confirm}" />
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" MinHeight="60" />
+          <ItemsControl ItemsSource="{Binding Devices}" AutomationProperties.Name="{l:T AccountPage_DevicesTitle.Text}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:DeviceItemViewModel">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,6" AutomationProperties.Name="{Binding Name}">
+                  <StackPanel>
+                    <WrapPanel Orientation="Horizontal">
+                      <TextBlock Classes="body strong" Text="{Binding Name}" Margin="0,0,10,0" TextWrapping="Wrap" />
+                      <Border Classes="chip green" IsVisible="{Binding IsCurrent}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ThisDevice}" />
+                      </Border>
+                    </WrapPanel>
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center" Margin="12,0,0,0" Command="{Binding RemoveCommand}"
+                          Content="{l:T AccountPage_DeviceRemove.Content}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <Rectangle Height="1" Fill="{DynamicResource RoGLineBrush}" Margin="0,4" />
+          <TextBlock Classes="section" Text="{l:T AccountPage_ExportTitle.Text, Upper=True}" />
+          <TextBlock Classes="muted" Text="{l:T AccountPage_ExportText.Text}" />
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding RequestExportCommand}" IsEnabled="{Binding !IsWorking}"
+                  Content="{l:T AccountPage_ExportRequest.Content}" />
+          <TextBlock Classes="muted small" Text="{l:T Linux_ExportsEmpty}" IsVisible="{Binding HasNoExports}" />
+          <ItemsControl ItemsSource="{Binding Exports}" AutomationProperties.Name="{l:T AccountPage_ExportTitle.Text}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ExportItemViewModel">
+                <WrapPanel Orientation="Horizontal" Margin="0,4" AutomationProperties.Name="{Binding Text}">
+                  <TextBlock Classes="body" Text="{Binding Text}" VerticalAlignment="Center" Margin="0,0,12,6" />
+                  <Button Classes="secondary" Margin="0,0,12,6" Command="{Binding DownloadCommand}" IsVisible="{Binding IsReady}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16" />
+                      <TextBlock Text="{l:T AccountPage_ExportDownload.Content}" />
+                    </StackPanel>
+                  </Button>
+                  <Button Classes="secondary" Margin="0,0,12,6" Command="{Binding ShowInFolderCommand}" IsVisible="{Binding IsSaved}"
+                          Content="{l:T MediaPage_ShowInFolder.Content}" />
+                </WrapPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <Rectangle Height="1" Fill="{DynamicResource RoGLineBrush}" Margin="0,4" />
+          <TextBlock Classes="section" Foreground="{DynamicResource RoGRedBrush}" Text="{l:T AccountPage_DeleteTitle.Text, Upper=True}" />
+          <TextBlock Classes="muted" Text="{l:T AccountPage_DeleteText.Text}" />
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding OpenDeleteCommand}" IsVisible="{Binding !IsDeleteOpen}"
+                  Content="{l:T AccountPage_Delete.Content}" />
+
+          <!-- Konto löschen: zweistufig im Inhalt (statt ContentDialog), Escape bricht ab -->
+          <Border x:Name="DeletePanel" Classes="hint error" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding IsDeleteOpen}">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="title" FontSize="20" Text="{l:T Account_DeleteTitle}" />
+              <TextBlock Classes="body" Text="{l:T Account_DeleteWarning}" />
+              <StackPanel>
+                <TextBlock Classes="label" Text="{l:T Account_DeleteConfirmHeader}" />
+                <TextBox x:Name="DeleteConfirmationBox" Text="{Binding DeleteConfirmation}"
+                         AutomationProperties.Name="{l:T Account_DeleteConfirmHeader}" />
+              </StackPanel>
+              <c:FeedbackBar DataContext="{Binding DeleteHint}" />
+              <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding LeaveClanCommand}" IsVisible="{Binding CanLeave}"
+                      Content="{Binding LeaveLabel}" AutomationProperties.Name="{Binding LeaveLabel}" />
+              <WrapPanel Orientation="Horizontal">
+                <Button Classes="primary" Margin="0,0,12,0" Command="{Binding DeleteAccountCommand}" Content="{l:T Account_DeleteConfirm}" />
+                <Button Classes="secondary" Command="{Binding CancelDeleteCommand}" Content="{l:T Common_Cancel}" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Expander>
+
       <StackPanel Spacing="10" IsVisible="{Binding IsSignedIn}">
         <TextBlock Classes="muted small" Text="{l:T Account_SignOutText}" />
         <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding SignOutCommand}" IsEnabled="{Binding !IsBusy}">

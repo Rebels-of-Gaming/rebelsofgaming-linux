@@ -373,4 +373,46 @@
   <data name="Linux_MapOpenProfile" xml:space="preserve">
     <value>Profil von {0} öffnen</value>
   </data>
+  <data name="Linux_ApplicationWithdrawTitle" xml:space="preserve">
+    <value>Bewerbung zurückziehen?</value>
+  </data>
+  <data name="Linux_ApplicationWithdrawText" xml:space="preserve">
+    <value>Deine Bewerbung bei {0} wird zurückgezogen. Das lässt sich nicht rückgängig machen – du kannst dich später neu bewerben.</value>
+  </data>
+  <data name="Linux_ApplicationWithdrawn" xml:space="preserve">
+    <value>Bewerbung zurückgezogen.</value>
+  </data>
+  <data name="Linux_ApplicationTimeline" xml:space="preserve">
+    <value>Verlauf</value>
+  </data>
+  <data name="Linux_ApplicationTasks" xml:space="preserve">
+    <value>Trial-Aufgaben</value>
+  </data>
+  <data name="Linux_ApplicationMessages" xml:space="preserve">
+    <value>Nachrichten</value>
+  </data>
+  <data name="Linux_ApplicationStep" xml:space="preserve">
+    <value>Schritt {0} von 4</value>
+  </data>
+  <data name="Linux_AbsencesEmpty" xml:space="preserve">
+    <value>Keine Abwesenheit gemeldet.</value>
+  </data>
+  <data name="Linux_AbsenceDeleted" xml:space="preserve">
+    <value>Abwesenheit gelöscht.</value>
+  </data>
+  <data name="Linux_AbsenceRange" xml:space="preserve">
+    <value>Das Ende darf nicht vor dem Beginn liegen.</value>
+  </data>
+  <data name="Linux_ExportSaved" xml:space="preserve">
+    <value>{0} liegt in deinem Downloads-Ordner.</value>
+  </data>
+  <data name="Linux_ExportsEmpty" xml:space="preserve">
+    <value>Noch kein Datenexport angefordert.</value>
+  </data>
+  <data name="Linux_DeviceRemoveTitle" xml:space="preserve">
+    <value>Dieses Gerät abmelden?</value>
+  </data>
+  <data name="Linux_DeviceRemoveText" xml:space="preserve">
+    <value>Das ist das Gerät, das du gerade benutzt – danach bist du in der App abgemeldet.</value>
+  </data>
 </root>

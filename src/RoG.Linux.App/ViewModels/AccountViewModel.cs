@@ -1,12 +1,17 @@
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RoG.Core.Navigation;
 using RoG.Linux.App.Services;
 
 namespace RoG.Linux.App.ViewModels;
 
-/// <summary>Konto (Spike): wer ist angemeldet, wo liegt der Token, Version, Abmelden bzw. Anmelden im Gastmodus.</summary>
-public sealed partial class AccountViewModel : ObservableObject
+/// <summary>
+/// Konto: wer ist angemeldet, wo liegt der Token, Version, Abmelden bzw. Anmelden im Gastmodus – und die aufklappbaren
+/// Bereiche wie die Windows-<c>AccountPage</c> (Profil, Bewerbungen, Abwesenheit, Minecraft, Geräte &amp; Daten), die
+/// erst beim Aufklappen laden. Escape schließt offene Rückfragen bzw. den Löschen-Bereich.
+/// </summary>
+public sealed partial class AccountViewModel : ObservableObject, IRoutablePage, IDetailPage
 {
     private readonly AppServices _services;
     private readonly Func<Task> _signOut;
@@ -15,6 +20,10 @@ public sealed partial class AccountViewModel : ObservableObject
     public AccountViewModel(AppServices services, Func<Task> signOut, Action signIn)
     {
         Editor = new ProfileEditViewModel(services);
+        Applications = new MyApplicationsViewModel(services);
+        Absences = new AbsencesViewModel(services);
+        Minecraft = new MinecraftAccountsViewModel(services);
+        Data = new AccountDataViewModel(services, signOut);
         _services = services;
         _signOut = signOut;
         _signIn = signIn;
@@ -30,6 +39,39 @@ public sealed partial class AccountViewModel : ObservableObject
 
     /// <summary>„Profil bearbeiten“ (lädt beim Aufklappen).</summary>
     public ProfileEditViewModel Editor { get; }
+
+    /// <summary>„Meine Bewerbungen“.</summary>
+    public MyApplicationsViewModel Applications { get; }
+
+    /// <summary>„Abwesenheit“.</summary>
+    public AbsencesViewModel Absences { get; }
+
+    /// <summary>„Minecraft“ (Accounts, Rebel-Coins, Statistiken).</summary>
+    public MinecraftAccountsViewModel Minecraft { get; }
+
+    /// <summary>„Geräte &amp; Daten“ (Geräte, Datenexport, Konto löschen).</summary>
+    public AccountDataViewModel Data { get; }
+
+    /// <summary>Offene Rückfrage oder Löschen-Bereich – Escape schließt sie.</summary>
+    public bool IsDetailOpen => Applications.Confirm.IsOpen || Minecraft.Confirm.IsOpen || Data.Confirm.IsOpen || Data.IsDeleteOpen;
+
+    public void CloseDetail()
+    {
+        Applications.Confirm.Cancel();
+        Minecraft.Confirm.Cancel();
+        Data.Confirm.Cancel();
+        Data.CancelDelete();
+    }
+
+    /// <summary>Link <c>rog://account/minecraft[?code=…]</c>: Minecraft aufklappen, Code nur vorbefüllen.</summary>
+    public void Open(string key)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        if (key.StartsWith(AppRoute.MinecraftKey, StringComparison.Ordinal))
+        {
+            Minecraft.OpenFromLink(new AppRoute(AppSection.Account, key).MinecraftCode);
+        }
+    }
 
     [ObservableProperty]
     public partial string Name { get; set; } = string.Empty;
