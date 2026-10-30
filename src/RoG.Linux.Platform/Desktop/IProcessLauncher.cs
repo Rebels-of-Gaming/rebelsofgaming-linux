@@ -7,10 +7,64 @@ public interface IProcessLauncher
 {
     /// <returns><c>true</c>, wenn das Programm gestartet wurde und mit 0 endete (bzw. nach <paramref name="wait"/> noch läuft).</returns>
     Task<bool> RunAsync(string fileName, IReadOnlyList<string> arguments, TimeSpan wait, CancellationToken cancellationToken = default);
+
+    /// <returns>Standardausgabe, wenn das Programm innerhalb von <paramref name="wait"/> mit 0 endete; sonst <c>null</c>.</returns>
+    Task<string?> ReadAsync(string fileName, IReadOnlyList<string> arguments, TimeSpan wait, CancellationToken cancellationToken = default);
 }
 
 public sealed class ProcessLauncher : IProcessLauncher
 {
+    public async Task<string?> ReadAsync(string fileName, IReadOnlyList<string> arguments, TimeSpan wait, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(arguments);
+        var info = new ProcessStartInfo(fileName)
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        foreach (var argument in arguments)
+        {
+            info.ArgumentList.Add(argument);
+        }
+
+        try
+        {
+            using var process = Process.Start(info);
+            if (process is null)
+            {
+                return null;
+            }
+
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(wait);
+            var output = process.StandardOutput.ReadToEndAsync(timeout.Token);
+            _ = process.StandardError.ReadToEndAsync(timeout.Token);
+            try
+            {
+                await process.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
+                return process.ExitCode == 0 ? await output.ConfigureAwait(false) : null;
+            }
+            catch (OperationCanceledException)
+            {
+                try
+                {
+                    process.Kill();
+                }
+                catch (InvalidOperationException)
+                {
+                    // schon beendet
+                }
+
+                return null;
+            }
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return null; // Programm fehlt
+        }
+    }
+
     public async Task<bool> RunAsync(string fileName, IReadOnlyList<string> arguments, TimeSpan wait, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(arguments);

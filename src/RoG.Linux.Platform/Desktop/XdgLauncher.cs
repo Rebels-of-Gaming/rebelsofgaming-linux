@@ -13,7 +13,7 @@ public sealed class XdgLauncher(IProcessLauncher? processes = null) : IBrowserLa
     /// <summary>Erlaubte Schemata – nie <c>file:</c> oder Skript-Schemata aus Inhalten der API öffnen.</summary>
     private static readonly HashSet<string> s_webSchemes = new(StringComparer.OrdinalIgnoreCase) { "http", "https", "mailto" };
 
-    private static readonly HashSet<string> s_gameSchemes = new(StringComparer.OrdinalIgnoreCase) { "steam", "et", "ts3server", "minecraft", "discord" };
+    private static readonly HashSet<string> s_gameSchemes = new(StringComparer.OrdinalIgnoreCase) { "steam", "et", "wolf", "ts3server", "minecraft", "discord" };
 
     private readonly IProcessLauncher _processes = processes ?? new ProcessLauncher();
 
@@ -23,11 +23,21 @@ public sealed class XdgLauncher(IProcessLauncher? processes = null) : IBrowserLa
         return uri.IsAbsoluteUri && s_webSchemes.Contains(uri.Scheme) ? RunAsync(uri, cancellationToken) : Task.FromResult(false);
     }
 
-    public Task<bool> CanLaunchAsync(Uri uri)
+    /// <summary>
+    /// Ist ein Programm für das Schema registriert (<c>xdg-mime query default x-scheme-handler/steam</c>)? Ohne
+    /// <c>xdg-mime</c> (z. B. in Flatpak – dort entscheidet das OpenURI-Portal) wird „ja“ angenommen; scheitert der
+    /// Start danach, kopiert der <see cref="ServerConnector"/> die Adresse.
+    /// </summary>
+    public async Task<bool> CanLaunchAsync(Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
-        // Ob ein Programm registriert ist, sagt erst xdg-open; die App bietet zusätzlich „Adresse kopieren“ an
-        return Task.FromResult(uri.IsAbsoluteUri && s_gameSchemes.Contains(uri.Scheme));
+        if (!uri.IsAbsoluteUri || !s_gameSchemes.Contains(uri.Scheme))
+        {
+            return false;
+        }
+
+        var handler = await _processes.ReadAsync("xdg-mime", ["query", "default", "x-scheme-handler/" + uri.Scheme.ToLowerInvariant()], TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+        return handler is null || handler.Trim().Length > 0;
     }
 
     public Task<bool> LaunchAsync(Uri uri)

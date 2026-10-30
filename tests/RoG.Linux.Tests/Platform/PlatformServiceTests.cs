@@ -60,7 +60,7 @@ public class PlatformServiceTests
         Assert.True(await launcher.CanLaunchAsync(new Uri("steam://connect/1.2.3.4:27015")));
         Assert.True(await launcher.LaunchAsync(new Uri("et://1.2.3.4:27960")));
         Assert.False(await launcher.LaunchAsync(new Uri("ssh://host")));
-        Assert.Single(processes.Calls);
+        Assert.Single(processes.Calls, c => c.File == "xdg-open");
     }
 
     [Fact]
