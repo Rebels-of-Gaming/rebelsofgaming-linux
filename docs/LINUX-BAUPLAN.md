@@ -210,6 +210,11 @@ rund 7 Minuten inkl. Wartezeit). Hinweis im Lauf: `libfontconfig1` fehlt auf dem
 trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehoben: `actions/checkout@v7`,
 `actions/setup-dotnet@v6` (Runner 2.338 unterstützt Node 24).
 
+**Stand Stufe 5 (30.10.2026):** alle Läufe grün. Einmal (Lauf 41052719016, erster Versuch) brach der Testprozess auf
+dem Runner nach 233 von 237 Tests mit Exit-Code 139 (nativer Absturz, vermutlich Skia beim Headless-Rendern ohne
+`libfontconfig1`) ab; die Wiederholung war grün, lokal (Debug und Release, mehrfach) nicht nachstellbar. Sollte es
+wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installieren (Owner-Aufgabe, siehe Punkt 3).
+
 **Einrichtung (zum Nachlesen):**
 
 1. **Deploy-Key für das private Submodul** *(erledigt)*
