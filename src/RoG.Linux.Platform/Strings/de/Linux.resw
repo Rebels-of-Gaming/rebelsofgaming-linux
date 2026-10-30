@@ -784,4 +784,7 @@
   <data name="Linux_ModLogEmpty" xml:space="preserve">
     <value>Noch keine Einträge im Mod-Log.</value>
   </data>
+  <data name="Linux_ResourcePackTypes" xml:space="preserve">
+    <value>Ressourcenpaket (.zip)</value>
+  </data>
 </root>

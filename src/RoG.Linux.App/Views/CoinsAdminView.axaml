@@ -1,0 +1,166 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.CoinsAdminView"
+             x:DataType="vm:CoinsAdminViewModel">
+  <!-- Verwaltung → Rebel-Coins (wie CoinsPanel der Windows-AdminPage): Wallets links, gewählte Wallet mit Buchung und
+       Buchungen rechts, darunter Tagesbonus und Grenzen. Schmal: eine Spalte (Zurück schließt das Detail). -->
+  <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}" ListWidth="360">
+    <!-- Wallets -->
+    <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="24,8,16,12">
+          <TextBox x:Name="SearchBox" Text="{Binding Search}" PlaceholderText="{l:T CoinsAdmin_Search.PlaceholderText}"
+                   AutomationProperties.Name="{l:T CoinsAdmin_Search.AutomationProperties.Name}">
+            <TextBox.InnerRightContent>
+              <Button Classes="icon" Width="32" Height="32" Padding="6" Command="{Binding SearchNowCommand}"
+                      ToolTip.Tip="{l:T CoinsAdmin_Search.AutomationProperties.Name}" AutomationProperties.Name="{l:T CoinsAdmin_Search.AutomationProperties.Name}">
+                <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" />
+              </Button>
+            </TextBox.InnerRightContent>
+          </TextBox>
+          <Grid ColumnDefinitions="*,Auto,Auto">
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding KindOptions}" SelectedItem="{Binding SelectedKind}"
+                      AutomationProperties.Name="{l:T CoinsAdmin_Kind.Header}" />
+            <Button Grid.Column="1" Classes="icon" Margin="8,0,0,0" VerticalAlignment="Center" Command="{Binding ReloadCommand}"
+                    ToolTip.Tip="{l:T CoinsAdmin_Reload.Content}" AutomationProperties.Name="{l:T CoinsAdmin_Reload.Content}">
+              <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+            </Button>
+            <Button Grid.Column="2" Classes="icon" Margin="4,0,0,0" VerticalAlignment="Center" Command="{Binding OpenSettingsCommand}"
+                    IsVisible="{Binding HasSettings}" ToolTip.Tip="{l:T CoinsAdmin_Settings.Header}" AutomationProperties.Name="{l:T CoinsAdmin_Settings.Header}">
+              <PathIcon Data="{StaticResource IconSettings}" Width="18" Height="18" />
+            </Button>
+          </Grid>
+          <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+          <TextBlock Classes="muted" Text="{l:T CoinsAdmin_Empty.Text}" IsVisible="{Binding ShowEmpty}" />
+        </StackPanel>
+        <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                 AutomationProperties.Name="{l:T CoinsAdmin_List.AutomationProperties.Name}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:CoinWalletItemViewModel">
+              <Grid ColumnDefinitions="*,Auto" AutomationProperties.Name="{Binding Title}">
+                <StackPanel Spacing="2" Margin="0,0,10,0">
+                  <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Classes="muted small" Text="{Binding Meta}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Classes="body strong" VerticalAlignment="Center" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding BalanceText}" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
+
+    <!-- Gewählte Wallet, Tagesbonus und Grenzen -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+      <StackPanel Margin="24,8,24,32" Spacing="12" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+        <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding CloseDetailCommand}" IsVisible="{Binding #Panel.IsNarrow}"
+                AutomationProperties.Name="{l:T Common_Back}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+            <TextBlock Text="{l:T Common_Back}" />
+          </StackPanel>
+        </Button>
+        <TextBlock Classes="muted" Text="{l:T CoinsAdmin_Hint.Text}" />
+
+        <StackPanel Spacing="12" IsVisible="{Binding HasSelection}">
+          <SelectableTextBlock Classes="title" Text="{Binding Selected.Title, FallbackValue=''}" />
+          <TextBlock FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding Selected.BalanceText, FallbackValue=''}" />
+          <TextBlock Classes="muted" Text="{Binding Selected.Meta, FallbackValue=''}" />
+          <SelectableTextBlock Classes="muted" FontSize="12" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding Selected.Uuid, FallbackValue=''}"
+                               IsVisible="{Binding Selected.HasUuid, FallbackValue=False}" TextWrapping="Wrap" />
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding Selected.OpenProfileCommand, FallbackValue={x:Null}}"
+                  IsVisible="{Binding Selected.HasProfile, FallbackValue=False}" Content="{l:T CoinsAdmin_OpenProfile.Content}" />
+
+          <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T CoinsAdmin_Adjust.Text}" />
+          <WrapPanel Orientation="Horizontal">
+            <StackPanel Spacing="4" Margin="0,0,12,8">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_Direction.Header}" />
+              <ComboBox MinWidth="160" ItemsSource="{Binding DirectionOptions}" SelectedItem="{Binding SelectedDirection}"
+                        AutomationProperties.Name="{l:T CoinsAdmin_Direction.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4" Margin="0,0,12,8">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_Amount.Header}" />
+              <NumericUpDown Width="180" Minimum="1" Maximum="1000000" Increment="10" FormatString="0" Value="{Binding Amount}"
+                             AutomationProperties.Name="{l:T CoinsAdmin_Amount.Header}" />
+            </StackPanel>
+          </WrapPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_Reason.Header}" />
+            <TextBox Text="{Binding Reason}" MaxLength="200" PlaceholderText="{l:T CoinsAdmin_Reason.PlaceholderText}"
+                     AutomationProperties.Name="{l:T CoinsAdmin_Reason.Header}" />
+          </StackPanel>
+          <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding AdjustCommand}" Content="{l:T CoinsAdmin_Submit.Content}" />
+
+          <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T CoinsAdmin_Transactions.Text}" />
+          <TextBlock Classes="muted" Text="{l:T CoinsAdmin_TransactionsEmpty.Text}" IsVisible="{Binding NoTransactions}" />
+          <ItemsControl ItemsSource="{Binding Transactions}" AutomationProperties.Name="{l:T CoinsAdmin_Transactions.Text}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:CoinTransactionViewModel">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,4" AutomationProperties.Name="{Binding Title}">
+                  <StackPanel Spacing="2" Margin="0,0,12,0">
+                    <TextBlock Classes="body" Text="{Binding Title}" />
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="1" Classes="body strong" VerticalAlignment="Center" Text="{Binding Amount}" Foreground="{DynamicResource RoGInkBrush}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding MoreTransactionsCommand}" IsVisible="{Binding HasMoreTransactions}"
+                  Content="{l:T Common_LoadMore.Content}" />
+        </StackPanel>
+
+        <Expander HorizontalAlignment="Stretch" IsVisible="{Binding HasSettings}" IsExpanded="{Binding IsSettingsOpen}" Margin="0,8,0,0"
+                  AutomationProperties.Name="{l:T CoinsAdmin_Settings.Header}">
+          <Expander.Header>
+            <TextBlock Classes="body strong" Text="{l:T CoinsAdmin_Settings.Header}" />
+          </Expander.Header>
+          <StackPanel Spacing="12" Margin="0,4">
+            <TextBlock Classes="muted" Text="{l:T CoinsAdmin_SettingsHint.Text}" />
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_DailyBase.Header}" />
+              <NumericUpDown Width="200" HorizontalAlignment="Left" Minimum="0" Maximum="1000000" Increment="10" FormatString="0" Value="{Binding DailyBase}"
+                             AutomationProperties.Name="{l:T CoinsAdmin_DailyBase.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_Milestones.Header}" />
+              <TextBox Text="{Binding Milestones}" PlaceholderText="{l:T CoinsAdmin_Milestones.PlaceholderText}"
+                       AutomationProperties.Name="{l:T CoinsAdmin_Milestones.Header}" />
+            </StackPanel>
+            <TextBlock Classes="body strong" Text="{l:T CoinsAdmin_LimitsTitle.Text}" />
+            <TextBlock Classes="muted small" Text="{l:T CoinsAdmin_LimitsHint.Text}" />
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_SystemDailyLimit.Header}" />
+              <NumericUpDown Width="200" HorizontalAlignment="Left" Minimum="0" Increment="100" FormatString="0" Value="{Binding SystemDailyLimit}"
+                             AutomationProperties.Name="{l:T CoinsAdmin_SystemDailyLimit.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_KeySystemDailyLimit.Header}" />
+              <NumericUpDown Width="200" HorizontalAlignment="Left" Minimum="0" Increment="100" FormatString="0" Value="{Binding KeySystemDailyLimit}"
+                             AutomationProperties.Name="{l:T CoinsAdmin_KeySystemDailyLimit.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_KeyEarningsHourlyLimit.Header}" />
+              <NumericUpDown Width="200" HorizontalAlignment="Left" Minimum="0" Increment="100" FormatString="0" Value="{Binding KeyEarningsHourlyLimit}"
+                             AutomationProperties.Name="{l:T CoinsAdmin_KeyEarningsHourlyLimit.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_PayDailyLimit.Header}" />
+              <NumericUpDown Width="200" HorizontalAlignment="Left" Minimum="0" Increment="100" FormatString="0" Value="{Binding PayDailyLimit}"
+                             AutomationProperties.Name="{l:T CoinsAdmin_PayDailyLimit.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T CoinsAdmin_AdminDailyLimit.Header}" />
+              <NumericUpDown Width="200" HorizontalAlignment="Left" Minimum="0" Increment="100" FormatString="0" Value="{Binding AdminDailyLimit}"
+                             AutomationProperties.Name="{l:T CoinsAdmin_AdminDailyLimit.Header}" />
+            </StackPanel>
+            <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding SaveSettingsCommand}" Content="{l:T CoinsAdmin_SaveSettings.Content}" />
+          </StackPanel>
+        </Expander>
+      </StackPanel>
+    </ScrollViewer>
+  </c:ListDetailPanel>
+</UserControl>

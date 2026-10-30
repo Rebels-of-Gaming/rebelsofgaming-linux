@@ -1,0 +1,193 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MinecraftOpsView"
+             x:DataType="vm:MinecraftOpsViewModel">
+  <!-- Verwaltung → Minecraft-Netzwerk (wie NetworkPanel der Windows-AdminPage): Server mit Heartbeat und Rolle,
+       Plugin-Deploy (minecraft.deploy) und Minigame-Pool (minecraft.pool). -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="24,8,24,32" Spacing="12" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+      <WrapPanel Orientation="Horizontal">
+        <Button Classes="secondary" Margin="0,0,12,0" Command="{Binding ReloadCommand}" AutomationProperties.Name="{l:T Network_Reload.Content}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource IconRefresh}" Width="16" Height="16" />
+            <TextBlock Text="{l:T Network_Reload.Content}" />
+          </StackPanel>
+        </Button>
+        <ProgressBar IsIndeterminate="True" Width="60" VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+      </WrapPanel>
+
+      <!-- Server -->
+      <TextBlock Classes="section" Text="{l:T Network_ServersTitle.Text, Upper=True}" />
+      <TextBlock Classes="muted" Text="{l:T Network_ServersHint.Text}" />
+      <TextBlock Classes="muted" Text="{l:T Network_ServersEmpty.Text}" IsVisible="{Binding NoServers}" />
+      <ItemsControl ItemsSource="{Binding Servers}" AutomationProperties.Name="{l:T Network_ServersTitle.Text}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:NetworkServerItemViewModel">
+            <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding Name}">
+              <StackPanel Spacing="4">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Panel Width="12" Height="12" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <Ellipse Width="10" Height="10" Fill="{DynamicResource RoGGreenBrush}" IsVisible="{Binding IsFresh}" />
+                    <Ellipse Width="10" Height="10" Fill="{DynamicResource RoGOfflineBrush}" IsVisible="{Binding !IsFresh}" />
+                  </Panel>
+                  <CheckBox Grid.Column="1" IsChecked="{Binding IsSelected}" IsVisible="{Binding CanSelect}" AutomationProperties.Name="{Binding Name}">
+                    <TextBlock Classes="body strong" Text="{Binding Name}" TextWrapping="Wrap" />
+                  </CheckBox>
+                  <TextBlock Grid.Column="1" Classes="body strong" Text="{Binding Name}" IsVisible="{Binding NotSelectable}" VerticalAlignment="Center" />
+                </Grid>
+                <TextBlock Classes="muted small" Text="{Binding StateText}" />
+                <TextBlock Classes="muted small" Text="{Binding DeployText}" />
+                <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding HasWarning}">
+                  <PathIcon Data="{StaticResource IconAlert}" Width="14" Height="14" Margin="0,1,6,0" VerticalAlignment="Top" Foreground="{DynamicResource RoGGoldBrush}" />
+                  <TextBlock Grid.Column="1" Classes="small" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding WarningText}" TextWrapping="Wrap" />
+                </Grid>
+                <WrapPanel Orientation="Horizontal" Margin="0,6,0,0" IsVisible="{Binding CanEditRole}">
+                  <ComboBox MinWidth="180" Margin="0,0,10,8" ItemsSource="{Binding RoleOptions}" SelectedItem="{Binding SelectedRole}"
+                            AutomationProperties.Name="{l:T Network_Role.Header}" />
+                  <TextBox Width="170" Margin="0,0,10,8" MaxLength="48" Text="{Binding Folder}" IsVisible="{Binding ShowFolder}"
+                           PlaceholderText="{l:T Network_Folder.PlaceholderText}" FontFamily="{StaticResource RoGMonoFont}"
+                           AutomationProperties.Name="{l:T Network_Folder.Header}" />
+                  <Button Classes="secondary" Margin="0,0,0,8" Command="{Binding SaveRoleCommand}" Content="{l:T Network_SaveRole.Content}" />
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <!-- Plugin-Deploy -->
+      <StackPanel Spacing="10" IsVisible="{Binding CanDeploy}">
+        <TextBlock Classes="section" Margin="0,12,0,0" Text="{l:T Deploy_Title.Text, Upper=True}" />
+        <TextBlock Classes="muted" Text="{l:T Deploy_Hint.Text}" />
+        <WrapPanel Orientation="Horizontal">
+          <Button Classes="secondary" Margin="0,0,12,0" Command="{Binding CheckReleaseCommand}" Content="{l:T Deploy_Check.Content}" />
+          <ProgressBar IsIndeterminate="True" Width="60" VerticalAlignment="Center" IsVisible="{Binding IsChecking}" />
+        </WrapPanel>
+        <Border Classes="card" Padding="16,12" IsVisible="{Binding HasRelease}">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="body strong" Text="{Binding ReleaseText}" TextWrapping="Wrap" />
+            <SelectableTextBlock Classes="muted" FontSize="12" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding ReleaseFiles}" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+        <CheckBox IsChecked="{Binding Restart}" Content="{l:T Deploy_Restart.Content}" />
+        <WrapPanel Orientation="Horizontal">
+          <Button Classes="primary" Margin="0,0,12,0" Command="{Binding StartDeployCommand}" Content="{l:T Deploy_Start.Content}" />
+          <ProgressBar IsIndeterminate="True" Width="60" VerticalAlignment="Center" IsVisible="{Binding IsDeploying}" />
+        </WrapPanel>
+        <TextBlock Classes="body strong" Margin="0,8,0,0" Text="{l:T Deploy_Runs.Text}" IsVisible="{Binding HasDeploys}" />
+        <ItemsControl ItemsSource="{Binding Deploys}" AutomationProperties.Name="{l:T Deploy_Runs.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:DeployItemViewModel">
+              <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding Title}">
+                <StackPanel Spacing="2">
+                  <TextBlock Classes="body strong" Text="{Binding Title}" TextWrapping="Wrap" />
+                  <ItemsControl ItemsSource="{Binding Targets}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="x:String">
+                        <TextBlock Classes="muted small" Text="{Binding}" TextWrapping="Wrap" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <!-- Minigame-Pool -->
+      <StackPanel Spacing="10" IsVisible="{Binding CanPool}">
+        <TextBlock Classes="section" Margin="0,12,0,0" Text="{l:T Pool_Title.Text, Upper=True}" />
+        <TextBlock Classes="muted" Text="{l:T Pool_Hint.Text}" />
+        <TextBlock Classes="muted small" Text="{Binding PoolInfo}" />
+        <TextBlock Classes="muted" Text="{l:T Pool_Empty.Text}" IsVisible="{Binding NoGroups}" />
+        <ItemsControl ItemsSource="{Binding Groups}" AutomationProperties.Name="{l:T Pool_Title.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:PoolGroupItemViewModel">
+              <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding Game}">
+                <StackPanel Spacing="8">
+                  <TextBlock Classes="body strong" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding Game}" />
+                  <TextBlock Classes="muted small" Text="{Binding Summary}" />
+                  <TextBlock Classes="muted small" Text="{Binding LastAction}" IsVisible="{Binding HasLastAction}" />
+                  <ToggleSwitch IsChecked="{Binding Enabled}" Content="{l:T Pool_Enabled.Header}" OnContent="" OffContent=""
+                                AutomationProperties.Name="{l:T Pool_Enabled.AutomationProperties.Name}" />
+                  <WrapPanel Orientation="Horizontal">
+                    <StackPanel Spacing="4" Margin="0,0,12,8">
+                      <TextBlock Classes="label" Text="{l:T Pool_MinRunning.Header}" />
+                      <NumericUpDown Width="150" Minimum="1" Maximum="20" Increment="1" FormatString="0" Value="{Binding MinRunning}"
+                                     AutomationProperties.Name="{l:T Pool_MinRunning.AutomationProperties.Name}" />
+                    </StackPanel>
+                    <StackPanel Spacing="4" Margin="0,0,12,8">
+                      <TextBlock Classes="label" Text="{l:T Pool_StartThreshold.Header}" />
+                      <NumericUpDown Width="150" Minimum="1" Maximum="100" Increment="5" FormatString="0" Value="{Binding StartThreshold}"
+                                     AutomationProperties.Name="{l:T Pool_StartThreshold.AutomationProperties.Name}" />
+                    </StackPanel>
+                    <StackPanel Spacing="4" Margin="0,0,12,8">
+                      <TextBlock Classes="label" Text="{l:T Pool_IdleMinutes.Header}" />
+                      <NumericUpDown Width="150" Minimum="1" Maximum="240" Increment="5" FormatString="0" Value="{Binding IdleMinutes}"
+                                     AutomationProperties.Name="{l:T Pool_IdleMinutes.AutomationProperties.Name}" />
+                    </StackPanel>
+                  </WrapPanel>
+                  <ItemsControl ItemsSource="{Binding Instances}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:PoolInstanceItemViewModel">
+                        <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,1,0,0" Padding="0,8,0,4" AutomationProperties.Name="{Binding Name}">
+                          <StackPanel Spacing="2">
+                            <TextBlock Classes="body" Text="{Binding Name}" />
+                            <TextBlock Classes="muted small" Text="{Binding StatusText}" />
+                            <CheckBox IsChecked="{Binding Excluded}" Content="{l:T Pool_Excluded.Content}" />
+                            <WrapPanel Orientation="Horizontal">
+                              <Button Classes="secondary" Margin="0,0,10,4" Command="{Binding ResetFailuresCommand}" IsVisible="{Binding HasFailures}"
+                                      Content="{l:T Pool_ResetFailures.Content}" />
+                              <Button Classes="secondary" Margin="0,0,10,4" Command="{Binding UnassignCommand}" Content="{l:T Pool_Unassign.Content}" />
+                            </WrapPanel>
+                          </StackPanel>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <StackPanel Spacing="4" IsVisible="{Binding HasSuggestions}">
+                    <TextBlock Classes="muted small" Text="{l:T Pool_Suggestions.Text}" />
+                    <ItemsControl ItemsSource="{Binding Suggestions}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PoolSuggestionItemViewModel">
+                          <Grid ColumnDefinitions="*,Auto" Margin="0,2" AutomationProperties.Name="{Binding Name}">
+                            <TextBlock Classes="body" VerticalAlignment="Center" Text="{Binding Name}" TextTrimming="CharacterEllipsis" Margin="0,0,10,0" />
+                            <Button Grid.Column="1" Classes="secondary" Command="{Binding AssignCommand}" Content="{l:T Pool_Assign.Content}" />
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                  <WrapPanel Orientation="Horizontal">
+                    <Button Classes="primary" Margin="0,0,10,0" Command="{Binding SaveCommand}" Content="{l:T Pool_Save.Content}" />
+                    <Button Classes="secondary" Command="{Binding DeleteCommand}" IsVisible="{Binding Configured}" Content="{l:T Pool_Delete.Content}" />
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Classes="body strong" Text="{l:T Pool_Log.Text}" IsVisible="{Binding HasPoolLog}" />
+        <ItemsControl ItemsSource="{Binding PoolLog}" AutomationProperties.Name="{l:T Pool_Log.Text}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <TextBlock Classes="muted small" Margin="0,2" Text="{Binding}" TextWrapping="Wrap" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

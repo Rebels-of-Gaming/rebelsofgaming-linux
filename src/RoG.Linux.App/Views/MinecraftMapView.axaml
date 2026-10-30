@@ -1,0 +1,125 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MinecraftMapView"
+             x:DataType="vm:MinecraftMapViewModel">
+  <!-- Weltkarte (wie MinecraftMapPage der Windows-App): Welt wählen, Karte mit Kacheln/Warps/Spawn/Live-Spielern,
+       rechts (schmal: darunter) Stand, Spieler, Warps und – mit minecraft.manage – „Weltkarte verwalten“. -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,12">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="display" Text="{l:T MinecraftMapPage_Title.Text}" />
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding ReloadMapCommand}"
+                ToolTip.Tip="{l:T MinecraftMapPage_Refresh.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T MinecraftMapPage_Refresh.AutomationProperties.Name}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+      <TextBlock Classes="muted" Text="{l:T MinecraftMapPage_Intro.Text}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <WrapPanel Orientation="Horizontal" IsVisible="{Binding ShowContent}">
+        <StackPanel Spacing="4" Margin="0,0,16,4">
+          <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T MinecraftMapPage_World.Header}" />
+          <ComboBox MinWidth="260" MaxWidth="420" ItemsSource="{Binding Worlds}" SelectedItem="{Binding SelectedWorld}"
+                    AutomationProperties.Name="{l:T MinecraftMapPage_World.AutomationProperties.Name}" />
+        </StackPanel>
+        <ToggleSwitch VerticalAlignment="Bottom" Margin="0,0,0,4" IsChecked="{Binding ShowLive}" IsEnabled="{Binding LiveAvailable}"
+                      Content="{l:T MinecraftMapPage_ShowLive.Header}" OnContent="" OffContent=""
+                      AutomationProperties.Name="{l:T MinecraftMapPage_ShowLive.Header}" />
+      </WrapPanel>
+      <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <c:ConfirmBar DataContext="{Binding Confirm}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <Panel>
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                   EmptyText="{l:T MinecraftMapPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+      <Grid x:Name="Body" Margin="24,0,24,24" IsVisible="{Binding ShowContent}" ColumnDefinitions="*,300">
+        <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="1" CornerRadius="{StaticResource RoGControlRadius}" ClipToBounds="True" MinHeight="240">
+          <Panel>
+            <c:MinecraftTileMap x:Name="Map" />
+            <TextBlock Classes="muted" Text="{l:T MinecraftMapPage_NoTiles.Text}" MaxWidth="360" TextAlignment="Center" TextWrapping="Wrap"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" IsVisible="{Binding HasNoTiles}" />
+          </Panel>
+        </Border>
+
+        <ScrollViewer x:Name="Side" Grid.Column="1" Margin="16,0,0,0" VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12" Margin="0,0,8,0">
+            <TextBlock Classes="muted" Text="{Binding WorldInfo}" />
+
+            <TextBlock Classes="section" Text="{l:T MinecraftMapPage_PlayersTitle.Text}" />
+            <TextBlock Classes="muted" Text="{Binding LiveInfo}" IsVisible="{Binding HasLiveInfo}" />
+            <ItemsControl ItemsSource="{Binding Players}" IsVisible="{Binding HasPlayers}" AutomationProperties.Name="{l:T MinecraftMapPage_Players.AutomationProperties.Name}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:MapPointItem">
+                  <Button Classes="row" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="8,6"
+                          Command="{Binding $parent[UserControl].((vm:MinecraftMapViewModel)DataContext).CenterOnCommand}" CommandParameter="{Binding}"
+                          AutomationProperties.Name="{Binding Label}">
+                    <StackPanel Spacing="1">
+                      <TextBlock Classes="body" Foreground="{DynamicResource RoGGreenBrush}" Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Classes="muted small" Text="{Binding Detail}" />
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Classes="muted small" Text="{l:T MinecraftMapPage_Privacy.Text}" />
+
+            <TextBlock Classes="section" Text="{l:T MinecraftMapPage_WarpsTitle.Text}" IsVisible="{Binding HasWarps}" />
+            <ItemsControl ItemsSource="{Binding Warps}" IsVisible="{Binding HasWarps}" AutomationProperties.Name="{l:T MinecraftMapPage_Warps.AutomationProperties.Name}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:MapPointItem">
+                  <Button Classes="row" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="8,6"
+                          Command="{Binding $parent[UserControl].((vm:MinecraftMapViewModel)DataContext).CenterOnCommand}" CommandParameter="{Binding}"
+                          AutomationProperties.Name="{Binding Label}">
+                    <StackPanel Spacing="1">
+                      <TextBlock Classes="body" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Classes="muted small" Text="{Binding Detail}" />
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Verwaltung (minecraft.manage) -->
+            <Expander HorizontalAlignment="Stretch" IsVisible="{Binding CanManage}" AutomationProperties.Name="{l:T MinecraftMapPage_Admin.AutomationProperties.Name}">
+              <Expander.Header>
+                <TextBlock Classes="body strong" Text="{l:T MinecraftMapPage_Admin.Header}" />
+              </Expander.Header>
+              <StackPanel Spacing="10" Margin="0,4">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T MinecraftMapPage_LiveMode.Header}" />
+                  <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding LiveModeOptions}" SelectedItem="{Binding SelectedLiveMode}"
+                            AutomationProperties.Name="{l:T MinecraftMapPage_LiveMode.AutomationProperties.Name}" />
+                </StackPanel>
+                <TextBlock Classes="muted small" Text="{Binding QuotaText}" IsVisible="{Binding HasQuota}" />
+                <TextBlock Classes="muted small" Text="{Binding WorldAdminInfo}" />
+                <ToggleSwitch IsChecked="{Binding EditWorldHidden}" Content="{l:T MinecraftMapPage_WorldHidden.Header}" OnContent="" OffContent=""
+                              AutomationProperties.Name="{l:T MinecraftMapPage_WorldHidden.Header}" />
+                <ToggleSwitch IsChecked="{Binding EditServerHidden}" Content="{l:T MinecraftMapPage_ServerHidden.Header}" OnContent="" OffContent=""
+                              AutomationProperties.Name="{l:T MinecraftMapPage_ServerHidden.Header}" />
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T MinecraftMapPage_NameDe.Header}" />
+                  <TextBox Text="{Binding EditNameDe}" MaxLength="64" AutomationProperties.Name="{l:T MinecraftMapPage_NameDe.Header}" />
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T MinecraftMapPage_NameEn.Header}" />
+                  <TextBox Text="{Binding EditNameEn}" MaxLength="64" AutomationProperties.Name="{l:T MinecraftMapPage_NameEn.Header}" />
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T MinecraftMapPage_NameFr.Header}" />
+                  <TextBox Text="{Binding EditNameFr}" MaxLength="64" AutomationProperties.Name="{l:T MinecraftMapPage_NameFr.Header}" />
+                </StackPanel>
+                <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding SaveWorldCommand}"
+                        Content="{l:T MinecraftMapPage_SaveWorld.Content}" />
+                <TextBlock Classes="muted small" Text="{l:T MinecraftMapPage_ClearHint.Text}" />
+                <Button Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding ClearTilesCommand}"
+                        Content="{l:T MinecraftMapPage_ClearTiles.Content}" />
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </Panel>
+  </DockPanel>
+</UserControl>

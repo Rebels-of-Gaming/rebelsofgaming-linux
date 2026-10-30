@@ -3,6 +3,7 @@
              xmlns:vm="using:RoG.Linux.App.ViewModels"
              xmlns:c="using:RoG.Linux.App.Controls"
              xmlns:l="using:RoG.Linux.App.Localization"
+             xmlns:views="using:RoG.Linux.App.Views"
              x:Class="RoG.Linux.App.Views.ServersView"
              x:DataType="vm:ServersViewModel">
   <!-- Server wie ServersPage der Windows-App: Reiter Gameserver · Minecraft · TeamSpeak · Discord-Voice -->
@@ -75,109 +76,9 @@
         </ScrollViewer>
       </Panel>
 
-      <!-- Minecraft: So kommst du auf den Server -->
+      <!-- Minecraft: So kommst du auf den Server (eigene Ansicht, mit minecraft.manage auch Bearbeiten und Ressourcenpaket) -->
       <Panel IsVisible="{Binding IsMinecraftTab}">
-        <Panel DataContext="{Binding Join}" x:DataType="vm:MinecraftJoinViewModel">
-          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
-                       EmptyText="{l:T ServersPage_McState.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
-          <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="24,8,24,32" Spacing="16" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
-              <StackPanel Spacing="4">
-                <TextBlock Classes="title" Text="{l:T McJoin_Title.Text}" />
-                <TextBlock Classes="muted" Text="{l:T McJoin_Lead.Text}" />
-              </StackPanel>
-
-              <!-- Java -->
-              <Border Classes="card">
-                <StackPanel Spacing="8">
-                  <TextBlock Classes="section" Text="{l:T McJoin_JavaTitle.Text}" />
-                  <TextBlock Classes="muted" Text="{l:T McJoin_JavaPlatforms.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_JavaStep1.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_JavaStep2.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_JavaStep3.Text}" />
-                  <WrapPanel Orientation="Horizontal">
-                    <TextBlock Classes="muted" Text="{l:T McJoin_Address.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <SelectableTextBlock Classes="body strong" Text="{Binding JavaAddress}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <Button Classes="secondary" Command="{Binding CopyJavaCommand}" Content="{l:T McJoin_CopyJava.Content}"
-                            AutomationProperties.Name="{l:T McJoin_CopyJava.AutomationProperties.Name}" />
-                  </WrapPanel>
-                  <TextBlock Classes="muted small" Text="{l:T McJoin_DefaultPort.Text}" IsVisible="{Binding ShowDefaultPortNote}" />
-                </StackPanel>
-              </Border>
-
-              <!-- Ressourcenpaket (Java) -->
-              <Border Classes="card" IsVisible="{Binding HasPack}">
-                <StackPanel Spacing="8">
-                  <TextBlock Classes="section" Text="{l:T McJoin_PackTitle.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_PackText.Text}" />
-                  <TextBlock Classes="muted" Text="{Binding PackInfo}" />
-                  <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding DownloadPackCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                      <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16" />
-                      <TextBlock Text="{l:T McJoin_PackDownload.Content}" />
-                    </StackPanel>
-                  </Button>
-                </StackPanel>
-              </Border>
-
-              <!-- Bedrock -->
-              <Border Classes="card">
-                <StackPanel Spacing="8">
-                  <TextBlock Classes="section" Text="{l:T McJoin_BedrockTitle.Text}" />
-                  <TextBlock Classes="muted" Text="{l:T McJoin_BedrockPlatforms.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep1.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep2.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep3.Text}" />
-                  <WrapPanel Orientation="Horizontal">
-                    <TextBlock Classes="muted" Text="{l:T McJoin_Address.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <SelectableTextBlock Classes="body strong" Text="{Binding BedrockAddress}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <Button Classes="secondary" Command="{Binding CopyBedrockAddressCommand}" Content="{l:T McJoin_CopyBedrockAddress.Content}"
-                            AutomationProperties.Name="{l:T McJoin_CopyBedrockAddress.AutomationProperties.Name}" />
-                  </WrapPanel>
-                  <WrapPanel Orientation="Horizontal">
-                    <TextBlock Classes="muted" Text="{l:T McJoin_Port.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <SelectableTextBlock Classes="body strong" Text="{Binding BedrockPort}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <Button Classes="secondary" Command="{Binding CopyBedrockPortCommand}" Content="{l:T McJoin_CopyBedrockPort.Content}"
-                            AutomationProperties.Name="{l:T McJoin_CopyBedrockPort.AutomationProperties.Name}" />
-                  </WrapPanel>
-                </StackPanel>
-              </Border>
-
-              <!-- Konsole -->
-              <Border Classes="card" IsVisible="{Binding ShowConsole}">
-                <StackPanel Spacing="8">
-                  <TextBlock Classes="section" Text="{l:T McJoin_ConsoleTitle.Text}" />
-                  <TextBlock Classes="muted" Text="{l:T McJoin_ConsolePlatforms.Text}" />
-                  <Border Classes="hint" IsVisible="{Binding HasHint}">
-                    <Grid ColumnDefinitions="Auto,*">
-                      <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Margin="0,0,10,0" Foreground="{DynamicResource RoGGoldBrush}" VerticalAlignment="Top" />
-                      <TextBlock Grid.Column="1" Classes="body" Text="{Binding Hint}" />
-                    </Grid>
-                  </Border>
-                  <TextBlock Classes="body" Text="{l:T McJoin_ConsoleIntro.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep1.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep2.Text}" />
-                  <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep3.Text}" />
-                  <WrapPanel Orientation="Horizontal">
-                    <TextBlock Classes="muted" Text="{l:T McJoin_Gamertag.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <SelectableTextBlock Classes="body strong" Text="{Binding Gamertag}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <Button Classes="secondary" Command="{Binding CopyGamertagCommand}" Content="{l:T McJoin_CopyGamertag.Content}"
-                            AutomationProperties.Name="{l:T McJoin_CopyGamertag.AutomationProperties.Name}" />
-                  </WrapPanel>
-                  <TextBlock Classes="muted" Text="{l:T McJoin_ConsoleTrouble.Text}" />
-                </StackPanel>
-              </Border>
-
-              <TextBlock Classes="muted" Text="{l:T McJoin_LinkTip.Text}" />
-              <WrapPanel Orientation="Horizontal">
-                <Button Classes="primary" Margin="0,0,12,8" Command="{Binding OpenMapCommand}" Content="{l:T McJoin_Map.Content}" />
-                <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding OpenLeaderboardsCommand}" Content="{l:T McJoin_Leaderboards.Content}" />
-                <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding LinkAccountCommand}" Content="{l:T McJoin_LinkAccount.Content}"
-                        IsVisible="{Binding IsSignedIn}" />
-              </WrapPanel>
-            </StackPanel>
-          </ScrollViewer>
-        </Panel>
+        <views:MinecraftJoinView DataContext="{Binding Join}" />
       </Panel>
 
       <!-- TeamSpeak -->

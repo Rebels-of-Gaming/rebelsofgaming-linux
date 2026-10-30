@@ -1,0 +1,128 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MinecraftAdminView"
+             x:DataType="vm:MinecraftAdminViewModel">
+  <!-- Verwaltung → Minecraft (wie MinecraftPanel der Windows-AdminPage): Gruppen (LuckPerms) und verknüpfte Accounts.
+       Rückmeldung und Rückfrage zeigt die Verwaltungsseite (gemeinsam für alle Reiter). -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="24,8,24,32" Spacing="12" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+
+      <!-- Gruppen (LuckPerms) -->
+      <StackPanel Spacing="12" DataContext="{Binding Groups}" x:DataType="vm:MinecraftGroupsViewModel">
+        <TextBlock Classes="section" Text="{l:T MinecraftGroups_Title.Text, Upper=True}" />
+        <TextBlock Classes="muted" Text="{l:T MinecraftGroups_Hint.Text}" />
+        <TextBlock Classes="muted" TextWrapping="Wrap">
+          <Run Text="{l:T MinecraftGroups_Managed.Text}" FontWeight="SemiBold" />
+          <Run Text="{Binding ManagedText}" />
+        </TextBlock>
+        <WrapPanel Orientation="Horizontal">
+          <StackPanel Spacing="4" Margin="0,0,12,8">
+            <TextBlock Classes="label" Text="{l:T MinecraftGroups_Role.Header}" />
+            <ComboBox MinWidth="200" ItemsSource="{Binding RoleOptions}" SelectedItem="{Binding SelectedRole}"
+                      AutomationProperties.Name="{l:T MinecraftGroups_Role.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4" Margin="0,0,12,8">
+            <TextBlock Classes="label" Text="{l:T MinecraftGroups_Group.Header}" />
+            <TextBox Width="200" MaxLength="36" Text="{Binding NewGroup}" PlaceholderText="{l:T MinecraftGroups_Group.PlaceholderText}"
+                     FontFamily="{StaticResource RoGMonoFont}" AutomationProperties.Name="{l:T MinecraftGroups_Group.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4" Margin="0,0,12,8">
+            <TextBlock Classes="label" Text="{l:T MinecraftGroups_Priority.Header}" />
+            <NumericUpDown Width="140" Minimum="0" Maximum="1000" Increment="10" FormatString="0" Value="{Binding NewPriority}"
+                           AutomationProperties.Name="{l:T MinecraftGroups_Priority.Header}" />
+          </StackPanel>
+          <Button Classes="primary" Margin="0,0,12,8" VerticalAlignment="Bottom" Command="{Binding SaveCommand}" Content="{l:T MinecraftGroups_Save.Content}" />
+          <ProgressBar IsIndeterminate="True" Width="60" Margin="0,0,0,20" VerticalAlignment="Bottom" IsVisible="{Binding IsBusy}" />
+        </WrapPanel>
+        <TextBlock Classes="muted" Text="{l:T MinecraftGroups_Empty.Text}" IsVisible="{Binding IsEmpty}" />
+        <ItemsControl ItemsSource="{Binding Mappings}" AutomationProperties.Name="{l:T MinecraftGroups_Title.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:MinecraftGroupItemViewModel">
+              <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding RoleLabel}">
+                <StackPanel Spacing="8">
+                  <StackPanel Spacing="2">
+                    <TextBlock Classes="body strong" Text="{Binding RoleLabel}" />
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                  </StackPanel>
+                  <WrapPanel Orientation="Horizontal">
+                    <Button Classes="secondary" Margin="0,0,10,0" Command="{Binding EditCommand}" Content="{l:T MinecraftGroups_Edit.Content}" />
+                    <Button Classes="secondary" Command="{Binding RemoveCommand}" Content="{l:T MinecraftGroups_Remove.Content}" />
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <StackPanel Spacing="8" IsVisible="{Binding HasRetired}">
+          <TextBlock Classes="body strong" Text="{l:T MinecraftGroups_Retired.Text}" />
+          <TextBlock Classes="muted" Text="{l:T MinecraftGroups_RetiredHint.Text}" />
+          <ItemsControl ItemsSource="{Binding Retired}" AutomationProperties.Name="{l:T MinecraftGroups_Retired.Text}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:MinecraftRetiredItemViewModel">
+                <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding Group}">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
+                      <TextBlock Classes="body" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding Group}" />
+                      <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center" Command="{Binding ReleaseCommand}"
+                            IsEnabled="{Binding CanRelease}" Content="{l:T MinecraftGroups_Release.Content}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Verknüpfte Accounts -->
+      <TextBlock Classes="section" Margin="0,16,0,0" Text="{l:T MinecraftAdmin_Title.Text, Upper=True}" />
+      <TextBlock Classes="muted" Text="{l:T MinecraftAdmin_Intro.Text}" />
+      <WrapPanel Orientation="Horizontal">
+        <TextBox x:Name="SearchBox" Width="260" Margin="0,0,12,8" Text="{Binding Search}" PlaceholderText="{l:T MinecraftAdmin_Search.PlaceholderText}"
+                 AutomationProperties.Name="{l:T MinecraftAdmin_Search.AutomationProperties.Name}">
+          <TextBox.InnerRightContent>
+            <Button Classes="icon" Width="32" Height="32" Padding="6" Command="{Binding SearchNowCommand}"
+                    ToolTip.Tip="{l:T MinecraftAdmin_Search.AutomationProperties.Name}" AutomationProperties.Name="{l:T MinecraftAdmin_Search.AutomationProperties.Name}">
+              <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" />
+            </Button>
+          </TextBox.InnerRightContent>
+        </TextBox>
+        <ComboBox MinWidth="170" Margin="0,0,12,8" ItemsSource="{Binding EditionOptions}" SelectedItem="{Binding SelectedEdition}"
+                  AutomationProperties.Name="{l:T MinecraftAdmin_Edition.AutomationProperties.Name}" />
+        <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding ReloadCommand}" Content="{l:T MinecraftAdmin_Reload.Content}" />
+        <ProgressBar IsIndeterminate="True" Width="60" Margin="0,0,0,8" VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+      </WrapPanel>
+      <TextBlock Classes="muted" Text="{l:T MinecraftAdmin_Empty.Text}" IsVisible="{Binding ShowEmpty}" />
+      <ItemsControl ItemsSource="{Binding Items}" AutomationProperties.Name="{l:T MinecraftAdmin_Title.Text}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:MinecraftAdminItemViewModel">
+            <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding Name}">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="body strong" Text="{Binding Name}" />
+                <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                <SelectableTextBlock Classes="muted" FontSize="12" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding Uuid}" TextWrapping="Wrap" />
+                <WrapPanel Orientation="Horizontal" Margin="0,4,0,0">
+                  <Button Classes="secondary" Margin="0,0,10,0" Command="{Binding UnlinkCommand}" Content="{l:T MinecraftAdmin_Unlink.Content}" />
+                  <Button Classes="secondary" Command="{Binding OpenProfileCommand}" IsVisible="{Binding HasProfile}" Content="{l:T MinecraftAdmin_OpenProfile.Content}" />
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding MoreCommand}" IsVisible="{Binding HasMore}" Content="{l:T Common_LoadMore.Content}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

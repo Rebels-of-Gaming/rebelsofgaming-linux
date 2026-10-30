@@ -147,11 +147,13 @@ public class ServersTabsTests
         await join.DownloadPackCommand.ExecuteAsync(null);
         Assert.Equal("https://cdn.example.test/minecraft/pack-3f2a.zip", t.Browser.Opened[^1].ToString());
 
-        // Weltkarte: Website-Seite, solange die App sie nicht nativ hat (Bestenlisten: MatchesTests)
+        // Weltkarte: native Seite (Stufe 9, Bestenlisten: MatchesTests)
         var shell = new ShellViewModel(t.Services);
         await shell.InitializeAsync();
+        var opened = t.Browser.Opened.Count;
         join.OpenMapCommand.Execute(null);
-        Assert.EndsWith("/de/minecraft/karte", t.Browser.Opened[^1].ToString(), StringComparison.Ordinal);
+        Assert.IsType<MinecraftMapViewModel>(shell.CurrentPage);
+        Assert.Equal(opened, t.Browser.Opened.Count);
         servers.Pause();
     }
 

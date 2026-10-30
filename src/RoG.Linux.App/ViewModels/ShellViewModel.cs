@@ -59,6 +59,7 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_Votes", "VotesPage_Title.Text", "IconVote", "votes", true),
             Item("Nav_Leaderboards", "LeaderboardsPage_Title.Text", "IconTrophy", "minecraft/leaderboards", true),
             Item("Nav_Bans", "BansPage_Title.Text", "IconShield", "bans", true),
+            Item("Nav_MinecraftMap", "MinecraftMapPage_Title.Text", "IconMapMarker", "minecraft/karte", true),
         ];
         UpdateAdminEntry();
         _services.CurrentUserChanged += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(UpdateAdminEntry);
@@ -431,6 +432,7 @@ public sealed partial class ShellViewModel : ObservableObject
         [AppSection.Leaderboards] = "Nav_Leaderboards",
         [AppSection.Bans] = "Nav_Bans",
         [AppSection.Admin] = "Nav_Admin",
+        [AppSection.MinecraftMap] = "Nav_MinecraftMap",
     };
 
     /// <summary>Adresse der Website für Ziele, die die App (noch) nicht nativ zeigt; <c>null</c> = nativ bzw. ohne Eintrag.</summary>
@@ -441,7 +443,6 @@ public sealed partial class ShellViewModel : ObservableObject
         string Escaped(string k) => string.Join('/', k.Split('/').Select(Uri.EscapeDataString));
         return route.Section switch
         {
-            AppSection.MinecraftMap => env.WebPage(lang, "minecraft/karte"),
             AppSection.Tools when route.Key is { } k => env.WebPage(lang, "tools/" + Escaped(k)),
             _ => null,
         };
@@ -470,6 +471,7 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Leaderboards" => new LeaderboardsViewModel(_services),
         "Nav_Friends" => new FriendsViewModel(_services, ShowLogin),
         "Nav_Bans" => new BansViewModel(_services),
+        "Nav_MinecraftMap" => new MinecraftMapViewModel(_services),
         "Nav_Wiki" => new WikiViewModel(_services, ShowLogin),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
         "Nav_Admin" => new AdminViewModel(_services),

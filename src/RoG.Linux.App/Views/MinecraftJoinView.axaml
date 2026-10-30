@@ -1,0 +1,203 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MinecraftJoinView"
+             x:DataType="vm:MinecraftJoinViewModel">
+  <!-- Server → Minecraft (wie MinecraftPanel der Windows-ServersPage): Anleitung Java/Bedrock/Konsole, Ressourcenpaket,
+       mit minecraft.manage zusätzlich Paket hochladen/löschen und „Beitrittsdaten bearbeiten“ (Formular lädt beim Aufklappen). -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://rebelsofgaming/Themes/ServerIcons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Panel>
+    <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                 EmptyText="{l:T ServersPage_McState.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+    <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+      <StackPanel Margin="24,8,24,32" Spacing="16" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="title" Text="{l:T McJoin_Title.Text}" />
+          <TextBlock Classes="muted" Text="{l:T McJoin_Lead.Text}" />
+        </StackPanel>
+
+        <!-- Java -->
+        <Border Classes="card">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="section" Text="{l:T McJoin_JavaTitle.Text}" />
+            <TextBlock Classes="muted" Text="{l:T McJoin_JavaPlatforms.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_JavaStep1.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_JavaStep2.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_JavaStep3.Text}" />
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="muted" Text="{l:T McJoin_Address.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <SelectableTextBlock Classes="body strong" Text="{Binding JavaAddress}" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <Button Classes="secondary" Command="{Binding CopyJavaCommand}" Content="{l:T McJoin_CopyJava.Content}"
+                      AutomationProperties.Name="{l:T McJoin_CopyJava.AutomationProperties.Name}" />
+            </WrapPanel>
+            <TextBlock Classes="muted small" Text="{l:T McJoin_DefaultPort.Text}" IsVisible="{Binding ShowDefaultPortNote}" />
+          </StackPanel>
+        </Border>
+
+        <!-- Ressourcenpaket (Java) – Verwaltende sehen die Karte immer (zum Hochladen) -->
+        <Border Classes="card" IsVisible="{Binding ShowPackCard}">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="section" Text="{l:T McJoin_PackTitle.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_PackText.Text}" />
+            <TextBlock Classes="muted" Text="{Binding PackInfo}" />
+            <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding DownloadPackCommand}" IsVisible="{Binding HasPack}"
+                    AutomationProperties.Name="{l:T McJoin_PackDownload.Content}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16" />
+                <TextBlock Text="{l:T McJoin_PackDownload.Content}" />
+              </StackPanel>
+            </Button>
+            <StackPanel Spacing="10" IsVisible="{Binding CanEdit}">
+              <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding HasPack}">
+                <TextBlock Classes="muted" Text="{l:T McJoin_PackSha1.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <SelectableTextBlock Grid.Column="1" Classes="body" FontFamily="{StaticResource RoGMonoFont}" FontSize="12" Text="{Binding PackSha1}"
+                                     TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <Button Grid.Column="2" Classes="secondary" VerticalAlignment="Center" Command="{Binding CopyPackSha1Command}"
+                        Content="{l:T McJoin_PackCopySha1.Content}" AutomationProperties.Name="{l:T McJoin_PackCopySha1.AutomationProperties.Name}" />
+              </Grid>
+              <TextBlock Classes="muted small" Text="{l:T McJoin_PackAdminHint.Text}" />
+              <WrapPanel Orientation="Horizontal">
+                <Button Classes="primary" Margin="0,0,12,8" Click="OnPackUploadClick" IsEnabled="{Binding !IsPackBusy}"
+                        AutomationProperties.Name="{l:T McJoin_PackUpload.Content}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Data="{StaticResource IconUpload}" Width="16" Height="16" />
+                    <TextBlock Text="{l:T McJoin_PackUpload.Content}" />
+                  </StackPanel>
+                </Button>
+                <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding DeletePackCommand}" IsVisible="{Binding HasPack}"
+                        AutomationProperties.Name="{l:T McJoin_PackDelete.AutomationProperties.Name}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Data="{StaticResource IconTrash}" Width="16" Height="16" />
+                    <TextBlock Text="{l:T McJoin_PackDelete.Content}" />
+                  </StackPanel>
+                </Button>
+                <ProgressBar IsIndeterminate="True" Width="80" Margin="0,0,0,8" VerticalAlignment="Center" IsVisible="{Binding IsPackBusy}"
+                             AutomationProperties.Name="{l:T McJoin_PackBusy.AutomationProperties.Name}" />
+              </WrapPanel>
+              <c:ConfirmBar DataContext="{Binding Confirm}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- Bedrock -->
+        <Border Classes="card">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="section" Text="{l:T McJoin_BedrockTitle.Text}" />
+            <TextBlock Classes="muted" Text="{l:T McJoin_BedrockPlatforms.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep1.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep2.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_BedrockStep3.Text}" />
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="muted" Text="{l:T McJoin_Address.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <SelectableTextBlock Classes="body strong" Text="{Binding BedrockAddress}" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <Button Classes="secondary" Command="{Binding CopyBedrockAddressCommand}" Content="{l:T McJoin_CopyBedrockAddress.Content}"
+                      AutomationProperties.Name="{l:T McJoin_CopyBedrockAddress.AutomationProperties.Name}" />
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="muted" Text="{l:T McJoin_Port.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <SelectableTextBlock Classes="body strong" Text="{Binding BedrockPort}" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <Button Classes="secondary" Command="{Binding CopyBedrockPortCommand}" Content="{l:T McJoin_CopyBedrockPort.Content}"
+                      AutomationProperties.Name="{l:T McJoin_CopyBedrockPort.AutomationProperties.Name}" />
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- Konsole -->
+        <Border Classes="card" IsVisible="{Binding ShowConsole}">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="section" Text="{l:T McJoin_ConsoleTitle.Text}" />
+            <TextBlock Classes="muted" Text="{l:T McJoin_ConsolePlatforms.Text}" />
+            <Border Classes="hint" IsVisible="{Binding HasHint}">
+              <Grid ColumnDefinitions="Auto,*">
+                <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Margin="0,0,10,0" Foreground="{DynamicResource RoGGoldBrush}" VerticalAlignment="Top" />
+                <TextBlock Grid.Column="1" Classes="body" Text="{Binding Hint}" />
+              </Grid>
+            </Border>
+            <TextBlock Classes="body" Text="{l:T McJoin_ConsoleIntro.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep1.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep2.Text}" />
+            <TextBlock Classes="body" Text="{l:T McJoin_ConsoleStep3.Text}" />
+            <WrapPanel Orientation="Horizontal">
+              <TextBlock Classes="muted" Text="{l:T McJoin_Gamertag.Text}" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <SelectableTextBlock Classes="body strong" Text="{Binding Gamertag}" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <Button Classes="secondary" Command="{Binding CopyGamertagCommand}" Content="{l:T McJoin_CopyGamertag.Content}"
+                      AutomationProperties.Name="{l:T McJoin_CopyGamertag.AutomationProperties.Name}" />
+            </WrapPanel>
+            <TextBlock Classes="muted" Text="{l:T McJoin_ConsoleTrouble.Text}" />
+          </StackPanel>
+        </Border>
+
+        <TextBlock Classes="muted" Text="{l:T McJoin_LinkTip.Text}" />
+        <WrapPanel Orientation="Horizontal">
+          <Button Classes="primary" Margin="0,0,12,8" Command="{Binding OpenMapCommand}" Content="{l:T McJoin_Map.Content}" />
+          <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding OpenLeaderboardsCommand}" Content="{l:T McJoin_Leaderboards.Content}" />
+          <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding LinkAccountCommand}" Content="{l:T McJoin_LinkAccount.Content}"
+                  IsVisible="{Binding IsSignedIn}" />
+        </WrapPanel>
+
+        <!-- Beitrittsdaten bearbeiten (minecraft.manage) -->
+        <Expander HorizontalAlignment="Stretch" IsVisible="{Binding CanEdit}" IsExpanded="{Binding IsEditExpanded}"
+                  AutomationProperties.Name="{l:T McJoin_Edit.AutomationProperties.Name}">
+          <Expander.Header>
+            <TextBlock Classes="body strong" Text="{l:T McJoin_Edit.Header}" />
+          </Expander.Header>
+          <StackPanel Spacing="12" Margin="0,4,0,4">
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsEditLoading}" AutomationProperties.Name="{l:T McJoin_EditLoading.AutomationProperties.Name}" />
+            <TextBlock Classes="muted" Text="{l:T McJoin_EditLead.Text}" />
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T McJoin_EditJavaAddress.Header}" />
+              <TextBox Text="{Binding EditJavaAddress}" MaxLength="253" AutomationProperties.Name="{l:T McJoin_EditJavaAddress.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T McJoin_EditJavaPort.Header}" />
+              <NumericUpDown Value="{Binding EditJavaPort}" Minimum="1" Maximum="65535" Increment="1" FormatString="0" Width="200" HorizontalAlignment="Left"
+                             AutomationProperties.Name="{l:T McJoin_EditJavaPort.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T McJoin_EditBedrockAddress.Header}" />
+              <TextBox Text="{Binding EditBedrockAddress}" MaxLength="253" AutomationProperties.Name="{l:T McJoin_EditBedrockAddress.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T McJoin_EditBedrockPort.Header}" />
+              <NumericUpDown Value="{Binding EditBedrockPort}" Minimum="1" Maximum="65535" Increment="1" FormatString="0" Width="200" HorizontalAlignment="Left"
+                             AutomationProperties.Name="{l:T McJoin_EditBedrockPort.Header}" />
+            </StackPanel>
+            <ToggleSwitch IsChecked="{Binding EditConsoleEnabled}" Content="{l:T McJoin_EditConsoleEnabled.Header}" OnContent="" OffContent=""
+                          AutomationProperties.Name="{l:T McJoin_EditConsoleEnabled.Header}" />
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T McJoin_EditGamertag.Header}" />
+              <TextBox Text="{Binding EditGamertag}" MaxLength="20" MaxWidth="320" HorizontalAlignment="Left" MinWidth="200"
+                       AutomationProperties.Name="{l:T McJoin_EditGamertag.Header}" />
+            </StackPanel>
+            <TextBlock Classes="muted" Text="{l:T McJoin_EditHintNote.Text}" />
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T McJoin_EditHintDe.Header}" />
+              <TextBox Text="{Binding EditHintDe}" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="500" MinHeight="60"
+                       AutomationProperties.Name="{l:T McJoin_EditHintDe.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T McJoin_EditHintEn.Header}" />
+              <TextBox Text="{Binding EditHintEn}" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="500" MinHeight="60"
+                       AutomationProperties.Name="{l:T McJoin_EditHintEn.Header}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" TextWrapping="Wrap" Text="{l:T McJoin_EditHintFr.Header}" />
+              <TextBox Text="{Binding EditHintFr}" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="500" MinHeight="60"
+                       AutomationProperties.Name="{l:T McJoin_EditHintFr.Header}" />
+            </StackPanel>
+            <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding SaveCommand}" Content="{l:T McJoin_EditSave.Content}" />
+          </StackPanel>
+        </Expander>
+      </StackPanel>
+    </ScrollViewer>
+  </Panel>
+</UserControl>
