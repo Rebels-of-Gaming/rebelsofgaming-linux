@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    xUnit-Tests der Linux-Projekte: Plattform-Dienste (Schlüsselbund-Logik, Übersetzungen, XDG, Gerätename),
+    ViewModels gegen einen Fake-API-Server (echte RoG-Pipeline aus dem Kern) und Headless-Screenshots der Hauptseiten
+    (Avalonia.Headless mit Skia, Ausgabe in artifacts/screenshots/).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Headless-Avalonia braucht einen Dispatcher je Testlauf; parallel nur über Klassen -->
+    <NoWarn>$(NoWarn);CA1707;CA2000;CA1861;CA1515;CA1849</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/RoG.Linux.App/RoG.Linux.App.csproj" />
+    <ProjectReference Include="../../src/RoG.Linux.Platform/RoG.Linux.Platform.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Avalonia.Headless.XUnit" />
+    <PackageReference Include="Avalonia.Skia" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
