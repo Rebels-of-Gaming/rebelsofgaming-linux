@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ServerConsoleView"
+             x:DataType="vm:ServerConsoleViewModel">
+  <!-- Reiter „Konsole“: Verbindungszeile, Ausgabe (Systemschrift monospace, folgt dem Ende), Eingabe mit ↑/↓-Verlauf -->
+  <UserControl.Resources>
+    <!-- Monospace-Schrift des Systems (fontconfig „monospace“), Rückfall auf verbreitete Familien -->
+    <FontFamily x:Key="ConsoleFont">monospace, DejaVu Sans Mono, Liberation Mono, Noto Sans Mono</FontFamily>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="ListBox#Output ListBoxItem">
+      <Setter Property="Padding" Value="8,0" />
+      <Setter Property="MinHeight" Value="0" />
+    </Style>
+    <Style Selector="Ellipse.state">
+      <Setter Property="Fill" Value="{DynamicResource RoGStatusOfflineBrush}" />
+    </Style>
+    <Style Selector="Ellipse.state.connected">
+      <Setter Property="Fill" Value="{DynamicResource RoGGreenBrush}" />
+    </Style>
+    <Style Selector="Ellipse.state.connecting">
+      <Setter Property="Fill" Value="{DynamicResource RoGGoldBrush}" />
+    </Style>
+    <Style Selector="Ellipse.state.lost">
+      <Setter Property="Fill" Value="{DynamicResource RoGRedBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="16,8,16,16" RowSpacing="8">
+    <!-- Verbindung + Werkzeuge -->
+    <Grid ColumnDefinitions="Auto,*,Auto">
+      <Ellipse Classes="state" Classes.connected="{Binding IsConnected}" Classes.connecting="{Binding IsConnecting}" Classes.lost="{Binding IsLost}"
+               Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,8,0" />
+      <TextBlock Grid.Column="1" Classes="muted small" Text="{Binding ConnectionText}" TextWrapping="Wrap" VerticalAlignment="Center"
+                 AutomationProperties.LiveSetting="Polite" />
+      <WrapPanel Grid.Column="2" Orientation="Horizontal" ItemSpacing="4" Margin="8,0,0,0" VerticalAlignment="Center">
+        <Button Classes="icon" Command="{Binding ConnectCommand}" IsVisible="{Binding HasConsole}"
+                ToolTip.Tip="{l:T Console_Reconnect.Content}" AutomationProperties.Name="{l:T Console_Reconnect.Content}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="16" Height="16" />
+        </Button>
+        <Button Classes="icon" Click="OnCopyClick"
+                ToolTip.Tip="{l:T Linux_ConsoleCopyHint}" AutomationProperties.Name="{l:T Linux_ConsoleCopy}">
+          <PathIcon Data="{StaticResource IconCopy}" Width="16" Height="16" />
+        </Button>
+        <Button Classes="icon" Command="{Binding ClearLinesCommand}"
+                ToolTip.Tip="{l:T Console_Clear.Content}" AutomationProperties.Name="{l:T Console_Clear.Content}">
+          <PathIcon Data="{StaticResource IconClose}" Width="16" Height="16" />
+        </Button>
+      </WrapPanel>
+    </Grid>
+
+    <!-- Ausgabe: virtualisierte Liste, Zeilen markier- und kopierbar (Strg+C) -->
+    <Border Grid.Row="1" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="1"
+            CornerRadius="6" ClipToBounds="True">
+      <Panel>
+        <ListBox x:Name="Output" ItemsSource="{Binding Lines}" SelectionMode="Multiple" Background="Transparent"
+                 Padding="0,6" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 AutomationProperties.Name="{l:T Console_Output.AutomationProperties.Name}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <TextBlock Text="{Binding}" FontFamily="{StaticResource ConsoleFont}" FontSize="13" LineHeight="18"
+                         Foreground="{DynamicResource RoGInkBrush}" TextWrapping="Wrap" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock Classes="muted" Text="{l:T Linux_ConsoleEmpty}" IsVisible="{Binding HasNoLines}" Margin="14,12"
+                   FontFamily="{StaticResource ConsoleFont}" FontSize="13" IsHitTestVisible="False" />
+        <Button Classes="secondary" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="12" Click="OnJumpToEnd"
+                IsVisible="{Binding !IsFollowing}" AutomationProperties.Name="{l:T Linux_ConsoleJumpToEnd}">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <PathIcon Data="{StaticResource IconChevronRight}" Width="12" Height="12" RenderTransform="rotate(90deg)" />
+            <TextBlock Text="{l:T Linux_ConsoleJumpToEnd, Upper=True}" />
+          </StackPanel>
+        </Button>
+      </Panel>
+    </Border>
+
+    <!-- Eingabe -->
+    <StackPanel Grid.Row="2" Spacing="6">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+        <TextBox x:Name="CommandBox" Text="{Binding Command}" MaxLength="500" IsEnabled="{Binding CanCommand}"
+                 FontFamily="{StaticResource ConsoleFont}" PlaceholderText="{l:T Console_Command.PlaceholderText}"
+                 AutomationProperties.Name="{l:T Console_Command.PlaceholderText}" KeyDown="OnCommandKeyDown" />
+        <Button Grid.Column="1" Classes="primary" Command="{Binding SendCommand}" IsEnabled="{Binding CanCommand}"
+                AutomationProperties.Name="{l:T Console_Send.Content}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource IconSend}" Width="14" Height="14" />
+            <TextBlock Text="{l:T Console_Send.Content, Upper=True}" />
+          </StackPanel>
+        </Button>
+      </Grid>
+      <TextBlock Classes="muted small" Text="{Binding CommandHint}" IsVisible="{Binding HasCommandHint}" TextWrapping="Wrap" />
+      <TextBlock Classes="muted small" Text="{l:T Linux_ConsoleHistoryHint}" IsVisible="{Binding CanCommand}" TextWrapping="Wrap" />
+    </StackPanel>
+  </Grid>
+</UserControl>

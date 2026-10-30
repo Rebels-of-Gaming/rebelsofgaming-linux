@@ -259,7 +259,17 @@ public sealed partial class ServerItemViewModel : ObservableObject
         CopyAutomationName = services.Format(StringKeys.ServersCopyAutomation, server.Name);
         Meta = string.Join(" · ", new[] { server.GameName, server.Map }.Where(s => !string.IsNullOrEmpty(s)));
         FillPercent = server.MaxPlayers > 0 ? Math.Clamp(100.0 * server.Players / server.MaxPlayers, 0, 100) : 0;
+        CanControl = ServerControlAccess.For(server.Control, services.CurrentUser).Any;
+        ControlAutomationName = services.Format("Linux_ServerControlAutomation", server.Name);
     }
+
+    /// <summary>Steuerungsrechte (<c>control</c>) plus passender Token-Scope → „Steuern“ (eigenes Fenster).</summary>
+    public bool CanControl { get; }
+
+    public string ControlAutomationName { get; }
+
+    [RelayCommand]
+    private void Control() => _services.ServerControlOpener?.Invoke(Server);
 
     public GameServer Server { get; }
 

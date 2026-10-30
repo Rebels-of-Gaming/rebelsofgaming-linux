@@ -415,4 +415,52 @@
   <data name="Linux_DeviceRemoveText" xml:space="preserve">
     <value>This is the device you are using right now – you will be signed out of the app.</value>
   </data>
+  <data name="Linux_ConsoleStopTitle" xml:space="preserve">
+    <value>Stop the server?</value>
+  </data>
+  <data name="Linux_ConsoleStopText" xml:space="preserve">
+    <value>All players are disconnected and the server shuts down cleanly.</value>
+  </data>
+  <data name="Linux_ConsoleRestartTitle" xml:space="preserve">
+    <value>Restart the server?</value>
+  </data>
+  <data name="Linux_ConsoleRestartText" xml:space="preserve">
+    <value>All players are briefly disconnected; the server is usually back within a few seconds.</value>
+  </data>
+  <data name="Linux_ConsoleCopy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Linux_ConsoleCopyHint" xml:space="preserve">
+    <value>Copy selected lines (Ctrl+C); without a selection, the whole output</value>
+  </data>
+  <data name="Linux_ConsoleCopied" xml:space="preserve">
+    <value>{0} lines copied.</value>
+  </data>
+  <data name="Linux_ConsoleJumpToEnd" xml:space="preserve">
+    <value>Jump to end</value>
+  </data>
+  <data name="Linux_ConsoleEmpty" xml:space="preserve">
+    <value>No output yet.</value>
+  </data>
+  <data name="Linux_ConsoleReadOnly" xml:space="preserve">
+    <value>Read only: your access does not allow commands on this server.</value>
+  </data>
+  <data name="Linux_ConsoleApprovalNeeded" xml:space="preserve">
+    <value>Four-eyes approval: console commands on this server need the approval permission.</value>
+  </data>
+  <data name="Linux_ConsoleHistoryHint" xml:space="preserve">
+    <value>↑/↓ browses recent commands.</value>
+  </data>
+  <data name="Linux_ServerTabSoon" xml:space="preserve">
+    <value>This section is coming in one of the next updates of the Linux app.</value>
+  </data>
+  <data name="Linux_ServerControlTabs" xml:space="preserve">
+    <value>Server control sections</value>
+  </data>
+  <data name="Linux_ServerControlAutomation" xml:space="preserve">
+    <value>Control {0}</value>
+  </data>
+  <data name="Linux_RconEmpty" xml:space="preserve">
+    <value>No RCON commands in this session yet. The output is not stored.</value>
+  </data>
 </root>

@@ -415,4 +415,52 @@
   <data name="Linux_DeviceRemoveText" xml:space="preserve">
     <value>C'est l'appareil que tu utilises actuellement – tu seras déconnecté de l'application.</value>
   </data>
+  <data name="Linux_ConsoleStopTitle" xml:space="preserve">
+    <value>Arrêter le serveur ?</value>
+  </data>
+  <data name="Linux_ConsoleStopText" xml:space="preserve">
+    <value>Tous les joueurs sont déconnectés, le serveur s'arrête proprement.</value>
+  </data>
+  <data name="Linux_ConsoleRestartTitle" xml:space="preserve">
+    <value>Redémarrer le serveur ?</value>
+  </data>
+  <data name="Linux_ConsoleRestartText" xml:space="preserve">
+    <value>Tous les joueurs sont brièvement déconnectés ; le serveur revient généralement en quelques secondes.</value>
+  </data>
+  <data name="Linux_ConsoleCopy" xml:space="preserve">
+    <value>Copier</value>
+  </data>
+  <data name="Linux_ConsoleCopyHint" xml:space="preserve">
+    <value>Copier les lignes sélectionnées (Ctrl+C) ; sans sélection, toute la sortie</value>
+  </data>
+  <data name="Linux_ConsoleCopied" xml:space="preserve">
+    <value>{0} lignes copiées.</value>
+  </data>
+  <data name="Linux_ConsoleJumpToEnd" xml:space="preserve">
+    <value>Aller à la fin</value>
+  </data>
+  <data name="Linux_ConsoleEmpty" xml:space="preserve">
+    <value>Pas encore de sortie.</value>
+  </data>
+  <data name="Linux_ConsoleReadOnly" xml:space="preserve">
+    <value>Lecture seule : ton accès ne permet pas d'envoyer des commandes sur ce serveur.</value>
+  </data>
+  <data name="Linux_ConsoleApprovalNeeded" xml:space="preserve">
+    <value>Validation à quatre yeux : les commandes console sur ce serveur exigent le droit de validation.</value>
+  </data>
+  <data name="Linux_ConsoleHistoryHint" xml:space="preserve">
+    <value>↑/↓ parcourt les dernières commandes.</value>
+  </data>
+  <data name="Linux_ServerTabSoon" xml:space="preserve">
+    <value>Cette section arrive dans une des prochaines mises à jour de l'app Linux.</value>
+  </data>
+  <data name="Linux_ServerControlTabs" xml:space="preserve">
+    <value>Sections du contrôle du serveur</value>
+  </data>
+  <data name="Linux_ServerControlAutomation" xml:space="preserve">
+    <value>Contrôler {0}</value>
+  </data>
+  <data name="Linux_RconEmpty" xml:space="preserve">
+    <value>Aucune commande RCON dans cette session. La sortie n'est pas enregistrée.</value>
+  </data>
 </root>

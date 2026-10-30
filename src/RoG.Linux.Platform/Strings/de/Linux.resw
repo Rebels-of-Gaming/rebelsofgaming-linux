@@ -415,4 +415,52 @@
   <data name="Linux_DeviceRemoveText" xml:space="preserve">
     <value>Das ist das Gerät, das du gerade benutzt – danach bist du in der App abgemeldet.</value>
   </data>
+  <data name="Linux_ConsoleStopTitle" xml:space="preserve">
+    <value>Server stoppen?</value>
+  </data>
+  <data name="Linux_ConsoleStopText" xml:space="preserve">
+    <value>Alle Spieler werden getrennt, der Server fährt sauber herunter.</value>
+  </data>
+  <data name="Linux_ConsoleRestartTitle" xml:space="preserve">
+    <value>Server neu starten?</value>
+  </data>
+  <data name="Linux_ConsoleRestartText" xml:space="preserve">
+    <value>Alle Spieler werden kurz getrennt, der Server ist in der Regel nach wenigen Sekunden wieder da.</value>
+  </data>
+  <data name="Linux_ConsoleCopy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="Linux_ConsoleCopyHint" xml:space="preserve">
+    <value>Markierte Zeilen kopieren (Strg+C), ohne Auswahl die ganze Ausgabe</value>
+  </data>
+  <data name="Linux_ConsoleCopied" xml:space="preserve">
+    <value>{0} Zeilen kopiert.</value>
+  </data>
+  <data name="Linux_ConsoleJumpToEnd" xml:space="preserve">
+    <value>Zum Ende</value>
+  </data>
+  <data name="Linux_ConsoleEmpty" xml:space="preserve">
+    <value>Noch keine Ausgabe.</value>
+  </data>
+  <data name="Linux_ConsoleReadOnly" xml:space="preserve">
+    <value>Nur lesen: Befehle erlaubt dein Zugang an diesem Server nicht.</value>
+  </data>
+  <data name="Linux_ConsoleApprovalNeeded" xml:space="preserve">
+    <value>Vier-Augen-Freigabe: Konsolenbefehle gehen an diesem Server nur mit Freigaberecht.</value>
+  </data>
+  <data name="Linux_ConsoleHistoryHint" xml:space="preserve">
+    <value>↑/↓ blättert durch die letzten Befehle.</value>
+  </data>
+  <data name="Linux_ServerTabSoon" xml:space="preserve">
+    <value>Dieser Bereich kommt mit einem der nächsten Updates der Linux-App.</value>
+  </data>
+  <data name="Linux_ServerControlTabs" xml:space="preserve">
+    <value>Bereiche der Server-Steuerung</value>
+  </data>
+  <data name="Linux_ServerControlAutomation" xml:space="preserve">
+    <value>{0} steuern</value>
+  </data>
+  <data name="Linux_RconEmpty" xml:space="preserve">
+    <value>Noch keine RCON-Befehle in dieser Sitzung. Die Ausgabe wird nicht gespeichert.</value>
+  </data>
 </root>

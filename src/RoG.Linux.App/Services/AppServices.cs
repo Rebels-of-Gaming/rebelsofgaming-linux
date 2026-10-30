@@ -150,6 +150,9 @@ public sealed class AppServices : IDisposable
 
     public bool Navigate(AppRoute route) => Navigator?.Invoke(route) ?? false;
 
+    /// <summary>Server-Steuerung im eigenen Fenster öffnen („Steuern“ auf der Server-Karte) – von der App gesetzt.</summary>
+    public Action<RoG.Core.Features.Servers.GameServer>? ServerControlOpener { get; set; }
+
     /// <summary>Zeigt die App dieses Ziel selbst an (Bereich mit eigener Seite)? Von der Shell gesetzt.</summary>
     public Func<AppRoute, bool>? IsNative { get; set; }
 

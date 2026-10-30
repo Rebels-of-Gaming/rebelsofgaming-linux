@@ -1,0 +1,258 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RoG.Linux.App.ViewModels"
+        xmlns:v="using:RoG.Linux.App.Views"
+        xmlns:c="using:RoG.Linux.App.Controls"
+        xmlns:l="using:RoG.Linux.App.Localization"
+        x:Class="RoG.Linux.App.Views.ServerControlWindow"
+        x:DataType="vm:ServerControlViewModel"
+        Width="980" Height="700" MinWidth="360" MinHeight="420"
+        Background="{DynamicResource RoGBgBrush}"
+        Title="{Binding Name}">
+  <!-- Server-Steuerung im eigenen Fenster (wie ServerConsoleWindow der Windows-App), je Server höchstens eins -->
+  <Window.Resources>
+    <FontFamily x:Key="ConsoleFont">monospace, DejaVu Sans Mono, Liberation Mono, Noto Sans Mono</FontFamily>
+  </Window.Resources>
+  <Window.Styles>
+    <Style Selector="TextBox.field">
+      <Setter Property="MinWidth" Value="0" />
+    </Style>
+  </Window.Styles>
+
+  <DockPanel>
+    <!-- Titel -->
+    <Border DockPanel.Dock="Top" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1"
+            Padding="16,8">
+      <Grid ColumnDefinitions="Auto,*">
+        <PathIcon Data="{StaticResource IconServers}" Width="16" Height="16" Foreground="{DynamicResource RoGMutedBrush}" Margin="0,0,10,0" />
+        <TextBlock Grid.Column="1" x:Name="TitleText" Classes="section" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+      </Grid>
+    </Border>
+
+    <!-- Zustand, Ressourcen, Power -->
+    <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="16,12,16,4" ItemSpacing="16" LineSpacing="10">
+      <StackPanel Spacing="4" MinWidth="220" VerticalAlignment="Center">
+        <TextBlock Classes="body strong" Text="{Binding Console.StateText}" />
+        <TextBlock Classes="muted small" Text="{Binding Console.ResourcesText}" IsVisible="{Binding Console.HasResources}" TextWrapping="Wrap" />
+        <ProgressBar Value="{Binding Console.MemoryPercent}" Maximum="100" Height="4" MinHeight="4" CornerRadius="2" MaxWidth="320"
+                     HorizontalAlignment="Left" Width="320" IsVisible="{Binding Console.HasMemoryLimit}" />
+      </StackPanel>
+      <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8" VerticalAlignment="Center" IsVisible="{Binding Console.CanPower}">
+        <Button Classes="primary" Command="{Binding Console.StartServerCommand}" IsVisible="{Binding Console.IsStopped}"
+                Content="{l:T Console_Start.Content, Upper=True}" AutomationProperties.Name="{l:T Console_Start.Content}" />
+        <Button Classes="secondary" Command="{Binding Console.StartServerCommand}" IsVisible="{Binding Console.IsRunning}"
+                Content="{l:T Console_StartSecondary.Content, Upper=True}" AutomationProperties.Name="{l:T Console_Start.Content}" />
+        <Button Classes="secondary" Command="{Binding Console.RestartServerCommand}"
+                Content="{l:T Console_Restart.Content, Upper=True}" AutomationProperties.Name="{l:T Console_Restart.Content}" />
+        <Button Classes="secondary" Command="{Binding Console.StopServerCommand}"
+                Content="{l:T Console_Stop.Content, Upper=True}" AutomationProperties.Name="{l:T Console_Stop.Content}" />
+        <Button Classes="secondary" Command="{Binding Console.KillServerCommand}"
+                Content="{l:T Console_Kill.Content, Upper=True}" AutomationProperties.Name="{l:T Console_KillTitle}" />
+      </WrapPanel>
+    </WrapPanel>
+
+    <!-- Rückfrage und Rückmeldung im Inhalt -->
+    <StackPanel DockPanel.Dock="Top" Margin="16,8,16,0" Spacing="8">
+      <c:ConfirmBar DataContext="{Binding Confirm}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <!-- Reiter (umbrechend statt waagrecht scrollen) -->
+    <Border DockPanel.Dock="Top" Margin="16,8,16,0" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1"
+            IsVisible="{Binding ShowTabs}">
+      <ItemsControl ItemsSource="{Binding Tabs}" AutomationProperties.Name="{l:T Linux_ServerControlTabs}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:ServerControlTabItem">
+            <ToggleButton Classes="segment" IsChecked="{Binding IsSelected}" Content="{Binding Label}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Border>
+
+    <Panel>
+      <!-- Konsole -->
+      <Panel IsVisible="{Binding IsConsoleTab}">
+        <v:ServerConsoleView x:Name="ConsolePanel" DataContext="{Binding Console}" />
+      </Panel>
+
+      <!-- Eingehängte Reiter (Configs, Dateien, Backups, Bans & Plugin): Ansicht per DataTemplate, sonst „kommt“ -->
+      <Panel IsVisible="{Binding IsConfigsTab}">
+        <ContentControl Content="{Binding ConfigsTab}" />
+        <TextBlock Classes="muted" Text="{l:T Linux_ServerTabSoon}" IsVisible="{Binding ConfigsPending}" Margin="24" TextWrapping="Wrap" />
+      </Panel>
+      <Panel IsVisible="{Binding IsFilesTab}">
+        <ContentControl Content="{Binding FilesTab}" />
+        <TextBlock Classes="muted" Text="{l:T Linux_ServerTabSoon}" IsVisible="{Binding FilesPending}" Margin="24" TextWrapping="Wrap" />
+      </Panel>
+      <Panel IsVisible="{Binding IsBackupsTab}">
+        <ContentControl Content="{Binding BackupsTab}" />
+        <TextBlock Classes="muted" Text="{l:T Linux_ServerTabSoon}" IsVisible="{Binding BackupsPending}" Margin="24" TextWrapping="Wrap" />
+      </Panel>
+      <Panel IsVisible="{Binding IsGameBansTab}">
+        <ContentControl Content="{Binding GameBansTab}" />
+        <TextBlock Classes="muted" Text="{l:T Linux_ServerTabSoon}" IsVisible="{Binding GameBansPending}" Margin="24" TextWrapping="Wrap" />
+      </Panel>
+
+      <!-- RCON -->
+      <Panel IsVisible="{Binding IsRconTab}">
+      <Grid RowDefinitions="*,Auto" Margin="16,8,16,16" RowSpacing="8" DataContext="{Binding Rcon}" x:DataType="vm:ServerRconViewModel">
+        <Border Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="1" CornerRadius="6">
+          <Panel>
+            <!-- RCON-Ausgaben sind oft Tabellen (status, listid): nicht umbrechen, im Kasten waagrecht scrollen -->
+            <ScrollViewer Padding="12,8" HorizontalScrollBarVisibility="Auto">
+              <SelectableTextBlock Text="{Binding Output}" FontFamily="{StaticResource ConsoleFont}" FontSize="13" TextWrapping="NoWrap"
+                                   Foreground="{DynamicResource RoGInkBrush}" AutomationProperties.Name="{l:T Rcon_Output.AutomationProperties.Name}" />
+            </ScrollViewer>
+            <TextBlock Classes="muted" Text="{l:T Linux_RconEmpty}" IsVisible="{Binding !HasOutput}" Margin="14,12" TextWrapping="Wrap" />
+          </Panel>
+        </Border>
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <TextBox x:Name="RconBox" Text="{Binding Command}" MaxLength="500" FontFamily="{StaticResource ConsoleFont}"
+                   PlaceholderText="{l:T Rcon_Command.PlaceholderText}" AutomationProperties.Name="{l:T Rcon_Command.PlaceholderText}"
+                   KeyDown="OnRconKeyDown" />
+          <Button Grid.Column="1" Classes="primary" Command="{Binding SendCommand}" AutomationProperties.Name="{l:T Console_Send.Content}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconSend}" Width="14" Height="14" />
+              <TextBlock Text="{l:T Console_Send.Content, Upper=True}" />
+            </StackPanel>
+          </Button>
+        </Grid>
+      </Grid>
+      </Panel>
+
+      <!-- Sperren -->
+      <Panel IsVisible="{Binding IsBansTab}">
+      <ScrollViewer DataContext="{Binding Bans}" x:DataType="vm:ServerBansViewModel" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16,8,16,16" Spacing="14" MaxWidth="900" HorizontalAlignment="Left">
+          <Border Classes="card" Padding="16">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="kicker" Text="{l:T Ban_NewTitle.Text}" />
+              <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="10">
+                <StackPanel Spacing="4" Width="240">
+                  <TextBlock Classes="label" Text="{l:T Ban_PlayerId.Header}" />
+                  <TextBox Text="{Binding PlayerId}" FontFamily="{StaticResource ConsoleFont}" AutomationProperties.Name="{l:T Ban_PlayerId.Header}" />
+                </StackPanel>
+                <StackPanel Spacing="4" Width="200">
+                  <TextBlock Classes="label" Text="{l:T Ban_PlayerName.Header}" />
+                  <TextBox Text="{Binding PlayerName}" AutomationProperties.Name="{l:T Ban_PlayerName.Header}" />
+                </StackPanel>
+                <StackPanel Spacing="4" Width="180">
+                  <TextBlock Classes="label" Text="{l:T Ban_Minutes.Header}" />
+                  <NumericUpDown Value="{Binding Minutes}" Minimum="0" Increment="60" FormatString="0" AutomationProperties.Name="{l:T Ban_Minutes.Header}" />
+                </StackPanel>
+                <StackPanel Spacing="4" Width="320">
+                  <TextBlock Classes="label" Text="{l:T Ban_Reason.Header}" />
+                  <TextBox Text="{Binding Reason}" MaxLength="200" AutomationProperties.Name="{l:T Ban_Reason.Header}" />
+                </StackPanel>
+              </WrapPanel>
+              <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+                <Button Classes="primary" Command="{Binding BanCommand}" Content="{l:T Ban_Submit.Content, Upper=True}" />
+                <Button Classes="secondary" Command="{Binding RefreshCommand}" Content="{l:T Backup_Reload.Content, Upper=True}" />
+              </WrapPanel>
+              <TextBlock Classes="muted small" Text="{l:T Ban_Hint.Text}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T Ban_Empty.Text}" RetryCommand="{Binding RefreshCommand}" MinHeight="160" />
+          <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:BanItemViewModel">
+                <Border Classes="card" Padding="14,10" Margin="0,0,0,8" AutomationProperties.Name="{Binding Player}">
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <StackPanel Spacing="2">
+                      <TextBlock Classes="body strong" Text="{Binding Player}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center" Command="{Binding LiftCommand}"
+                            Content="{l:T Ban_Lift.Content, Upper=True}" AutomationProperties.Name="{Binding LiftAutomationName}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+      </Panel>
+
+      <!-- Whitelist -->
+      <Panel IsVisible="{Binding IsWhitelistTab}">
+      <ScrollViewer DataContext="{Binding Whitelist}" x:DataType="vm:ServerWhitelistViewModel" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16,8,16,16" Spacing="14" MaxWidth="900" HorizontalAlignment="Left">
+          <Border Classes="card" Padding="16">
+            <StackPanel Spacing="10">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="label" Text="{l:T Whitelist_Player.Header}" />
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" MaxWidth="560">
+                  <TextBox x:Name="WhitelistBox" Text="{Binding PlayerName}" MaxLength="64" AutomationProperties.Name="{l:T Whitelist_Player.Header}"
+                           KeyDown="OnWhitelistKeyDown" />
+                  <Button Grid.Column="1" Classes="primary" Command="{Binding AddCommand}" Content="{l:T Whitelist_Add.Content, Upper=True}" />
+                  <Button Grid.Column="2" Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:T Backup_Reload.Content}"
+                          AutomationProperties.Name="{l:T Backup_Reload.Content}">
+                    <PathIcon Data="{StaticResource IconRefresh}" Width="16" Height="16" />
+                  </Button>
+                </Grid>
+              </StackPanel>
+              <TextBlock Classes="muted small" Text="{l:T Whitelist_Hint.Text}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T Whitelist_Empty.Text}" RetryCommand="{Binding RefreshCommand}" MinHeight="160" />
+          <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:WhitelistItemViewModel">
+                <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" Padding="4,8" AutomationProperties.Name="{Binding Display}">
+                  <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <PathIcon Data="{StaticResource IconPerson}" Width="16" Height="16" VerticalAlignment="Center"
+                              Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding IsMember}" />
+                    <TextBlock Grid.Column="1" Classes="body" Text="{Binding Display}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    <Button Grid.Column="2" Classes="secondary" Command="{Binding RemoveCommand}" Content="{l:T Whitelist_Remove.Content, Upper=True}"
+                            AutomationProperties.Name="{Binding RemoveAutomationName}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+      </Panel>
+
+      <!-- Freigaben (Vier-Augen-Prinzip) -->
+      <Panel IsVisible="{Binding IsApprovalsTab}">
+      <ScrollViewer DataContext="{Binding Approvals}" x:DataType="vm:ServerApprovalsViewModel" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16,8,16,16" Spacing="12" MaxWidth="900" HorizontalAlignment="Left">
+          <Button Classes="secondary" Command="{Binding RefreshCommand}" Content="{l:T Backup_Reload.Content, Upper=True}" />
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T Approval_Empty.Text}" RetryCommand="{Binding RefreshCommand}" MinHeight="160" />
+          <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ChangeItemViewModel">
+                <Border Classes="card" Padding="14" Margin="0,0,0,12" AutomationProperties.Name="{Binding Title}">
+                  <StackPanel Spacing="8">
+                    <TextBlock Classes="body strong" Text="{Binding Title}" FontFamily="{StaticResource ConsoleFont}" TextWrapping="Wrap" />
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                    <Border Background="{DynamicResource RoGBg3Brush}" CornerRadius="4" Padding="10,8" IsVisible="{Binding HasDiff}">
+                      <SelectableTextBlock Text="{Binding Diff}" FontFamily="{StaticResource ConsoleFont}" FontSize="12" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource RoGInkBrush}" />
+                    </Border>
+                    <TextBox Text="{Binding Note}" MaxLength="500" PlaceholderText="{l:T Approval_Note.PlaceholderText}"
+                             AutomationProperties.Name="{l:T Approval_Note.PlaceholderText}" />
+                    <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+                      <Button Classes="primary" Command="{Binding ApproveCommand}" Content="{l:T Approval_Approve.Content, Upper=True}" />
+                      <Button Classes="secondary" Command="{Binding RejectCommand}" Content="{l:T Approval_Reject.Content, Upper=True}" />
+                    </WrapPanel>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+      </Panel>
+    </Panel>
+  </DockPanel>
+</Window>

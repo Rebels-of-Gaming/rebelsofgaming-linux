@@ -162,6 +162,7 @@ public sealed partial class App : Application
         RichContentView.ImageSource = (uri, width) => services.Images.LoadAsync(uri, width);
         ThemeService.Apply(services.LinuxSettings.EffectiveTheme);
         services.LinuxSettingsChanged += (_, _) => Dispatcher.UIThread.Post(() => ThemeService.Apply(services.LinuxSettings.EffectiveTheme));
+        services.ServerControlOpener = server => Views.ServerControlWindow.Open(services, server);
         return new MainWindow(services) { DataContext = new ShellViewModel(services) };
     }
 
