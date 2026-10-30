@@ -1,0 +1,4 @@
+[submodule "external/rog-windows"]
+	path = external/rog-windows
+	url = https://github.com/Rebels-of-Gaming/rebelsofgaming-windows.git
+	branch = develop

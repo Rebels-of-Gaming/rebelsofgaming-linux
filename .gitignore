@@ -1,0 +1,24 @@
+# Build
+bin/
+obj/
+artifacts/
+TestResults/
+*.binlog
+
+# Flatpak-Bau (flatpak-builder)
+.flatpak-builder/
+build-dir/
+repo/
+*.flatpak
+
+# IDEs
+.vs/
+.idea/
+*.user
+*.DotSettings.user
+.vscode/*
+!.vscode/extensions.json
+
+# Lokale Umgebung – nie ins Repo
+*.env
+.env*

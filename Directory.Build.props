@@ -1,0 +1,29 @@
+<Project>
+  <!--
+    Gemeinsame Einstellungen für die Linux-Projekte (src/, tests/). Gilt NICHT für den geteilten Kern im Submodul
+    external/rog-windows – MSBuild nimmt dort die Directory.Build.props des Windows-Repos (die nächstgelegene gewinnt).
+  -->
+  <PropertyGroup>
+    <RoGLinuxVersion>0.1.0</RoGLinuxVersion>
+    <Version>$(RoGLinuxVersion)</Version>
+    <AssemblyVersion>$(RoGLinuxVersion).0</AssemblyVersion>
+    <FileVersion>$(RoGLinuxVersion).0</FileVersion>
+    <Company>Rebels of Gaming</Company>
+    <Product>Rebels of Gaming für Linux</Product>
+    <Copyright>© 2020–2026 Rebels of Gaming · Copyright by wahke (https://wahke.lu)</Copyright>
+
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <Deterministic>true</Deterministic>
+
+    <!-- Pfad zum geteilten Kern (Git-Submodul, fester Commit) -->
+    <RoGWindowsRoot>$(MSBuildThisFileDirectory)external/rog-windows/</RoGWindowsRoot>
+    <RoGCoreProject>$(RoGWindowsRoot)src/RoG.Core/RoG.Core.csproj</RoGCoreProject>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,23 @@
+<Project>
+  <!--
+    Zentrale Paketversionen (Central Package Management) der Linux-Projekte. Versionen fest, Updates bewusst per Commit.
+    RoG.Core (Submodul) bringt seine Versionen aus external/rog-windows/Directory.Packages.props mit (AngleSharp).
+  -->
+  <ItemGroup Label="App">
+    <PackageVersion Include="Avalonia" Version="11.3.22" />
+    <PackageVersion Include="Avalonia.Desktop" Version="11.3.22" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.22" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+  <ItemGroup Label="Plattform (D-Bus)">
+    <!-- Gleiche Version wie Avalonia.FreeDesktop 11.3.22, damit nur eine Tmds.DBus.Protocol.dll im Paket landet -->
+    <PackageVersion Include="Tmds.DBus.Protocol" Version="0.21.3" />
+  </ItemGroup>
+  <ItemGroup Label="Tests">
+    <PackageVersion Include="Avalonia.Headless.XUnit" Version="11.3.22" />
+    <PackageVersion Include="Avalonia.Skia" Version="11.3.22" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+</Project>
