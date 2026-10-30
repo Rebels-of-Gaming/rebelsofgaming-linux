@@ -542,6 +542,19 @@
     <Setter Property="BorderThickness" Value="2" />
   </Style>
 
+  <!-- Ablagefläche für Uploads: gestrichelte Kante, beim Darüberziehen rot -->
+  <Style Selector="Border.dropzone">
+    <Setter Property="Background" Value="{DynamicResource RoGBg2Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGLineBrush}" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGCardRadius}" />
+    <Setter Property="Padding" Value="20,16" />
+  </Style>
+  <Style Selector="Border.dropzone.over">
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+  </Style>
+
   <!-- Reaktion unter einem Forenbeitrag („👍 3“), eigene mit roter Kante -->
   <Style Selector="Button.reaction">
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />

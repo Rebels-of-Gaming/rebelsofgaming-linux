@@ -414,4 +414,32 @@ public static class FakeData
     public static string ForumPreview => """
         {"data":{"html":"<p><strong>Vorschau</strong> deiner Antwort</p>"}}
         """;
+
+    public static string Upload(string id, string name, string status, string visibility, string created) => $$$"""
+        {"id":"{{{id}}}","code":"{{{id.ToLowerInvariant()}}}","status":"{{{status}}}","title":null,"original_name":"{{{name}}}","kind":"image","size":184320,"visibility":"{{{visibility}}}","created_at":"{{{created}}}",
+         "links":{"direct":"https://i.example.test/{{{id}}}.webp","preview":"https://i.example.test/{{{id}}}","thumb":"{{{Cdn}}}/uploads/{{{id}}}-thumb.webp","bbcode":"[img]https://i.example.test/{{{id}}}.webp[/img]","markdown":"![](https://i.example.test/{{{id}}}.webp)","html":null},
+         "error":{{{(status == "failed" ? "{\"message\":\"Datei beschädigt\"}" : "null")}}}}
+        """;
+
+    public static string Uploads => "{\"data\":[" + string.Join(",",
+        Upload("01UP1", "scrim-aufstellung.png", "ready", "public", "2026-10-29T20:00:00Z"),
+        Upload("01UP2", "clip-ace.mp4", "processing", "members", "2026-10-29T21:10:00Z"),
+        Upload("01UP3", "kaputt.png", "failed", "private", "2026-10-28T10:00:00Z")) + "],\"meta\":{\"next_cursor\":null}}";
+
+    public static string Presign => """
+        {"data":{"upload":{"id":"01UPNEW"},"upload_url":"https://s3.example.test/rog-public/01UPNEW?sig=abc","method":"PUT","headers":{"Content-Type":"image/png","x-amz-acl":["public-read"]},"expires_at":"2026-10-30T12:00:00Z"}}
+        """;
+
+    public static string UploadCompleted => "{\"data\":" + Upload("01UPNEW", "screenshot.png", "ready", "public", "2026-10-30T09:00:00Z") + "}";
+
+    public static string ShortLinks => """
+        {"data":[
+          {"id":"01L1","code":"scrim","short_url":"https://rogclan.de/scrim","url":"https://rebelsofgaming.com/de/events/01EV1","title":"Scrim-Anmeldung","active":true,"blocked":false,"clicks":42,"created_at":"2026-10-20T10:00:00Z"},
+          {"id":"01L2","code":"alt","short_url":"https://rogclan.de/alt","url":"https://example.org/alt","title":null,"active":false,"blocked":true,"clicks":3,"created_at":"2026-10-01T10:00:00Z"}
+        ],"meta":{"next_cursor":null}}
+        """;
+
+    public static string ShortLinkCreated => """
+        {"data":{"id":"01L3","code":"ts","short_url":"https://rogclan.de/ts","url":"https://rebelsofgaming.com/de/servers/teamspeak","title":"TeamSpeak","active":true,"blocked":false,"clicks":0,"created_at":"2026-10-30T09:00:00Z"}}
+        """;
 }

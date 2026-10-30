@@ -32,6 +32,8 @@ public sealed class TestServices : IDisposable
 
     public FakeLauncher Launcher { get; }
 
+    public FakeStorage Storage { get; private init; } = new();
+
     public static async Task<TestServices> CreateAsync(StoredToken? token = null, bool guest = false, string language = "de", bool keyring = true)
     {
         var folder = Path.Combine(Path.GetTempPath(), "rog-linux-tests", Guid.NewGuid().ToString("N"));
@@ -47,12 +49,14 @@ public sealed class TestServices : IDisposable
         var browser = new RecordingBrowser();
         var clipboard = new FakeClipboard();
         var launcher = new FakeLauncher();
+        var storage = new FakeStorage();
         var services = await AppServices.CreateAsync(new AppServicesOptions
         {
             SettingsDirectory = folder,
             Tokens = tokens,
             ApiHandler = api,
             ImageHandler = new FakeImages(),
+            StorageHandler = storage,
             Browser = browser,
             Notifier = new SilentNotifier(),
             Autostart = new FakeAutostart(),
@@ -67,7 +71,7 @@ public sealed class TestServices : IDisposable
             await services.UpdateSettingsAsync(s => s with { GuestMode = true });
         }
 
-        return new TestServices(services, api, secrets, browser, folder, clipboard, launcher);
+        return new TestServices(services, api, secrets, browser, folder, clipboard, launcher) { Storage = storage };
     }
 
     public void Dispose()

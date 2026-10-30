@@ -204,6 +204,23 @@ public class ScreenshotTests
     public async Task Servers_discord_guest() => await Shoot("servers_discord_guest_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), shell => OpenServerTab(shell, "discord"));
 
     [AvaloniaFact]
+    public async Task Uploads() => await Shoot("uploads_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenUploads(shell, false));
+
+    [AvaloniaFact]
+    public async Task Uploads_narrow() => await Shoot("uploads_narrow_480x900", 480, 900, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenUploads(shell, false));
+
+    [AvaloniaFact]
+    public async Task Uploads_links() => await Shoot("uploads_links_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenUploads(shell, true));
+
+    [AvaloniaFact]
+    public async Task Uploads_guest() =>
+        await Shoot("uploads_guest_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), async shell =>
+        {
+            shell.NavigateTo("Nav_Uploads");
+            await Settle(300);
+        });
+
+    [AvaloniaFact]
     public async Task Settings_full() =>
         await Shoot("settings_full_1280x2000", 1280, 2000, await TestServices.CreateAsync(guest: true), shell =>
         {
@@ -338,6 +355,24 @@ public class ScreenshotTests
         await servers.Servers[1].ConnectCommand.ExecuteAsync(null);
         await Settle(300);
         servers.Pause();
+    }
+
+    private static async Task OpenUploads(ShellViewModel shell, bool links)
+    {
+        shell.NavigateTo("Nav_Uploads");
+        var uploads = Assert.IsType<UploadsViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => uploads.ShowContent);
+        if (links)
+        {
+            uploads.IsLinksTab = true;
+            await ViewModelTests.WaitUntil(() => uploads.Links.ShowContent);
+        }
+        else
+        {
+            uploads.Items[0].CopyDirectCommand.Execute(null);
+        }
+
+        await Settle(400);
     }
 
     private static async Task OpenForumThread(ShellViewModel shell)

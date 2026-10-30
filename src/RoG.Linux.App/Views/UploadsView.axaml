@@ -1,0 +1,164 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.UploadsView"
+             x:DataType="vm:UploadsViewModel"
+             DragDrop.AllowDrop="True">
+  <!-- Uploads wie UploadsPage der Windows-App: Reiter Uploads · Kurzlinks; Drag & Drop auf die ganze Seite, Strg+V -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="display" Text="{l:T UploadsPage_Title.Text}" />
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+      <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" IsVisible="{Binding ShowUploader}">
+        <WrapPanel Orientation="Horizontal">
+          <ToggleButton Classes="segment" IsChecked="{Binding IsUploadsTab}" Content="{l:T UploadsPage_TabUploads.Text, Upper=True}" />
+          <ToggleButton Classes="segment" IsChecked="{Binding IsLinksTab}" Content="{l:T UploadsPage_TabLinks.Text, Upper=True}" />
+        </WrapPanel>
+      </Border>
+      <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <Panel>
+      <!-- Gastmodus -->
+      <StackPanel Spacing="16" Margin="24" IsVisible="{Binding IsGuest}" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <PathIcon Data="{StaticResource IconUploads}" Width="48" Height="48" Foreground="{DynamicResource RoGMutedBrush}" />
+        <TextBlock Classes="muted" Text="{l:T UploadsPage_Guest.Text}" TextAlignment="Center" />
+        <Button Classes="primary" HorizontalAlignment="Center" Command="{Binding SignInCommand}" Content="{l:T Linux_SignIn}" />
+      </StackPanel>
+
+      <!-- Uploads -->
+      <DockPanel IsVisible="{Binding ShowUploader}">
+        <Panel IsVisible="{Binding IsUploadsTab}" DockPanel.Dock="Top">
+          <Border x:Name="DropZone" Classes="dropzone" Margin="24,8,24,12">
+            <StackPanel Spacing="12">
+              <Grid ColumnDefinitions="Auto,*">
+                <PathIcon Data="{StaticResource IconUploads}" Width="28" Height="28" Margin="0,0,12,0" Foreground="{DynamicResource RoGRedBrush}" VerticalAlignment="Top" />
+                <TextBlock Grid.Column="1" Classes="body" Text="{l:T UploadsPage_DropHint.Text}" MaxWidth="620" HorizontalAlignment="Left" />
+              </Grid>
+              <WrapPanel Orientation="Horizontal">
+                <Button Classes="primary" Margin="0,0,12,8" Click="OnPickClick" IsEnabled="{Binding !IsUploading}" Content="{l:T UploadsPage_Pick.Content}" />
+                <Button Classes="secondary" Margin="0,0,12,8" Click="OnPasteClick" IsEnabled="{Binding !IsUploading}" Content="{l:T UploadsPage_Paste.Content}" />
+                <StackPanel Margin="0,0,16,8">
+                  <TextBlock Classes="label" Text="{l:T UploadsPage_Visibility.Header}" />
+                  <ComboBox MinWidth="220" ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}"
+                            AutomationProperties.Name="{l:T UploadsPage_Visibility.Header}" />
+                </StackPanel>
+                <ToggleSwitch IsChecked="{Binding CopyLink}" Content="{l:T UploadsPage_CopyLink.Header}" OnContent="" OffContent="" Margin="0,0,0,8"
+                              AutomationProperties.Name="{l:T UploadsPage_CopyLink.Header}" />
+              </WrapPanel>
+              <StackPanel Spacing="4" IsVisible="{Binding IsUploading}">
+                <TextBlock Classes="muted small" Text="{Binding ProgressText}" />
+                <ProgressBar Value="{Binding Progress}" Maximum="100" Height="6" AutomationProperties.Name="{Binding ProgressText}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+        </Panel>
+
+        <Panel>
+          <!-- Liste der Uploads -->
+          <DockPanel IsVisible="{Binding IsUploadsTab}">
+            <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="24,0,24,12" HorizontalAlignment="Stretch"
+                    IsVisible="{Binding HasMore}" Command="{Binding LoadMoreCommand}" Content="{l:T Common_LoadMore.Content}" />
+            <Panel>
+              <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmptyForMember}"
+                           EmptyText="{l:T UploadsPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+              <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Items}" Margin="24,0,24,24">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="340" Spacing="12" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:UploadItemViewModel">
+                      <Border Classes="card" Padding="12" AutomationProperties.Name="{Binding Title}">
+                        <Grid ColumnDefinitions="96,*">
+                          <Border Width="96" Height="72" CornerRadius="{StaticResource RoGControlRadius}" ClipToBounds="True" Background="{DynamicResource RoGBg3Brush}"
+                                  VerticalAlignment="Top">
+                            <Panel>
+                              <PathIcon Data="{StaticResource IconMedia}" Width="28" Height="28" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding !HasThumb}" />
+                              <Image Source="{Binding Thumb}" Stretch="UniformToFill" />
+                            </Panel>
+                          </Border>
+                          <StackPanel Grid.Column="1" Spacing="4" Margin="12,0,0,0">
+                            <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Classes="muted small" Classes.error="{Binding IsFailed}" Text="{Binding Meta}" TextWrapping="Wrap" />
+                            <WrapPanel Orientation="Horizontal" IsVisible="{Binding HasLinks}">
+                              <Button Classes="reaction" Margin="0,0,6,4" Command="{Binding CopyDirectCommand}" Content="{l:T UploadsPage_CopyDirect.Content}" />
+                              <Button Classes="reaction" Margin="0,0,6,4" Command="{Binding CopyBbCodeCommand}" Content="{l:T UploadsPage_CopyBbCode.Content}" />
+                              <Button Classes="reaction" Margin="0,0,6,4" Command="{Binding CopyMarkdownCommand}" Content="{l:T UploadsPage_CopyMarkdown.Content}" />
+                              <Button Classes="icon" Width="30" Height="30" Padding="6" Command="{Binding OpenCommand}"
+                                      ToolTip.Tip="{l:T UploadsPage_Open.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T UploadsPage_Open.AutomationProperties.Name}">
+                                <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+                              </Button>
+                            </WrapPanel>
+                          </StackPanel>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </Panel>
+          </DockPanel>
+
+          <!-- Kurzlinks -->
+          <Panel IsVisible="{Binding IsLinksTab}">
+          <DockPanel DataContext="{Binding Links}" x:DataType="vm:ShortLinksViewModel">
+            <Border DockPanel.Dock="Top" Classes="card" Margin="24,8,24,12">
+              <StackPanel Spacing="10" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+                <StackPanel>
+                  <TextBlock Classes="label" Text="{l:T LinksPage_Target.Header}" />
+                  <TextBox Text="{Binding Target}" PlaceholderText="{l:T LinksPage_Target.PlaceholderText}" AutomationProperties.Name="{l:T LinksPage_Target.Header}" />
+                </StackPanel>
+                <WrapPanel Orientation="Horizontal">
+                  <StackPanel Margin="0,0,12,0">
+                    <TextBlock Classes="label" Text="{l:T LinksPage_Code.Header}" />
+                    <TextBox Text="{Binding Code}" MinWidth="200" AutomationProperties.Name="{l:T LinksPage_Code.Header}" />
+                  </StackPanel>
+                  <StackPanel>
+                    <TextBlock Classes="label" Text="{l:T LinksPage_LinkTitle.Header}" />
+                    <TextBox Text="{Binding Title}" MinWidth="260" AutomationProperties.Name="{l:T LinksPage_LinkTitle.Header}" />
+                  </StackPanel>
+                </WrapPanel>
+                <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding CreateCommand}" Content="{l:T LinksPage_Create.Content}" />
+              </StackPanel>
+            </Border>
+            <Panel>
+              <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                           EmptyText="{l:T LinksPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+              <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Items}" Margin="24,0,24,24" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left"
+                              AutomationProperties.Name="{l:T LinksPage_List.AutomationProperties.Name}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ShortLinkItemViewModel">
+                      <Border Classes="card" Padding="14,10" AutomationProperties.Name="{Binding ShortUrl}">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <StackPanel Spacing="2">
+                            <SelectableTextBlock Classes="body strong" Text="{Binding ShortUrl}" FontFamily="{StaticResource RoGMonoFont}" />
+                            <TextBlock Classes="muted small" Text="{Binding Target}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Classes="muted small" Classes.error="{Binding IsBlocked}" Text="{Binding Meta}" />
+                          </StackPanel>
+                          <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center" Command="{Binding CopyCommand}" Content="{l:T Common_Copy.Content}" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </Panel>
+          </DockPanel>
+          </Panel>
+        </Panel>
+      </DockPanel>
+    </Panel>
+  </DockPanel>
+</UserControl>

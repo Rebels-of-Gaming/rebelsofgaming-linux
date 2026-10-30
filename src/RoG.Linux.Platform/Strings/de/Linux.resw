@@ -304,4 +304,7 @@
   <data name="Linux_ShortcutHelp" xml:space="preserve">
     <value>Diese Liste</value>
   </data>
+  <data name="Linux_UploadFileTypes" xml:space="preserve">
+    <value>Bilder und Videos</value>
+  </data>
 </root>

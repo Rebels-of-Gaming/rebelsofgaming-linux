@@ -27,6 +27,9 @@ public sealed record AppServicesOptions
     /// <summary>Innerer HTTP-Handler der API (Tests: Fake-Server).</summary>
     public HttpMessageHandler? ApiHandler { get; init; }
 
+    /// <summary>HTTP-Handler für Uploads in den Speicher der Plattform (vorab signierte Adressen, ohne Token).</summary>
+    public HttpMessageHandler? StorageHandler { get; init; }
+
     /// <summary>HTTP-Handler für Bilder vom CDN der Plattform.</summary>
     public HttpMessageHandler? ImageHandler { get; init; }
 
@@ -196,6 +199,12 @@ public sealed class AppServices : IDisposable
     /// <summary>„Beim Anmelden starten“ (Portal in Flatpak, sonst <c>~/.config/autostart</c>).</summary>
     public IAutostart Autostart { get; }
 
+    /// <summary>
+    /// Direkter Upload in den Speicher der Plattform (vorab signierte Adresse aus <c>POST /v1/uploads</c>) – eigener
+    /// Client ohne Token und ohne RoG-Pipeline, lange Zeitgrenze für Videos.
+    /// </summary>
+    public HttpClient StorageHttp { get; private init; } = new() { Timeout = TimeSpan.FromMinutes(15) };
+
     /// <summary>Spiele- und Voice-Links (<c>steam://</c>, <c>ts3server://</c> …) über <c>xdg-open</c>.</summary>
     public RoG.Core.Features.Servers.IExternalLauncher Launcher { get; }
 
@@ -292,6 +301,9 @@ public sealed class AppServices : IDisposable
             connector)
         {
             PersistentCache = persistentCache,
+            StorageHttp = options.StorageHandler is null
+                ? new HttpClient { Timeout = TimeSpan.FromMinutes(15) }
+                : new HttpClient(options.StorageHandler, disposeHandler: false) { Timeout = TimeSpan.FromMinutes(15) },
         };
     }
 
@@ -382,6 +394,7 @@ public sealed class AppServices : IDisposable
         (Notifier as IDisposable)?.Dispose();
         OutboxRunner.Dispose();
         Outbox.Dispose();
+        StorageHttp.Dispose();
         (Tokens as IDisposable)?.Dispose();
     }
 

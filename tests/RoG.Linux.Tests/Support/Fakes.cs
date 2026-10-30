@@ -157,3 +157,18 @@ public sealed class FakeAutostart : RoG.Linux.Platform.Desktop.IAutostart
         return Task.FromResult(enable ? RoG.Linux.Platform.Desktop.AutostartResult.Enabled : RoG.Linux.Platform.Desktop.AutostartResult.Disabled);
     }
 }
+
+/// <summary>Speicher der Plattform (vorab signierte PUT-Adresse): merkt sich Uploads, prüft „ohne Token“.</summary>
+public sealed class FakeStorage : HttpMessageHandler
+{
+    public List<(HttpMethod Method, Uri Url, long Length, string? ContentType, bool HasAuthorization)> Puts { get; } = [];
+
+    public System.Net.HttpStatusCode Status { get; set; } = System.Net.HttpStatusCode.OK;
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var bytes = request.Content is null ? [] : await request.Content.ReadAsByteArrayAsync(cancellationToken);
+        Puts.Add((request.Method, request.RequestUri!, bytes.LongLength, request.Content?.Headers.ContentType?.MediaType, request.Headers.Authorization is not null));
+        return new HttpResponseMessage(Status);
+    }
+}
