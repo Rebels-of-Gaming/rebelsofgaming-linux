@@ -5,7 +5,9 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
-**Stufe 4 (Kommunikation, 30.10.2026) – erledigt** (Direktnachrichten schreiben mit Zitat, live, Anhängen und
+**Stufe 5 (Medien, 30.10.2026) – erledigt** (Uploads mit Drag & Drop, Dateiauswahl über das Portal und Strg+V,
+Kurzlinks, Galerie mit Großansicht und Einreichen, Downloads mit Prüfsumme, Profil bearbeiten).
+**Stufe 4 (Kommunikation) – erledigt** (Direktnachrichten schreiben mit Zitat, live, Anhängen und
 eigenem Fenster, Forum lesen + schreiben, Zusagen, Offline-Warteschlange, verschlüsselter Plattencache, Tastenkürzel).
 **Stufe 3 (Echtzeit + Desktop-Integration) – erledigt** (Reverb, Glocke + Zähler,
 Desktop-Benachrichtigungen mit Klick, alle `rog://`-Ziele, Server-Reiter Minecraft/TeamSpeak/Discord-Voice, Tray,
@@ -52,9 +54,14 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Offline-Warteschlange** (Kern-`Outbox`: DMs nur im Speicher, Forenantworten und Zusagen verschlüsselt in `$XDG_DATA_HOME/rebelsofgaming/outbox-<umgebung>.dat`; senden nach Anmeldung, bei Neuverbindung und jede Minute; endgültige Ablehnung als Desktop-Benachrichtigung) | steht |
 | **Verschlüsselter Plattencache** (Kern-`PersistentEtagCache` mit `KeyringPayloadProtector`: AES-256-GCM, Schlüssel nur im Schlüsselbund; nie Unterhaltungen/Konto/Geräte; Dateien > 30 Tage werden beim Start gelöscht, höchstens 400 Einträge; Abmelden löscht alles) | steht; ohne Schlüsselbund nur im Speicher |
 | **Tastenkürzel** (Alt+←/→ Verlauf, Strg+N, Strg+R, Strg+W, Strg+Q, F1 → Liste in den Einstellungen) | steht |
+| **Uploads** (Bilder/kurze Videos per Drag & Drop, Dateiauswahl – Avalonia nutzt das FileChooser-Portal – oder Strg+V: kopierte Dateien bzw. Bild als PNG; vorab signierte Adresse ohne Token, Fortschritt, Sichtbarkeit, Direktlink kopieren; eigene Uploads mit Vorschaubild (nur öffentliche), Link/BBCode/Markdown kopieren) | steht |
+| **Kurzlinks** (Reiter auf der Upload-Seite: anlegen mit Wunsch-Kürzel und Titel, Klicks, gesperrt/inaktiv, kopieren) | steht |
+| **Galerie** (Alben mit Titelbild, Bilder/Clips, Großansicht mit Pfeiltasten und Escape, Clips öffnen im Browser, Einreichen mit Bildunterschrift + Rechte-Bestätigung) | steht; gegen die Produktion geprüft (noch keine Alben) |
+| **Downloads** (Version, Spiel, Größe, Zähler, Änderungen; Laden mit Fortschritt in den Downloads-Ordner nach xdg-user-dirs, SHA-256-Prüfung, „Im Ordner zeigen“ über `org.freedesktop.FileManager1`, sonst `xdg-open`) | steht |
+| **Profil bearbeiten** (Konto: Motto, Über mich, Stadt/Land, Einwilligungen Karte/Online-Status/Hall of Fame, Avatar/Banner mit Größengrenze der Plattform) | steht |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -155,8 +162,11 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    Plattencache (Schlüssel im Schlüsselbund), Tastenkürzel. *Wie Windows nicht enthalten:* Anhänge **senden** in DMs
    (die Windows-App kann es auch nicht), Beiträge bearbeiten/melden (Melden kommt mit der Moderation, Stufe 9), Bilder
    im Forum hochladen (Uploader, Stufe 5).
-5. **Medien** – Uploads (Drag & Drop, Strg+V, Datei-Dialog über das FileChooser-Portal), Galerie, Downloads, Kurzlinks,
-   Profil bearbeiten.
+5. **Medien** *(erledigt)* – Uploads (Drag & Drop, Strg+V, Datei-Dialog über das FileChooser-Portal), Galerie (mit
+   Einreichen), Downloads (Prüfsumme, Downloads-Ordner), Kurzlinks, Profil bearbeiten. *Nicht enthalten (auch in der
+   Windows-App nur teilweise):* Likes/Kommentare an Galerie-Alben (Social-Karte, Stufe 6), Melden von Bildern
+   (Moderation, Stufe 9), globales Screenshot-Kürzel (Pflichtenheft „optional“, unter Wayland nur über das
+   Screenshot-Portal – F8).
 6. **Clan-Prozesse** – Bewerbung, Votes, Regeln bestätigen, Mitgliederkarte, Stats, Abwesenheit, Konto/Sicherheit.
 7. **Server-Steuerung** – Pterodactyl (Power, Ressourcen, Konsole im eigenen Fenster, Configs, Dateien, Backups, RCON);
    App-Sperre (statt Windows Hello: Polkit/fprintd prüfen, sonst PIN).
@@ -182,7 +192,8 @@ Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
   Domain uns gehört (`https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt`).
 - Manifest-Entwurf `packaging/flatpak/com.rebelsofgaming.RebelsOfGaming.yml` (freedesktop 25.08, Binärpakete von
   cdn.rogclan.de mit sha256 – F1, Rechte: Netz, Wayland + X11-Rückfall, IPC, DRI, Secret Service,
-  StatusNotifierWatcher; Benachrichtigungen, Autostart, Farbschema und Links über Portale ohne Zusatzrecht)
+  StatusNotifierWatcher, `xdg-download`; Benachrichtigungen, Autostart, Dateiauswahl, Farbschema und Links über Portale
+  ohne Zusatzrecht)
 - `.desktop` (inkl. `x-scheme-handler/rog`) und AppStream-Metadaten unter `packaging/linux/` (Entwürfe, validiert:
   `desktop-file-validate` ok, XML wohlgeformt; `appstreamcli validate` vor Einreichung)
 - Kein Offline-NuGet-Restore nötig: Flathub bekommt fertige Pakete (F1)
@@ -214,8 +225,15 @@ trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehob
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 4)
+## Datenschutz (Stand Stufe 5)
 
+- **Neu in Stufe 5:** Uploads gehen direkt an den Speicher der Plattform (vorab signierte Adresse aus
+  `POST /v1/uploads/presign`, ohne Token), danach `POST /v1/uploads/{id}/complete`; Galerie-Einreichungen ebenso plus
+  `POST /v1/gallery/albums/{album}/items` (Rechte-Bestätigung, Bildunterschrift). Downloads kommen über einen
+  kurzlebigen signierten Link (`POST /v1/download-versions/{id}/link`) und landen im Downloads-Ordner (bleiben dort,
+  gehören dem Benutzer). Profiländerungen `PATCH /v1/me/profile`, Avatar/Banner `POST /v1/me/avatar|banner` (der Server
+  entfernt EXIF/GPS). Neue Einstellungen in `settings.json` (Kern-Felder): Sichtbarkeit neuer Uploads, „Link danach
+  kopieren“. Keine weiteren lokalen Daten; Vorschaubilder nur im Speicher und nur von öffentlichen Uploads.
 - **Neu in Stufe 4:** **Plattencache** `$XDG_CACHE_HOME/rebelsofgaming/http/<umgebung>/*.dat` (verschlüsselte
   API-Antworten wie News, Forum, Profile, Termine; nie Unterhaltungen, Nachrichten, Konto, Geräte, Exporte),
   **Warteschlange** `$XDG_DATA_HOME/rebelsofgaming/outbox-<umgebung>.dat` (verschlüsselt: Forenantworten, Zusagen –
@@ -351,10 +369,23 @@ docs/                       LINUX-BAUPLAN.md
 - **L34 – Emojis:** Reaktionen im Forum kommen als Unicode-Emoji von der API. Avalonia nimmt dafür eine Farb-Emoji-Schrift
   des Systems (Noto Color Emoji ist auf den gängigen Desktops installiert); ohne sie erscheinen Ersatzzeichen (so auf dem
   Testrechner/CI). Eine eigene Emoji-Schrift mitzuliefern (~10 MB) wäre möglich – siehe F7.
+- **L35 – Downloads direkt in den Downloads-Ordner** (wie Windows) statt Speichern-Dialog: Ordner aus
+  `user-dirs.dirs` (`XDG_DOWNLOAD_DIR`), in Flatpak mit `--filesystem=xdg-download` (gängiges, von Flathub akzeptiertes
+  Recht). Namen kommen vom Server und werden bereinigt (`SafeFileName` des Kerns), bei Kollision „Name (2).ext“; stimmt
+  die SHA-256-Prüfsumme nicht, wird die Datei gelöscht.
+- **L36 – Uploads über die Dateiauswahl des Systems** (Avalonia → FileChooser-Portal bzw. GTK-Dialog): in Flatpak kein
+  Dateisystem-Recht nötig. Strg+V nimmt kopierte Dateien oder ein Bild (als PNG, Name `screenshot-<Zeit>.png`).
+- **L37 – Neues in den Kern?** Nein: Uploads, Kurzlinks, Galerie, Downloads und Profil nutzen unverändert die Dienste des
+  Kerns (`UploadService`, `ShortLinkService`, `MediaService`, `ProfileService`).
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
 ## Offene Fragen (an Wahke)
+
+- **F8 – Screenshot-Kürzel?** Das Pflichtenheft nennt ein optionales globales Kürzel „Bildschirmausschnitt hochladen“.
+  Unter Linux geht das sauber nur über das Screenshot-Portal (`org.freedesktop.portal.Screenshot`, der Desktop fragt
+  nach) und ein globales Kürzel über das GlobalShortcuts-Portal (GNOME 48+/KDE). Soll die App das bekommen (Vorschlag:
+  Knopf „Bildschirmfoto hochladen“ auf der Upload-Seite über das Portal, ohne globales Kürzel)?
 
 - **F7 – Emoji-Schrift mitliefern?** Forum-Reaktionen sind Unicode-Emojis. Auf Desktops mit Noto Color Emoji (Standard bei
   GNOME/KDE/Steam Deck) sehen sie richtig aus, sonst erscheinen Ersatzzeichen. Soll das Paket eine eigene Emoji-Schrift

@@ -6,7 +6,15 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+
+### Hinzugefügt (Stufe 5)
+
+- **Uploads**: Bilder und kurze Videos per Drag & Drop, „Dateien wählen“ oder Strg+V (kopierte Dateien oder ein Screenshot) hochladen, mit Fortschritt und Sichtbarkeit; der Link wird danach kopiert; eigene Uploads mit Vorschau und Knöpfen für Link, BBCode und Markdown
+- **Kurzlinks** (Reiter auf der Upload-Seite): anlegen, Klicks sehen, kopieren
+- **Galerie**: Alben, Bilder und Clips, Großansicht mit Pfeiltasten, Einreichen mit Bildunterschrift und Bestätigung der Rechte
+- **Downloads**: herunterladen in den Downloads-Ordner mit Prüfsumme und „Im Ordner zeigen“
+- **Profil bearbeiten** (Konto): Motto, Über mich, Stadt/Land, Mitgliederkarte, Online-Status, Hall of Fame, Avatar und Banner
 
 ### Hinzugefügt (Stufe 4)
 
@@ -48,6 +56,7 @@ Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 �
 
 ### Geändert (Stufe 2 und 3)
 
+- Flatpak-Entwurf: `--filesystem=xdg-download` für Downloads (Stufe 5)
 - Flatpak-Entwurf: `--talk-name=org.kde.StatusNotifierWatcher` statt `--talk-name=org.freedesktop.Notifications` (Benachrichtigungen und Autostart über Portale)
 
 - CI: `actions/checkout@v7` und `actions/setup-dotnet@v6` (Node 24)
