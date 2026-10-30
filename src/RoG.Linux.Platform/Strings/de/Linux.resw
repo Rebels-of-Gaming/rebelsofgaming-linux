@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Linux-Texte: überschreiben gleichnamige Schlüssel aus den .resw-Dateien der Windows-App (Submodul) bzw. ergänzen
+  eigene Schlüssel mit Präfix Linux_. Deutsch zuerst, EN/FR immer mitpflegen (Test LocalizationTests).
+-->
+<root>
+  <data name="LoginPage_Privacy.Text" xml:space="preserve">
+    <value>Die App speichert nur ein Geräte-Token im Schlüsselbund deines Systems (Secret Service). Abmelden widerruft es sofort.</value>
+  </data>
+  <data name="Settings_AppVersion" xml:space="preserve">
+    <value>Rebels of Gaming für Linux v{0}</value>
+  </data>
+  <data name="Account_SignOutText" xml:space="preserve">
+    <value>Dieses Gerät wird auf der Website abgemeldet und der Zugang auf diesem Rechner gelöscht.</value>
+  </data>
+  <data name="Linux_TokenNotPersistent" xml:space="preserve">
+    <value>Kein Schlüsselbund erreichbar (Secret Service) – die Anmeldung gilt nur, bis du die App schließt.</value>
+  </data>
+  <data name="Linux_ComingSoonWeb" xml:space="preserve">
+    <value>Bis dahin findest du diesen Bereich auf der Website.</value>
+  </data>
+  <data name="Linux_SignedInAs" xml:space="preserve">
+    <value>Angemeldet als {0}</value>
+  </data>
+  <data name="Linux_GuestMode" xml:space="preserve">
+    <value>Du siehst dich ohne Anmeldung um.</value>
+  </data>
+  <data name="Linux_SignIn" xml:space="preserve">
+    <value>ANMELDEN</value>
+  </data>
+  <data name="Linux_Environment" xml:space="preserve">
+    <value>Umgebung: {0}</value>
+  </data>
+  <data name="Linux_MenuToggle" xml:space="preserve">
+    <value>Menü ein- oder ausklappen</value>
+  </data>
+  <data name="Linux_Refresh" xml:space="preserve">
+    <value>Aktualisieren (F5)</value>
+  </data>
+  <data name="Linux_ChatReadOnly" xml:space="preserve">
+    <value>Antworten geht in dieser Vorschau noch nicht – öffne die Unterhaltung dafür auf der Website.</value>
+  </data>
+  <data name="Linux_KeyringStored" xml:space="preserve">
+    <value>Dein Geräte-Token liegt im Schlüsselbund des Systems.</value>
+  </data>
+  <data name="Linux_SignOutFailed" xml:space="preserve">
+    <value>Auf dem Server konnte das Gerät nicht abgemeldet werden – lokal ist der Zugang gelöscht. Entferne es auf der Website unter Konto → Apps &amp; Geräte.</value>
+  </data>
+</root>

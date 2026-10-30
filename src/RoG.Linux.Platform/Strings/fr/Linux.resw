@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Linux-Texte: überschreiben gleichnamige Schlüssel aus den .resw-Dateien der Windows-App (Submodul) bzw. ergänzen
+  eigene Schlüssel mit Präfix Linux_. Deutsch zuerst, EN/FR immer mitpflegen (Test LocalizationTests).
+-->
+<root>
+  <data name="LoginPage_Privacy.Text" xml:space="preserve">
+    <value>L’application ne conserve qu’un jeton d’appareil dans le trousseau de ton système (Secret Service). La déconnexion le révoque immédiatement.</value>
+  </data>
+  <data name="Settings_AppVersion" xml:space="preserve">
+    <value>Rebels of Gaming pour Linux v{0}</value>
+  </data>
+  <data name="Account_SignOutText" xml:space="preserve">
+    <value>Cet appareil est déconnecté du site et son accès sur cet ordinateur est supprimé.</value>
+  </data>
+  <data name="Linux_TokenNotPersistent" xml:space="preserve">
+    <value>Aucun trousseau disponible (Secret Service) – la connexion ne dure que jusqu’à la fermeture de l’application.</value>
+  </data>
+  <data name="Linux_ComingSoonWeb" xml:space="preserve">
+    <value>En attendant, tu trouves cette section sur le site.</value>
+  </data>
+  <data name="Linux_SignedInAs" xml:space="preserve">
+    <value>Connecté en tant que {0}</value>
+  </data>
+  <data name="Linux_GuestMode" xml:space="preserve">
+    <value>Tu navigues sans être connecté.</value>
+  </data>
+  <data name="Linux_SignIn" xml:space="preserve">
+    <value>SE CONNECTER</value>
+  </data>
+  <data name="Linux_Environment" xml:space="preserve">
+    <value>Environnement : {0}</value>
+  </data>
+  <data name="Linux_MenuToggle" xml:space="preserve">
+    <value>Déplier ou replier le menu</value>
+  </data>
+  <data name="Linux_Refresh" xml:space="preserve">
+    <value>Actualiser (F5)</value>
+  </data>
+  <data name="Linux_ChatReadOnly" xml:space="preserve">
+    <value>Répondre n’est pas encore possible dans cet aperçu – ouvre la conversation sur le site.</value>
+  </data>
+  <data name="Linux_KeyringStored" xml:space="preserve">
+    <value>Ton jeton d’appareil est conservé dans le trousseau du système.</value>
+  </data>
+  <data name="Linux_SignOutFailed" xml:space="preserve">
+    <value>L’appareil n’a pas pu être déconnecté sur le serveur – l’accès a été supprimé localement. Retire-le sur le site sous Compte → Applications et appareils.</value>
+  </data>
+</root>

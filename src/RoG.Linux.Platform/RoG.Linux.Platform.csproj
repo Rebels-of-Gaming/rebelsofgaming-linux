@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Linux-Verdrahtung ohne Oberfläche: Token im Secret Service (D-Bus), Desktop-Benachrichtigungen, xdg-open,
+    XDG-Ordner, Übersetzungen aus den .resw-Dateien der Windows-App. Baut und testet ohne Avalonia.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>RoG.Linux.Platform</RootNamespace>
+    <AssemblyName>RoG.Linux.Platform</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RoGCoreProject)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Tmds.DBus.Protocol" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Texte der Windows-App (DE/EN/FR) wiederverwenden, Linux-Abweichungen liegen in Strings/<sprache>/Linux.resw -->
+    <EmbeddedResource Include="$(RoGWindowsRoot)src/RoG.App/Strings/de-DE/Resources.resw" LogicalName="RoG.Strings.de.Resources.resw" Link="Strings/Windows/de-DE.resw" />
+    <EmbeddedResource Include="$(RoGWindowsRoot)src/RoG.App/Strings/en-US/Resources.resw" LogicalName="RoG.Strings.en.Resources.resw" Link="Strings/Windows/en-US.resw" />
+    <EmbeddedResource Include="$(RoGWindowsRoot)src/RoG.App/Strings/fr-FR/Resources.resw" LogicalName="RoG.Strings.fr.Resources.resw" Link="Strings/Windows/fr-FR.resw" />
+    <EmbeddedResource Include="Strings/de/Linux.resw" LogicalName="RoG.Strings.de.Linux.resw" />
+    <EmbeddedResource Include="Strings/en/Linux.resw" LogicalName="RoG.Strings.en.Linux.resw" />
+    <EmbeddedResource Include="Strings/fr/Linux.resw" LogicalName="RoG.Strings.fr.Linux.resw" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RoG.Linux.Tests" />
+  </ItemGroup>
+
+</Project>

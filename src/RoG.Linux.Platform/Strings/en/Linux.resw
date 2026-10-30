@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Linux-Texte: überschreiben gleichnamige Schlüssel aus den .resw-Dateien der Windows-App (Submodul) bzw. ergänzen
+  eigene Schlüssel mit Präfix Linux_. Deutsch zuerst, EN/FR immer mitpflegen (Test LocalizationTests).
+-->
+<root>
+  <data name="LoginPage_Privacy.Text" xml:space="preserve">
+    <value>The app only stores a device token in your system keyring (Secret Service). Signing out revokes it immediately.</value>
+  </data>
+  <data name="Settings_AppVersion" xml:space="preserve">
+    <value>Rebels of Gaming for Linux v{0}</value>
+  </data>
+  <data name="Account_SignOutText" xml:space="preserve">
+    <value>This device is signed out on the website and its access on this computer is deleted.</value>
+  </data>
+  <data name="Linux_TokenNotPersistent" xml:space="preserve">
+    <value>No keyring available (Secret Service) – you stay signed in only until you close the app.</value>
+  </data>
+  <data name="Linux_ComingSoonWeb" xml:space="preserve">
+    <value>Until then, you can find this area on the website.</value>
+  </data>
+  <data name="Linux_SignedInAs" xml:space="preserve">
+    <value>Signed in as {0}</value>
+  </data>
+  <data name="Linux_GuestMode" xml:space="preserve">
+    <value>You are browsing without signing in.</value>
+  </data>
+  <data name="Linux_SignIn" xml:space="preserve">
+    <value>SIGN IN</value>
+  </data>
+  <data name="Linux_Environment" xml:space="preserve">
+    <value>Environment: {0}</value>
+  </data>
+  <data name="Linux_MenuToggle" xml:space="preserve">
+    <value>Expand or collapse the menu</value>
+  </data>
+  <data name="Linux_Refresh" xml:space="preserve">
+    <value>Refresh (F5)</value>
+  </data>
+  <data name="Linux_ChatReadOnly" xml:space="preserve">
+    <value>Replying is not available in this preview yet – open the conversation on the website.</value>
+  </data>
+  <data name="Linux_KeyringStored" xml:space="preserve">
+    <value>Your device token is stored in the system keyring.</value>
+  </data>
+  <data name="Linux_SignOutFailed" xml:space="preserve">
+    <value>The device could not be signed out on the server – access was deleted locally. Remove it on the website under Account → Apps &amp; devices.</value>
+  </data>
+</root>
