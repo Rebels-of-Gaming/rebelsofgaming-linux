@@ -160,9 +160,6 @@
   <data name="Linux_Today" xml:space="preserve">
     <value>Aujourd’hui</value>
   </data>
-  <data name="Linux_RulesAcceptInBrowser" xml:space="preserve">
-    <value>Tu dois encore accepter ce règlement. Pour l’instant, cela se fait sur le site.</value>
-  </data>
   <data name="Linux_SearchTitle" xml:space="preserve">
     <value>Recherche</value>
   </data>
@@ -324,5 +321,32 @@
   </data>
   <data name="Linux_ScreenshotHint" xml:space="preserve">
     <value>Le bureau te demande quelle zone partager. L’application ne voit que l’image finale.</value>
+  </data>
+  <data name="Linux_AcceptBanner" xml:space="preserve">
+    <value>À lire et à accepter : {0}.</value>
+  </data>
+  <data name="Linux_AcceptBannerBlocked" xml:space="preserve">
+    <value>À lire et à accepter : {0}. D’ici là, tu peux lire mais pas écrire.</value>
+  </data>
+  <data name="Linux_AcceptBannerOpen" xml:space="preserve">
+    <value>Lire maintenant</value>
+  </data>
+  <data name="Linux_AcceptReadHint" xml:space="preserve">
+    <value>Tu dois encore accepter cette version. Lis-la et accepte-la en bas.</value>
+  </data>
+  <data name="Linux_AcceptConfirmText" xml:space="preserve">
+    <value>Avec ce bouton, tu confirmes avoir lu et accepté cette version.</value>
+  </data>
+  <data name="Linux_LegalAccepted" xml:space="preserve">
+    <value>Merci – ton acceptation est enregistrée.</value>
+  </data>
+  <data name="Linux_VotesGuest" xml:space="preserve">
+    <value>Tu vois les votes sur les candidatures si tu es connecté et autorisé à voter dans ton squad.</value>
+  </data>
+  <data name="Linux_ApplySent" xml:space="preserve">
+    <value>Candidature envoyée – la direction du squad te recontactera.</value>
+  </data>
+  <data name="Error_rules_acceptance_required" xml:space="preserve">
+    <value>Accepte d’abord les règles (bandeau en haut ou Info → Règles) – d’ici là, tu peux lire mais pas écrire.</value>
   </data>
 </root>

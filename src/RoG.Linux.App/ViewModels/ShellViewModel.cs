@@ -55,9 +55,10 @@ public sealed partial class ShellViewModel : ObservableObject
         // Bereiche ohne Eintrag in der Seitenleiste (geöffnet über Startseite, Links, andere Seiten)
         HiddenItems =
         [
-            Item("Nav_Votes", "VotesPage_Title.Text", "IconVote", "votes", false),
+            Item("Nav_Votes", "VotesPage_Title.Text", "IconVote", "votes", true),
             Item("Nav_Leaderboards", "LeaderboardsPage_Title.Text", "IconTrophy", "minecraft/leaderboards", false),
         ];
+        Acceptance = new AcceptanceViewModel(services);
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
         _services.Navigator = Navigate;
         _services.IsNative = route => s_sections.TryGetValue(route.Section, out var key) && AllItems.FirstOrDefault(i => i.Key == key)?.Implemented == true;
@@ -110,6 +111,9 @@ public sealed partial class ShellViewModel : ObservableObject
 
     /// <summary>Seiten ohne eigenen Eintrag in der Seitenleiste (Votes, Bestenlisten …).</summary>
     public IReadOnlyList<NavItem> HiddenItems { get; }
+
+    /// <summary>Offene Pflicht-Bestätigungen (Regeln, Rechtstexte) – Hinweisbalken über der Seite.</summary>
+    public AcceptanceViewModel Acceptance { get; }
 
     public string SearchText => _services.T("Shell_Search.PlaceholderText");
 
@@ -326,7 +330,7 @@ public sealed partial class ShellViewModel : ObservableObject
             return false;
         }
 
-        // Bereiche ohne eigene Seite (Votes, Verwaltung, Bans, Bestenlisten, Karte) bzw. Einträge in Bereichen, die die
+        // Bereiche ohne eigene Seite (Verwaltung, Bans, Bestenlisten, Karte) bzw. Einträge in Bereichen, die die
         // App noch nicht nativ hat (Forum-Thema, Wiki-Seite …): genau diese Seite der Website öffnen
         var web = WebFallback(route);
         if (!s_sections.TryGetValue(route.Section, out var key))
@@ -413,7 +417,6 @@ public sealed partial class ShellViewModel : ObservableObject
         string Escaped(string k) => string.Join('/', k.Split('/').Select(Uri.EscapeDataString));
         return route.Section switch
         {
-            AppSection.Votes => env.WebPage(lang, "votes"),
             AppSection.Admin => env.AdminBaseUrl ?? env.WebPage(lang, "admin"),
             AppSection.Bans => env.WebPage(lang, route.Key is { } b ? "bans/" + Escaped(b) : "bans"),
             AppSection.Leaderboards => env.WebPage(lang, "minecraft/leaderboards"),
@@ -436,7 +439,8 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Members" => new MembersViewModel(_services),
         "Nav_Servers" => new ServersViewModel(_services, ShowLogin),
         "Nav_Calendar" => new EventsViewModel(_services),
-        "Nav_Info" => new InfoViewModel(_services),
+        "Nav_Info" => new InfoViewModel(_services, Acceptance),
+        "Nav_Votes" => new VotesViewModel(_services, ShowLogin),
         "Nav_Search" => new SearchViewModel(_services),
         "Nav_Notifications" => new NotificationsViewModel(_services, ShowLogin),
         "Nav_Messages" => new MessagesViewModel(_services, ShowLogin),

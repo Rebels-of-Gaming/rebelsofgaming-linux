@@ -3,6 +3,7 @@
              xmlns:vm="using:RoG.Linux.App.ViewModels"
              xmlns:c="using:RoG.Linux.App.Controls"
              xmlns:l="using:RoG.Linux.App.Localization"
+             xmlns:views="using:RoG.Linux.App.Views"
              x:Class="RoG.Linux.App.Views.SquadsView"
              x:DataType="vm:SquadsViewModel">
 
@@ -61,6 +62,11 @@
                    IsVisible="{Binding ShowSelectHint}" Margin="32" />
         <c:StateView DataContext="{Binding Detail}" x:DataType="vm:SquadDetailViewModel"
                      IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+        <!-- Bewerbung: Formular statt der Squad-Seite (Escape/Abbrechen schließt) -->
+        <Panel IsVisible="{Binding Detail.IsApplying}">
+          <views:ApplicationFormView DataContext="{Binding Detail.Application}" />
+        </Panel>
+        <Panel IsVisible="{Binding Detail.ShowSquad}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Detail.ShowContent}">
           <StackPanel Margin="32,24,32,40" Spacing="16" DataContext="{Binding Detail}" x:DataType="vm:SquadDetailViewModel">
             <Button Classes="secondary" HorizontalAlignment="Left"
@@ -86,6 +92,8 @@
                         HorizontalAlignment="Left" IsVisible="{Binding HasRecruiting}">
                   <TextBlock Text="{Binding RecruitingText}" />
                 </Border>
+                <Button x:Name="ApplyButton" Classes="primary" HorizontalAlignment="Left" Margin="0,6,0,0" Command="{Binding ApplyCommand}"
+                        IsVisible="{Binding CanApply}" Content="{l:T SquadsPage_Apply.Content}" />
               </StackPanel>
               <Button Grid.Column="2" Classes="icon" VerticalAlignment="Top" Command="{Binding OpenInBrowserCommand}"
                       ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">
@@ -214,6 +222,7 @@
             </Panel>
           </StackPanel>
         </ScrollViewer>
+        </Panel>
       </Panel>
     </c:ListDetailPanel>
 

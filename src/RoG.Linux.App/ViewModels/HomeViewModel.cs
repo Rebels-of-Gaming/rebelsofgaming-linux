@@ -18,8 +18,7 @@ namespace RoG.Linux.App.ViewModels;
 /// <summary>
 /// Startseite wie in der Windows-App: Begrüßung, Gast-Hinweis, offene Abstimmungen, Onboarding-Checkliste,
 /// Live-Ticker aus <c>/v1/live</c> (Lade-/Fehler-/Leerzustand) und je drei neueste News und nächste Termine.
-/// News öffnen den Artikel in der App; Termine, Abstimmungen und Onboarding-Schritte vorerst die Website
-/// (Kalender/Votes kommen in späteren Stufen).
+/// News, Termine, Abstimmungen und Onboarding-Schritte öffnen die Seite in der App.
 /// </summary>
 public sealed partial class HomeViewModel : LoadableViewModel
 {
@@ -212,9 +211,9 @@ public sealed partial class HomeViewModel : LoadableViewModel
     [RelayCommand]
     private void SignIn() => Services.Navigate(new AppRoute(AppSection.Account));
 
-    /// <summary>Abstimmungen gibt es nativ erst mit Stufe 6 – bis dahin die Website.</summary>
+    /// <summary>Offene Abstimmungen in der App (Seite „Abstimmungen“).</summary>
     [RelayCommand]
-    private Task OpenVotesAsync() => Services.Browser.OpenAsync(Services.Environment.WebPage(Services.Language, "votes"));
+    private void OpenVotes() => Services.Navigate(new AppRoute(AppSection.Votes));
 }
 
 /// <summary>Kachel des Live-Tickers: Wert, Beschriftung (übersetzt von der API), Symbol und Status-Farbe.</summary>

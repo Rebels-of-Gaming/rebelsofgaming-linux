@@ -160,9 +160,6 @@
   <data name="Linux_Today" xml:space="preserve">
     <value>Heute</value>
   </data>
-  <data name="Linux_RulesAcceptInBrowser" xml:space="preserve">
-    <value>Dieses Regelwerk musst du noch bestätigen. Das geht vorerst auf der Website.</value>
-  </data>
   <data name="Linux_SearchTitle" xml:space="preserve">
     <value>Suche</value>
   </data>
@@ -324,5 +321,32 @@
   </data>
   <data name="Linux_ScreenshotHint" xml:space="preserve">
     <value>Der Desktop fragt, welchen Bereich du teilen willst. Die App sieht nur das fertige Bild.</value>
+  </data>
+  <data name="Linux_AcceptBanner" xml:space="preserve">
+    <value>Bitte lesen und bestätigen: {0}.</value>
+  </data>
+  <data name="Linux_AcceptBannerBlocked" xml:space="preserve">
+    <value>Bitte lesen und bestätigen: {0}. Bis dahin kannst du lesen, aber nicht schreiben.</value>
+  </data>
+  <data name="Linux_AcceptBannerOpen" xml:space="preserve">
+    <value>Jetzt lesen</value>
+  </data>
+  <data name="Linux_AcceptReadHint" xml:space="preserve">
+    <value>Diese Fassung musst du noch bestätigen. Lies sie bitte und bestätige sie unten.</value>
+  </data>
+  <data name="Linux_AcceptConfirmText" xml:space="preserve">
+    <value>Mit dem Knopf bestätigst du, dass du diese Fassung gelesen hast und akzeptierst.</value>
+  </data>
+  <data name="Linux_LegalAccepted" xml:space="preserve">
+    <value>Danke – deine Bestätigung ist gespeichert.</value>
+  </data>
+  <data name="Linux_VotesGuest" xml:space="preserve">
+    <value>Abstimmungen über Bewerbungen siehst du, wenn du angemeldet und in deinem Squad stimmberechtigt bist.</value>
+  </data>
+  <data name="Linux_ApplySent" xml:space="preserve">
+    <value>Bewerbung abgeschickt – die Squad-Leitung meldet sich bei dir.</value>
+  </data>
+  <data name="Error_rules_acceptance_required" xml:space="preserve">
+    <value>Bitte bestätige zuerst die Regeln (Hinweis oben oder Info → Regeln) – bis dahin kannst du lesen, aber nicht schreiben.</value>
   </data>
 </root>

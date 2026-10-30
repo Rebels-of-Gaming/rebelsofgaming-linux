@@ -1,0 +1,130 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.VotesView"
+             x:DataType="vm:VotesViewModel">
+  <!-- Abstimmungen wie VotesPage der Windows-App: Karten mit Antworten, Trial-Aufgaben, Beteiligung und Ja/Nein/Enthaltung -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="display" Text="{l:T VotesPage_Title.Text}" />
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+      <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <Panel>
+      <!-- Gastmodus -->
+      <StackPanel Spacing="16" Margin="24" IsVisible="{Binding IsGuest}" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="480">
+        <PathIcon Data="{StaticResource IconVote}" Width="48" Height="48" Foreground="{DynamicResource RoGMutedBrush}" />
+        <TextBlock Classes="muted" Text="{l:T Linux_VotesGuest}" TextAlignment="Center" TextWrapping="Wrap" />
+        <Button Classes="primary" HorizontalAlignment="Center" Command="{Binding SignInCommand}" Content="{l:T Linux_SignIn}" />
+      </StackPanel>
+
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmptyForMember}"
+                   EmptyText="{l:T VotesPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Items}" Margin="24,4,24,32" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left"
+                      AutomationProperties.Name="{l:T VotesPage_Title.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="16" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:VoteItemViewModel">
+              <Border Classes="card" AutomationProperties.Name="{Binding Title}">
+                <StackPanel Spacing="12">
+                  <!-- Kopf: Bewerber → Squad, Alter · Ende -->
+                  <StackPanel Spacing="4">
+                    <WrapPanel Orientation="Horizontal" ItemSpacing="8">
+                      <Button Classes="link" Command="{Binding OpenProfileCommand}" IsEnabled="{Binding HasProfile}"
+                              AutomationProperties.Name="{Binding Applicant}" Padding="0">
+                        <TextBlock Classes="title" FontSize="24" Text="{Binding Applicant}" />
+                      </Button>
+                      <TextBlock Classes="title" FontSize="24" Foreground="{DynamicResource RoGMutedBrush}" Text="→" />
+                      <TextBlock Classes="title" FontSize="24" Text="{Binding Squad}" TextWrapping="Wrap" />
+                    </WrapPanel>
+                    <TextBlock Classes="muted" Text="{Binding Meta}" TextWrapping="Wrap" />
+                  </StackPanel>
+
+                  <!-- Beteiligung / Quorum -->
+                  <StackPanel Spacing="4">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Classes="small" Text="{Binding Participation}" TextWrapping="Wrap" />
+                      <PathIcon Grid.Column="1" Data="{StaticResource IconCheckCircle}" Width="16" Height="16" Margin="8,0,0,0"
+                                Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding QuorumMet}" />
+                    </Grid>
+                    <ProgressBar Value="{Binding ParticipationValue}" Maximum="100" Height="6" AutomationProperties.Name="{Binding Participation}" />
+                  </StackPanel>
+
+                  <!-- Antworten -->
+                  <ItemsControl ItemsSource="{Binding Answers}" IsVisible="{Binding HasAnswers}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:VoteAnswer">
+                        <StackPanel Spacing="2">
+                          <TextBlock Classes="label" Text="{Binding Question}" TextWrapping="Wrap" />
+                          <SelectableTextBlock Classes="body" Text="{Binding Answer}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <!-- Trial-Aufgaben -->
+                  <ItemsControl ItemsSource="{Binding Tasks}" IsVisible="{Binding HasTasks}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:VoteTask">
+                        <Grid ColumnDefinitions="Auto,*">
+                          <Border Classes="check" Classes.done="{Binding Done}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                          <TextBlock Grid.Column="1" Classes="body" Classes.muted="{Binding Done}" Text="{Binding Title}" TextWrapping="Wrap" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <!-- Eigene Stimme (gold) und Abstimmen -->
+                  <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasMyVote}">
+                    <PathIcon Data="{StaticResource IconStar}" Width="14" Height="14" Foreground="{DynamicResource RoGGoldBrush}" />
+                    <TextBlock Classes="body strong" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding MyVote}" />
+                  </StackPanel>
+                  <WrapPanel ItemSpacing="8" LineSpacing="8">
+                    <Button Classes="choice yes" Classes.selected="{Binding IsYes}" Command="{Binding YesCommand}" IsEnabled="{Binding !IsBusy}"
+                            AutomationProperties.Name="{l:T VotesPage_Yes.Content}">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{StaticResource IconCheck}" Width="14" Height="14" IsVisible="{Binding IsYes}" />
+                        <TextBlock Text="{l:T VotesPage_Yes.Content}" />
+                      </StackPanel>
+                    </Button>
+                    <Button Classes="choice no" Classes.selected="{Binding IsNo}" Command="{Binding NoCommand}" IsEnabled="{Binding !IsBusy}"
+                            AutomationProperties.Name="{l:T VotesPage_No.Content}">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{StaticResource IconCheck}" Width="14" Height="14" IsVisible="{Binding IsNo}" />
+                        <TextBlock Text="{l:T VotesPage_No.Content}" />
+                      </StackPanel>
+                    </Button>
+                    <Button Classes="choice maybe" Classes.selected="{Binding IsAbstain}" Command="{Binding AbstainCommand}" IsEnabled="{Binding !IsBusy}"
+                            AutomationProperties.Name="{l:T VotesPage_Abstain.Content}">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{StaticResource IconCheck}" Width="14" Height="14" IsVisible="{Binding IsAbstain}" />
+                        <TextBlock Text="{l:T VotesPage_Abstain.Content}" />
+                      </StackPanel>
+                    </Button>
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</UserControl>

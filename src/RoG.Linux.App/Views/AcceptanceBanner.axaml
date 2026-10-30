@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.AcceptanceBanner"
+             x:DataType="vm:AcceptanceViewModel"
+             IsVisible="{Binding HasPending}">
+  <!-- Offene Pflicht-Bestätigungen (Regeln, Rechtstexte): nicht wegklickbar, führt zur Info-Seite -->
+  <Border Background="{DynamicResource RoGBg3Brush}" BorderBrush="{DynamicResource RoGGoldBrush}" BorderThickness="0,0,0,2"
+          Padding="16,10" AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="{Binding Text}">
+    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+      <PathIcon Data="{StaticResource IconShield}" Width="20" Height="20" Foreground="{DynamicResource RoGGoldBrush}"
+                VerticalAlignment="Top" Margin="0,2,12,0" />
+      <TextBlock Grid.Column="1" Classes="body" Text="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center" />
+      <Button x:Name="OpenButton" Grid.Column="2" Classes="primary" Command="{Binding OpenCommand}" Margin="12,0,0,0" VerticalAlignment="Center"
+              Content="{l:T Linux_AcceptBannerOpen, Upper=True}" />
+    </Grid>
+  </Border>
+</UserControl>

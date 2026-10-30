@@ -75,16 +75,12 @@
             <SelectableTextBlock Classes="title" Text="{Binding Title}" AutomationProperties.HeadingLevel="1" />
             <TextBlock Classes="muted" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" />
           </StackPanel>
+          <!-- Bestätigung offen: Hinweis oben, Knopf unter dem Text -->
           <Border Classes="hint" IsVisible="{Binding NeedsAcceptance}">
-            <StackPanel Spacing="8">
-              <TextBlock Classes="body" Text="{l:T Linux_RulesAcceptInBrowser}" />
-              <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding OpenInBrowserCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
-                  <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
-                </StackPanel>
-              </Button>
-            </StackPanel>
+            <Grid ColumnDefinitions="Auto,*">
+              <PathIcon Data="{StaticResource IconAlert}" Width="16" Height="16" Foreground="{DynamicResource RoGGoldBrush}" VerticalAlignment="Top" Margin="0,2,10,0" />
+              <TextBlock Grid.Column="1" Classes="body" Text="{l:T Linux_AcceptReadHint}" TextWrapping="Wrap" />
+            </Grid>
           </Border>
           <SelectableTextBlock Classes="body" Text="{Binding Intro}" IsVisible="{Binding HasIntro}" FontStyle="Italic" />
           <ItemsControl ItemsSource="{Binding Sections}">
@@ -111,6 +107,19 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
+          <Border Classes="card" IsVisible="{Binding CanAccept}">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="body" Text="{l:T Linux_AcceptConfirmText}" TextWrapping="Wrap" />
+              <Button x:Name="AcceptButton" Classes="primary" HorizontalAlignment="Left" Command="{Binding AcceptCommand}" IsEnabled="{Binding !IsAccepting}"
+                      AutomationProperties.Name="{l:T InfoPage_Accept.Content}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" />
+                  <TextBlock Text="{l:T InfoPage_Accept.Content}" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Border>
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
           <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding OpenInBrowserCommand}" IsVisible="{Binding HasWebUrl}">
             <StackPanel Orientation="Horizontal" Spacing="8">
               <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />

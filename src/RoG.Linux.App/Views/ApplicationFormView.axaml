@@ -1,0 +1,101 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ApplicationFormView"
+             x:DataType="vm:ApplicationFormViewModel">
+  <!-- Bewerbung wie ApplicationDialog der Windows-App – als Bereich auf der Squad-Seite (Escape/Abbrechen schließt) -->
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" Padding="16,12">
+      <Grid ColumnDefinitions="Auto,*">
+        <Button Classes="icon" Command="{Binding CancelCommand}" Margin="0,0,8,0"
+                ToolTip.Tip="{l:T Common_Cancel}" AutomationProperties.Name="{l:T Common_Cancel}">
+          <PathIcon Data="{StaticResource IconBack}" Width="18" Height="18" />
+        </Button>
+        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+          <TextBlock Classes="kicker" Text="{l:T Apply_Title, Upper=True}" />
+          <TextBlock Classes="title" FontSize="24" Text="{Binding Title}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="1" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Panel>
+      <StackPanel Spacing="12" IsVisible="{Binding HasError}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24" MaxWidth="480">
+        <c:StateView IsLoading="False" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+        <Button Classes="secondary" HorizontalAlignment="Center" Command="{Binding CancelCommand}" Content="{l:T Common_Cancel, Upper=True}" />
+      </StackPanel>
+      <c:StateView IsLoading="{Binding IsLoading}" />
+      <ScrollViewer x:Name="Scroller" IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,16,24,32" Spacing="16" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+          <Border Classes="hint info" IsVisible="{Binding IsWaitlist}">
+            <TextBlock Classes="body" Text="{l:T Apply_Waitlist}" TextWrapping="Wrap" />
+          </Border>
+
+          <StackPanel>
+            <TextBlock Classes="label" Text="{Binding BirthdateLabel}" TextWrapping="Wrap" />
+            <CalendarDatePicker x:Name="BirthdatePicker" SelectedDate="{Binding Birthdate}" DisplayDateEnd="{Binding Today}" PlaceholderText="{Binding BirthdateExample}"
+                                HorizontalAlignment="Left" MinWidth="220" AutomationProperties.Name="{Binding BirthdateLabel}" />
+          </StackPanel>
+
+          <ItemsControl ItemsSource="{Binding Questions}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Spacing="16" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ApplicationQuestionViewModel">
+                <StackPanel>
+                  <TextBlock Classes="label" Text="{Binding Header}" TextWrapping="Wrap" />
+                  <ComboBox IsVisible="{Binding IsChoice}" ItemsSource="{Binding Options}" SelectedItem="{Binding SelectedOption}"
+                            HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Header}" />
+                  <NumericUpDown IsVisible="{Binding IsNumber}" Value="{Binding Number}" FormatString="0" Increment="1" Minimum="0"
+                                 HorizontalAlignment="Left" MinWidth="160" AutomationProperties.Name="{Binding Header}" />
+                  <TextBox IsVisible="{Binding IsText}" Text="{Binding Text}" MaxLength="500" AutomationProperties.Name="{Binding Header}" />
+                  <TextBox IsVisible="{Binding IsLongText}" Text="{Binding Text}" AcceptsReturn="True" TextWrapping="Wrap"
+                           MinHeight="100" MaxHeight="260" MaxLength="5000" AutomationProperties.Name="{Binding Header}" />
+                  <TextBlock Classes="muted small" Text="{Binding Help}" IsVisible="{Binding HasHelp}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <ItemsControl ItemsSource="{Binding Rules}" IsVisible="{Binding HasRules}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ApplicationRuleViewModel">
+                <Grid ColumnDefinitions="*,Auto">
+                  <CheckBox IsChecked="{Binding Accepted}" AutomationProperties.Name="{Binding Text}">
+                    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+                  </CheckBox>
+                  <Button Grid.Column="1" Classes="link pad" Command="{Binding ReadCommand}" VerticalAlignment="Center" Margin="8,0,0,0"
+                          ToolTip.Tip="{l:T Apply_ReadRules}">
+                    <TextBlock Text="{l:T Apply_ReadRules}" />
+                  </Button>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <CheckBox IsChecked="{Binding TrialConsent}" AutomationProperties.Name="{l:T Apply_TrialConsent}">
+            <TextBlock Text="{l:T Apply_TrialConsent}" TextWrapping="Wrap" />
+          </CheckBox>
+
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T Apply_Referral}" />
+            <TextBox Text="{Binding Referral}" MaxLength="100" AutomationProperties.Name="{l:T Apply_Referral}" />
+          </StackPanel>
+
+          <c:FeedbackBar DataContext="{Binding Feedback}" />
+
+          <WrapPanel Orientation="Horizontal">
+            <Button Classes="primary" Margin="0,0,12,8" Command="{Binding SubmitCommand}" IsEnabled="{Binding !IsSubmitting}"
+                    Content="{l:T Apply_Submit, Upper=True}" />
+            <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding CancelCommand}" Content="{l:T Common_Cancel, Upper=True}" />
+          </WrapPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</UserControl>

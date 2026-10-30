@@ -33,7 +33,10 @@
 
       <Grid ColumnDefinitions="Auto,*">
         <views:NavPane Width="{Binding PaneWidth}" ShowLabels="{Binding ShowLabels}" IsVisible="{Binding ShowSidePane}" />
-        <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" />
+        <DockPanel Grid.Column="1">
+          <views:AcceptanceBanner DockPanel.Dock="Top" DataContext="{Binding Acceptance}" />
+          <ContentControl Content="{Binding CurrentPage}" />
+        </DockPanel>
       </Grid>
     </DockPanel>
 

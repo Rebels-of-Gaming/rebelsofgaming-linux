@@ -1,24 +1,43 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RoG.Core.Api;
 using RoG.Core.Content;
 using RoG.Core.Features.Info;
+using RoG.Core.Features.Servers;
 using RoG.Core.Localization;
 using RoG.Linux.App.Services;
 
 namespace RoG.Linux.App.ViewModels;
 
-/// <summary>Info: Regeln, Seiten (Über uns, Partner …) und Rechtstexte – Liste nach Gruppen, Dokument nativ gerendert.</summary>
+/// <summary>
+/// Info: Regeln, Seiten (Über uns, Partner …) und Rechtstexte – Liste nach Gruppen, Dokument nativ gerendert. Regelwerke
+/// und Rechtstexte, die die Person bestätigen muss, haben unter dem Text „Gelesen und akzeptiert“
+/// (<see cref="AcceptanceViewModel"/> hält den Stand für den Hinweisbalken der Shell).
+/// </summary>
 public sealed partial class InfoViewModel : LoadableViewModel, IDetailPage, IRoutablePage
 {
     private readonly InfoService _info;
+    private readonly AcceptanceViewModel? _acceptance;
     private string? _pendingKey;
 
-    public InfoViewModel(AppServices services)
+    public InfoViewModel(AppServices services, AcceptanceViewModel? acceptance = null)
         : base(services)
     {
         _info = new InfoService(services.Api.Client, services.Environment.WebBaseUrl);
-        Detail = new InfoDetailViewModel(services, _info);
+        _acceptance = acceptance;
+        Detail = new InfoDetailViewModel(services, _info, acceptance);
+        Detail.Accepted += (_, entry) =>
+        {
+            if (Rows.FirstOrDefault(r => r.Entry is { } e && e.Kind == entry.Kind && e.Key == entry.Key) is { } row)
+            {
+                row.NeedsAcceptance = false;
+            }
+        };
+        if (acceptance is not null)
+        {
+            acceptance.Changed += (_, _) => UpdateAcceptance();
+        }
     }
 
     /// <summary>Gruppenüberschriften und Einträge in einer Liste (wie die Windows-App).</summary>
@@ -55,6 +74,8 @@ public sealed partial class InfoViewModel : LoadableViewModel, IDetailPage, IRou
             }
         }
 
+        UpdateAcceptance();
+
         if (selected is not null)
         {
             Selected = Rows.FirstOrDefault(r => r.Entry is { } e && e.Kind == selected.Kind && e.Key == selected.Key);
@@ -88,6 +109,27 @@ public sealed partial class InfoViewModel : LoadableViewModel, IDetailPage, IRou
 
     [RelayCommand]
     public void CloseDetail() => Selected = null;
+
+    /// <summary>Rechtstexte: „bitte bestätigen“ nur, wenn für diese Person eine Bestätigung offen ist (<c>/v1/me/legal</c>).</summary>
+    private void UpdateAcceptance()
+    {
+        if (_acceptance is not { IsLoaded: true } acceptance)
+        {
+            return;
+        }
+
+        foreach (var row in Rows)
+        {
+            if (row.Entry is { Kind: InfoKind.Legal } legal)
+            {
+                row.NeedsAcceptance = acceptance.IsPending(InfoKind.Legal, legal.Key);
+            }
+            else if (row.Entry is { Kind: InfoKind.Rules } rules && acceptance.IsPending(InfoKind.Rules, rules.Key))
+            {
+                row.NeedsAcceptance = true;
+            }
+        }
+    }
 
     partial void OnSelectedChanged(InfoRowViewModel? value)
     {
@@ -138,24 +180,33 @@ public sealed partial class InfoRowViewModel : ObservableObject
 
     public bool IsItem => Entry is not null;
 
-    public bool NeedsAcceptance { get; private init; }
+    [ObservableProperty]
+    public partial bool NeedsAcceptance { get; set; }
 
     public string AcceptanceText { get; private init; } = string.Empty;
 
     public static InfoRowViewModel Group(string title) => new(title);
 
-    public static InfoRowViewModel Item(InfoEntry entry, AppServices services, Action<InfoRowViewModel> select) => new(entry.Title)
+    public static InfoRowViewModel Item(InfoEntry entry, AppServices services, Action<InfoRowViewModel> select)
     {
-        _select = select,
-        Entry = entry,
-        Subtitle = entry.Subtitle ?? string.Empty,
-        NeedsAcceptance = entry.NeedsAcceptance,
-        AcceptanceText = services.T(StringKeys.InfoNeedsAcceptance),
-    };
+        var row = new InfoRowViewModel(entry.Title)
+        {
+            _select = select,
+            Entry = entry,
+            Subtitle = entry.Subtitle ?? string.Empty,
+            AcceptanceText = services.T(StringKeys.InfoNeedsAcceptance),
+        };
+        row.NeedsAcceptance = entry.NeedsAcceptance;
+        return row;
+    }
 }
 
-/// <summary>Dokument: Titel, Einleitung, Version, Abschnitte (Regeln mit Nummer, wichtige markiert), „Im Browser öffnen“.</summary>
-public sealed partial class InfoDetailViewModel(AppServices services, InfoService info) : LoadableViewModel(services)
+/// <summary>
+/// Dokument: Titel, Einleitung, Version, Abschnitte (Regeln mit Nummer, wichtige markiert), „Im Browser öffnen“ und – wenn
+/// eine Bestätigung offen ist – „Gelesen und akzeptiert“ unter dem Text (Regelwerk: <c>POST /v1/rules/{set}/accept</c>,
+/// Rechtstext: <c>POST /v1/me/legal/{type}/accept</c>).
+/// </summary>
+public sealed partial class InfoDetailViewModel(AppServices services, InfoService info, AcceptanceViewModel? acceptance = null) : LoadableViewModel(services)
 {
     private InfoEntry? _entry;
     private InfoDocument? _document;
@@ -177,9 +228,21 @@ public sealed partial class InfoDetailViewModel(AppServices services, InfoServic
 
     public ObservableCollection<InfoSectionViewModel> Sections { get; } = [];
 
-    /// <summary>Regelwerk noch nicht bestätigt – Bestätigen kommt mit Stufe 6, bis dahin über die Website.</summary>
+    /// <summary>Dokument verlangt eine Bestätigung, die noch fehlt.</summary>
     [ObservableProperty]
     public partial bool NeedsAcceptance { get; set; }
+
+    /// <summary>Angemeldet und Bestätigung offen → Knopf „Gelesen und akzeptiert“.</summary>
+    [ObservableProperty]
+    public partial bool CanAccept { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsAccepting { get; set; }
+
+    public FeedbackViewModel Feedback { get; } = new();
+
+    /// <summary>Nach erfolgreicher Bestätigung (Liste und Hinweisbalken aktualisieren).</summary>
+    public event EventHandler<InfoEntry>? Accepted;
 
     [ObservableProperty]
     public partial bool HasWebUrl { get; set; }
@@ -190,6 +253,7 @@ public sealed partial class InfoDetailViewModel(AppServices services, InfoServic
     {
         _entry = entry;
         _document = null;
+        Feedback.Close();
         return LoadAsync();
     }
 
@@ -202,6 +266,12 @@ public sealed partial class InfoDetailViewModel(AppServices services, InfoServic
 
         var entry = _entry;
         var document = await info.GetAsync(entry, cancellationToken);
+        var signedIn = await Services.Tokens.GetAsync(cancellationToken) is not null;
+        if (signedIn && acceptance is not null)
+        {
+            await acceptance.EnsureLoadedAsync();
+        }
+
         if (!ReferenceEquals(entry, _entry))
         {
             return;
@@ -210,7 +280,13 @@ public sealed partial class InfoDetailViewModel(AppServices services, InfoServic
         Title = document.Title;
         Intro = document.Intro;
         Meta = document.Meta;
-        NeedsAcceptance = document.CanAccept;
+        NeedsAcceptance = entry.Kind switch
+        {
+            InfoKind.Rules => document.CanAccept || acceptance?.IsPending(InfoKind.Rules, entry.Key) == true,
+            InfoKind.Legal => acceptance?.IsPending(InfoKind.Legal, entry.Key) == true,
+            _ => false,
+        };
+        CanAccept = NeedsAcceptance && signedIn;
         HasWebUrl = WebUrl(document) is not null;
         Sections.Clear();
         foreach (var section in document.Sections)
@@ -223,6 +299,46 @@ public sealed partial class InfoDetailViewModel(AppServices services, InfoServic
 
     private Uri? WebUrl(InfoDocument document) => document.WebUrl
         ?? (document.Entry.Kind == InfoKind.Rules ? Services.Environment.WebPage(Services.Language, "rules") : null);
+
+    [RelayCommand]
+    private async Task AcceptAsync()
+    {
+        if (_entry is not { } entry || IsAccepting)
+        {
+            return;
+        }
+
+        IsAccepting = true;
+        try
+        {
+            if (entry.Kind == InfoKind.Rules)
+            {
+                await info.AcceptRulesAsync(entry.Key);
+            }
+            else
+            {
+                await Services.Api.Client.V1_me_legal_acceptAsync(entry.Key);
+            }
+
+            CanAccept = false;
+            NeedsAcceptance = false;
+            Feedback.Show(Services.T(entry.Kind == InfoKind.Rules ? StringKeys.InfoAccepted : "Linux_LegalAccepted"), MessageTone.Success);
+            acceptance?.MarkAccepted(entry.Kind, entry.Key);
+            Accepted?.Invoke(this, entry);
+        }
+        catch (ApiProblemException ex)
+        {
+            Feedback.Show(Services.Localizer.GetError(ex.Problem.Code), MessageTone.Error);
+        }
+        catch (Exception ex) when (ex is RoG.Core.Api.Generated.GeneratedApiException or HttpRequestException or TaskCanceledException)
+        {
+            Feedback.Show(Services.Localizer.GetError(ApiProblem.Codes.Unknown), MessageTone.Error);
+        }
+        finally
+        {
+            IsAccepting = false;
+        }
+    }
 
     [RelayCommand]
     private async Task OpenInBrowserAsync()

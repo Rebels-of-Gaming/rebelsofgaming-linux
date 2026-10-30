@@ -116,6 +116,13 @@ public sealed partial class SquadsViewModel : LoadableViewModel, IDetailPage, IR
     [RelayCommand]
     public void CloseDetail()
     {
+        // Escape/Zurück schließt zuerst das Bewerbungsformular
+        if (Detail.IsApplying)
+        {
+            Detail.Application?.Cancel();
+            return;
+        }
+
         Selected = null;
         DetailForced = false;
     }
@@ -295,6 +302,42 @@ public sealed partial class SquadDetailViewModel(AppServices services, SquadServ
 
     public SquadInternalViewModel Internal { get; } = new(services);
 
+    /// <summary>Bewerben möglich: angemeldet, der Squad sucht (offen oder Warteliste) und man ist noch nicht drin (wie Windows).</summary>
+    [ObservableProperty]
+    public partial bool CanApply { get; set; }
+
+    /// <summary>Offenes Bewerbungsformular (ersetzt die Squad-Seite, bis abgeschickt oder abgebrochen).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsApplying), nameof(ShowSquad))]
+    public partial ApplicationFormViewModel? Application { get; set; }
+
+    public bool IsApplying => Application is not null;
+
+    public bool ShowSquad => !IsApplying;
+
+    [RelayCommand]
+    private void Apply()
+    {
+        if (_slug is null || !CanApply)
+        {
+            return;
+        }
+
+        Feedback.Close();
+        Application = new ApplicationFormViewModel(Services, _slug, Name, OnApplicationClosed);
+        _ = Application.LoadAsync();
+    }
+
+    private void OnApplicationClosed(bool submitted)
+    {
+        Application = null;
+        if (submitted)
+        {
+            CanApply = false;
+            Feedback.Show(Services.T("Linux_ApplySent"), MessageTone.Success);
+        }
+    }
+
     protected override bool HasData => Name is not null;
 
     public Task ShowAsync(string slug)
@@ -309,6 +352,8 @@ public sealed partial class SquadDetailViewModel(AppServices services, SquadServ
         Name = null;
         Header = null;
         Logo = null;
+        Application = null;
+        CanApply = false;
         Tab = SquadTab.About;
         Feedback.Close();
         return LoadAsync();
@@ -393,6 +438,9 @@ public sealed partial class SquadDetailViewModel(AppServices services, SquadServ
         }
 
         HasMembers = Members.Count > 0;
+        CanApply = s.Recruiting is Recruiting.Open or Recruiting.Waitlist
+            && await Services.Tokens.GetAsync(cancellationToken) is not null
+            && !(Services.CurrentUser is { } me && Members.Any(m => m.Slug == me.Slug));
         MembersHeader = Services.Format(StringKeys.SquadsMembers, Members.Count);
 
         Servers.Clear();

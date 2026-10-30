@@ -26,6 +26,7 @@
     <DataTemplate DataType="vm:ForumViewModel"><views:ForumView /></DataTemplate>
     <DataTemplate DataType="vm:UploadsViewModel"><views:UploadsView /></DataTemplate>
     <DataTemplate DataType="vm:MediaViewModel"><views:MediaView /></DataTemplate>
+    <DataTemplate DataType="vm:VotesViewModel"><views:VotesView /></DataTemplate>
     <!-- Bausteine, die mehrere Seiten zeigen -->
     <DataTemplate DataType="vm:ServerItemViewModel"><views:ServerCard /></DataTemplate>
     <DataTemplate DataType="vm:InternalRowViewModel">

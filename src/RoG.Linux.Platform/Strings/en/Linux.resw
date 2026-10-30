@@ -160,9 +160,6 @@
   <data name="Linux_Today" xml:space="preserve">
     <value>Today</value>
   </data>
-  <data name="Linux_RulesAcceptInBrowser" xml:space="preserve">
-    <value>You still need to accept these rules. For now that’s done on the website.</value>
-  </data>
   <data name="Linux_SearchTitle" xml:space="preserve">
     <value>Search</value>
   </data>
@@ -324,5 +321,32 @@
   </data>
   <data name="Linux_ScreenshotHint" xml:space="preserve">
     <value>Your desktop asks which area to share. The app only sees the finished picture.</value>
+  </data>
+  <data name="Linux_AcceptBanner" xml:space="preserve">
+    <value>Please read and accept: {0}.</value>
+  </data>
+  <data name="Linux_AcceptBannerBlocked" xml:space="preserve">
+    <value>Please read and accept: {0}. Until then you can read but not post.</value>
+  </data>
+  <data name="Linux_AcceptBannerOpen" xml:space="preserve">
+    <value>Read now</value>
+  </data>
+  <data name="Linux_AcceptReadHint" xml:space="preserve">
+    <value>You still need to accept this version. Please read it and accept it below.</value>
+  </data>
+  <data name="Linux_AcceptConfirmText" xml:space="preserve">
+    <value>With this button you confirm that you have read and accept this version.</value>
+  </data>
+  <data name="Linux_LegalAccepted" xml:space="preserve">
+    <value>Thanks – your acceptance has been saved.</value>
+  </data>
+  <data name="Linux_VotesGuest" xml:space="preserve">
+    <value>You can see votes on applications when you are signed in and allowed to vote in your squad.</value>
+  </data>
+  <data name="Linux_ApplySent" xml:space="preserve">
+    <value>Application sent – the squad leads will get back to you.</value>
+  </data>
+  <data name="Error_rules_acceptance_required" xml:space="preserve">
+    <value>Please accept the rules first (banner at the top or Info → Rules) – until then you can read but not post.</value>
   </data>
 </root>

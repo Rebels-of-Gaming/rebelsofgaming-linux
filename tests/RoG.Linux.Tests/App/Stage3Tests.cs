@@ -162,7 +162,6 @@ public class Stage3Tests
     }
 
     [AvaloniaTheory]
-    [InlineData("rog://votes", "https://rebelsofgaming.com/de/votes")]
     [InlineData("rog://admin", "https://admin.rebelsofgaming.com/")]
     [InlineData("rog://bans/01B1", "https://rebelsofgaming.com/de/bans/01B1")]
     [InlineData("rog://leaderboards", "https://rebelsofgaming.com/de/minecraft/leaderboards")]
@@ -197,6 +196,7 @@ public class Stage3Tests
     [InlineData("rog://media", "Nav_Media")]
     [InlineData("rog://uploads", "Nav_Uploads")]
     [InlineData("rog://search?q=et", "Nav_Search")]
+    [InlineData("rog://votes", "Nav_Votes")]
     public async Task Every_section_link_opens_its_page(string link, string section)
     {
         using var t = await TestServices.CreateAsync(TestTokens.Wahke);

@@ -23,6 +23,9 @@ public sealed class FakeApi : HttpMessageHandler
     /// <summary>Alle Antworten als Fehler (Fehlerzustand testen).</summary>
     public HttpStatusCode? FailWith { get; set; }
 
+    /// <summary>Fehlerantwort (RFC 9457) für einen Pfad – z. B. <c>409 application_blocked</c> mit <c>detail</c>.</summary>
+    public Dictionary<string, (HttpStatusCode Status, string Problem)> Failures { get; } = new(StringComparer.Ordinal);
+
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         Requests.Add(request);
@@ -52,6 +55,11 @@ public sealed class FakeApi : HttpMessageHandler
         }
 
         var path = request.RequestUri!.AbsolutePath.TrimEnd('/');
+        if (Failures.TryGetValue(path, out var failure))
+        {
+            return Task.FromResult(Json(failure.Problem, failure.Status, "application/problem+json"));
+        }
+
         var body = Overrides.TryGetValue(path, out var custom) ? custom : (request.Method.Method, path) switch
         {
             ("GET", "/v1/news") => FakeData.NewsList,
