@@ -32,7 +32,15 @@ public sealed class ImageLoader : IDisposable
 
     public void Clear() => _cache.Clear();
 
-    private async Task<Bitmap?> LoadCoreAsync(Uri uri, int decodeWidth)
+    /// <summary>Ohne den Cache dieser Klasse laden (Kartenkacheln: eigener, begrenzter Cache in <see cref="MapTileCache"/>).</summary>
+    public Task<Bitmap?> LoadUncachedAsync(Uri? uri, int decodeWidth) =>
+        uri is null || !uri.IsAbsoluteUri || (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp)
+            ? Task.FromResult<Bitmap?>(null)
+            : FetchAsync(uri, decodeWidth, cached: false);
+
+    private Task<Bitmap?> LoadCoreAsync(Uri uri, int decodeWidth) => FetchAsync(uri, decodeWidth, cached: true);
+
+    private async Task<Bitmap?> FetchAsync(Uri uri, int decodeWidth, bool cached)
     {
         try
         {
@@ -48,7 +56,11 @@ public sealed class ImageLoader : IDisposable
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException or ArgumentException or IOException)
         {
-            _cache.TryRemove((uri, decodeWidth), out _);
+            if (cached)
+            {
+                _cache.TryRemove((uri, decodeWidth), out _);
+            }
+
             return null;
         }
     }

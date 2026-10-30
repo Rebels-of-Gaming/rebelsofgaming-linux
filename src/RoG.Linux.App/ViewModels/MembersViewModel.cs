@@ -4,7 +4,9 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RoG.Core.Api;
+using RoG.Core.Features.Friends;
 using RoG.Core.Features.Members;
+using RoG.Core.Features.Servers;
 using RoG.Core.Localization;
 using RoG.Linux.App.Services;
 
@@ -22,6 +24,22 @@ public sealed partial class MembersViewModel : LoadableViewModel, IDetailPage, I
     {
         _members = new MemberService(services.Api.Client);
         Detail = new MemberDetailViewModel(services, _members);
+        services.CurrentUserChanged += (_, _) => OnPropertyChanged(nameof(CanShowMap));
+    }
+
+    /// <summary>„Karte“: nur angemeldet (die API prüft Clan-Mitgliedschaft und Scope).</summary>
+    public bool CanShowMap => Services.CurrentUser is not null;
+
+    /// <summary>Mitgliederkarte öffnen – die Ansicht zeigt sie im eigenen Fenster.</summary>
+    public event EventHandler<MemberMapViewModel>? MapRequested;
+
+    [RelayCommand]
+    private void OpenMap()
+    {
+        if (CanShowMap)
+        {
+            MapRequested?.Invoke(this, new MemberMapViewModel(Services));
+        }
     }
 
     public ObservableCollection<MemberListItemViewModel> Items { get; } = [];
@@ -341,6 +359,8 @@ public sealed partial class MemberDetailViewModel(AppServices services, MemberSe
         _id = s.Id;
         var me = Services.CurrentUser?.Id ?? (await Services.Tokens.GetAsync(cancellationToken))?.UserId;
         CanMessage = me is not null && me != s.Id;
+        CanBefriend = CanMessage && Services.CurrentUser?.HasScope(FriendsService.WriteScope) == true;
+        FriendFeedback.Close();
         Rank = s.RankLabel?.ToUpper(Services.Culture);
         RankBrush = UiResources.FromHex(s.RankColor, "RoGGoldBrush");
         Presence = s.Presence;
@@ -411,6 +431,38 @@ public sealed partial class MemberDetailViewModel(AppServices services, MemberSe
     /// <summary>Angemeldet und nicht das eigene Profil: „Nachricht senden“.</summary>
     [ObservableProperty]
     public partial bool CanMessage { get; set; }
+
+    /// <summary>Freundschaftsanfrage senden (fremdes Profil, Scope <c>friends:write</c>; Grenzen/Sperren prüft der Server).</summary>
+    [ObservableProperty]
+    public partial bool CanBefriend { get; set; }
+
+    /// <summary>Rückmeldung zu „Als Freund hinzufügen“.</summary>
+    public FeedbackViewModel FriendFeedback { get; } = new();
+
+    [RelayCommand]
+    private async Task BefriendAsync()
+    {
+        if (_id is not { } id || !CanBefriend)
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await new FriendsService(Services.Api.Http).SendAsync(id);
+            FriendFeedback.Show(Services.Format(result.IsAccepted ? StringKeys.FriendsNowFriends : StringKeys.FriendsRequestSent, result.User.Name), MessageTone.Success);
+        }
+        catch (ApiProblemException ex)
+        {
+            FriendFeedback.Show(
+                Services.Localizer.GetError(ex.Problem.Code),
+                ex.Problem.Code is "already_friends" or "already_requested" ? MessageTone.Info : MessageTone.Error);
+        }
+        catch (Exception ex) when (ex is System.Text.Json.JsonException or InvalidDataException or ArgumentException or HttpRequestException)
+        {
+            FriendFeedback.Show(Services.Localizer.GetError(ApiProblem.Codes.Unknown), MessageTone.Error);
+        }
+    }
 
     /// <summary>1:1-Unterhaltung öffnen bzw. starten und in „Nachrichten“ zeigen.</summary>
     [RelayCommand]

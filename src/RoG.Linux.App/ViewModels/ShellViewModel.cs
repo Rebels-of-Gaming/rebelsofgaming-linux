@@ -32,7 +32,7 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_News", "Shell_NavNews.Content", "IconNews", "news", true),
             Item("Nav_Squads", "Shell_NavSquads.Content", "IconSquads", "squads", true),
             Item("Nav_Messages", "Shell_NavMessages.Content", "IconMessages", "messages", true),
-            Item("Nav_Friends", "Shell_NavFriends.Content", "IconFriends", "friends", false),
+            Item("Nav_Friends", "Shell_NavFriends.Content", "IconFriends", "friends", true),
             Item("Nav_Calendar", "Shell_NavCalendar.Content", "IconCalendar", "events", true),
             Item("Nav_Servers", "Shell_NavServers.Content", "IconServers", "servers", true),
             Item("Nav_Forum", "Shell_NavForum.Content", "IconForum", "forum", true),
@@ -78,6 +78,7 @@ public sealed partial class ShellViewModel : ObservableObject
         };
         realtime.NotificationReceived += (_, n) => (Page("Nav_Notifications") as NotificationsViewModel)?.Prepend(n);
         realtime.ServerStatusChanged += (_, s) => (Page("Nav_Servers") as ServersViewModel)?.Apply(s);
+        realtime.FriendsChanged += (_, _) => _ = (Page("Nav_Friends") as FriendsViewModel)?.LoadAsync(silent: true); // ohne Inhalt – still neu laden
         realtime.LiveChanged += (_, _) =>
         {
             if (Page("Nav_Home") is HomeViewModel home && home.ShowContent)
@@ -447,6 +448,7 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Media" => new MediaViewModel(_services),
         "Nav_Matches" => new MatchesViewModel(_services, ShowLogin),
         "Nav_Leaderboards" => new LeaderboardsViewModel(_services),
+        "Nav_Friends" => new FriendsViewModel(_services, ShowLogin),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
         _ => new PlaceholderViewModel(_services, item),
     };

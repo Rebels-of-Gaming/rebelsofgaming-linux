@@ -1,0 +1,169 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.FriendsView"
+             x:DataType="vm:FriendsViewModel">
+  <!-- Freunde wie FriendsPage der Windows-App; Ablehnen/Entfernen wird in der Zeile bestätigt (Escape bricht ab) -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="display" Text="{l:T FriendsPage_Title.Text}" />
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}" IsVisible="{Binding !IsGuest}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+      <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <Border Classes="hint" IsVisible="{Binding NeedsSignIn}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+        <TextBlock Classes="body" Text="{l:T FriendsPage_SignIn.Message}" TextWrapping="Wrap" />
+      </Border>
+    </StackPanel>
+
+    <Panel>
+      <!-- Gastmodus -->
+      <StackPanel Spacing="16" Margin="24" IsVisible="{Binding IsGuest}" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <PathIcon Data="{StaticResource IconFriends}" Width="48" Height="48" Foreground="{DynamicResource RoGMutedBrush}" />
+        <TextBlock Classes="muted" Text="{l:T FriendsPage_State.EmptyText}" TextAlignment="Center" TextWrapping="Wrap" />
+        <Button Classes="primary" HorizontalAlignment="Center" Command="{Binding SignInCommand}" Content="{l:T Linux_SignIn}" />
+      </StackPanel>
+
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                   EmptyText="{l:T FriendsPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding ShowList}">
+        <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" Spacing="12" Margin="24,4,24,32">
+          <TextBlock Classes="muted" Text="{l:T FriendsPage_Intro.Text}" TextWrapping="Wrap" />
+
+          <!-- Hinzufügen -->
+          <StackPanel Spacing="6" IsVisible="{Binding CanWrite}">
+            <TextBlock Classes="label" Text="{l:T FriendsPage_Add.Header}" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Text="{Binding AddInput}" MaxLength="200" PlaceholderText="{l:T FriendsPage_Add.PlaceholderText}"
+                       AutomationProperties.Name="{l:T FriendsPage_Add.Header}">
+                <TextBox.KeyBindings>
+                  <KeyBinding Gesture="Enter" Command="{Binding AddCommand}" />
+                </TextBox.KeyBindings>
+              </TextBox>
+              <Button Grid.Column="1" Classes="primary" Margin="8,0,0,0" Command="{Binding AddCommand}" IsEnabled="{Binding !IsBusy}"
+                      Content="{l:T FriendsPage_AddButton.Content, Upper=True}" />
+            </Grid>
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" Height="3" MinHeight="3" />
+          </StackPanel>
+
+          <!-- Anfragen an mich -->
+          <StackPanel Spacing="8" IsVisible="{Binding HasIncoming}" Margin="0,8,0,0">
+            <TextBlock Classes="section" Text="{l:T FriendsPage_Incoming.Text}" />
+            <ItemsControl ItemsSource="{Binding Incoming}" AutomationProperties.Name="{l:T FriendsPage_Incoming.Text}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:FriendRequestItemViewModel">
+                  <Border Classes="card" Padding="12" Margin="0,0,0,8" AutomationProperties.Name="{Binding Name}">
+                    <StackPanel Spacing="10">
+                      <Grid ColumnDefinitions="Auto,*">
+                        <c:AvatarView Size="40" Source="{Binding Avatar}" DisplayName="{Binding Name}" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="2" VerticalAlignment="Center">
+                          <Button Classes="link" HorizontalAlignment="Left" Command="{Binding OpenProfileCommand}">
+                            <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                          </Button>
+                          <TextBlock Classes="muted small" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Grid>
+                      <WrapPanel IsVisible="{Binding ShowActions}" Margin="52,0,0,0">
+                        <Button Classes="primary" Margin="0,0,8,0" Command="{Binding AcceptCommand}" Content="{l:T FriendsPage_Accept.Content, Upper=True}" />
+                        <Button Classes="secondary" Command="{Binding DeclineCommand}" Content="{l:T FriendsPage_Decline.Content, Upper=True}" />
+                      </WrapPanel>
+                      <Border Classes="hint" IsVisible="{Binding IsConfirming}">
+                        <StackPanel Spacing="8">
+                          <TextBlock Classes="body strong" Text="{Binding ConfirmTitle}" />
+                          <TextBlock Classes="body" Text="{Binding ConfirmText}" TextWrapping="Wrap" />
+                          <WrapPanel>
+                            <Button Classes="primary" Margin="0,0,8,0" Command="{Binding ConfirmCommand}" Content="{l:T Common_Confirm, Upper=True}" />
+                            <Button Classes="secondary" Command="{Binding CancelConfirmCommand}" Content="{l:T Common_Cancel, Upper=True}" />
+                          </WrapPanel>
+                        </StackPanel>
+                      </Border>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <!-- Freunde -->
+          <WrapPanel Margin="0,8,0,0">
+            <TextBlock Classes="section" Text="{l:T FriendsPage_List.Text}" Margin="0,0,12,0" VerticalAlignment="Bottom" />
+            <TextBlock Classes="muted" Text="{Binding CountText}" IsVisible="{Binding HasCount}" VerticalAlignment="Bottom" />
+          </WrapPanel>
+          <TextBlock Classes="muted" Text="{l:T FriendsPage_Empty.Text}" TextWrapping="Wrap" IsVisible="{Binding HasNoFriends}" />
+          <ItemsControl ItemsSource="{Binding Friends}" AutomationProperties.Name="{l:T FriendsPage_List.Text}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:FriendItemViewModel">
+                <Border Classes="card" Padding="12" Margin="0,0,0,8" AutomationProperties.Name="{Binding Name}">
+                  <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                      <c:AvatarView Size="44" Source="{Binding Avatar}" DisplayName="{Binding Name}"
+                                    Presence="{Binding Presence}" PresenceText="{Binding PresenceText}" VerticalAlignment="Center" />
+                      <StackPanel Grid.Column="1" Margin="12,0,8,0" Spacing="2" VerticalAlignment="Center">
+                        <Button Classes="link" HorizontalAlignment="Left" Command="{Binding OpenProfileCommand}">
+                          <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        </Button>
+                        <TextBlock Classes="muted small" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" TextWrapping="Wrap" />
+                      </StackPanel>
+                      <WrapPanel Grid.Column="2" VerticalAlignment="Center" IsVisible="{Binding ShowActions}">
+                        <Button Classes="secondary" Margin="0,0,8,0" Command="{Binding MessageCommand}">
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Data="{StaticResource IconMessages}" Width="14" Height="14" />
+                            <TextBlock Text="{l:T FriendsPage_Message.Content, Upper=True}" />
+                          </StackPanel>
+                        </Button>
+                        <Button Classes="icon" Command="{Binding RemoveCommand}" IsVisible="{Binding CanWrite}"
+                                ToolTip.Tip="{l:T FriendsPage_Remove.Content}" AutomationProperties.Name="{l:T FriendsPage_Remove.Content}">
+                          <PathIcon Data="{StaticResource IconClose}" Width="14" Height="14" />
+                        </Button>
+                      </WrapPanel>
+                    </Grid>
+                    <Border Classes="hint" IsVisible="{Binding IsConfirming}">
+                      <StackPanel Spacing="8">
+                        <TextBlock Classes="body strong" Text="{Binding ConfirmTitle}" />
+                        <TextBlock Classes="body" Text="{Binding ConfirmText}" TextWrapping="Wrap" />
+                        <WrapPanel>
+                          <Button Classes="primary" Margin="0,0,8,0" Command="{Binding ConfirmCommand}" Content="{l:T FriendsPage_Remove.Content, Upper=True}" />
+                          <Button Classes="secondary" Command="{Binding CancelConfirmCommand}" Content="{l:T Common_Cancel, Upper=True}" />
+                        </WrapPanel>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <!-- Anfragen von mir -->
+          <StackPanel Spacing="8" IsVisible="{Binding HasOutgoing}" Margin="0,8,0,0">
+            <TextBlock Classes="section" Text="{l:T FriendsPage_Outgoing.Text}" />
+            <ItemsControl ItemsSource="{Binding Outgoing}" AutomationProperties.Name="{l:T FriendsPage_Outgoing.Text}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:FriendRequestItemViewModel">
+                  <Border Classes="card" Padding="12" Margin="0,0,0,8" AutomationProperties.Name="{Binding Name}">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                      <c:AvatarView Size="32" Source="{Binding Avatar}" DisplayName="{Binding Name}" VerticalAlignment="Center" />
+                      <StackPanel Grid.Column="1" Margin="12,0,8,0" Spacing="2" VerticalAlignment="Center">
+                        <Button Classes="link" HorizontalAlignment="Left" Command="{Binding OpenProfileCommand}">
+                          <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        </Button>
+                        <TextBlock Classes="muted small" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" TextWrapping="Wrap" />
+                      </StackPanel>
+                      <Button Grid.Column="2" Classes="secondary" VerticalAlignment="Center" Command="{Binding CancelCommand}" IsVisible="{Binding CanWrite}"
+                              Content="{l:T FriendsPage_Cancel.Content, Upper=True}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</UserControl>

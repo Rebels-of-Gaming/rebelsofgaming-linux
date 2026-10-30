@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RoG.Linux.App.ViewModels"
+        xmlns:c="using:RoG.Linux.App.Controls"
+        xmlns:l="using:RoG.Linux.App.Localization"
+        x:Class="RoG.Linux.App.Views.MemberMapWindow"
+        x:DataType="vm:MemberMapViewModel"
+        Width="1000" Height="700" MinWidth="360" MinHeight="360"
+        Background="{DynamicResource RoGBgBrush}"
+        Title="{l:T Map_Title}">
+  <!-- Mitgliederkarte im eigenen Fenster (wie MemberMapWindow der Windows-App): nur Opt-in, Stadt-Genauigkeit -->
+  <Panel>
+    <c:MemberMapView x:Name="Map" IsVisible="{Binding ShowContent}" />
+    <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+
+    <!-- links oben: Hinweis und Orte des angeklickten Punkts (rechts oben liegen die Zoom-Knöpfe) -->
+    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16,16,72,48" Spacing="12" MaxWidth="360">
+      <Border Classes="hint info" IsVisible="{Binding HasInfo}">
+        <TextBlock Classes="body" Text="{Binding Info}" TextWrapping="Wrap" />
+      </Border>
+      <Border x:Name="PlacesPanel" Classes="card" Padding="0" IsVisible="{Binding IsPanelOpen}" MaxHeight="{Binding #Map.Bounds.Height}"
+              Background="{DynamicResource RoGBgBrush}" BoxShadow="0 6 20 0 #66000000">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="16,10,8,4">
+            <TextBlock Classes="section" Text="{Binding PanelTitle}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="icon" Command="{Binding ClosePanelCommand}"
+                    ToolTip.Tip="{l:T Linux_Close}" AutomationProperties.Name="{l:T Linux_Close}">
+              <PathIcon Data="{StaticResource IconClose}" Width="14" Height="14" />
+            </Button>
+          </Grid>
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Places}" Margin="8,0,8,10">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:MapPlaceViewModel">
+                  <StackPanel Spacing="2" Margin="0,6,0,0">
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="8,0,0,2">
+                      <PathIcon Data="{StaticResource IconMapMarker}" Width="14" Height="14" Foreground="{DynamicResource RoGRedBrush}" />
+                      <TextBlock Classes="kicker" Text="{Binding Title}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding Members}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:MapMemberItemViewModel">
+                          <Button Classes="row" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding AutomationName}">
+                            <Grid ColumnDefinitions="Auto,*">
+                              <c:AvatarView Size="32" Source="{Binding Avatar}" DisplayName="{Binding Name}" />
+                              <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Classes="muted small" Text="{Binding Squads}" IsVisible="{Binding HasSquads}" TextTrimming="CharacterEllipsis" />
+                              </StackPanel>
+                            </Grid>
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+    </StackPanel>
+  </Panel>
+</Window>

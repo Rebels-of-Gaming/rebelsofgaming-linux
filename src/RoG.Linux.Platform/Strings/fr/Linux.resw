@@ -359,5 +359,16 @@
   </data>
   <data name="Linux_StatsGuest" xml:space="preserve">
     <value>Les statistiques sont réservées aux membres. Connecte-toi pour voir les classements et les récompenses de la semaine.</value>
+  <data name="Linux_MapHint" xml:space="preserve">
+    <value>Carte des membres – faites glisser ou utilisez les flèches pour vous déplacer, molette ou plus/moins pour zoomer</value>
+  </data>
+  <data name="Linux_MapMembers" xml:space="preserve">
+    <value>{0} membres</value>
+  </data>
+  <data name="Linux_MapMemberOne" xml:space="preserve">
+    <value>1 membre</value>
+  </data>
+  <data name="Linux_MapOpenProfile" xml:space="preserve">
+    <value>Ouvrir le profil de {0}</value>
   </data>
 </root>

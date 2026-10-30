@@ -359,5 +359,16 @@
   </data>
   <data name="Linux_StatsGuest" xml:space="preserve">
     <value>Statistics are for members only. Sign in to see leaderboards and weekly awards.</value>
+  <data name="Linux_MapHint" xml:space="preserve">
+    <value>Member map – drag or use the arrow keys to move, mouse wheel or plus/minus to zoom</value>
+  </data>
+  <data name="Linux_MapMembers" xml:space="preserve">
+    <value>{0} members</value>
+  </data>
+  <data name="Linux_MapMemberOne" xml:space="preserve">
+    <value>1 member</value>
+  </data>
+  <data name="Linux_MapOpenProfile" xml:space="preserve">
+    <value>Open {0}'s profile</value>
   </data>
 </root>
