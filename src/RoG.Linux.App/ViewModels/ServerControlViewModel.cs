@@ -149,8 +149,29 @@ public sealed partial class ServerControlViewModel : ObservableObject, IAsyncDis
 
         SelectedTab = Tabs.Count > 0 ? Tabs[0].Tab : ServerControlTab.Console;
 
-        // Hier hängen die Teile „Configs/Dateien/Backups“ und „Bans & Plugin“ ihre ViewModels ein, z. B.
-        // ConfigsTab = new ServerConfigsViewModel(services, server) – Rückmeldung/Rückfrage über Feedback und Confirm.
+        // Reiter aus eigenen ViewModels (laden beim ersten Öffnen, Rückmeldung über das gemeinsame Feedback)
+        if (server.Control is { } abilities)
+        {
+            if (Access.Allows(ServerControlTab.Configs))
+            {
+                ConfigsTab = new ServerConfigsViewModel(services, server.Slug, abilities, Feedback);
+            }
+
+            if (Access.Allows(ServerControlTab.Files))
+            {
+                FilesTab = new ServerFilesViewModel(services, server.Slug, abilities, Feedback);
+            }
+
+            if (Access.Allows(ServerControlTab.Backups))
+            {
+                BackupsTab = new ServerBackupsViewModel(services, server.Slug, abilities, Feedback);
+            }
+
+            if (Access.Allows(ServerControlTab.GameBans))
+            {
+                GameBansTab = new ServerGameBansViewModel(services, server.Slug, server.Id, abilities, (text, tone) => Feedback.Show(text, tone));
+            }
+        }
     }
 
     public GameServer Server { get; }
@@ -275,7 +296,15 @@ public sealed partial class ServerControlViewModel : ObservableObject, IAsyncDis
             return true;
         }
 
-        return false;
+        // Rückfragen/Formulare des offenen Reiters zuerst schließen
+        return SelectedTab switch
+        {
+            ServerControlTab.Configs => (ConfigsTab as ServerDataTabViewModel)?.CloseOverlay() == true,
+            ServerControlTab.Files => (FilesTab as ServerDataTabViewModel)?.CloseOverlay() == true,
+            ServerControlTab.Backups => (BackupsTab as ServerDataTabViewModel)?.CloseOverlay() == true,
+            ServerControlTab.GameBans => (GameBansTab as ServerGameBansViewModel)?.CloseOverlay() == true,
+            _ => false,
+        };
     }
 
     public ValueTask DisposeAsync()

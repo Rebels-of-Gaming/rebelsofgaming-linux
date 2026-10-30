@@ -17,8 +17,6 @@ internal static class FakeServerFilesRoutes
 
     public const string BannersId = "01JCFG0000000000000000003";
 
-    private const string Prefix = "/v1/servers/" + Slug;
-
     public static readonly string ServerCfg = string.Join('\n',
         "// RoG ET Public – Grundeinstellungen",
         "set sv_hostname \"^1RoG ^7Public ^3| ^7rebelsofgaming.com\"",
@@ -59,12 +57,24 @@ internal static class FakeServerFilesRoutes
 
     private static string? Route(HttpRequestMessage request, string path, string body)
     {
-        if (!path.StartsWith(Prefix + "/", StringComparison.Ordinal))
+        // jeder Server-Slug (auch die Server der Steuerungs-Tests), nur Configs/Dateien/Backups
+        if (!path.StartsWith("/v1/servers/", StringComparison.Ordinal))
         {
             return null;
         }
 
-        var rest = path[Prefix.Length..];
+        var slash = path.IndexOf('/', "/v1/servers/".Length);
+        if (slash < 0)
+        {
+            return null;
+        }
+
+        var rest = path[slash..];
+        if (!(rest.StartsWith("/configs", StringComparison.Ordinal) || rest.StartsWith("/files", StringComparison.Ordinal) || rest.StartsWith("/backups", StringComparison.Ordinal)))
+        {
+            return null;
+        }
+
         var query = Uri.UnescapeDataString(request.RequestUri!.Query);
         var method = request.Method.Method;
         return (method, rest) switch

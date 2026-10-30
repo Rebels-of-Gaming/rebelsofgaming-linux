@@ -12,7 +12,7 @@ namespace RoG.Linux.App.ViewModels;
 /// Windows-App): Server-Slug, wirksame Rechte, Rückmeldung, Rückfrage im Inhalt, Fehlertexte über <c>Error_&lt;code&gt;</c>.
 /// Lädt beim ersten Anzeigen (<see cref="EnsureLoadedAsync"/>, ruft die View selbst auf).
 /// </summary>
-public abstract partial class ServerDataTabViewModel : LoadableViewModel
+public abstract partial class ServerDataTabViewModel : LoadableViewModel, ILazyTab
 {
     private bool _loaded;
 

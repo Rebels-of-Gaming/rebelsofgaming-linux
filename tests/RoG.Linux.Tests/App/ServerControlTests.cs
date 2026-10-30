@@ -479,11 +479,14 @@ public class ServerControlTests
     }
 
     [AvaloniaFact]
-    public async Task Hooked_tabs_show_coming_soon_until_a_view_model_is_set_and_load_lazily()
+    public async Task Hooked_tabs_are_wired_by_rights_and_load_lazily()
     {
         using var t = await SignedInAsync();
         await using var control = Create(t, new FakeConsoleSockets());
-        Assert.True(control.ConfigsPending && control.FilesPending && control.BackupsPending && control.GameBansPending);
+        Assert.IsType<ServerConfigsViewModel>(control.ConfigsTab);
+        Assert.IsType<ServerFilesViewModel>(control.FilesTab);
+        Assert.IsType<ServerBackupsViewModel>(control.BackupsTab);
+        Assert.False(control.ConfigsPending);
 
         var tab = new LazyTab();
         control.ConfigsTab = tab;

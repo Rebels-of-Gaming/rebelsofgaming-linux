@@ -20,7 +20,7 @@ namespace RoG.Linux.App.ViewModels;
 /// <see cref="Token"/>) statt in Dialogen; das Fenster kann <see cref="Confirm"/>, <see cref="AskReason"/>,
 /// <see cref="AskDuration"/> und <see cref="ShowToken"/> wie in Windows ersetzen.
 /// </summary>
-public sealed partial class ServerGameBansViewModel : ObservableObject
+public sealed partial class ServerGameBansViewModel : ObservableObject, ILazyTab
 {
     private readonly AppServices _services;
     private readonly GameBanService _bans;
