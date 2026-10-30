@@ -566,37 +566,21 @@ docs/                       LINUX-BAUPLAN.md
   und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · Einreichung
   bei Flathub (nur auf Auftrag).
 
-- **F14 – Clan-„Tools“ mit WebKitGTK?** Nächster Bauschritt nach Stufe 10 wären die Tools in einem abgeschotteten
-  WebKitGTK-Fenster. Das braucht im Flatpak die GNOME-Runtime (WebKitGTK ist nicht in freedesktop) – Paket deutlich
-  größer, Runtime-Wechsel schwer umkehrbar. Vorschlag: Tools vorerst im System-Browser öffnen (heute schon so) und
-  WebKitGTK erst angehen, wenn einzelne Tools nachweislich in der App gebraucht werden.
+- **F14 – Tools – entschieden (Owner 30.10.2026: „entscheide du“):** vorerst im System-Browser öffnen (wie heute), keine
+  GNOME-Runtime/WebKitGTK. Neu bewerten, wenn einzelne Tools nachweislich in der App gebraucht werden.
 - **F10 – Lizenz – entschieden (Owner 30.10.2026):** **GPL-3.0-or-later**, der Quelltext wird später öffentlich
   („später ist der Code öffentlich“). `LICENSE`, `TRADEMARKS.md` (Name/Logo ausgenommen), `project_license` gesetzt.
   Folgen: Flathub baut nach der Veröffentlichung aus dem Quelltext (F1 nur bis dahin), F11 entfällt dann; vorher muss
   `RoG.Core` im Windows-Repo öffentlich und GPL-verträglich lizenziert werden und die Historie beider Repos auf
   Geheimnisse geprüft sein (Aufgabe vor dem Umschalten, nicht im Linux-Repo).
-- **F11 – Upload-Zugang für Releases?** Für die Pipeline (F1) braucht die CI Schreibrecht nur auf `rog-public/apps/linux/`
-  (Secrets `ROG_PUBLIC_APPS_KEY_ID`/`ROG_PUBLIC_APPS_SECRET`). Vorschlag: anlegen, sobald die erste Veröffentlichung
-  ansteht – bis dahin bleiben Upload und Flathub-PR im Workflow auskommentiert.
-- **F12 – Rotton für Schrift?** Für AA-Kontrast nutzt rote Schrift im Dunkel-Design #FF6A7D statt #E0324A (wirkt etwas
-  heller/rosa). Vorschlag: so lassen (Barrierefreiheit), Markenrot bleibt für Flächen und Kanten.
-- **F13 – Altersbewertung (OARS) und Bugtracker?** Die Bewertung ist streng (Chat, sichtbare Profile/Orte). Vorschlag:
-  so lassen; dazu einen Forenbereich „Linux-App“ anlegen und als `bugtracker` eintragen.
-
-- **F9 – Datei-Upload auf Gameserver?** Die API kennt für Server-Dateien kein Hochladen (nur Configs über den Editor).
-  Soll die Website das anbieten (z. B. Maps, Mapscripts, Plugins), damit Windows- und Linux-App es nachziehen können?
-  Vorschlag: ja, als eigener Endpunkt mit Whitelist von Ordnern und Größenlimit – bis dahin bleibt es beim Config-Editor.
-
-- ~~F8 – Screenshot-Kürzel~~ **entschieden (30.10.2026): ja, Knopf ohne globales Kürzel.** Umgesetzt: „Bildschirmfoto
-  hochladen“ auf der Upload-Seite über `org.freedesktop.portal.Screenshot` (interaktiv – der Desktop fragt nach
-  Bereich/Fenster), danach normaler Upload. Kein GlobalShortcuts-Portal.
-
-- ~~F7 – Emoji-Schrift mitliefern?~~ **entschieden (30.10.2026): nein**, vorerst keine eigene Emoji-Schrift; erst wenn
-  Mitglieder fehlende Zeichen melden (L34 bleibt).
-
-- ~~F6 – Reverb und Apps~~ **erledigt** (Website v0.53.1, Commit 606f1c40): Reverb nimmt Verbindungen ohne und mit
-  Origin an. Die Linux-App sendet weiter die Website ihrer Umgebung als Origin (L22).
-
+- **F11 – Upload-Zugang – entfällt** mit der Veröffentlichung des Quelltexts (F10: Flathub baut aus dem Quelltext); nur
+  falls vorher eine Binär-Version raus soll, Secrets `ROG_PUBLIC_APPS_KEY_ID`/`ROG_PUBLIC_APPS_SECRET` kurz davor anlegen.
+- **F12 – Rotton für Schrift – entschieden (30.10.2026):** #FF6A7D für rote Schrift im Dunkel-Design bleibt (AA-Kontrast),
+  Markenrot #E0324A für Flächen und Kanten.
+- **F13 – OARS und Bugtracker – entschieden (30.10.2026):** strenge Altersbewertung bleibt; Fehlermeldungen über das
+  Forum der Website (`bugtracker` = Forum; sobald ein eigener Bereich „Linux-App“ existiert, dessen Adresse eintragen).
+- **F9 – Datei-Upload auf Gameserver – entschieden (30.10.2026):** die Website bekommt einen Upload-Endpunkt mit festen
+  Zielordnern je Spiel und Größenlimit (Website-Repo); Windows- und Linux-App ziehen danach nach.
 - **F5 – Wayland-Test:** Bitte die App einmal unter einer Wayland-Sitzung (GNOME oder KDE, gern auch Steam Deck im
   Desktopmodus) starten und unter Einstellungen → Über die App „Anzeige: Wayland“ prüfen; bei Problemen hilft
   `--x11` sofort.

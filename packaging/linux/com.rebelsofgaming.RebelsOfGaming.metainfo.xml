@@ -77,6 +77,7 @@
   <!-- Nur echte Adressen der Plattform (RoG.Core/Config/environments.json); ein öffentlicher Bugtracker existiert nicht -->
   <url type="homepage">https://rebelsofgaming.com/</url>
   <url type="help">https://wiki.rebelsofgaming.com/</url>
+  <url type="bugtracker">https://rebelsofgaming.com/de/forum</url>
 
   <!-- RoG-Rot (hell) und RoG-Dunkel (dunkel) aus dem Design der Plattform -->
   <branding>
