@@ -125,7 +125,7 @@ public sealed class FakeApi : HttpMessageHandler
             ("GET", "/v1/discord/voice") => request.Headers.Authorization is null ? null : FakeData.DiscordVoice,
             ("GET", "/v1/minecraft/join") => FakeData.MinecraftJoin,
             ("GET", "/v1/minecraft/resource-pack") => FakeData.MinecraftResourcePack,
-            _ => null,
+            _ => FakeRoutes.Resolve(request, path, sentBody),
         };
         return Task.FromResult(body is null
             ? Json(Problem(404, "not_found"), HttpStatusCode.NotFound, "application/problem+json")

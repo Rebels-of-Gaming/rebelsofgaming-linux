@@ -507,7 +507,7 @@ public class ScreenshotTests
         await Settle(300);
     }
 
-    private static async Task Shoot(string name, int width, int height, TestServices t, Func<ShellViewModel, Task> arrange, Action<Avalonia.Controls.Window>? check = null)
+    internal static async Task Shoot(string name, int width, int height, TestServices t, Func<ShellViewModel, Task> arrange, Action<Avalonia.Controls.Window>? check = null)
     {
         using (t)
         {
@@ -533,7 +533,7 @@ public class ScreenshotTests
     }
 
     /// <summary>Bilder (asynchron) und Layout fertig werden lassen.</summary>
-    private static async Task Settle(int ms)
+    internal static async Task Settle(int ms)
     {
         var end = Environment.TickCount64 + ms;
         while (Environment.TickCount64 < end)

@@ -51,6 +51,13 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_Settings", "Linux_NavSettings", "IconSettings", "settings", true),
         ];
         SearchItem = Item("Nav_Search", "Linux_SearchTitle", "IconSearch", "search", true);
+
+        // Bereiche ohne Eintrag in der Seitenleiste (geöffnet über Startseite, Links, andere Seiten)
+        HiddenItems =
+        [
+            Item("Nav_Votes", "VotesPage_Title.Text", "IconVote", "votes", false),
+            Item("Nav_Leaderboards", "LeaderboardsPage_Title.Text", "IconTrophy", "minecraft/leaderboards", false),
+        ];
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
         _services.Navigator = Navigate;
         _services.IsNative = route => s_sections.TryGetValue(route.Section, out var key) && AllItems.FirstOrDefault(i => i.Key == key)?.Implemented == true;
@@ -100,6 +107,9 @@ public sealed partial class ShellViewModel : ObservableObject
 
     /// <summary>Globale Suche (Strg+K, Lupe in der Seitenleiste) – eigene Seite, nicht in der Liste der Bereiche.</summary>
     public NavItem SearchItem { get; }
+
+    /// <summary>Seiten ohne eigenen Eintrag in der Seitenleiste (Votes, Bestenlisten …).</summary>
+    public IReadOnlyList<NavItem> HiddenItems { get; }
 
     public string SearchText => _services.T("Shell_Search.PlaceholderText");
 
@@ -391,6 +401,8 @@ public sealed partial class ShellViewModel : ObservableObject
         [AppSection.Account] = "Nav_Account",
         [AppSection.Settings] = "Nav_Settings",
         [AppSection.Search] = "Nav_Search",
+        [AppSection.Votes] = "Nav_Votes",
+        [AppSection.Leaderboards] = "Nav_Leaderboards",
     };
 
     /// <summary>Adresse der Website für Ziele, die die App (noch) nicht nativ zeigt; <c>null</c> = nativ bzw. ohne Eintrag.</summary>
@@ -413,7 +425,7 @@ public sealed partial class ShellViewModel : ObservableObject
         };
     }
 
-    private IEnumerable<NavItem> AllItems => MainItems.Concat(FooterItems).Append(SearchItem);
+    private IEnumerable<NavItem> AllItems => MainItems.Concat(FooterItems).Append(SearchItem).Concat(HiddenItems);
 
     private object CreatePage(NavItem item) => item.Key switch
     {
