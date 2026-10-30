@@ -6,7 +6,20 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+
+### Hinzugefügt (Stufe 7)
+
+- **Server steuern** (mit Recht): eigenes Fenster je Server mit Start/Neustart/Stopp/Kill, Live-Ressourcen und Live-Konsole (Befehle mit ↑/↓, Mitscrollen, Kopieren, Neuverbinden)
+- **Configs** mit Prüfen, Unterschieden vor dem Speichern, Versionen und Zurückspielen; **Dateien** ansehen, kopieren, umbenennen, löschen; **Backups** anlegen, sperren, wiederherstellen, löschen
+- **RCON, Sperren, Whitelist, Spiel-Bans mit Plugin-Schlüssel und Vier-Augen-Freigaben**
+- **Gameserver einrichten und verwalten** (Node, Spiel-Vorlage, Limits, Ablauf, Ports)
+- **Ban-Liste** in der App mit Einspruch
+- **App-Sperre**: mit PIN oder Fingerabdruck (fprintd) entsperren, beim Start und nach Abwesenheit
+
+### Behoben (Stufe 7)
+
+- Beim Schließen des Fensters konnte die App hängen bleiben, wenn gerade eine Einstellung gespeichert wurde
 
 ### Hinzugefügt (Stufe 6)
 

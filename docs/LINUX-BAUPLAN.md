@@ -5,6 +5,9 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
+**Stufe 7 (Server-Steuerung, 30.10.2026) – erledigt** (Steuer-Fenster je Server mit Live-Konsole, Power, Ressourcen,
+Configs mit Diff/Versionen, Dateien, Backups, RCON, Sperren, Whitelist, Spiel-Bans + Plugin-Schlüssel, Vier-Augen-Freigaben;
+Gameserver einrichten/verwalten; öffentliche Ban-Liste mit Einspruch; App-Sperre mit PIN und Fingerabdruck).
 **Stufe 6 (Clan-Prozesse, 30.10.2026) – erledigt** (Votes, Bewerben, Regeln/Rechtstexte bestätigen mit Hinweisbalken,
 Matches/Hall of Fame/Stats/Turniere, Minecraft-Bestenlisten, Freunde, Mitgliederkarte, Konto: Bewerbungen, Abwesenheit,
 Minecraft + Rebel-Coins, Geräte, Datenexport, Konto löschen; Benachrichtigungen je Kanal; dazu „Bildschirmfoto hochladen“, F8).
@@ -71,9 +74,14 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Mitgliederkarte** (eigenes Fenster über „Karte“ auf der Mitglieder-Seite, nur angemeldet: Kacheln nur über den Kachel-Proxy der Plattform (`/v1/map/tiles`, signiert, ohne Token), Ziehen/Mausrad/Tastatur, Zusammenfassen naher Orte, Namen → Profil, © OpenStreetMap) | steht |
 | **Konto** (aufklappbar, lädt beim Öffnen): Meine Bewerbungen (Schritte, Verlauf, Trial-Aufgaben, Nachrichten, Zurückziehen) · Abwesenheit (melden, löschen) · Minecraft (Code prüfen → „bist das du?“, verknüpfen, trennen, Website-Nachrichten, Rebel-Coins, Sichtbarkeit; `rog://account/minecraft?code=…` füllt nur vor) · Geräte & Daten (Geräte abmelden, Datenexport in den Downloads-Ordner, Konto löschen zweistufig mit Austritt aus dem Clan) | steht |
 | **Benachrichtigungen je Kanal** (Einstellungen, angemeldet: Glocke/E-Mail/Discord je Ereignis, Sammel-Mail, Ruhezeit) | steht |
+| **Server-Steuerung** (eigenes Fenster je Server über „Steuern“ an der Karte, nur mit Recht **und** Token-Scope; Reiter wie Windows: Konsole · Configs · Dateien · Backups · RCON · Sperren · Whitelist · Bans & Plugin · Freigaben) | steht |
+| **Konsole** (Power Start/Neustart/Stopp/Kill mit Rückfrage, Ressourcen live, Live-Konsole über den WebSocket des Nodes mit kurzlebigem Ticket aus der API, ANSI entfernt, Monospace, Mitscrollen + „Zum Ende“, 5000 Zeilen, Kopieren, Neuverbinden, Befehle über die API mit ↑/↓-Verlauf, Lese-/Demo-Modus) | steht |
+| **Configs/Dateien/Backups** (Editor nur Whitelist-Dateien, Prüfen + Diff vor dem Speichern, Vier-Augen-Antrag, Versionen + Zurückspielen, „Aus Datei laden“ über das Portal, Herunterladen in den Downloads-Ordner; Dateien mit Pfadleiste, Vorschau, Kopie/Umbenennen/Löschen; Backups anlegen/sperren/wiederherstellen/löschen) | steht |
+| **Spiel-Bans + Plugin-Schlüssel**, **Gameserver einrichten/verwalten** (eigenes Fenster: Node, Egg, Felder, Limits, Ablauf; Status, Verlängern, Löschen mit Namensbestätigung) und **öffentliche Ban-Liste** mit Einspruch (`rog://bans`) | steht |
+| **App-Sperre** (statt Windows Hello: PIN 4–8 Ziffern als PBKDF2-Hash im Schlüsselbund, optional Fingerabdruck über fprintd; Sperre beim Start und nach Abwesenheit, Fehlversuche mit Wartezeit, „PIN vergessen? Abmelden“) | steht; fprintd gegen privaten Bus getestet, echtes Gerät vom Owner zu prüfen |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 457 xUnit-Tests (Stufe 7); 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -138,6 +146,9 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
   Neu (Stufe 2): **`SquadInternalService`** für `GET /v1/squads/{squad}/intern` (Forum, Squad-Gruppe, Termine, Downloads,
   Alben, `missing_scopes`) – liegt bis dahin in `src/RoG.Linux.App/Services/SquadInternalService.cs`; die Windows-App
   zeigt „Intern“ noch nicht. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
+  Neu (Stufe 7): öffentlicher Helfer für freie Dateinamen (`MediaService.FreePath`/`SafeFileName` sind `internal`),
+  `RollbackAsync` meldet wie `SaveAsync`, ob ein Vier-Augen-Antrag entstand (202), Auswertung von `.server.backup`
+  (Backup-Liste live; fehlt auch unter Windows), Ressourcen-Formatierer (MB/Laufzeit) im Kern.
   Neu (Stufe 6): `MatchService.GetAsync(id)` mit Line-up/Bericht/Web-Adresse (liegt in `MatchDetailService`), ein
   Dienst für offene Bestätigungen (Regeln + Rechtstexte) und `InfoService.AcceptLegalAsync`/`CanAccept` für Rechtstexte
   (liegt in `AcceptanceViewModel`), `VoteService` Ja/Nein als bool, `MemberMapService` prüft die Kachel-Vorlage auf die
@@ -189,8 +200,9 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    Rechtstexte bestätigen, Mitgliederkarte, Matches/Hall of Fame/Stats/Turniere, Minecraft-Bestenlisten, Freunde,
    Abwesenheit, Konto/Sicherheit (Geräte, Export, Löschen), Minecraft-Konten + Rebel-Coins, Benachrichtigungen je Kanal.
    Onboarding gab es schon auf der Startseite (Stufe 1). *Nicht enthalten:* Match-Bearbeitung (Stufe 9).
-7. **Server-Steuerung** – Pterodactyl (Power, Ressourcen, Konsole im eigenen Fenster, Configs, Dateien, Backups, RCON);
-   App-Sperre (statt Windows Hello: Polkit/fprintd prüfen, sonst PIN).
+7. **Server-Steuerung** *(erledigt)* – Pterodactyl (Power, Ressourcen, Konsole im eigenen Fenster, Configs, Dateien,
+   Backups, RCON, Sperren, Whitelist, Spiel-Bans, Freigaben), Gameserver einrichten, öffentliche Ban-Liste; App-Sperre
+   mit PIN + fprintd (kein Polkit, L49). *Nicht enthalten:* freier Datei-Upload auf den Server (die API hat keinen, F9).
 8. **Wiki** – lesen, offline, bearbeiten, Versionen.
 9. **Verwaltung + Moderation** – Bereiche aus der API wie in der Windows-App.
 10. **Feinschliff, Steam Deck, Flathub** – siehe unten.
@@ -251,7 +263,16 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 6)
+## Datenschutz (Stand Stufe 7)
+
+- **Neu in Stufe 7:** Aufrufe nur an die eigene API (`/v1/servers/{slug}/resources|power|commands|console-token|rcon|bans|whitelist|config-changes|configs…|files…|backups…|plugin-key|game-bans…`,
+  `/v1/game-bans*`, `/v1/bans*` inkl. Einspruch, `/v1/servers/provisioning/*`) und eine **WebSocket-Verbindung zum
+  Pterodactyl-Node (Wings)** mit dem kurzlebigen Ticket aus der API (Origin aus dem Ticket). Ticket, Konsolen- und
+  RCON-Ausgabe, Plugin-Schlüssel nur im Speicher, verschwinden mit dem Fenster (Test prüft: nichts auf der Platte).
+  Lokal neu: vom Benutzer gestartete Downloads (Config-/Textdateien) im Downloads-Ordner; **App-Sperre:** PIN-Hash
+  (PBKDF2-SHA256, 210 000 Runden, Salz) im Schlüsselbund (`kind=app-lock-pin`, eine PIN für alle Umgebungen), in
+  `linux.json` Fehlversuche, Ende der Wartezeit, Fingerabdruck an/aus (ohne Personenbezug). fprintd nur lokal über
+  den System-Bus – die App sieht nie Fingerabdruck-Daten. Abschalten der Sperre bzw. „PIN vergessen“ löscht die PIN.
 
 - **Neu in Stufe 6:** Neue Aufrufe nur an die eigene API: Votes (`GET /v1/votes`, `PUT /v1/applications/{id}/vote`),
   Bewerbung (`GET /v1/squads/{slug}/application-form`, `POST /v1/squads/{slug}/applications` – enthält das
@@ -439,6 +460,20 @@ docs/                       LINUX-BAUPLAN.md
 - **L44 – Konto:** Abmelden des eigenen Geräts fragt vorher nach (danach ist man abgemeldet), fremde Geräte ohne Rückfrage
   wie Windows; Rebel-Coins-Buchungen ohne das Zeichen ⛃ (in üblichen Linux-Schriften ein Kästchen); Export-Hinweis ohne
   „Prüfsumme stimmt“ (der Export hat keine).
+- **L45 – Server-Steuerung:** Reiter und „Steuern“ verlangen zusätzlich zu den Rechten den Token-Scope
+  (`servers:power|console|files|backups|rcon`, Windows prüft nur Rechte); Stopp und Neustart fragen wie Kill nach;
+  im Demo-Modus sind Befehle erlaubt (werden simuliert); „verbunden“ erst nach `auth success`.
+- **L46 – Configs:** Speichern prüft immer zuerst und zeigt den Diff; „Hochladen“ nur als „Aus Datei laden“ in den
+  Editor (UTF-8-Text bis 512 KB), weil die API keinen freien Datei-Upload hat; Herunterladen im Reiter Dateien nur für
+  Text bis 512 KB; Backups laden über den kurzlebigen Link im Browser (große Archive).
+- **L47 – Provisioning:** „Zusätzliche Ports“ wie Windows als Textfeld für IDs; Prüfhinweise als Fehler-Meldung.
+- **L48 – Öffentliche Ban-Liste** nativ (wie Windows `BansPage`) als Seite ohne Eintrag in der Seitenleiste (`Nav_Bans`).
+- **L49 – App-Sperre statt Windows Hello:** PIN + optional Fingerabdruck über fprintd (`net.reactivated.Fprint`, in
+  Flatpak `--system-talk-name=net.reactivated.Fprint`). **Kein Polkit:** eine eigene Policy-Datei ist in Flatpak nicht
+  installierbar. Eine PIN für alle Umgebungen; Einschalten nur mit neuer PIN, Ausschalten ohne PIN (wie Windows);
+  4 freie Fehlversuche, dann 30 s, verdoppelt bis 15 min (übersteht Neustart); Fingerabdruck startet nur per Knopf (Gerät
+  bleibt sonst für `sudo`/pam frei) und zählt nicht als PIN-Fehlversuch; „PIN vergessen“ = Sperre aus, PIN löschen,
+  abmelden. Gäste werden nie gesperrt.
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
@@ -447,6 +482,10 @@ docs/                       LINUX-BAUPLAN.md
 - **Nur vom Owner zu erledigen/testen (blockiert nichts):** F5 Wayland-Test + Tray unter GNOME/KDE · `libfontconfig1`
   und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · Einreichung
   bei Flathub (nur auf Auftrag).
+
+- **F9 – Datei-Upload auf Gameserver?** Die API kennt für Server-Dateien kein Hochladen (nur Configs über den Editor).
+  Soll die Website das anbieten (z. B. Maps, Mapscripts, Plugins), damit Windows- und Linux-App es nachziehen können?
+  Vorschlag: ja, als eigener Endpunkt mit Whitelist von Ordnern und Größenlimit – bis dahin bleibt es beim Config-Editor.
 
 - ~~F8 – Screenshot-Kürzel~~ **entschieden (30.10.2026): ja, Knopf ohne globales Kürzel.** Umgesetzt: „Bildschirmfoto
   hochladen“ auf der Upload-Seite über `org.freedesktop.portal.Screenshot` (interaktiv – der Desktop fragt nach
