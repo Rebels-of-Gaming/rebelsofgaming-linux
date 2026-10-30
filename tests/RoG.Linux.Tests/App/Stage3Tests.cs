@@ -58,10 +58,12 @@ public class Stage3Tests
         await ViewModelTests.WaitUntil(() => events.Detail.ShowContent);
         Assert.Equal("01EV1", events.Detail.Id);
 
-        // Forum-Thema gibt es noch nicht nativ → Website
+        // Forum-Thema → Forum in der App (seit Stufe 4)
         shell.NavigateTo("Nav_Notifications");
         await bell.Items[0].OpenCommand.ExecuteAsync(null);
-        Assert.Equal("https://rebelsofgaming.com/de/forum/t/01T1/taktik", t.Browser.Opened[^1].ToString());
+        var forum = Assert.IsType<ForumViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => forum.Thread.ShowContent);
+        Assert.Equal("01T1", forum.Thread.ThreadId);
 
         shell.NavigateTo("Nav_Notifications");
         await bell.MarkAllReadCommand.ExecuteAsync(null);
@@ -164,9 +166,8 @@ public class Stage3Tests
     [InlineData("rog://admin", "https://admin.rebelsofgaming.com/")]
     [InlineData("rog://bans/01B1", "https://rebelsofgaming.com/de/bans/01B1")]
     [InlineData("rog://leaderboards", "https://rebelsofgaming.com/de/minecraft/leaderboards")]
-    [InlineData("rog://forum/01T1", "https://rebelsofgaming.com/de/forum/t/01T1")]
     [InlineData("rog://wiki/Minecraft/Befehle", "https://wiki.rebelsofgaming.com/Minecraft/Befehle")]
-    [InlineData("rog://open?url=https://rebelsofgaming.com/de/forum/t/01T1/taktik", "https://rebelsofgaming.com/de/forum/t/01T1")]
+    [InlineData("rog://open?url=https://rebelsofgaming.com/de/matches/01MA1", "https://rebelsofgaming.com/de/matches/01MA1")]
     public async Task Deep_links_without_a_native_page_open_the_exact_website_page(string link, string web)
     {
         using var t = await TestServices.CreateAsync(TestTokens.Wahke);

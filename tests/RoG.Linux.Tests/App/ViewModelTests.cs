@@ -143,10 +143,10 @@ public class ViewModelTests
         using var t = await TestServices.CreateAsync(guest: true, language: "fr");
         var shell = new ShellViewModel(t.Services);
         await shell.InitializeAsync();
-        Assert.True(shell.NavigateTo("Nav_Forum"));
+        Assert.True(shell.NavigateTo("Nav_Matches"));
         var page = Assert.IsType<PlaceholderViewModel>(shell.CurrentPage);
         await page.OpenInBrowserCommand.ExecuteAsync(null);
-        Assert.Equal("https://rebelsofgaming.com/fr/forum", Assert.Single(t.Browser.Opened).ToString());
+        Assert.Equal("https://rebelsofgaming.com/fr/matches", Assert.Single(t.Browser.Opened).ToString());
     }
 
     internal static async Task WaitUntil(Func<bool> condition, int timeoutMs = 5000)

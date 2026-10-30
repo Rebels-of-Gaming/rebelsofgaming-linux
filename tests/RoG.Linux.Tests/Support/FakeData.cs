@@ -363,4 +363,55 @@ public static class FakeData
             : "null";
         return $$$"""{"data":{"id":"01M9","conversation_id":"01CONV1","author":{"id":"01USERWAHKE","slug":"wahke","name":"Wahke"},"body":{{{System.Text.Json.JsonSerializer.Serialize(body)}}},"deleted":false,"quote":{{{quote}}},"attachments":[],"source":null,"created_at":"2026-10-30T08:05:00Z"}}""";
     }
+
+    private const string ForumAccessWrite = """{"level":"write","can_write":true,"can_moderate":false,"upload_visibility":"public"}""";
+
+    public static string ForumCategories => $$$"""
+        {"data":[
+          {"id":"01fc1","slug":"ankuendigungen","name":"Ankündigungen","description":"Neuigkeiten aus der Clanleitung","icon":"megaphone","parent_id":null,"squad":null,"is_locked":true,"threads_count":4,"posts_count":18,"last_post_at":"2026-10-28T10:00:00Z","access":{"level":"read","can_write":false,"can_moderate":false,"upload_visibility":"public"}},
+          {"id":"01fc2","slug":"allgemein","name":"Allgemein","description":"Alles rund um RoG – Fragen, Ideen, Treffen","icon":"message","parent_id":null,"squad":null,"is_locked":false,"threads_count":12,"posts_count":143,"last_post_at":"2026-10-30T07:40:00Z","access":{{{ForumAccessWrite}}}},
+          {"id":"01fc3","slug":"scrims","name":"Scrims & Training","description":"Termine, Gegner, Auswertungen","icon":"trophy","parent_id":"01fc2","squad":{"name":"Squad CS2"},"is_locked":false,"threads_count":5,"posts_count":40,"last_post_at":"2026-10-29T21:00:00Z","access":{{{ForumAccessWrite}}}},
+          {"id":"01fc4","slug":"off-topic","name":"Off-Topic","description":"Hardware, Musik, Memes und der Rest","icon":"smile","parent_id":null,"squad":null,"is_locked":false,"threads_count":9,"posts_count":77,"last_post_at":"2026-10-27T18:00:00Z","access":{{{ForumAccessWrite}}}}
+        ]}
+        """;
+
+    public const string ForumThreadId = "01m4gcf6nj9fv347yzwt78adzm";
+
+    public static string ForumThreads => $$$"""
+        {"data":[
+          {"id":"{{{ForumThreadId}}}","title":"Clanabend im November – welcher Tag passt?","status":"published","is_pinned":true,"is_locked":false,"has_poll":true,"author":{"id":"01U2","slug":"nyx","name":"Nyx"},"author_blocked":false,"replies_count":3,"views":120,"last_post_at":"2026-10-30T07:40:00Z","last_poster":{"slug":"kaito","name":"Kaito"},"unread":true},
+          {"id":"01m4gcf6nj9fv347yzwt78adzn","title":"Neue Map-Rotation für den ET-Server","status":"published","is_pinned":false,"is_locked":false,"has_poll":false,"author":{"id":"01U3","slug":"kaito","name":"Kaito"},"author_blocked":false,"replies_count":8,"views":240,"last_post_at":"2026-10-29T20:15:00Z","last_poster":{"slug":"wahke","name":"Wahke"},"unread":false},
+          {"id":"01m4gcf6nj9fv347yzwt78adzp","title":"Regeln für Voice-Kanäle (bitte lesen)","status":"published","is_pinned":false,"is_locked":true,"has_poll":false,"author":{"id":"01USERWAHKE","slug":"wahke","name":"Wahke"},"author_blocked":false,"replies_count":0,"views":88,"last_post_at":"2026-10-20T12:00:00Z","last_poster":null,"unread":false}
+        ],"meta":{"next_cursor":null,"per_page":30}}
+        """;
+
+    public static string ForumThread => $$$"""
+        {"data":{"id":"{{{ForumThreadId}}}","category_id":"01fc2","title":"Clanabend im November – welcher Tag passt?","slug":"clanabend-im-november","url":"https://rebelsofgaming.com/de/forum/t/{{{ForumThreadId}}}","status":"published","is_pinned":true,"is_locked":false,"has_poll":true,
+          "author":{"id":"01U2","slug":"nyx","name":"Nyx"},"author_blocked":false,"replies_count":3,"views":120,"last_post_at":"2026-10-30T07:40:00Z","unread":false,"created_at":"2026-10-28T18:00:00Z",
+          "category":{"id":"01fc2","slug":"allgemein","name":"Allgemein","icon":"message","is_locked":false,"threads_count":12,"posts_count":143,"access":{{{ForumAccessWrite}}}},
+          "poll":{"id":"01poll1","question":"Welcher Tag passt dir am besten?","multiple":false,"is_closed":false,"voters":9,"options":[
+            {"id":"01o1","label":"Freitag, 6. November","votes":5,"mine":true},{"id":"01o2","label":"Samstag, 7. November","votes":3,"mine":false},{"id":"01o3","label":"Freitag, 13. November","votes":1,"mine":false}]},
+          "subscribed":true,"can_reply":true,"can_moderate":false}}
+        """;
+
+    public static string ForumPosts => """
+        {"data":[
+          {"id":"01p1","thread_id":"01m4gcf6nj9fv347yzwt78adzm","author":{"id":"01U2","slug":"nyx","name":"Nyx"},"author_blocked":false,"body":"…","html":"<p>Hi zusammen! Wir planen den <strong>Clanabend</strong> im November. Stimmt oben ab, welcher Tag passt.</p><ul><li>Start 20 Uhr im TeamSpeak</li><li>Danach ET, CS2 und Minecraft</li></ul>","status":"published","edited_at":null,"reactions":[{"reaction":"like","emoji":"👍","count":4,"mine":true},{"reaction":"heart","emoji":"❤️","count":2,"mine":false}],"attachments":[],"can_edit":false,"created_at":"2026-10-28T18:00:00Z"},
+          {"id":"01p2","thread_id":"01m4gcf6nj9fv347yzwt78adzm","author":{"id":"01U3","slug":"kaito","name":"Kaito"},"author_blocked":false,"body":"…","html":"<blockquote><p>Start 20 Uhr im TeamSpeak</p></blockquote><p>Passt mir, ich bringe die neuen Configs mit.</p>","status":"published","edited_at":"2026-10-28T19:10:00Z","reactions":[],"attachments":[{"id":"01fa1","name":"configs.zip","mime":"application/zip","size":20480}],"can_edit":false,"created_at":"2026-10-28T19:02:00Z"},
+          {"id":"01p3","thread_id":"01m4gcf6nj9fv347yzwt78adzm","author":{"id":"01U9","slug":"troll","name":"Troll"},"author_blocked":true,"body":null,"html":null,"status":"published","edited_at":null,"reactions":[],"attachments":[],"can_edit":false,"created_at":"2026-10-29T08:00:00Z"},
+          {"id":"01p4","thread_id":"01m4gcf6nj9fv347yzwt78adzm","author":{"id":"01U4","slug":"blizzard","name":"Blizzard"},"author_blocked":false,"body":"…","html":"<p>Freitag klappt bei mir nur ab 21 Uhr – ich stoße später dazu.</p>","status":"published","edited_at":null,"reactions":[{"reaction":"like","emoji":"👍","count":1,"mine":false}],"attachments":[],"can_edit":false,"created_at":"2026-10-30T07:40:00Z"}
+        ],"meta":{"next_cursor":null,"per_page":30}}
+        """;
+
+    public static string ForumPost => """
+        {"data":{"id":"01p3","thread_id":"01m4gcf6nj9fv347yzwt78adzm","author":{"id":"01U9","slug":"troll","name":"Troll"},"author_blocked":true,"body":"…","html":"<p>Inhalt eines blockierten Beitrags.</p>","status":"published","reactions":[],"attachments":[],"can_edit":false,"created_at":"2026-10-29T08:00:00Z"}}
+        """;
+
+    public static string ForumReactions => """
+        {"data":[{"key":"like","emoji":"👍","label":"Gefällt mir","position":10,"active":true},{"key":"heart","emoji":"❤️","label":"Herz","position":20,"active":true},{"key":"gg","emoji":"🎮","label":"GG","position":30,"active":true},{"key":"old","emoji":"🦕","label":"Alt","position":40,"active":false}]}
+        """;
+
+    public static string ForumPreview => """
+        {"data":{"html":"<p><strong>Vorschau</strong> deiner Antwort</p>"}}
+        """;
 }

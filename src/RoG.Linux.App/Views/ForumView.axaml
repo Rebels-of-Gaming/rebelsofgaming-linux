@@ -1,0 +1,319 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ForumView"
+             x:DataType="vm:ForumViewModel">
+  <!-- Forum wie ForumPage der Windows-App: links Bereiche/Themen, rechts Thema mit Antwort bzw. „Neues Thema“ -->
+  <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}">
+    <!-- Liste -->
+    <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,16,12">
+          <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+            <Button Classes="icon" Command="{Binding BackToCategoriesCommand}" IsVisible="{Binding ShowThreads}" Margin="-8,0,4,0"
+                    ToolTip.Tip="{l:T ForumPage_Back.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T ForumPage_Back.AutomationProperties.Name}">
+              <PathIcon Data="{StaticResource IconBack}" Width="18" Height="18" />
+            </Button>
+            <TextBlock Grid.Column="1" Classes="display" Text="{l:T ForumPage_Title.Text}" IsVisible="{Binding ShowCategories}" />
+            <TextBlock Grid.Column="1" Classes="title" Text="{Binding ListTitle}" IsVisible="{Binding ShowThreads}" VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis" MaxLines="1" />
+            <Button Grid.Column="2" Classes="icon" Command="{Binding OpenInBrowserCommand}"
+                    ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">
+              <PathIcon Data="{StaticResource IconOpenExternal}" Width="18" Height="18" />
+            </Button>
+            <Button Grid.Column="3" Classes="icon" Command="{Binding RefreshCommand}"
+                    ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+              <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+            </Button>
+          </Grid>
+          <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding StartNewThreadCommand}" IsVisible="{Binding CanCreateThread}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconPlus}" Width="16" Height="16" />
+              <TextBlock Text="{l:T ForumPage_NewThread.Content}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+
+        <Panel>
+          <!-- Bereiche -->
+          <Panel IsVisible="{Binding ShowCategories}">
+            <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                         EmptyText="{l:T ForumPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+            <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding Categories}" Margin="12,0,12,16"
+                            AutomationProperties.Name="{l:T ForumPage_Categories.AutomationProperties.Name}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:CategoryItemViewModel">
+                    <Button Classes="row tile" Margin="{Binding Indent}" Command="{Binding $parent[UserControl].((vm:ForumViewModel)DataContext).OpenCategoryCommand}"
+                            CommandParameter="{Binding}" AutomationProperties.Name="{Binding Name}">
+                      <Grid ColumnDefinitions="Auto,*">
+                        <PathIcon Data="{StaticResource IconForum}" Width="20" Height="20" Margin="0,2,12,0" VerticalAlignment="Top"
+                                  Foreground="{DynamicResource RoGMutedBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="2">
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Classes="body strong" Text="{Binding Name}" />
+                            <PathIcon Data="{StaticResource IconLock}" Width="14" Height="14" IsVisible="{Binding Locked}" Foreground="{DynamicResource RoGMutedBrush}" />
+                          </StackPanel>
+                          <TextBlock Classes="muted small" Text="{Binding Description}" IsVisible="{Binding HasDescription}" />
+                          <TextBlock Classes="muted small" Text="{Binding Stats}" />
+                        </StackPanel>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Panel>
+
+          <!-- Themen eines Bereichs -->
+          <DockPanel IsVisible="{Binding ShowThreads}">
+            <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="12,0,12,12" HorizontalAlignment="Stretch"
+                    IsVisible="{Binding HasMoreThreads}" Command="{Binding LoadMoreThreadsCommand}" Content="{l:T Common_LoadMore.Content}" />
+            <Panel>
+              <c:StateView IsLoading="{Binding IsLoadingThreads}" ErrorMessage="{Binding ThreadsError}" IsEmpty="{Binding ShowThreadsEmpty}"
+                           EmptyText="{l:T Linux_ForumThreadsEmpty}" RetryCommand="{Binding RetryThreadsCommand}" />
+              <ListBox Classes="cards" ItemsSource="{Binding Threads}" SelectedItem="{Binding SelectedThread}" SelectionMode="Single"
+                       AutomationProperties.Name="{l:T ForumPage_Threads.AutomationProperties.Name}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ThreadItemViewModel">
+                    <Grid ColumnDefinitions="*,Auto" AutomationProperties.Name="{Binding AutomationName}">
+                      <StackPanel Spacing="3">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                          <PathIcon Data="{StaticResource IconPin}" Width="14" Height="14" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Pinned}" />
+                          <PathIcon Data="{StaticResource IconLock}" Width="14" Height="14" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding Locked}" />
+                          <PathIcon Data="{StaticResource IconChart}" Width="14" Height="14" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding HasPoll}" />
+                        </StackPanel>
+                        <TextBlock Classes="body" Classes.strong="{Binding Unread}" Text="{Binding Title}" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="muted small" Text="{Binding Meta}" TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                      <Ellipse Grid.Column="1" Width="10" Height="10" Fill="{DynamicResource RoGRedBrush}" VerticalAlignment="Top" Margin="8,4,0,0"
+                               IsVisible="{Binding Unread}" />
+                    </Grid>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Panel>
+          </DockPanel>
+        </Panel>
+      </DockPanel>
+    </Border>
+
+    <!-- Detail -->
+    <Panel>
+      <TextBlock Classes="muted" Text="{l:T ForumPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsVisible="{Binding ShowSelectHint}" Margin="32" />
+
+      <!-- Neues Thema -->
+      <Panel IsVisible="{Binding IsComposing}">
+      <DockPanel DataContext="{Binding NewThread}" x:DataType="vm:NewThreadViewModel">
+        <Border DockPanel.Dock="Top" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" Padding="16,12">
+          <Grid ColumnDefinitions="Auto,*">
+            <Button Classes="icon" Command="{Binding CancelCommand}" Margin="0,0,8,0"
+                    ToolTip.Tip="{l:T Common_Back}" AutomationProperties.Name="{l:T Common_Back}">
+              <PathIcon Data="{StaticResource IconBack}" Width="18" Height="18" />
+            </Button>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Classes="title" FontSize="24" Text="{l:T Forum_NewThread}" />
+              <TextBlock Classes="muted small" Text="{Binding CategoryName}" />
+            </StackPanel>
+          </Grid>
+        </Border>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="24,16" Spacing="12" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+            <c:FeedbackBar DataContext="{Binding Feedback}" />
+            <StackPanel>
+              <TextBlock Classes="label" Text="{l:T Forum_NewThreadTitle}" />
+              <TextBox x:Name="NewTitle" Text="{Binding Title}" MaxLength="120" AutomationProperties.Name="{l:T Forum_NewThreadTitle}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="{l:T Forum_NewThreadBody}" />
+              <WrapPanel x:Name="NewToolbar" Orientation="Horizontal" />
+              <TextBox x:Name="NewBody" Text="{Binding Body}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="180" MaxHeight="420"
+                       AutomationProperties.Name="{l:T Forum_NewThreadBody}" />
+            </StackPanel>
+            <Border Classes="card" IsVisible="{Binding ShowPreview}">
+              <c:RichContentView Document="{Binding PreviewDocument}" />
+            </Border>
+            <WrapPanel Orientation="Horizontal">
+              <Button Classes="primary" Margin="0,0,12,8" Command="{Binding CreateCommand}" Content="{l:T Forum_Create}" />
+              <ToggleButton Classes="secondary" Margin="0,0,12,8" IsChecked="{Binding ShowPreview, Mode=OneWay}" Command="{Binding TogglePreviewCommand}"
+                            Content="{l:T ForumPage_Preview.Content}" />
+              <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding CancelCommand}" Content="{l:T Common_Cancel}" />
+            </WrapPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </DockPanel>
+      </Panel>
+
+      <!-- Thema -->
+      <Panel IsVisible="{Binding ShowThread}">
+      <DockPanel DataContext="{Binding Thread}" x:DataType="vm:ThreadViewModel">
+        <Border DockPanel.Dock="Top" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" Padding="16,12">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Button Classes="icon" Command="{Binding $parent[UserControl].((vm:ForumViewModel)DataContext).CloseDetailCommand}"
+                    IsVisible="{Binding #Panel.IsNarrow}" Margin="0,0,8,0"
+                    ToolTip.Tip="{l:T Common_Back}" AutomationProperties.Name="{l:T Common_Back}">
+              <PathIcon Data="{StaticResource IconBack}" Width="18" Height="18" />
+            </Button>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Classes="title" FontSize="24" Text="{Binding Title}" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+              <TextBlock Classes="muted small" Text="{Binding Meta}" />
+            </StackPanel>
+            <Button Grid.Column="2" Classes="icon" Command="{Binding OpenInBrowserCommand}" VerticalAlignment="Top"
+                    ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">
+              <PathIcon Data="{StaticResource IconOpenExternal}" Width="18" Height="18" />
+            </Button>
+          </Grid>
+        </Border>
+
+        <!-- Antwort -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,1,0,0"
+                Padding="16,10" IsVisible="{Binding CanReply}">
+          <StackPanel Spacing="6">
+            <c:FeedbackBar DataContext="{Binding Feedback}" />
+            <Border Classes="card" IsVisible="{Binding ShowPreview}" MaxHeight="240">
+              <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <c:RichContentView Document="{Binding PreviewDocument}" />
+              </ScrollViewer>
+            </Border>
+            <WrapPanel x:Name="ReplyToolbar" Orientation="Horizontal" />
+            <TextBox x:Name="ReplyBox" Text="{Binding Draft}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64" MaxHeight="200"
+                     PlaceholderText="{l:T ForumPage_ReplyBox.PlaceholderText}" KeyDown="OnReplyKeyDown"
+                     AutomationProperties.Name="{l:T ForumPage_ReplyBox.AutomationProperties.Name}" />
+            <WrapPanel Orientation="Horizontal">
+              <Button Classes="primary" Margin="0,0,8,0" Command="{Binding SendCommand}" Content="{l:T ForumPage_Send.Content}" />
+              <ToggleButton Classes="secondary" IsChecked="{Binding ShowPreview, Mode=OneWay}" Command="{Binding TogglePreviewCommand}"
+                            Content="{l:T ForumPage_Preview.Content}" />
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,1,0,0"
+                Padding="20,12" IsVisible="{Binding ShowReadOnlyHint}">
+          <TextBlock Classes="muted small" Text="{l:T Linux_ForumReadOnly}" />
+        </Border>
+
+        <Panel>
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T ForumPage_SelectHint.Text}" RetryCommand="{Binding RefreshCommand}" />
+          <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20,16" Spacing="12" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+              <!-- Umfrage -->
+              <Border Classes="card" IsVisible="{Binding HasPoll}">
+                <StackPanel Spacing="10">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Data="{StaticResource IconChart}" Width="18" Height="18" Foreground="{DynamicResource RoGGoldBrush}" />
+                    <TextBlock Classes="body strong" Text="{Binding PollQuestion}" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <TextBlock Classes="muted small" Text="{Binding PollMeta}" />
+                  <ItemsControl ItemsSource="{Binding PollOptions}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:PollOptionViewModel">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                          <TextBlock Classes="body" Classes.strong="{Binding Mine}" Text="{Binding Label}" TextWrapping="Wrap" />
+                          <TextBlock Grid.Column="1" Classes="muted small" Text="{Binding Votes}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                          <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" Value="{Binding Percent}" Maximum="100" Height="6" Margin="0,4,0,0"
+                                       AutomationProperties.Name="{Binding Votes}" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <ItemsControl ItemsSource="{Binding PollOptions}" IsVisible="{Binding CanVote}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:PollOptionViewModel">
+                        <Button Classes="secondary" Margin="0,0,8,8" Command="{Binding VoteCommand}" AutomationProperties.Name="{Binding VoteAutomationName}">
+                          <TextBlock Text="{Binding Label}" />
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+
+              <!-- Beiträge -->
+              <ItemsControl ItemsSource="{Binding Posts}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Spacing="12" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:PostViewModel">
+                    <Border Classes="card" Padding="16,12" Focusable="True" AutomationProperties.Name="{Binding AutomationName}">
+                      <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                          <Border Width="32" Height="32" CornerRadius="16" Background="{DynamicResource RoGBg3Brush}" Margin="0,0,10,0">
+                            <TextBlock Text="{Binding Initial}" FontFamily="{StaticResource RoGDisplayFont}" FontWeight="Bold" FontSize="16"
+                                       Foreground="{DynamicResource RoGMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          </Border>
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Classes="body strong" Text="{Binding Author}" />
+                            <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                          </StackPanel>
+                          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Top">
+                            <Button Classes="icon" Width="32" Height="32" Padding="7" IsVisible="{Binding CanReact}"
+                                    ToolTip.Tip="{l:T ForumPage_React.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T ForumPage_React.AutomationProperties.Name}">
+                              <PathIcon Data="{StaticResource IconEmoji}" Width="16" Height="16" />
+                              <Button.Flyout>
+                                <Flyout Placement="BottomEdgeAlignedRight">
+                                  <ItemsControl ItemsSource="{Binding ReactionChoices}" MaxWidth="320">
+                                    <ItemsControl.ItemsPanel>
+                                      <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                      <DataTemplate x:DataType="vm:ReactionChoiceViewModel">
+                                        <Button Classes="secondary" Margin="0,0,6,6" Command="{Binding ChooseCommand}" Content="{Binding Text}"
+                                                AutomationProperties.Name="{Binding Text}" />
+                                      </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                  </ItemsControl>
+                                </Flyout>
+                              </Button.Flyout>
+                            </Button>
+                            <Button Classes="icon" Width="32" Height="32" Padding="7" Command="{Binding QuoteCommand}" IsVisible="{Binding CanQuote}"
+                                    ToolTip.Tip="{l:T ForumPage_Quote.Content}" AutomationProperties.Name="{l:T ForumPage_Quote.Content}">
+                              <PathIcon Data="{StaticResource IconQuote}" Width="16" Height="16" />
+                            </Button>
+                          </StackPanel>
+                        </Grid>
+                        <Button Classes="secondary" HorizontalAlignment="Left" IsVisible="{Binding IsCollapsed}" Command="{Binding RevealCommand}"
+                                Content="{l:T ForumPage_Reveal.Content}" />
+                        <c:RichContentView Document="{Binding Content}" IsVisible="{Binding !IsCollapsed}" />
+                        <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasAttachments}">
+                          <PathIcon Data="{StaticResource IconAttachment}" Width="14" Height="14" Foreground="{DynamicResource RoGMutedBrush}" />
+                          <TextBlock Classes="muted small" Text="{Binding Attachments}" />
+                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding Reactions}" IsVisible="{Binding HasReactions}">
+                          <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                          </ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ReactionChipViewModel">
+                              <Button Classes="reaction" Classes.mine="{Binding Mine}" Margin="0,0,6,4" Command="{Binding ToggleCommand}"
+                                      Content="{Binding Text}" AutomationProperties.Name="{Binding AutomationName}" />
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Button Classes="secondary" HorizontalAlignment="Center" IsVisible="{Binding HasMorePosts}" Command="{Binding LoadMorePostsCommand}"
+                      Content="{l:T Common_LoadMore.Content}" />
+            </StackPanel>
+          </ScrollViewer>
+        </Panel>
+      </DockPanel>
+      </Panel>
+    </Panel>
+  </c:ListDetailPanel>
+</UserControl>

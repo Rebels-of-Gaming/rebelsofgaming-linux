@@ -208,7 +208,7 @@
   </Style>
 
   <!-- Knöpfe -->
-  <Style Selector="Button.primary, Button.secondary">
+  <Style Selector="Button.primary, Button.secondary, ToggleButton.secondary">
     <Setter Property="FontFamily" Value="{StaticResource RoGDisplayFont}" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="FontSize" Value="17" />
@@ -230,13 +230,18 @@
   <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource RoGRedPressedBrush}" />
   </Style>
-  <Style Selector="Button.secondary">
+  <Style Selector="Button.secondary, ToggleButton.secondary">
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource RoGLineBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
   </Style>
-  <Style Selector="Button.secondary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="ToggleButton.secondary:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
+  </Style>
+  <Style Selector="Button.secondary:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.secondary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource RoGLineBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource RoGMutedBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
@@ -535,6 +540,36 @@
   <Style Selector="Button.choice.no.selected">
     <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
     <Setter Property="BorderThickness" Value="2" />
+  </Style>
+
+  <!-- Reaktion unter einem Forenbeitrag („👍 3“), eigene mit roter Kante -->
+  <Style Selector="Button.reaction">
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="Padding" Value="10,3" />
+    <Setter Property="MinHeight" Value="28" />
+  </Style>
+  <Style Selector="Button.reaction.mine">
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
+  </Style>
+  <!-- Format-Knopf der BBCode-Leiste -->
+  <Style Selector="Button.format">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGMutedBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="MinWidth" Value="36" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Padding" Value="8,0" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.format:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
   </Style>
 
   <!-- Sprechblase im Chat: fremde links (bg2), eigene rechts (bg3, rote Kante) -->

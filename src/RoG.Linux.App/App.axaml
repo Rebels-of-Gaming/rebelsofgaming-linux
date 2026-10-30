@@ -23,6 +23,7 @@
     <DataTemplate DataType="vm:InfoViewModel"><views:InfoView /></DataTemplate>
     <DataTemplate DataType="vm:SearchViewModel"><views:SearchView /></DataTemplate>
     <DataTemplate DataType="vm:NotificationsViewModel"><views:NotificationsView /></DataTemplate>
+    <DataTemplate DataType="vm:ForumViewModel"><views:ForumView /></DataTemplate>
     <!-- Bausteine, die mehrere Seiten zeigen -->
     <DataTemplate DataType="vm:ServerItemViewModel"><views:ServerCard /></DataTemplate>
     <DataTemplate DataType="vm:InternalRowViewModel">

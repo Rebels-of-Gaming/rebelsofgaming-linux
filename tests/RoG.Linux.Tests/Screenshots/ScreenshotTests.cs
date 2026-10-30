@@ -60,7 +60,7 @@ public class ScreenshotTests
     public async Task Placeholder_french() =>
         await Shoot("placeholder_fr_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true, language: "fr"), shell =>
         {
-            shell.NavigateTo("Nav_Forum");
+            shell.NavigateTo("Nav_Wiki");
             return Settle(100);
         });
 
@@ -204,6 +204,35 @@ public class ScreenshotTests
     public async Task Servers_discord_guest() => await Shoot("servers_discord_guest_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), shell => OpenServerTab(shell, "discord"));
 
     [AvaloniaFact]
+    public async Task Forum_thread() => await Shoot("forum_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenForumThread);
+
+    [AvaloniaFact]
+    public async Task Forum_thread_narrow() => await Shoot("forum_narrow_480x900", 480, 900, await TestServices.CreateAsync(TestTokens.Wahke), OpenForumThread);
+
+    [AvaloniaFact]
+    public async Task Forum_categories_guest() =>
+        await Shoot("forum_categories_guest_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), async shell =>
+        {
+            shell.NavigateTo("Nav_Forum");
+            var forum = Assert.IsType<ForumViewModel>(shell.CurrentPage);
+            await ViewModelTests.WaitUntil(() => forum.ShowContent);
+            await Settle(300);
+        });
+
+    [AvaloniaFact]
+    public async Task Forum_new_thread() =>
+        await Shoot("forum_new_thread_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), async shell =>
+        {
+            await OpenForumThread(shell);
+            var forum = Assert.IsType<ForumViewModel>(shell.CurrentPage);
+            forum.StartNewThreadCommand.Execute(null);
+            forum.NewThread.Title = "Scrim am Freitag?";
+            forum.NewThread.Body = "[b]Wer ist dabei?[/b] Treffpunkt wie immer im TeamSpeak. @Nyx";
+            await forum.NewThread.TogglePreviewCommand.ExecuteAsync(null);
+            await Settle(300);
+        });
+
+    [AvaloniaFact]
     public async Task Calendar_steam_deck() => await Shoot("calendar_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenEvent);
 
     [AvaloniaFact]
@@ -301,6 +330,17 @@ public class ScreenshotTests
         await servers.Servers[1].ConnectCommand.ExecuteAsync(null);
         await Settle(300);
         servers.Pause();
+    }
+
+    private static async Task OpenForumThread(ShellViewModel shell)
+    {
+        Assert.True(shell.OpenDeepLink(new Uri("rog://forum/allgemein")));
+        var forum = Assert.IsType<ForumViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => forum.Threads.Count > 0);
+        forum.SelectedThread = forum.Threads[0];
+        await ViewModelTests.WaitUntil(() => forum.Thread.ShowContent);
+        forum.Thread.Draft = "[quote=Kaito]Passt mir[/quote]\n\nIch bin Freitag dabei!";
+        await Settle(400);
     }
 
     private static async Task OpenServerTab(ShellViewModel shell, string tab)

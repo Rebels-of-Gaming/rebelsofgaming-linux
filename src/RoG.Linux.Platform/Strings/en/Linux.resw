@@ -232,4 +232,28 @@
   <data name="Linux_CopyFailed" xml:space="preserve">
     <value>Could not copy – the clipboard is busy.</value>
   </data>
+  <data name="Linux_Unread" xml:space="preserve">
+    <value>unread</value>
+  </data>
+  <data name="Linux_ForumPinned" xml:space="preserve">
+    <value>pinned</value>
+  </data>
+  <data name="Linux_ForumLocked" xml:space="preserve">
+    <value>locked</value>
+  </data>
+  <data name="Linux_ReactionAutomation" xml:space="preserve">
+    <value>Reaction {0}: {1}</value>
+  </data>
+  <data name="Linux_ReactionMine" xml:space="preserve">
+    <value>your reaction</value>
+  </data>
+  <data name="Linux_PollVoteAutomation" xml:space="preserve">
+    <value>Vote for “{0}”</value>
+  </data>
+  <data name="Linux_ForumReadOnly" xml:space="preserve">
+    <value>You can’t reply here – the topic is locked or you can’t write in this section.</value>
+  </data>
+  <data name="Linux_ForumThreadsEmpty" xml:space="preserve">
+    <value>No topics in this section yet.</value>
+  </data>
 </root>

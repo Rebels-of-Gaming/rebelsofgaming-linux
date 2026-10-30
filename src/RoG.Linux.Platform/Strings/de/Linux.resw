@@ -232,4 +232,28 @@
   <data name="Linux_CopyFailed" xml:space="preserve">
     <value>Kopieren nicht möglich – die Zwischenablage ist gerade belegt.</value>
   </data>
+  <data name="Linux_Unread" xml:space="preserve">
+    <value>ungelesen</value>
+  </data>
+  <data name="Linux_ForumPinned" xml:space="preserve">
+    <value>angeheftet</value>
+  </data>
+  <data name="Linux_ForumLocked" xml:space="preserve">
+    <value>geschlossen</value>
+  </data>
+  <data name="Linux_ReactionAutomation" xml:space="preserve">
+    <value>Reaktion {0}: {1}</value>
+  </data>
+  <data name="Linux_ReactionMine" xml:space="preserve">
+    <value>deine Reaktion</value>
+  </data>
+  <data name="Linux_PollVoteAutomation" xml:space="preserve">
+    <value>Für „{0}“ stimmen</value>
+  </data>
+  <data name="Linux_ForumReadOnly" xml:space="preserve">
+    <value>Antworten ist hier nicht möglich – das Thema ist geschlossen oder du darfst in diesem Bereich nicht schreiben.</value>
+  </data>
+  <data name="Linux_ForumThreadsEmpty" xml:space="preserve">
+    <value>Noch keine Themen in diesem Bereich.</value>
+  </data>
 </root>
