@@ -28,6 +28,12 @@ public sealed partial class App : Application
         }
 
         var services = await AppServices.CreateAsync();
+
+        // Zahlen/Datum im Kern (z. B. „1,2 GB“) folgen der App-Sprache, nicht der Locale des Systems (wie Windows)
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = services.Culture;
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = services.Culture;
+        System.Globalization.CultureInfo.CurrentCulture = services.Culture;
+        System.Globalization.CultureInfo.CurrentUICulture = services.Culture;
         var window = CreateMainWindow(services);
         WindowPlacementService.Restore(window, services.Settings.Window);
         desktop.Exit += (_, _) => services.Dispose();

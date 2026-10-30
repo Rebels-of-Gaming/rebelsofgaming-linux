@@ -506,7 +506,8 @@ public class MinecraftAdminTests
         // Verwaltung: Live-Modus, Speicher, Welt ausblenden/benennen, Kacheln löschen nach Rückfrage
         Assert.True(map.CanManage);
         Assert.Equal("public", map.SelectedLiveMode!.Value);
-        Assert.Contains("1,2 GB von 50 GB", map.QuotaText, StringComparison.Ordinal);
+        // Kern formatiert mit der Kultur des Threads (App setzt sie beim Start auf die App-Sprache)
+        Assert.Contains(RoG.Core.Features.Minecraft.MinecraftMapGeometry.FormatBytes(1_340_918_988) + " von 50 GB", map.QuotaText, StringComparison.Ordinal);
         map.SelectedLiveMode = map.LiveModeOptions.Single(o => o.Value == "auth");
         await WaitUntil(() => t.Api.Writes.Any(w => w.Path == "/v1/minecraft/map/settings"));
         Assert.Equal("auth", LastBody(t, "PATCH", "/v1/minecraft/map/settings")["live_players"]!.GetValue<string>());
