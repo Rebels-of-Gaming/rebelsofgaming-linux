@@ -25,6 +25,7 @@ public sealed partial class EventsViewModel : LoadableViewModel, IDetailPage, IR
     {
         _events = new EventService(services.Api.Client);
         Detail = new EventDetailViewModel(services, _events);
+        Detail.Changed += (_, _) => _ = LoadAsync(silent: true); // Zahlen und eigene Antwort in der Liste
         WeekdayNames = Enumerable.Range(0, 7)
             .Select(i => services.Culture.DateTimeFormat.GetAbbreviatedDayName((DayOfWeek)((i + 1) % 7)))
             .ToList();
@@ -439,6 +440,78 @@ public sealed partial class EventDetailViewModel(AppServices services, EventServ
 
     public FeedbackViewModel Feedback { get; } = new();
 
+    /// <summary>Eigene Antwort (Zusage, Vielleicht, Absage) – angemeldet und nicht abgesagt.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsYes), nameof(IsMaybe), nameof(IsNo))]
+    public partial Rsvp MyRsvp { get; set; }
+
+    public bool IsYes => MyRsvp == Rsvp.Yes;
+
+    public bool IsMaybe => MyRsvp == Rsvp.Maybe;
+
+    public bool IsNo => MyRsvp == Rsvp.No;
+
+    [ObservableProperty]
+    public partial bool CanRespond { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsResponding { get; set; }
+
+    /// <summary>Antwort gespeichert – die Liste lädt Zahlen und Antwort neu.</summary>
+    public event EventHandler<EventItem>? Changed;
+
+    [RelayCommand]
+    private Task RespondYesAsync() => RespondAsync(Rsvp.Yes);
+
+    [RelayCommand]
+    private Task RespondMaybeAsync() => RespondAsync(Rsvp.Maybe);
+
+    [RelayCommand]
+    private Task RespondNoAsync() => RespondAsync(Rsvp.No);
+
+    /// <summary>Antwort senden (wie die Windows-App); ohne Netz in die Warteschlange (verschlüsselt, wenn möglich).</summary>
+    private async Task RespondAsync(Rsvp answer)
+    {
+        if (_item is null || IsResponding || !CanRespond)
+        {
+            return;
+        }
+
+        IsResponding = true;
+        var item = _item;
+        try
+        {
+            var result = await events.RespondAsync(item.Id, answer);
+            var updated = await events.GetAsync(item.Id);
+            if (item.Id == _id)
+            {
+                await ApplyAsync(updated);
+            }
+
+            Changed?.Invoke(this, updated);
+            Feedback.Show(Services.Format(StringKeys.EventsRsvpSaved, EventsViewModel.RsvpLabel(result, Services.Localizer)), MessageTone.Success);
+        }
+        catch (ApiProblemException ex) when (ex.Problem.IsNetworkError)
+        {
+            var status = answer switch { Rsvp.Yes => "yes", Rsvp.Maybe => "maybe", _ => "no" };
+            await Services.Outbox.EnqueueAsync(RoG.Core.Offline.OutboxKind.EventRsvp, item.Id, new { status }, Services.T(StringKeys.OutboxLabelRsvp));
+            MyRsvp = answer; // vorläufig – kommt beim Senden der Warteschlange an
+            Feedback.Show(Services.T(StringKeys.OutboxQueued), MessageTone.Info);
+        }
+        catch (ApiProblemException ex)
+        {
+            Feedback.Show(Services.Localizer.GetError(ex.Problem.Code), MessageTone.Error);
+        }
+        catch (Exception ex) when (ex is RoG.Core.Api.Generated.GeneratedApiException or HttpRequestException or TaskCanceledException)
+        {
+            Feedback.Show(Services.Localizer.GetError(ApiProblem.Codes.Unknown), MessageTone.Error);
+        }
+        finally
+        {
+            IsResponding = false;
+        }
+    }
+
     protected override bool HasData => _item is not null;
 
     /// <summary>Aus der Liste: sofort zeigen, dann still den neuesten Stand und die Teilnehmer holen.</summary>
@@ -513,6 +586,8 @@ public sealed partial class EventDetailViewModel(AppServices services, EventServ
         Description = item.Description;
         Server = item.Server is null ? null : new ServerItemViewModel(item.Server, Services, Feedback);
         IsSignedIn = await Services.Tokens.GetAsync() is not null;
+        MyRsvp = item.MyRsvp;
+        CanRespond = IsSignedIn && !item.Cancelled;
         HasMyRsvp = item.MyRsvp != Rsvp.None;
         RsvpText = HasMyRsvp
             ? EventsViewModel.RsvpLabel(item.MyRsvp, Services.Localizer)

@@ -149,7 +149,7 @@
     <value>Einige Bereiche fehlen, weil die Anmeldung dieses Geräts sie nicht erlaubt ({0}). Melde dich ab und wieder an, um sie freizugeben.</value>
   </data>
   <data name="Linux_EventsNoRsvp" xml:space="preserve">
-    <value>Du hast noch nicht geantwortet. Zusagen geht in der App bald – bis dahin im Browser.</value>
+    <value>Du hast noch nicht geantwortet.</value>
   </data>
   <data name="Linux_EventsRsvpGuest" xml:space="preserve">
     <value>Zusagen gibt es nach der Anmeldung.</value>

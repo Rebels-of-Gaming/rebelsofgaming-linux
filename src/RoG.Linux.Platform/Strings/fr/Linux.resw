@@ -149,7 +149,7 @@
     <value>Certaines sections manquent car la connexion de cet appareil ne les autorise pas ({0}). Déconnecte-toi puis reconnecte-toi pour les autoriser.</value>
   </data>
   <data name="Linux_EventsNoRsvp" xml:space="preserve">
-    <value>Tu n’as pas encore répondu. Répondre dans l’app arrive bientôt – en attendant, via le navigateur.</value>
+    <value>Tu n’as pas encore répondu.</value>
   </data>
   <data name="Linux_EventsRsvpGuest" xml:space="preserve">
     <value>Connecte-toi pour répondre aux événements.</value>

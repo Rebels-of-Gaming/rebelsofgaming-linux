@@ -62,6 +62,8 @@ public sealed class FakeApi : HttpMessageHandler
             ("GET", var p) when p.EndsWith("/messages", StringComparison.Ordinal) => FakeData.Messages,
             ("POST", var p) when p.EndsWith("/read", StringComparison.Ordinal) => """{"data":{"unread":1}}""",
             ("POST", var p) when p.StartsWith("/v1/conversations/", StringComparison.Ordinal) && p.EndsWith("/messages", StringComparison.Ordinal) => FakeData.SentMessage(sentBody),
+            ("PUT", var p) when p.StartsWith("/v1/events/", StringComparison.Ordinal) && p.EndsWith("/rsvp", StringComparison.Ordinal) =>
+                "{\"data\":{\"status\":" + System.Text.Json.JsonSerializer.Serialize(System.Text.Json.JsonDocument.Parse(sentBody).RootElement.GetProperty("status").GetString()) + "}}",
             ("POST", "/v1/conversations") => """{"data":{"id":"01CONV1","type":"direct"}}""",
             ("GET", "/v1/me") => FakeData.Me,
             ("GET", "/v1") => FakeData.Platform,

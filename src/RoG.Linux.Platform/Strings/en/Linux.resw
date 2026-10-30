@@ -149,7 +149,7 @@
     <value>Some sections are missing because this device’s sign-in doesn’t allow them ({0}). Sign out and in again to grant them.</value>
   </data>
   <data name="Linux_EventsNoRsvp" xml:space="preserve">
-    <value>You haven’t answered yet. Replying in the app is coming soon – until then use the browser.</value>
+    <value>You haven’t answered yet.</value>
   </data>
   <data name="Linux_EventsRsvpGuest" xml:space="preserve">
     <value>Sign in to reply to events.</value>

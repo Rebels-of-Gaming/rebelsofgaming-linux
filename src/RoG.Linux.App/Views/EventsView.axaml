@@ -190,14 +190,37 @@
             </StackPanel>
           </StackPanel>
 
-          <!-- Eigene Antwort: nur anzeigen (Antworten in der App ab Stufe 4) -->
+          <!-- Eigene Antwort: Dabei · Vielleicht · Absagen (gewählte Antwort hervorgehoben, auch als Haken) -->
           <Border Classes="card" Padding="16,12">
-            <StackPanel Spacing="6">
+            <StackPanel Spacing="10">
               <TextBlock Classes="section" Text="{l:T EventsPage_Rsvp.Text}" />
               <StackPanel Orientation="Horizontal" Spacing="8">
                 <PathIcon Data="{StaticResource IconCheckCircle}" Width="18" Height="18" Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding HasMyRsvp}" />
                 <TextBlock Classes="body" Text="{Binding RsvpText}" />
               </StackPanel>
+              <WrapPanel ItemSpacing="8" LineSpacing="8" IsVisible="{Binding CanRespond}">
+                <Button Classes="choice yes" Classes.selected="{Binding IsYes}" Command="{Binding RespondYesCommand}" IsEnabled="{Binding !IsResponding}"
+                        AutomationProperties.Name="{l:T EventsPage_Yes.Content}">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconCheck}" Width="14" Height="14" IsVisible="{Binding IsYes}" />
+                    <TextBlock Text="{l:T EventsPage_Yes.Content}" />
+                  </StackPanel>
+                </Button>
+                <Button Classes="choice maybe" Classes.selected="{Binding IsMaybe}" Command="{Binding RespondMaybeCommand}" IsEnabled="{Binding !IsResponding}"
+                        AutomationProperties.Name="{l:T EventsPage_Maybe.Content}">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconCheck}" Width="14" Height="14" IsVisible="{Binding IsMaybe}" />
+                    <TextBlock Text="{l:T EventsPage_Maybe.Content}" />
+                  </StackPanel>
+                </Button>
+                <Button Classes="choice no" Classes.selected="{Binding IsNo}" Command="{Binding RespondNoCommand}" IsEnabled="{Binding !IsResponding}"
+                        AutomationProperties.Name="{l:T EventsPage_No.Content}">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconCheck}" Width="14" Height="14" IsVisible="{Binding IsNo}" />
+                    <TextBlock Text="{l:T EventsPage_No.Content}" />
+                  </StackPanel>
+                </Button>
+              </WrapPanel>
             </StackPanel>
           </Border>
 

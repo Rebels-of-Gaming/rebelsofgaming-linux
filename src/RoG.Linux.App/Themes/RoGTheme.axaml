@@ -511,6 +511,32 @@
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
   </Style>
 
+  <!-- Auswahl-Knopf (Zusage): Rahmen, gewählt mit farbiger Fläche – Grün dabei, Gold vielleicht, Rot absagen -->
+  <Style Selector="Button.choice">
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    <Setter Property="Padding" Value="16,8" />
+    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="FontFamily" Value="{StaticResource RoGDisplayFont}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="16" />
+  </Style>
+  <Style Selector="Button.choice.yes.selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGGreenBrush}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+  <Style Selector="Button.choice.maybe.selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGGoldBrush}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+  <Style Selector="Button.choice.no.selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+
   <!-- Sprechblase im Chat: fremde links (bg2), eigene rechts (bg3, rote Kante) -->
   <Style Selector="Border.bubble">
     <Setter Property="HorizontalAlignment" Value="Left" />
