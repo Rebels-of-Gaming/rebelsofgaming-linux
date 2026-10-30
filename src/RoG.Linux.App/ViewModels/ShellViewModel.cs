@@ -36,7 +36,7 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_Calendar", "Shell_NavCalendar.Content", "IconCalendar", "events", true),
             Item("Nav_Servers", "Shell_NavServers.Content", "IconServers", "servers", true),
             Item("Nav_Forum", "Shell_NavForum.Content", "IconForum", "forum", true),
-            Item("Nav_Wiki", "Shell_NavWiki.Content", "IconWiki", string.Empty, false),
+            Item("Nav_Wiki", "Shell_NavWiki.Content", "IconWiki", string.Empty, true),
             Item("Nav_Tools", "Shell_NavTools.Content", "IconTools", "tools", false),
             Item("Nav_Members", "Shell_NavMembers.Content", "IconMembers", "members", true),
             Item("Nav_Matches", "Shell_NavMatches.Content", "IconMatches", "matches", true),
@@ -338,7 +338,7 @@ public sealed partial class ShellViewModel : ObservableObject
         }
 
         // Bereiche ohne eigene Seite (Verwaltung, Karte) bzw. Einträge in Bereichen, die die
-        // App noch nicht nativ hat (Forum-Thema, Wiki-Seite …): genau diese Seite der Website öffnen
+        // App noch nicht nativ hat (Tools …): genau diese Seite der Website öffnen
         var web = WebFallback(route);
         if (!s_sections.TryGetValue(route.Section, out var key))
         {
@@ -427,7 +427,6 @@ public sealed partial class ShellViewModel : ObservableObject
         {
             AppSection.Admin => env.AdminBaseUrl ?? env.WebPage(lang, "admin"),
             AppSection.MinecraftMap => env.WebPage(lang, "minecraft/karte"),
-            AppSection.Wiki when route.Key is { } w => new Uri(env.WikiBaseUrl, Escaped(w)),
             AppSection.Tools when route.Key is { } k => env.WebPage(lang, "tools/" + Escaped(k)),
             _ => null,
         };
@@ -456,6 +455,7 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Leaderboards" => new LeaderboardsViewModel(_services),
         "Nav_Friends" => new FriendsViewModel(_services, ShowLogin),
         "Nav_Bans" => new BansViewModel(_services),
+        "Nav_Wiki" => new WikiViewModel(_services, ShowLogin),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
         _ => new PlaceholderViewModel(_services, item),
     };

@@ -217,6 +217,13 @@ public sealed class AppServices : IDisposable
     /// </summary>
     public RoG.Core.Offline.Outbox Outbox { get; }
 
+    /// <summary>
+    /// Offline-Kopien gelesener Wiki-Seiten (Kern, verschlüsselt mit dem Schlüssel aus dem Schlüsselbund) in
+    /// <c>$XDG_DATA_HOME/rebelsofgaming/wiki-&lt;umgebung&gt;/</c>; ohne Schlüsselbund <c>null</c> (Wiki nur online).
+    /// Speicherdauer: bis zum Abmelden, Dateien ohne Aktualisierung seit <see cref="CacheRetention"/> fallen beim Start weg.
+    /// </summary>
+    public RoG.Core.Features.Wiki.WikiOfflineStore? WikiOffline { get; private init; }
+
     /// <summary>Werden Antworten/Warteschlange verschlüsselt auf der Platte gehalten? (Über-Bereich, Diagnose)</summary>
     public bool PersistentCache { get; private init; }
 
@@ -310,6 +317,12 @@ public sealed class AppServices : IDisposable
             protector is null ? null : Path.Combine(options.DataDirectory ?? paths.DataDirectory, $"outbox-{environment.Name}.dat"),
             protector ?? (RoG.Core.Security.IPayloadProtector)RoG.Core.Security.NoPayloadProtection.Instance);
         await outbox.LoadAsync();
+        var wikiFolder = Path.Combine(options.DataDirectory ?? paths.DataDirectory, $"wiki-{environment.Name}");
+        if (protector is not null)
+        {
+            PruneOld(wikiFolder, CacheRetention);
+        }
+
         // RoGHttpHandler setzt „RoG-Windows“ nur, wenn noch kein User-Agent da ist – HttpClient überträgt diesen vorher
         api.Http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(AppIdentity.UserAgentProduct, AppVersion));
 
@@ -340,6 +353,7 @@ public sealed class AppServices : IDisposable
             Screenshots = options.Screenshots ?? new ScreenshotPortal(),
             DownloadDirectory = options.DownloadDirectory ?? paths.DownloadDirectory,
             PersistentCache = persistentCache,
+            WikiOffline = protector is null ? null : new RoG.Core.Features.Wiki.WikiOfflineStore(wikiFolder, protector),
             StorageHttp = options.StorageHandler is null
                 ? new HttpClient { Timeout = TimeSpan.FromMinutes(15) }
                 : new HttpClient(options.StorageHandler, disposeHandler: false) { Timeout = TimeSpan.FromMinutes(15) },
@@ -420,6 +434,14 @@ public sealed class AppServices : IDisposable
         Api.Handler.ClearCache();
         Outbox.Clear();
         Images.Clear();
+        try
+        {
+            WikiOffline?.Clear(); // Wiki-Kopien können Mitglieder- und interne Bereiche enthalten
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Ordner wird beim nächsten Start nach der Speicherdauer ohnehin bereinigt
+        }
     }
 
     /// <summary>Cache-Dateien, die länger nicht geschrieben wurden, löschen (Speicherdauer wie im Bauplan).</summary>

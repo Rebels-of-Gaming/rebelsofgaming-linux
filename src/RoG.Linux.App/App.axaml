@@ -34,6 +34,7 @@
     <DataTemplate DataType="vm:ServerFilesViewModel"><views:ServerFilesView /></DataTemplate>
     <DataTemplate DataType="vm:ServerBackupsViewModel"><views:ServerBackupsView /></DataTemplate>
     <DataTemplate DataType="vm:BansViewModel"><views:BansView /></DataTemplate>
+    <DataTemplate DataType="vm:WikiViewModel"><views:WikiView /></DataTemplate>
     <!-- Bausteine, die mehrere Seiten zeigen -->
     <DataTemplate DataType="vm:ServerItemViewModel"><views:ServerCard /></DataTemplate>
     <DataTemplate DataType="vm:ServerGameBansViewModel"><views:ServerGameBansView /></DataTemplate>

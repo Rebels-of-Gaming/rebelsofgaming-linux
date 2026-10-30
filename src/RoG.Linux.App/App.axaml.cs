@@ -158,7 +158,8 @@ public sealed partial class App : Application
     {
         ArgumentNullException.ThrowIfNull(services);
         Loc.Current = services.Localizer;
-        RichContentView.LinkOpener = uri => services.Browser.OpenAsync(uri);
+        // Links der Plattform (Wiki, News, Forum …) öffnen die Seite in der App, alles andere den Browser
+        RichContentView.LinkOpener = services.OpenLinkAsync;
         RichContentView.ImageSource = (uri, width) => services.Images.LoadAsync(uri, width);
         ThemeService.Apply(services.LinuxSettings.EffectiveTheme);
         services.LinuxSettingsChanged += (_, _) => Dispatcher.UIThread.Post(() => ThemeService.Apply(services.LinuxSettings.EffectiveTheme));

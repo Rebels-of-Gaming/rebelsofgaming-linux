@@ -60,7 +60,7 @@ public class ScreenshotTests
     public async Task Placeholder_french() =>
         await Shoot("placeholder_fr_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true, language: "fr"), shell =>
         {
-            shell.NavigateTo("Nav_Wiki");
+            shell.NavigateTo("Nav_Tools");
             return Settle(100);
         });
 

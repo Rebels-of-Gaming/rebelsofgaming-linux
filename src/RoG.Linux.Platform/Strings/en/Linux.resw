@@ -643,4 +643,64 @@
   <data name="Linux_AppLockFingerprintNone" xml:space="preserve">
     <value>No fingerprint reader with an enrolled finger found (fprintd) – unlock with PIN only.</value>
   </data>
+  <data name="Linux_WikiGuest" xml:space="preserve">
+    <value>As a guest you only see public sections. Sign in to read member sections and edit pages.</value>
+  </data>
+  <data name="Linux_WikiSaveOffline" xml:space="preserve">
+    <value>SAVE SECTION FOR OFFLINE USE</value>
+  </data>
+  <data name="Linux_WikiSavingOffline" xml:space="preserve">
+    <value>Saving for offline use … {0} of {1}</value>
+  </data>
+  <data name="Linux_WikiSavedOffline" xml:space="preserve">
+    <value>{0} pages are now available offline.</value>
+  </data>
+  <data name="Linux_WikiOfflineInfo" xml:space="preserve">
+    <value>Pages you read are stored encrypted for offline use – until you sign out, at most 30 days without an update.</value>
+  </data>
+  <data name="Linux_WikiOfflineUnavailable" xml:space="preserve">
+    <value>Without a keyring the wiki can only be read online.</value>
+  </data>
+  <data name="Linux_WikiAvailableOffline" xml:space="preserve">
+    <value>AVAILABLE OFFLINE</value>
+  </data>
+  <data name="Linux_WikiTakeTheirs" xml:space="preserve">
+    <value>USE THEIR VERSION</value>
+  </data>
+  <data name="Linux_WikiTookTheirs" xml:space="preserve">
+    <value>The current version is now in the editor – your changes were discarded.</value>
+  </data>
+  <data name="Linux_WikiConflictTitle" xml:space="preserve">
+    <value>EDIT CONFLICT</value>
+  </data>
+  <data name="Linux_WikiDiffRevision" xml:space="preserve">
+    <value>Version of {0} → current version</value>
+  </data>
+  <data name="Linux_WikiDiffConflict" xml:space="preserve">
+    <value>Current version → your version</value>
+  </data>
+  <data name="Linux_WikiCloseDiff" xml:space="preserve">
+    <value>Close comparison</value>
+  </data>
+  <data name="Linux_WikiRevisionsEmpty" xml:space="preserve">
+    <value>No versions.</value>
+  </data>
+  <data name="Linux_WikiSearchClear" xml:space="preserve">
+    <value>Clear search</value>
+  </data>
+  <data name="Linux_WikiImageTypes" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="Linux_WikiNewPageHint" xml:space="preserve">
+    <value>The page will be created in the section {0}.</value>
+  </data>
+  <data name="Linux_WikiCategoryCount" xml:space="preserve">
+    <value>{0} pages</value>
+  </data>
+  <data name="Linux_WikiStatusPending" xml:space="preserve">
+    <value>PENDING</value>
+  </data>
+  <data name="Linux_WikiStatusRejected" xml:space="preserve">
+    <value>REJECTED</value>
+  </data>
 </root>

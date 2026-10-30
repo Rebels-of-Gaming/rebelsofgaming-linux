@@ -643,4 +643,64 @@
   <data name="Linux_AppLockFingerprintNone" xml:space="preserve">
     <value>Aucun lecteur d'empreintes avec un doigt enregistré (fprintd) – déverrouillage par code PIN uniquement.</value>
   </data>
+  <data name="Linux_WikiGuest" xml:space="preserve">
+    <value>En tant qu'invité, tu ne vois que les sections publiques. Connecte-toi pour lire les sections membres et modifier des pages.</value>
+  </data>
+  <data name="Linux_WikiSaveOffline" xml:space="preserve">
+    <value>ENREGISTRER LA SECTION HORS LIGNE</value>
+  </data>
+  <data name="Linux_WikiSavingOffline" xml:space="preserve">
+    <value>Enregistrement hors ligne … {0} sur {1}</value>
+  </data>
+  <data name="Linux_WikiSavedOffline" xml:space="preserve">
+    <value>{0} pages sont maintenant disponibles hors ligne.</value>
+  </data>
+  <data name="Linux_WikiOfflineInfo" xml:space="preserve">
+    <value>Les pages lues sont enregistrées chiffrées hors ligne – jusqu'à la déconnexion, 30 jours au plus sans mise à jour.</value>
+  </data>
+  <data name="Linux_WikiOfflineUnavailable" xml:space="preserve">
+    <value>Sans trousseau, le wiki n'est lisible qu'en ligne.</value>
+  </data>
+  <data name="Linux_WikiAvailableOffline" xml:space="preserve">
+    <value>DISPONIBLE HORS LIGNE</value>
+  </data>
+  <data name="Linux_WikiTakeTheirs" xml:space="preserve">
+    <value>REPRENDRE LEUR VERSION</value>
+  </data>
+  <data name="Linux_WikiTookTheirs" xml:space="preserve">
+    <value>La version actuelle est maintenant dans l'éditeur – tes modifications ont été abandonnées.</value>
+  </data>
+  <data name="Linux_WikiConflictTitle" xml:space="preserve">
+    <value>CONFLIT DE MODIFICATION</value>
+  </data>
+  <data name="Linux_WikiDiffRevision" xml:space="preserve">
+    <value>Version du {0} → version actuelle</value>
+  </data>
+  <data name="Linux_WikiDiffConflict" xml:space="preserve">
+    <value>Version actuelle → ta version</value>
+  </data>
+  <data name="Linux_WikiCloseDiff" xml:space="preserve">
+    <value>Fermer la comparaison</value>
+  </data>
+  <data name="Linux_WikiRevisionsEmpty" xml:space="preserve">
+    <value>Aucune version.</value>
+  </data>
+  <data name="Linux_WikiSearchClear" xml:space="preserve">
+    <value>Effacer la recherche</value>
+  </data>
+  <data name="Linux_WikiImageTypes" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="Linux_WikiNewPageHint" xml:space="preserve">
+    <value>La page sera créée dans la section {0}.</value>
+  </data>
+  <data name="Linux_WikiCategoryCount" xml:space="preserve">
+    <value>{0} pages</value>
+  </data>
+  <data name="Linux_WikiStatusPending" xml:space="preserve">
+    <value>EN ATTENTE</value>
+  </data>
+  <data name="Linux_WikiStatusRejected" xml:space="preserve">
+    <value>REFUSÉE</value>
+  </data>
 </root>
