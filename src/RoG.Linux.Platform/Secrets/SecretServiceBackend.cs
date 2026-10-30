@@ -24,13 +24,13 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
 
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly string? _address;
-    private Connection? _connection;
+    private DBusConnection? _connection;
     private string? _session;
 
     /// <param name="address">D-Bus-Adresse; <c>null</c> = Session-Bus aus <c>DBUS_SESSION_BUS_ADDRESS</c>.</param>
     public SecretServiceBackend(string? address = null)
     {
-        _address = address ?? Address.Session;
+        _address = address ?? DBusAddress.Session;
     }
 
     public async Task<byte[]?> LookupAsync(IReadOnlyDictionary<string, string> attributes, CancellationToken cancellationToken = default)
@@ -92,7 +92,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
         }).ConfigureAwait(false);
     }
 
-    private async Task<T> GuardAsync<T>(Func<Connection, Task<T>> action)
+    private async Task<T> GuardAsync<T>(Func<DBusConnection, Task<T>> action)
     {
         await _gate.WaitAsync().ConfigureAwait(false);
         try
@@ -100,17 +100,17 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
             var connection = await ConnectAsync().ConfigureAwait(false);
             return await action(connection).ConfigureAwait(false);
         }
-        catch (DBusException ex)
+        catch (DBusErrorReplyException ex)
         {
             ResetConnection();
             throw new SecretStoreUnavailableException($"Secret Service: {ex.ErrorName}", ex);
         }
-        catch (ConnectException ex)
+        catch (DBusConnectFailedException ex)
         {
             ResetConnection();
             throw new SecretStoreUnavailableException("Kein D-Bus-Session-Bus erreichbar.", ex);
         }
-        catch (DisconnectedException ex)
+        catch (DBusConnectionClosedException ex)
         {
             ResetConnection();
             throw new SecretStoreUnavailableException("D-Bus-Verbindung getrennt.", ex);
@@ -121,7 +121,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
         }
     }
 
-    private async Task<Connection> ConnectAsync()
+    private async Task<DBusConnection> ConnectAsync()
     {
         if (_connection is not null)
         {
@@ -133,7 +133,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
             throw new SecretStoreUnavailableException("Kein D-Bus-Session-Bus (DBUS_SESSION_BUS_ADDRESS fehlt).");
         }
 
-        var connection = new Connection(_address);
+        var connection = new DBusConnection(_address);
         try
         {
             await connection.ConnectAsync().ConfigureAwait(false);
@@ -155,7 +155,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
         _session = null;
     }
 
-    private async Task<string> EnsureSessionAsync(Connection connection)
+    private async Task<string> EnsureSessionAsync(DBusConnection connection)
     {
         if (_session is not null)
         {
@@ -182,7 +182,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
         return _session;
     }
 
-    private static Task<(string[] Unlocked, string[] Locked)> SearchAsync(Connection connection, IReadOnlyDictionary<string, string> attributes) =>
+    private static Task<(string[] Unlocked, string[] Locked)> SearchAsync(DBusConnection connection, IReadOnlyDictionary<string, string> attributes) =>
         CallAsync(
             connection,
             ServicePath,
@@ -198,7 +198,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
                 return (unlocked, locked);
             });
 
-    private static async Task<string[]> UnlockAsync(Connection connection, string[] items, CancellationToken cancellationToken)
+    private static async Task<string[]> UnlockAsync(DBusConnection connection, string[] items, CancellationToken cancellationToken)
     {
         var (unlocked, prompt) = await CallAsync(
             connection,
@@ -222,7 +222,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
         return items;
     }
 
-    private static Task<byte[]?> GetSecretAsync(Connection connection, string item, string session) =>
+    private static Task<byte[]?> GetSecretAsync(DBusConnection connection, string item, string session) =>
         CallAsync(
             connection,
             ServicePath,
@@ -254,7 +254,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
                 return value;
             });
 
-    private static Task<(string Item, string Prompt)> CreateItemAsync(Connection connection, string label, IReadOnlyDictionary<string, string> attributes, byte[] secret, string session) =>
+    private static Task<(string Item, string Prompt)> CreateItemAsync(DBusConnection connection, string label, IReadOnlyDictionary<string, string> attributes, byte[] secret, string session) =>
         CallAsync(
             connection,
             DefaultCollection,
@@ -288,7 +288,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
             });
 
     /// <summary>Prompt des Dienstes zeigen und auf <c>Completed</c> warten; abgelehnt → <see cref="SecretStoreUnavailableException"/>.</summary>
-    private static async Task RunPromptAsync(Connection connection, string prompt, CancellationToken cancellationToken)
+    private static async Task RunPromptAsync(DBusConnection connection, string prompt, CancellationToken cancellationToken)
     {
         var completed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         var rule = new MatchRule
@@ -301,21 +301,19 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
         using var subscription = await connection.AddMatchAsync(
             rule,
             static (m, _) => m.GetBodyReader().ReadBool(),
-            (ex, dismissed, _, _) =>
+            (Notification<bool> n) =>
             {
-                if (ex is not null)
+                if (n.HasValue)
                 {
-                    completed.TrySetException(ex);
+                    completed.TrySetResult(n.Value);
                 }
-                else
+                else if (n.IsCompletion)
                 {
-                    completed.TrySetResult(dismissed);
+                    completed.TrySetException(n.Exception);
                 }
             },
-            readerState: null,
-            handlerState: null,
             emitOnCapturedContext: false,
-            ObserverFlags.None).ConfigureAwait(false);
+            ObserverFlags.EmitOnConnectionClosed | ObserverFlags.EmitOnConnectionFailed | ObserverFlags.EmitOnReaderFailed).ConfigureAwait(false);
 
         await CallAsync<object?>(connection, prompt, PromptInterface, "Prompt", "s", static (ref MessageWriter w) => w.WriteString(string.Empty), static (_, _) => null).ConfigureAwait(false);
 
@@ -353,7 +351,7 @@ public sealed class SecretServiceBackend : ISecretBackend, IAsyncDisposable, IDi
     private delegate void BodyWriter(ref MessageWriter writer);
 
     private static Task<T> CallAsync<T>(
-        Connection connection,
+        DBusConnection connection,
         string path,
         string @interface,
         string member,

@@ -4,20 +4,23 @@
     RoG.Core (Submodul) bringt seine Versionen aus external/rog-windows/Directory.Packages.props mit (AngleSharp).
   -->
   <ItemGroup Label="App">
-    <PackageVersion Include="Avalonia" Version="11.3.22" />
-    <PackageVersion Include="Avalonia.Desktop" Version="11.3.22" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.22" />
+    <PackageVersion Include="Avalonia" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.1.4" />
+    <!-- Nativer Wayland-Backend (ab 12.1, noch „experimentell“) – Auswahl zur Laufzeit, Rückfall X11/XWayland -->
+    <PackageVersion Include="Avalonia.Wayland" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.4" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
   </ItemGroup>
   <ItemGroup Label="Plattform (D-Bus)">
-    <!-- Gleiche Version wie Avalonia.FreeDesktop 11.3.22, damit nur eine Tmds.DBus.Protocol.dll im Paket landet -->
-    <PackageVersion Include="Tmds.DBus.Protocol" Version="0.21.3" />
+    <!-- Gleiche Version wie Avalonia.FreeDesktop 12.1.4, damit nur eine Tmds.DBus.Protocol.dll im Paket landet -->
+    <PackageVersion Include="Tmds.DBus.Protocol" Version="0.94.1" />
   </ItemGroup>
   <ItemGroup Label="Tests">
-    <PackageVersion Include="Avalonia.Headless.XUnit" Version="11.3.22" />
-    <PackageVersion Include="Avalonia.Skia" Version="11.3.22" />
+    <!-- Avalonia.Headless.XUnit 12 setzt xUnit v3 voraus (xunit.v3.extensibility.core 3.2.2) -->
+    <PackageVersion Include="Avalonia.Headless.XUnit" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Skia" Version="12.1.4" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
-    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.v3" Version="3.2.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
 </Project>

@@ -9,8 +9,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- xUnit v3: Testprojekte sind eigene Programme -->
+    <OutputType>Exe</OutputType>
     <!-- Headless-Avalonia braucht einen Dispatcher je Testlauf; parallel nur über Klassen -->
-    <NoWarn>$(NoWarn);CA1707;CA2000;CA1861;CA1515;CA1849</NoWarn>
+    <NoWarn>$(NoWarn);CA1707;CA2000;CA1861;CA1515;CA1849;xUnit1051</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Avalonia.Headless.XUnit" />
     <PackageReference Include="Avalonia.Skia" />

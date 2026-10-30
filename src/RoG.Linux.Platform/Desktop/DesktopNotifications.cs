@@ -16,9 +16,9 @@ public interface IDesktopNotifier
 /// </summary>
 public sealed class FreedesktopNotifier(string? address = null) : IDesktopNotifier, IDisposable
 {
-    private readonly string? _address = address ?? Address.Session;
+    private readonly string? _address = address ?? DBusAddress.Session;
     private readonly SemaphoreSlim _gate = new(1, 1);
-    private Connection? _connection;
+    private DBusConnection? _connection;
 
     public async Task<bool> ShowAsync(string title, string body, CancellationToken cancellationToken = default)
     {
@@ -34,7 +34,7 @@ public sealed class FreedesktopNotifier(string? address = null) : IDesktopNotifi
         {
             if (_connection is null)
             {
-                var connection = new Connection(_address);
+                var connection = new DBusConnection(_address);
                 await connection.ConnectAsync().ConfigureAwait(false);
                 _connection = connection;
             }
@@ -72,7 +72,7 @@ public sealed class FreedesktopNotifier(string? address = null) : IDesktopNotifi
             await _connection.CallMethodAsync(message, static (m, _) => m.GetBodyReader().ReadUInt32(), null).ConfigureAwait(false);
             return true;
         }
-        catch (Exception ex) when (ex is DBusException or ConnectException or DisconnectedException or IOException)
+        catch (Exception ex) when (ex is DBusExceptionBase or IOException)
         {
             _connection?.Dispose();
             _connection = null;
