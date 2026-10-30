@@ -5,8 +5,10 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
-**Stufe 2 (Community lesen, 30.10.2026) – erledigt.** Stufe 1 (Konto + Start) und der Wechsel auf **Avalonia 12**
-(Owner-Entscheidung F3) davor. Version 0.1.0, nicht veröffentlicht.
+**Stufe 3 (Echtzeit + Desktop-Integration, 30.10.2026) – Kern erledigt** (Reverb, Glocke + Zähler,
+Desktop-Benachrichtigungen mit Klick, alle `rog://`-Ziele); offen aus Stufe 3: Tray (StatusNotifierItem), Autostart
+(Background-Portal), TeamSpeak-/Discord-Voice-Ansicht. **Stufe 2 (Community lesen) – erledigt**, davor Stufe 1 (Konto +
+Start) und der Wechsel auf **Avalonia 12** (Owner-Entscheidung F3). Version 0.1.0, nicht veröffentlicht.
 
 | Bereich | Stand |
 |---|---|
@@ -32,9 +34,13 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 | **Kalender** (Liste 60 Tage nach Tag gruppiert, Monatsansicht 6×7 ab Montag mit Typfarben-Punkten, Tagesliste; Termin mit Zeit, Ort, Zahlen, eigener Antwort **nur anzeigen**, Teilnehmern, Server mit Verbinden, „In Kalender übernehmen“ = .ics) | steht |
 | **Info** (Regeln, Seiten, Rechtstexte gruppiert; Regeln mit §-Abschnitten, wichtige markiert; „bitte bestätigen“ → Website) | steht |
 | **Suche** (Strg+K, Lupe in Seitenleiste/Kopfleiste; Gruppen je Bereich; Treffer öffnen den Bereich in der App, sonst Browser) | steht |
+| **Echtzeit** (Reverb über den Kern: `live`, `servers`, eigener Kanal `private-App.Models.User.{id}`; Zähler per API beim Start und nach Neuverbindung) | steht; gegen die Produktion geprüft („Echtzeit: verbunden“ unter Einstellungen → Über die App) |
+| **Glocke** (Postfach, „Nur ungelesene“, „Alle gelesen“, Eintrag öffnet das Ziel in der App bzw. die genaue Website-Seite; neue Einträge kommen live dazu; Zähler an Glocke und Nachrichten in der Seitenleiste) | steht |
+| **Desktop-Benachrichtigungen** (neue Benachrichtigungen und neue Direktnachrichten, solange die App läuft und das Fenster nicht im Vordergrund ist; Aktion „Öffnen“ → Fenster nach vorn + Ziel; Kategorie `im.received` für DMs; Einstellung „Desktop-Benachrichtigungen zeigen“) | steht; Protokoll-Test mit `ActionInvoked` gegen privaten D-Bus |
+| **`rog://` vollständig** (alle Ziele der Windows-App: Bereiche mit eigener Seite öffnen nativ, Votes/Verwaltung/Bans/Bestenlisten/Karte und Einträge in Forum/Wiki/Tools/Matches öffnen genau diese Website-Seite; Links während des Logins warten bis nach der Anmeldung; zweite Instanz gibt Links weiter) | steht |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 132 xUnit-Tests inkl. 38 Headless-Screenshots (`artifacts/screenshots/`) und 7 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -99,6 +105,8 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
   Neu (Stufe 2): **`SquadInternalService`** für `GET /v1/squads/{squad}/intern` (Forum, Squad-Gruppe, Termine, Downloads,
   Alben, `missing_scopes`) – liegt bis dahin in `src/RoG.Linux.App/Services/SquadInternalService.cs`; die Windows-App
   zeigt „Intern“ noch nicht. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
+  Neu (Stufe 3): **Origin für Reverb** (`ClientWebSocketConnection` mit `WebBaseUrl` der Umgebung, F6) und
+  `client=rog-<plattform>` statt fest `rog-windows` in `RealtimeConfig.BuildSocketUri`.
 - **Kern anheben:** `git -C external/rog-windows fetch && git -C external/rog-windows checkout <commit>`, bauen,
   testen, Commit `chore: bump core to <hash>`.
 
@@ -119,10 +127,11 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    Monat, Zusagen nur anzeigen), Regeln/Seiten/Rechtstexte, globale Suche, Deep Links in alle diese Bereiche.
    *Verschoben:* TeamSpeak-/Discord-Voice-Ansicht und Minecraft-Reiter der Server (Stufe 3, zusammen mit der Echtzeit
    über `.live.updated`), Matches/Hall of Fame (Stufe 6 mit Stats), Zusagen/Regeln bestätigen (Stufe 4 bzw. 6).
-3. **Echtzeit + Desktop-Integration** – Reverb (Kern) im Betrieb, Glocke + Zähler, Desktop-Benachrichtigungen
-   (Notification-Portal in Flatpak), Tray über StatusNotifierItem (KDE/GNOME-Erweiterung, optional), Autostart
-   (Background-Portal), **Deep Links `rog://`** für alle Bereiche (Weitergabe per Single-Instance steht seit Stufe 1;
-   Fokus unter Wayland mit xdg-activation-Token).
+3. **Echtzeit + Desktop-Integration** *(Kern erledigt)* – Reverb (Kern) im Betrieb, Glocke + Zähler,
+   Desktop-Benachrichtigungen mit Klick, **Deep Links `rog://`** für alle Bereiche (Weitergabe per Single-Instance seit
+   Stufe 1). *Offen:* Tray über StatusNotifierItem (KDE/GNOME-Erweiterung, optional), Autostart (Background-Portal),
+   Notification-Portal statt D-Bus-Dienst in Flatpak, TeamSpeak-/Discord-Voice- und Minecraft-Reiter der Server
+   (Live über `.live.updated`), Fokus unter Wayland mit xdg-activation-Token (Avalonia wertet ihn noch nicht aus).
 4. **Kommunikation** – DMs schreiben (Antworten, Anhänge, Pop-out-Fenster), Forum lesen + schreiben (BBCode), Zusagen,
    Offline-Warteschlange und verschlüsselter Plattencache (Schlüssel im Schlüsselbund), Tastenkürzel.
 5. **Medien** – Uploads (Drag & Drop, Strg+V, Datei-Dialog über das FileChooser-Portal), Galerie, Downloads, Kurzlinks,
@@ -183,7 +192,7 @@ trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehob
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 2)
+## Datenschutz (Stand Stufe 3)
 
 - **Lokal:** `settings.json` (Sprache, Umgebung, Gastmodus, zuletzt geöffneter Bereich, Benachrichtigungen an/aus,
   Fenstergröße/-lage – keine personenbezogenen Daten) und `linux.json` (Design) unter
@@ -199,6 +208,12 @@ trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehob
   Übertragen werden nur `rog://`-Links zwischen zwei Prozessen desselben Benutzers.
 - **Neu in Stufe 1, keine Übermittlung an Dritte:** Startseite lädt `/v1/live`, `/v1/events`, `/v1/news` und
   (angemeldet) `/v1/votes`, `/v1/me/onboarding`; Einstellungen lesen die Plattform-Version (`GET /v1`).
+- **Neu in Stufe 3, keine Übermittlung an Dritte:** WebSocket zu Reverb der Plattform (`ws.`-Domain aus `GET /v1`,
+  Origin = Website der Umgebung); private Kanäle werden mit dem Geräte-Token über `POST /v1/broadcasting/auth`
+  autorisiert. Zähler über `/v1/notifications/unread-count` und `/v1/messages/unread-count`, Glocke über
+  `/v1/notifications` (+ gelesen markieren). Desktop-Benachrichtigungen (Titel/Text der Benachrichtigung bzw. Name und
+  Vorschau der Nachricht) gehen nur an den lokalen Benachrichtigungsdienst; die Zuordnung „Benachrichtigung → Ziel“ liegt
+  nur im Speicher und verschwindet beim Beenden. Nichts davon wird gespeichert.
 - **Neu in Stufe 2, keine Übermittlung an Dritte:** Squads, Mitglieder/Profile, Team, Spiele, Server, Termine
   (+ Teilnehmer nur angemeldet), Regeln/Seiten/Rechtstexte und Suche kommen nur von der eigenen API (`/v1/squads…`,
   `/v1/members…`, `/v1/team`, `/v1/games`, `/v1/servers`, `/v1/events…`, `/v1/rules…`, `/v1/pages`, `/v1/legal`,
@@ -254,10 +269,25 @@ docs/                       LINUX-BAUPLAN.md
   Scrollen passen. Für Touch/Controller (Stufe 10) wird das mit dem Spielmodus noch einmal bewertet.
 - **L15 – Startseite:** Abstimmungen öffnen vorerst die Website (Votes nativ in Stufe 6); Termine, News und
   Onboarding-Schritte (Regeln, Termine …) öffnen seit Stufe 2 die Seite in der App.
+- **L22 – Reverb mit Origin:** Die Produktion lehnt WebSocket-Verbindungen ohne erlaubten `Origin` mit
+  `pusher:error 4009 „Origin not allowed“` ab (geprüft 30.10.2026). Die Linux-App sendet als Origin die Website ihrer
+  Umgebung (`WebBaseUrl` aus `environments.json`, keine feste Domain). Siehe offene Frage F6.
+- **L23 – Desktop-Benachrichtigungen nur im Hintergrund:** Hat das Fenster den Fokus, zeigt die App nichts zusätzlich
+  (Zähler und Glocke aktualisieren sich trotzdem). Direktnachrichten erzeugen serverseitig keine Glocken-Einträge
+  (`messages.received` nie in der Glocke) – die App holt bei steigendem `.messages.unread` die Unterhaltungen und meldet
+  neue Nachrichten seit dem Start (je Nachricht einmal, höchstens drei auf einmal).
+- **L24 – Ziele ohne eigene Seite:** Benachrichtigungen, Suche und Links öffnen Ziele, die die App noch nicht nativ hat
+  (Forum-Thema, Wiki-Seite, Votes …), mit genau der Adresse im Browser statt nur des Platzhalters.
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
 ## Offene Fragen (an Wahke)
+
+- **F6 – Reverb und Apps (wichtig, betrifft auch die Windows-App):** Reverb der Produktion antwortet Verbindungen
+  **ohne** `Origin`-Kopf mit `4009 Origin not allowed`. Die Windows-App (`ClientWebSocketConnection` ohne Origin) bekommt
+  damit vermutlich keine Echtzeit. Die Linux-App sendet die Website ihrer Umgebung als Origin und ist verbunden.
+  Vorschlag: im Kern `RealtimeService`/`ClientWebSocketConnection` den Origin der Umgebung mitgeben (Wunsch an den Kern)
+  oder auf der Website Verbindungen ohne Origin für Apps zulassen.
 
 - **F5 – Wayland-Test:** Bitte die App einmal unter einer Wayland-Sitzung (GNOME oder KDE, gern auch Steam Deck im
   Desktopmodus) starten und unter Einstellungen → Über die App „Anzeige: Wayland“ prüfen; bei Problemen hilft

@@ -6,7 +6,16 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 3 – Echtzeit + Desktop-Integration (Kern), Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+
+### Hinzugefügt (Stufe 3)
+
+- Echtzeit über Reverb (Kern): Live-Ticker der Startseite, Serverstatus und eigene Ereignisse kommen sofort; nach einer Neuverbindung gleicht die App die Zähler ab; „Echtzeit: verbunden“ unter Einstellungen → Über die App
+- Glocke: Benachrichtigungen mit Symbol, „Nur ungelesene“, „Alle gelesen“, „Mehr laden“; ein Eintrag öffnet das Ziel in der App (Termin, Squad, News …) oder genau die Seite der Website; neue Einträge kommen live dazu
+- Zähler an Glocke und Nachrichten in der Seitenleiste (aufgeklappt als Zahl, sonst als Punkt)
+- Desktop-Benachrichtigungen für neue Benachrichtigungen und neue Direktnachrichten, solange die App im Hintergrund läuft – Klick auf „Öffnen“ holt das Fenster nach vorn und öffnet das Ziel
+- `rog://` für alle Ziele der Windows-App: Votes, Verwaltung, Bans, Bestenlisten, Karte sowie Forum-Themen, Wiki-Seiten, Tools und Matches öffnen die passende Website-Seite; Links, die während des Logins ankommen, öffnen sich nach der Anmeldung
+- Tests: Glocke, Zähler, Desktop-Benachrichtigungen mit Klick (auch gegen einen privaten D-Bus), alle `rog://`-Bereiche
 
 ### Hinzugefügt (Stufe 2)
 
@@ -22,9 +31,10 @@ Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Ava
 - Escape schließt das Detail auf allen Liste-Detail-Seiten; Farben aus der API (Ränge, Rollen, Abzeichen) bleiben im hellen Design lesbar
 - Tests: ViewModel-Tests für alle neuen Seiten, Deep Links und `xdg-mime`; Screenshots in 1280×800, 1440×900, schmal (480 px) und hell
 
-### Geändert (Stufe 2)
+### Geändert (Stufe 2 und 3)
 
 - CI: `actions/checkout@v7` und `actions/setup-dotnet@v6` (Node 24)
+- Hinweis zu Desktop-Benachrichtigungen in den Einstellungen beschreibt jetzt, was gemeldet wird
 
 ### Hinzugefügt (Stufe 1)
 
