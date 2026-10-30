@@ -6,7 +6,16 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+
+### Hinzugefügt (Stufe 4)
+
+- **Direktnachrichten schreiben**: Enter sendet, Umschalt+Enter neue Zeile; auf eine Nachricht antworten (Zitat), Text kopieren; neue und gelöschte Nachrichten erscheinen live; Bild-Anhänge mit Vorschau, andere Dateien öffnen sich im Browser
+- **Chat in eigenem Fenster** (je Unterhaltung eins, optional immer im Vordergrund) und „Nachricht senden“ im Profil
+- **Forum**: Bereiche und Unterbereiche, Themen (angeheftet, geschlossen, Umfrage, ungelesen), Beiträge mit Formatierung, Reaktionen, Umfragen mit Abstimmen, Antworten mit BBCode-Leiste und Vorschau (Strg+Enter sendet), Zitieren, neues Thema; Beiträge blockierter Personen eingeklappt mit „Trotzdem anzeigen“; neue Beiträge kommen live
+- **Zusagen** im Kalender: Dabei, Vielleicht, Absagen
+- **Offline**: ohne Netz geschriebene Nachrichten, Forenantworten und Zusagen warten und gehen automatisch raus, sobald wieder Netz da ist; zuletzt gesehene Inhalte (News, Forum, Profile …) sind nach dem Start sofort da – verschlüsselt, der Schlüssel liegt im Schlüsselbund
+- **Tastenkürzel**: Alt+←/→, Strg+N, Strg+R, Strg+W, Strg+Q, F1 (Liste unter Einstellungen)
 
 ### Hinzugefügt (Stufe 3)
 

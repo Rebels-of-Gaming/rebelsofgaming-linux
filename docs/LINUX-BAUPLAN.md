@@ -5,7 +5,9 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
-**Stufe 3 (Echtzeit + Desktop-Integration, 30.10.2026) – erledigt** (Reverb, Glocke + Zähler,
+**Stufe 4 (Kommunikation, 30.10.2026) – erledigt** (Direktnachrichten schreiben mit Zitat, live, Anhängen und
+eigenem Fenster, Forum lesen + schreiben, Zusagen, Offline-Warteschlange, verschlüsselter Plattencache, Tastenkürzel).
+**Stufe 3 (Echtzeit + Desktop-Integration) – erledigt** (Reverb, Glocke + Zähler,
 Desktop-Benachrichtigungen mit Klick, alle `rog://`-Ziele, Server-Reiter Minecraft/TeamSpeak/Discord-Voice, Tray,
 Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Community lesen) – erledigt**, davor Stufe 1
 (Konto + Start) und der Wechsel auf **Avalonia 12** (Owner-Entscheidung F3). Version 0.1.0, nicht veröffentlicht.
@@ -43,9 +45,16 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Schließen in den Infobereich** (nur wenn ein Panel das Symbol zeigt und „Beim Schließen in den Infobereich“ an ist; einmaliger Hinweis; Abmelden/SIGTERM/„Beenden“ schließen wirklich) | steht |
 | **Autostart** („Beim Anmelden am Desktop starten“: XDG-Autostart-Datei bzw. Background-Portal in Flatpak, Start mit `--background` ohne Fenster im Infobereich, wartet bis 15 s auf das Panel, ohne Panel mit Fenster) | steht; Portal gegen privaten Bus getestet, Hintergrund-Start unter Xvfb + xfce4-panel geprüft |
 | **Notification-Portal in Flatpak** (statt `--talk-name=org.freedesktop.Notifications`; Klick/„Öffnen“ über `ActionInvoked`) | steht; gegen privaten Bus getestet |
+| **Direktnachrichten schreiben** (Enter sendet, Umschalt+Enter neue Zeile, Zitat-Antwort über Knopf/Kontextmenü, Text kopieren, Zeichen-Rest ab 90 %, neue/gelöschte Nachrichten live über `private-conversations.{id}`, Anhänge: Bilder mit Vorschau, Dateien über kurzlebigen Link im Browser; ohne Netz in die Warteschlange) | steht |
+| **Chat als eigenes Fenster** (je Unterhaltung eins, „immer im Vordergrund“, Strg+W) und „Nachricht senden“ im Profil | steht |
+| **Forum** (Bereiche mit Unterbereichen, Themen mit angeheftet/geschlossen/Umfrage und ungelesen, Thema mit nativ gezeichneten Beiträgen, blockierte Personen eingeklappt mit „Trotzdem anzeigen“, Reaktionen (Chips + Auswahl), Umfrage mit Balken und Abstimmen, Antwort mit BBCode-Leiste, Vorschau über die API, Strg+Enter, Zitat, „Neues Thema“, live über `private-forum.threads.{id}`; `rog://forum/{bereich|thema}`) | steht; gegen die Produktion geprüft (Bereiche, leerer Bereich) |
+| **Zusagen** im Kalender (Dabei/Vielleicht/Absagen, gewählte Antwort mit Farbe + Haken, Liste lädt nach) | steht |
+| **Offline-Warteschlange** (Kern-`Outbox`: DMs nur im Speicher, Forenantworten und Zusagen verschlüsselt in `$XDG_DATA_HOME/rebelsofgaming/outbox-<umgebung>.dat`; senden nach Anmeldung, bei Neuverbindung und jede Minute; endgültige Ablehnung als Desktop-Benachrichtigung) | steht |
+| **Verschlüsselter Plattencache** (Kern-`PersistentEtagCache` mit `KeyringPayloadProtector`: AES-256-GCM, Schlüssel nur im Schlüsselbund; nie Unterhaltungen/Konto/Geräte; Dateien > 30 Tage werden beim Start gelöscht, höchstens 400 Einträge; Abmelden löscht alles) | steht; ohne Schlüsselbund nur im Speicher |
+| **Tastenkürzel** (Alt+←/→ Verlauf, Strg+N, Strg+R, Strg+W, Strg+Q, F1 → Liste in den Einstellungen) | steht |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -141,8 +150,11 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    Notification-Portal in Flatpak. *Bleibt offen (Avalonia):* Fokus unter Wayland mit xdg-activation-Token – Avalonia
    12.1 wertet ihn nicht aus, das Fenster meldet sich dann nur in der Taskleiste. *Verschoben:* Minecraft-Beitrittsdaten
    bearbeiten und Ressourcenpaket hochladen (`minecraft.manage`) → Stufe 9 (Verwaltung).
-4. **Kommunikation** – DMs schreiben (Antworten, Anhänge, Pop-out-Fenster), Forum lesen + schreiben (BBCode), Zusagen,
-   Offline-Warteschlange und verschlüsselter Plattencache (Schlüssel im Schlüsselbund), Tastenkürzel.
+4. **Kommunikation** *(erledigt)* – DMs schreiben (Zitat, live, Anhänge ansehen, Pop-out-Fenster), Forum lesen +
+   schreiben (BBCode, Vorschau, Reaktionen, Umfragen, neues Thema), Zusagen, Offline-Warteschlange und verschlüsselter
+   Plattencache (Schlüssel im Schlüsselbund), Tastenkürzel. *Wie Windows nicht enthalten:* Anhänge **senden** in DMs
+   (die Windows-App kann es auch nicht), Beiträge bearbeiten/melden (Melden kommt mit der Moderation, Stufe 9), Bilder
+   im Forum hochladen (Uploader, Stufe 5).
 5. **Medien** – Uploads (Drag & Drop, Strg+V, Datei-Dialog über das FileChooser-Portal), Galerie, Downloads, Kurzlinks,
    Profil bearbeiten.
 6. **Clan-Prozesse** – Bewerbung, Votes, Regeln bestätigen, Mitgliederkarte, Stats, Abwesenheit, Konto/Sicherheit.
@@ -202,8 +214,16 @@ trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehob
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 3)
+## Datenschutz (Stand Stufe 4)
 
+- **Neu in Stufe 4:** **Plattencache** `$XDG_CACHE_HOME/rebelsofgaming/http/<umgebung>/*.dat` (verschlüsselte
+  API-Antworten wie News, Forum, Profile, Termine; nie Unterhaltungen, Nachrichten, Konto, Geräte, Exporte),
+  **Warteschlange** `$XDG_DATA_HOME/rebelsofgaming/outbox-<umgebung>.dat` (verschlüsselt: Forenantworten, Zusagen –
+  DMs nur im Speicher), **Schlüsselbund-Eintrag** „Cache-Schlüssel“. Speicherdauer: Cache 30 Tage/400 Einträge,
+  Warteschlange bis zum Senden; Abmelden löscht Cache und Warteschlange. Neue Übermittlungen nur an die eigene API:
+  Nachrichten senden, Unterhaltung starten (`POST /v1/conversations`), Anhänge abrufen (kurzlebige Links, Vorschau nur
+  im Speicher), Forum lesen/schreiben/reagieren/abstimmen/Vorschau, Zusagen (`PUT /v1/events/{id}/rsvp`). Echtzeit
+  zusätzlich auf `private-conversations.{id}` und `private-forum.threads.{id}`.
 - **Neu in Stufe 3 (Abschluss):** Server-Reiter laden `/v1/minecraft/join`, `/v1/minecraft/resource-pack`,
   `/v1/teamspeak/viewer` (öffentlich) und angemeldet `/v1/discord/voice` (Namen + Avatare der Personen im Voice, nur im
   Speicher, Avatare nur vom CDN der Plattform). „TeamSpeak verbinden“ übergibt Adresse und den eigenen RoG-Namen als
@@ -219,7 +239,7 @@ trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehob
   Fenstergröße/-lage – keine personenbezogenen Daten) und `linux.json` (Design) unter
   `$XDG_CONFIG_HOME/rebelsofgaming/` (Flatpak: `~/.var/app/com.rebelsofgaming.RebelsOfGaming/config/…`); Geräte-Token im Schlüsselbund des Systems (Attribute: App-ID, Art,
   Umgebung; Bezeichnung „Rebels of Gaming (&lt;Anzeigename&gt;)“). Ohne Schlüsselbund nur im Speicher.
-  Antworten und Bilder nur im Speicher. Abmelden widerruft den Token (`POST /v1/auth/logout`) und löscht ihn lokal.
+  Bilder nur im Speicher, Antworten seit Stufe 4 verschlüsselt auf der Platte (siehe unten). Abmelden widerruft den Token (`POST /v1/auth/logout`) und löscht ihn lokal.
 - **Übermittlung:** nur an die eigenen Server (API, CDN der Plattform). Gerätemeldung `POST /v1/devices` mit
   `platform: linux` und App-Version (nur mit Scope `devices:manage`), Gerätename beim Login (enthält den
   Linux-Benutzernamen bzw. „Steam Deck“ – wie unter Windows).
@@ -270,8 +290,7 @@ docs/                       LINUX-BAUPLAN.md
 - **L5 – Secret Service direkt über D-Bus** (Tmds.DBus.Protocol, Sitzung `plain` über den lokalen Bus) statt libsecret
   per P/Invoke: keine native Abhängigkeit, funktioniert mit GNOME Keyring, KWallet (Secret-Service-Schnittstelle) und
   KeePassXC. Später zusätzlich das Secret-Portal für Flatpak prüfen.
-- **L6 – Kein Plattencache im Spike:** DPAPI gibt es nicht; ein eigener `IPayloadProtector` (AES-GCM, Schlüssel im
-  Schlüsselbund) kommt mit der Offline-Stufe.
+- **L6 – Plattencache** (seit Stufe 4): eigener `IPayloadProtector` statt DPAPI – siehe L30.
 - **L7 – Nachrichten nur lesen:** Senden, Echtzeit und Anhänge folgen in Stufe 4 (Logik steht im Kern bereit).
 - **L8 – Systemschrift für Fließtext:** keine eingebettete Textschrift; Barlow Condensed nur für Anzeige-Texte.
 - **L9 – Symbole** als Vektorpfade nach Material Design Icons (Apache 2.0) statt Symbolschrift.
@@ -316,10 +335,30 @@ docs/                       LINUX-BAUPLAN.md
 - **L29 – TeamSpeak-Trenner** (`spacer`) sind Überschriften, ihre Unterkanäle bleiben sichtbar (die Website liefert
   Kanäle unter Trennern als Kinder, siehe Produktion). Die Windows-App blendet Trenner samt Unterkanälen aus – Hinweis
   an das Windows-Repo (siehe „Wünsche an den Kern“).
+- **L30 – Cache-Schlüssel im Schlüsselbund:** eigener Eintrag „Rebels of Gaming (Cache-Schlüssel)“ (Attribute App-ID,
+  `kind=cache-key`, Umgebung), 32 Zufallsbytes, AES-256-GCM je Datei mit eigener Nonce. Er wird beim Start gelesen
+  (auch im Gastmodus – öffentliche Antworten werden ebenfalls zwischengespeichert). Ist der Schlüsselbund gesperrt,
+  fragt das System wie beim Token nach; ohne Schlüsselbund bleibt alles im Speicher. **Speicherdauer:** Antworten
+  höchstens 30 Tage nach dem letzten Schreiben und höchstens 400 Einträge, Warteschlange bis zum Senden, beides bis zum
+  Abmelden. Die Windows-App kennt keine Altersgrenze – Linux ist hier strenger.
+- **L31 – Neues Thema im rechten Bereich** statt Dialog (Avalonia hat keinen ContentDialog; so bleibt die Liste
+  sichtbar und der Entwurf geht beim Wechsel nicht verloren, solange die Seite offen ist).
+- **L32 – Forum-Links:** `rog://forum/{x}` – ist `x` ein Bereich, zeigt die App den Bereich, sonst gilt `x` als
+  Themen-ID (wie `/forum/t/{id}/{slug}` der Website).
+- **L33 – Tastenkürzel nach Pflichtenheft** (Strg+N, Alt+←/→, Strg+W, F1 – die Windows-App setzt sie noch nicht um),
+  dazu Linux-üblich Strg+Q (beenden). Strg+N öffnet „Nachrichten“ (eine neue Unterhaltung beginnt man über „Nachricht
+  senden“ im Profil), im Forum mit Schreibrecht „Neues Thema“.
+- **L34 – Emojis:** Reaktionen im Forum kommen als Unicode-Emoji von der API. Avalonia nimmt dafür eine Farb-Emoji-Schrift
+  des Systems (Noto Color Emoji ist auf den gängigen Desktops installiert); ohne sie erscheinen Ersatzzeichen (so auf dem
+  Testrechner/CI). Eine eigene Emoji-Schrift mitzuliefern (~10 MB) wäre möglich – siehe F7.
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
 ## Offene Fragen (an Wahke)
+
+- **F7 – Emoji-Schrift mitliefern?** Forum-Reaktionen sind Unicode-Emojis. Auf Desktops mit Noto Color Emoji (Standard bei
+  GNOME/KDE/Steam Deck) sehen sie richtig aus, sonst erscheinen Ersatzzeichen. Soll das Paket eine eigene Emoji-Schrift
+  (Noto Color Emoji, SIL OFL, rund 10 MB) mitbringen? Vorschlag: nein, erst wenn Mitglieder es melden.
 
 - ~~F6 – Reverb und Apps~~ **erledigt** (Website v0.53.1, Commit 606f1c40): Reverb nimmt Verbindungen ohne und mit
   Origin an. Die Linux-App sendet weiter die Website ihrer Umgebung als Origin (L22).
