@@ -130,3 +130,30 @@ public static class TestTokens
 {
     public static StoredToken Wahke { get; } = new("test-token", "01USERWAHKE", "Wahke", ["news:read", "messages:read", "profile:read"], "Linux-App – PC von wahke", DateTimeOffset.UnixEpoch);
 }
+
+/// <summary>Autostart im Speicher; <see cref="Answer"/> simuliert die Antwort des Portals.</summary>
+public sealed class FakeAutostart : RoG.Linux.Platform.Desktop.IAutostart
+{
+    public bool? Enabled { get; set; } = false;
+
+    public bool UsesPortal { get; set; }
+
+    /// <summary>Antwort statt Ein/Aus (z. B. <c>Denied</c>).</summary>
+    public RoG.Linux.Platform.Desktop.AutostartResult? Answer { get; set; }
+
+    public List<bool> Requests { get; } = [];
+
+    public Task<bool?> IsEnabledAsync(CancellationToken cancellationToken = default) => Task.FromResult(UsesPortal ? null : Enabled);
+
+    public Task<RoG.Linux.Platform.Desktop.AutostartResult> SetAsync(bool enable, string reason, CancellationToken cancellationToken = default)
+    {
+        Requests.Add(enable);
+        if (Answer is { } answer)
+        {
+            return Task.FromResult(answer);
+        }
+
+        Enabled = enable;
+        return Task.FromResult(enable ? RoG.Linux.Platform.Desktop.AutostartResult.Enabled : RoG.Linux.Platform.Desktop.AutostartResult.Disabled);
+    }
+}

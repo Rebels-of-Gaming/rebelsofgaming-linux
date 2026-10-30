@@ -16,6 +16,12 @@ public enum DisplayBackend
 /// <summary>Start-Argumente: Umgebung für die Entwicklung, Fenstersystem und ein Deep Link (<c>rog://…</c>).</summary>
 public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBackend Backend = DisplayBackend.X11)
 {
+    /// <summary>Argument des Autostarts: ohne Fenster im Infobereich starten (nur wenn ein Tray da ist).</summary>
+    public const string BackgroundArgument = "--background";
+
+    /// <summary>Im Hintergrund starten (<see cref="BackgroundArgument"/>, z. B. beim Anmelden am Desktop).</summary>
+    public bool Background { get; init; }
+
     public static LaunchOptions Current { get; set; } = new(null, null);
 
     /// <summary>
@@ -31,6 +37,7 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
         string? environment = null;
         Uri? link = null;
         DisplayBackend? backend = null;
+        var background = false;
         foreach (var arg in args)
         {
             if (arg.StartsWith("--environment=", StringComparison.Ordinal))
@@ -45,6 +52,10 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
             {
                 backend = DisplayBackend.Wayland;
             }
+            else if (arg == BackgroundArgument)
+            {
+                background = true;
+            }
             else if (TryParseDeepLink(arg, out var uri))
             {
                 link = uri;
@@ -58,7 +69,10 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
             "wayland" => DisplayBackend.Wayland,
             _ => DetectBackend(env),
         };
-        return new LaunchOptions(environment is not null && RoGEnvironment.All.ContainsKey(environment) ? environment : null, link, backend.Value);
+        return new LaunchOptions(environment is not null && RoGEnvironment.All.ContainsKey(environment) ? environment : null, link, backend.Value)
+        {
+            Background = background,
+        };
     }
 
     /// <summary>Nur <c>rog://…</c>-Links werden angenommen (von der .desktop-Datei bzw. einer zweiten Instanz).</summary>

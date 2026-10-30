@@ -12,10 +12,14 @@ public sealed class LinuxPaths
     {
         _env = environment ?? Environment.GetEnvironmentVariable;
         var home = _env("HOME") is { Length: > 0 } h ? h : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        ConfigDirectory = Path.Combine(Resolve("XDG_CONFIG_HOME", home, ".config"), AppIdentity.DataFolderName);
+        ConfigHome = Resolve("XDG_CONFIG_HOME", home, ".config");
+        ConfigDirectory = Path.Combine(ConfigHome, AppIdentity.DataFolderName);
         DataDirectory = Path.Combine(Resolve("XDG_DATA_HOME", home, ".local/share"), AppIdentity.DataFolderName);
         CacheDirectory = Path.Combine(Resolve("XDG_CACHE_HOME", home, ".cache"), AppIdentity.DataFolderName);
     }
+
+    /// <summary><c>$XDG_CONFIG_HOME</c> (z. B. für <c>autostart/</c>).</summary>
+    public string ConfigHome { get; }
 
     /// <summary>Einstellungen (<c>settings.json</c>), keine personenbezogenen Daten.</summary>
     public string ConfigDirectory { get; }

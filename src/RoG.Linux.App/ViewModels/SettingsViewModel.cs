@@ -5,6 +5,7 @@ using RoG.Core.Localization;
 using RoG.Core.Settings;
 using RoG.Linux.App.Services;
 using RoG.Linux.Platform;
+using RoG.Linux.Platform.Desktop;
 
 namespace RoG.Linux.App.ViewModels;
 
@@ -48,6 +49,14 @@ public sealed partial class SettingsViewModel : ObservableObject
         SelectedLanguage = Languages.FirstOrDefault(l => l.Value == _startLanguage) ?? Languages[0];
         SelectedTheme = Themes.First(t => t.Value == services.LinuxSettings.EffectiveTheme);
         Notifications = services.Settings.ToastNotifications;
+        CloseToTray = services.Settings.CloseToTray;
+        UpdateTrayState();
+        if (services.Tray is { } tray)
+        {
+            tray.VisibilityChanged += (_, _) => UpdateTrayState();
+        }
+
+        AutostartUsesPortal = services.Autostart.UsesPortal;
         AppVersionText = services.Format(StringKeys.SettingsAppVersion, AppServices.AppVersion);
         PlatformText = services.Format(StringKeys.SettingsPlatformVersion, "…");
         EnvironmentText = services.Format("Linux_Environment", services.Environment.Name);
@@ -65,6 +74,87 @@ public sealed partial class SettingsViewModel : ObservableObject
         };
         _loaded = true;
         _ = LoadPlatformAsync();
+        _ = LoadAutostartAsync();
+    }
+
+    /// <summary>„Beim Schließen in den Infobereich“ (wirkt nur, wenn ein Panel das Tray-Symbol zeigt).</summary>
+    [ObservableProperty]
+    public partial bool CloseToTray { get; set; }
+
+    /// <summary>Kein Panel zeigt das Symbol (GNOME ohne AppIndicator-Erweiterung) → Hinweis.</summary>
+    [ObservableProperty]
+    public partial bool TrayUnavailable { get; set; }
+
+    [ObservableProperty]
+    public partial bool Autostart { get; set; }
+
+    /// <summary>Schalter erst nach dem Lesen des Standes bedienbar.</summary>
+    [ObservableProperty]
+    public partial bool CanChangeAutostart { get; set; }
+
+    public bool AutostartUsesPortal { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAutostartFeedback))]
+    public partial string? AutostartFeedback { get; set; }
+
+    public bool HasAutostartFeedback => !string.IsNullOrEmpty(AutostartFeedback);
+
+    private bool _autostartLoaded;
+    private bool _autostartBusy;
+
+    private void UpdateTrayState() => TrayUnavailable = _services.Tray is not { IsVisible: true };
+
+    partial void OnCloseToTrayChanged(bool value)
+    {
+        if (_loaded && _services.Settings.CloseToTray != value)
+        {
+            _ = _services.UpdateSettingsAsync(s => s with { CloseToTray = value });
+        }
+    }
+
+    /// <summary>Stand lesen: Datei unter <c>~/.config/autostart</c> bzw. (Portal) der zuletzt bestätigte Stand.</summary>
+    public async Task LoadAutostartAsync()
+    {
+        var state = await _services.Autostart.IsEnabledAsync();
+        Autostart = state ?? _services.LinuxSettings.Autostart;
+        CanChangeAutostart = true;
+        _autostartLoaded = true;
+    }
+
+    partial void OnAutostartChanged(bool value)
+    {
+        if (_autostartLoaded && !_autostartBusy)
+        {
+            _ = SetAutostartAsync(value);
+        }
+    }
+
+    private async Task SetAutostartAsync(bool enable)
+    {
+        CanChangeAutostart = false;
+        AutostartFeedback = null;
+        var result = await _services.Autostart.SetAsync(enable, _services.T("Linux_AutostartReason"));
+        var now = result switch
+        {
+            AutostartResult.Enabled => true,
+            AutostartResult.Disabled => false,
+            _ => !enable,
+        };
+        if (result is AutostartResult.Denied or AutostartResult.Failed)
+        {
+            AutostartFeedback = _services.T(result == AutostartResult.Denied ? "Linux_AutostartDenied" : "Linux_AutostartFailed");
+        }
+
+        _autostartBusy = true;
+        Autostart = now;
+        _autostartBusy = false;
+        if (_services.LinuxSettings.Autostart != now)
+        {
+            await _services.UpdateLinuxSettingsAsync(s => s with { Autostart = now });
+        }
+
+        CanChangeAutostart = true;
     }
 
     public IReadOnlyList<SettingsOption> Languages { get; }

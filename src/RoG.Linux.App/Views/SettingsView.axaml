@@ -46,6 +46,21 @@
             </Button>
             <TextBlock Classes="muted" Text="{Binding NotificationFeedback}" IsVisible="{Binding HasNotificationFeedback}" VerticalAlignment="Center" />
           </WrapPanel>
+          <Rectangle Height="1" Fill="{DynamicResource RoGLineBrush}" Margin="0,4" />
+          <ToggleSwitch IsChecked="{Binding CloseToTray}" Content="{l:T SettingsPage_CloseToTray.Header}"
+                        OnContent="" OffContent="" AutomationProperties.Name="{l:T SettingsPage_CloseToTray.Header}" />
+          <TextBlock Classes="muted small" Text="{l:T Linux_CloseToTrayHint}" IsVisible="{Binding !TrayUnavailable}" />
+          <Border Classes="hint" IsVisible="{Binding TrayUnavailable}">
+            <Grid ColumnDefinitions="Auto,*">
+              <PathIcon Data="{StaticResource IconInfo}" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Top" Foreground="{DynamicResource RoGGoldBrush}" />
+              <TextBlock Grid.Column="1" Classes="body" Text="{l:T Linux_TrayUnavailable}" />
+            </Grid>
+          </Border>
+          <ToggleSwitch IsChecked="{Binding Autostart}" IsEnabled="{Binding CanChangeAutostart}" Content="{l:T Linux_Autostart}"
+                        OnContent="" OffContent="" AutomationProperties.Name="{l:T Linux_Autostart}" />
+          <TextBlock Classes="muted small" Text="{l:T Linux_AutostartHint}" />
+          <TextBlock Classes="muted small" Text="{l:T Linux_AutostartPortalHint}" IsVisible="{Binding AutostartUsesPortal}" />
+          <TextBlock Classes="body" Foreground="{DynamicResource RoGRedBrush}" Text="{Binding AutostartFeedback}" IsVisible="{Binding HasAutostartFeedback}" />
         </StackPanel>
       </Border>
 

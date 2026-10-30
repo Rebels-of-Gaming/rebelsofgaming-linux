@@ -55,6 +55,7 @@ public sealed class TestServices : IDisposable
             ImageHandler = new FakeImages(),
             Browser = browser,
             Notifier = new SilentNotifier(),
+            Autostart = new FakeAutostart(),
             Clipboard = clipboard,
             Launcher = launcher,
             Environment = "production",

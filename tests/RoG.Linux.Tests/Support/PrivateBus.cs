@@ -352,3 +352,151 @@ public sealed class FakeNotificationService : IPathMethodHandler
         return ValueTask.CompletedTask;
     }
 }
+
+/// <summary>
+/// <c>org.kde.StatusNotifierWatcher</c> wie in KDE/der GNOME-Erweiterung: merkt sich angemeldete Symbole (Busname des
+/// Absenders), meldet <c>IsStatusNotifierHostRegistered</c>.
+/// </summary>
+public sealed class FakeStatusNotifierWatcher : IPathMethodHandler
+{
+    public List<string> Registered { get; } = [];
+
+    /// <summary>Zeigt ein Panel Symbole an?</summary>
+    public bool HostRegistered { get; set; } = true;
+
+    public string Path => "/StatusNotifierWatcher";
+
+    public bool HandlesChildPaths => false;
+
+    public ValueTask HandleMethodAsync(MethodContext context)
+    {
+        var request = context.Request;
+        var reader = request.GetBodyReader();
+        switch (request.InterfaceAsString, request.MemberAsString)
+        {
+            case ("org.kde.StatusNotifierWatcher", "RegisterStatusNotifierItem"):
+                var service = reader.ReadString();
+                Registered.Add(service.StartsWith('/') ? request.SenderAsString! : service);
+                Replies.Send(context, null);
+                break;
+            case ("org.freedesktop.DBus.Properties", "Get"):
+                reader.ReadString();
+                var name = reader.ReadString();
+                var host = HostRegistered;
+                if (name == "IsStatusNotifierHostRegistered")
+                {
+                    Replies.Send(context, "v", (ref MessageWriter w) => w.WriteVariantBool(host));
+                }
+                else
+                {
+                    context.ReplyError("org.freedesktop.DBus.Error.UnknownProperty", name);
+                }
+
+                break;
+            default:
+                context.ReplyUnknownMethodError();
+                break;
+        }
+
+        return ValueTask.CompletedTask;
+    }
+}
+
+/// <summary>
+/// <c>org.freedesktop.portal.Desktop</c> mit Notification- und Background-Portal (wie xdg-desktop-portal):
+/// Benachrichtigungen merken, <c>ActionInvoked</c> simulieren, <c>RequestBackground</c> mit Antwort über das
+/// Request-Objekt.
+/// </summary>
+public sealed class FakeDesktopPortal : IPathMethodHandler
+{
+    public sealed record Added(string Id, Dictionary<string, VariantValue> Notification);
+
+    public List<Added> Notifications { get; } = [];
+
+    public List<(bool Autostart, string[] Commandline, string Reason)> BackgroundRequests { get; } = [];
+
+    /// <summary>Antwortcode für RequestBackground: 0 = ok, 1 = abgelehnt, 2 = Fehler.</summary>
+    public uint BackgroundResponse { get; set; }
+
+    public DBusConnection? Connection { get; set; }
+
+    public string Path => "/org/freedesktop/portal/desktop";
+
+    public bool HandlesChildPaths => false;
+
+    /// <summary>Klick simulieren: <c>ActionInvoked(app_id, id, action, parameter)</c>.</summary>
+    public void Invoke(string id, string action)
+    {
+        var writer = Connection!.GetMessageWriter();
+        try
+        {
+            writer.WriteSignalHeader(null, Path, "org.freedesktop.portal.Notification", "ActionInvoked", "sssav");
+            writer.WriteString("com.rebelsofgaming.RebelsOfGaming");
+            writer.WriteString(id);
+            writer.WriteString(action);
+            writer.WriteArray(Array.Empty<VariantValue>());
+            Connection.TrySendMessage(writer.CreateMessage());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
+
+    public ValueTask HandleMethodAsync(MethodContext context)
+    {
+        var request = context.Request;
+        var reader = request.GetBodyReader();
+        switch (request.InterfaceAsString, request.MemberAsString)
+        {
+            case ("org.freedesktop.portal.Notification", "AddNotification"):
+            {
+                var id = reader.ReadString();
+                Notifications.Add(new Added(id, reader.ReadDictionaryOfStringToVariantValue()));
+                Replies.Send(context, null);
+                break;
+            }
+
+            case ("org.freedesktop.portal.Background", "RequestBackground"):
+            {
+                reader.ReadString();
+                var options = reader.ReadDictionaryOfStringToVariantValue();
+                var token = options["handle_token"].GetString();
+                var autostart = options["autostart"].GetBool();
+                var commandline = options["commandline"].GetArray<string>();
+                BackgroundRequests.Add((autostart, commandline, options["reason"].GetString()));
+                var sender = request.SenderAsString!.TrimStart(':').Replace('.', '_');
+                var handle = $"/org/freedesktop/portal/desktop/request/{sender}/{token}";
+                Replies.Send(context, "o", (ref MessageWriter w) => w.WriteObjectPath(handle));
+                var code = BackgroundResponse;
+                var writer = context.Connection.GetMessageWriter();
+                try
+                {
+                    writer.WriteSignalHeader(null, handle, "org.freedesktop.portal.Request", "Response", "ua{sv}");
+                    writer.WriteUInt32(code);
+                    var dict = writer.WriteDictionaryStart();
+                    writer.WriteDictionaryEntryStart();
+                    writer.WriteString("background");
+                    writer.WriteVariantBool(code == 0);
+                    writer.WriteDictionaryEntryStart();
+                    writer.WriteString("autostart");
+                    writer.WriteVariantBool(code == 0 && autostart);
+                    writer.WriteDictionaryEnd(dict);
+                    context.Connection.TrySendMessage(writer.CreateMessage());
+                }
+                finally
+                {
+                    writer.Dispose();
+                }
+
+                break;
+            }
+
+            default:
+                context.ReplyUnknownMethodError();
+                break;
+        }
+
+        return ValueTask.CompletedTask;
+    }
+}

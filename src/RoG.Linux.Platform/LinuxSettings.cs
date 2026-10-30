@@ -18,6 +18,12 @@ public sealed record LinuxSettings
     /// <summary><c>dark</c> (RoG-Dunkel, Standard), <c>system</c> (hell/dunkel wie das System) oder <c>light</c>.</summary>
     public string Theme { get; init; } = ThemeDark;
 
+    /// <summary>
+    /// Letzter bekannter Stand von „Beim Anmelden starten“ – in Flatpak lässt sich der Autostart-Eintrag (vom Portal
+    /// außerhalb der Sandbox angelegt) nicht lesen.
+    /// </summary>
+    public bool Autostart { get; init; }
+
     /// <summary>Unbekannte Werte (Hand-Edit, ältere Version) → Standard.</summary>
     public string EffectiveTheme => Themes.Contains(Theme) ? Theme : ThemeDark;
 }

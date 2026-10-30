@@ -34,6 +34,9 @@ public sealed record AppServicesOptions
 
     public IDesktopNotifier? Notifier { get; init; }
 
+    /// <summary>„Beim Anmelden starten“; Standard: Background-Portal in Flatpak, sonst XDG-Autostart-Datei.</summary>
+    public IAutostart? Autostart { get; init; }
+
     /// <summary>Spiele-Links (<c>steam://</c>, <c>et://</c> …); Standard <c>xdg-open</c>.</summary>
     public RoG.Core.Features.Servers.IExternalLauncher? Launcher { get; init; }
 
@@ -65,10 +68,12 @@ public sealed class AppServices : IDisposable
         IBrowserLauncher browser,
         IDesktopNotifier notifier,
         ImageLoader images,
+        IAutostart autostart,
         RoG.Core.Features.Servers.IExternalLauncher launcher,
         RoG.Core.Features.Servers.ServerConnector serverConnector)
     {
         Launcher = launcher;
+        Autostart = autostart;
         SettingsStore = settingsStore;
         Settings = settings;
         _linuxStore = linuxStore;
@@ -88,6 +93,9 @@ public sealed class AppServices : IDisposable
         api.Handler.Unauthorized += (_, _) => Unauthorized?.Invoke(this, EventArgs.Empty);
         Realtime = new RealtimeService(this);
     }
+
+    /// <summary>Tray-Symbol (nur in der laufenden App, nicht in Tests); <c>null</c> = keins.</summary>
+    public TrayService? Tray { get; set; }
 
     /// <summary>Echtzeit (Reverb), Zähler für Glocke/Nachrichten, Desktop-Benachrichtigungen.</summary>
     public RealtimeService Realtime { get; }
@@ -152,6 +160,9 @@ public sealed class AppServices : IDisposable
     public IDesktopNotifier Notifier { get; }
 
     public ImageLoader Images { get; }
+
+    /// <summary>„Beim Anmelden starten“ (Portal in Flatpak, sonst <c>~/.config/autostart</c>).</summary>
+    public IAutostart Autostart { get; }
 
     /// <summary>Spiele- und Voice-Links (<c>steam://</c>, <c>ts3server://</c> …) über <c>xdg-open</c>.</summary>
     public RoG.Core.Features.Servers.IExternalLauncher Launcher { get; }
@@ -219,8 +230,11 @@ public sealed class AppServices : IDisposable
             api,
             new ReswLocalizer(language),
             options.Browser ?? xdg,
-            options.Notifier ?? new FreedesktopNotifier(),
+            options.Notifier ?? (paths.IsFlatpak ? new PortalNotifier() : new FreedesktopNotifier()),
             images,
+            options.Autostart ?? (paths.IsFlatpak
+                ? new PortalAutostart()
+                : new XdgAutostart(paths.ConfigHome, AutostartExecutable())),
             launcher,
             connector);
     }
@@ -288,6 +302,18 @@ public sealed class AppServices : IDisposable
         _settingsGate.Dispose();
         (Notifier as IDisposable)?.Dispose();
         (Tokens as IDisposable)?.Dispose();
+    }
+
+    /// <summary>
+    /// Programm für den Autostart-Eintrag: das eigene Startprogramm (Paket: <c>rebelsofgaming</c>); läuft die App über
+    /// <c>dotnet rebelsofgaming.dll</c> (Entwicklung), das daneben liegende Startprogramm.
+    /// </summary>
+    private static string AutostartExecutable()
+    {
+        var process = System.Environment.ProcessPath;
+        return process is not null && !Path.GetFileNameWithoutExtension(process).Equals("dotnet", StringComparison.Ordinal)
+            ? process
+            : Path.Combine(AppContext.BaseDirectory, AppIdentity.DataFolderName);
     }
 
     private static string ReadVersion()

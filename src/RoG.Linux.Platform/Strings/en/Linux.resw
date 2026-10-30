@@ -205,4 +205,28 @@
   <data name="Linux_DiscordVoiceGuest" xml:space="preserve">
     <value>Sign in to see who is in Discord voice right now.</value>
   </data>
+  <data name="Linux_CloseToTrayHint" xml:space="preserve">
+    <value>The window goes to the system tray and notifications keep coming. Quit from the icon (right-click → Quit).</value>
+  </data>
+  <data name="Linux_TrayUnavailable" xml:space="preserve">
+    <value>No system tray found – closing the window quits the app. On GNOME, the “AppIndicator and KStatusNotifierItem Support” extension shows the icon.</value>
+  </data>
+  <data name="Linux_Autostart" xml:space="preserve">
+    <value>Start when I sign in to the desktop</value>
+  </data>
+  <data name="Linux_AutostartHint" xml:space="preserve">
+    <value>Starts without a window in the system tray (with a window if there is none) and reports new messages.</value>
+  </data>
+  <data name="Linux_AutostartPortalHint" xml:space="preserve">
+    <value>The system asks once when you switch it on; you can also change it in the system settings (background apps).</value>
+  </data>
+  <data name="Linux_AutostartReason" xml:space="preserve">
+    <value>Start Rebels of Gaming in the system tray when you sign in to report new messages and notifications.</value>
+  </data>
+  <data name="Linux_AutostartDenied" xml:space="preserve">
+    <value>Denied – you can allow it in the system settings under background apps.</value>
+  </data>
+  <data name="Linux_AutostartFailed" xml:space="preserve">
+    <value>Could not change the autostart.</value>
+  </data>
 </root>

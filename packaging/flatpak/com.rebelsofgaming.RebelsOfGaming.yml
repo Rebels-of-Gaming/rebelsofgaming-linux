@@ -33,10 +33,12 @@ finish-args:
   - --device=dri
   # Geräte-Token im Schlüsselbund (Secret Service); später ggf. Secret-Portal
   - --talk-name=org.freedesktop.secrets
-  # Desktop-Benachrichtigungen (später ggf. Notification-Portal)
-  - --talk-name=org.freedesktop.Notifications
+  # Tray-Symbol (StatusNotifierItem): Anmeldung beim Watcher des Panels mit dem eindeutigen Busnamen – kein eigener
+  # Name nötig. Ohne Panel (GNOME ohne AppIndicator-Erweiterung) schließt das Fenster die App wie gewohnt.
+  - --talk-name=org.kde.StatusNotifierWatcher
   # Single-Instance: Die App besitzt ihre eigene App-ID als D-Bus-Namen – das erlaubt Flatpak ohne weiteres Recht.
-  # Farbschema („Wie das System“) kommt über das Settings-Portal – ebenfalls ohne weiteres Recht.
+  # Ohne weitere Rechte über Portale: Desktop-Benachrichtigungen (Notification-Portal), Autostart beim Anmelden
+  # (Background-Portal, fragt einmal nach), Farbschema („Wie das System“, Settings-Portal), Links (OpenURI-Portal).
 
 modules:
   - name: rebelsofgaming

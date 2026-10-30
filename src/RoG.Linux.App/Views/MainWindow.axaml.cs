@@ -33,6 +33,15 @@ public sealed partial class MainWindow : Window
 
     private ShellViewModel? Shell => DataContext as ShellViewModel;
 
+    /// <summary>„Beenden“ aus dem Tray-Menü: wirklich schließen statt in den Infobereich.</summary>
+    public bool ExitRequested { get; set; }
+
+    /// <summary>Soll „Schließen“ nur ausblenden? (Tray sichtbar und „Beim Schließen in den Infobereich“ an.)</summary>
+    public Func<bool>? CloseToTray { get; set; }
+
+    /// <summary>Fenster wurde in den Infobereich ausgeblendet (für den einmaligen Hinweis).</summary>
+    public event EventHandler? HiddenToTray;
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -69,13 +78,25 @@ public sealed partial class MainWindow : Window
     protected override void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
-        if (_services is null || e.Cancel || _normalSize.Width <= 0)
+        if (e.Cancel)
         {
             return;
         }
 
-        var placement = WindowPlacementService.Capture(_normalPosition, _normalSize, WindowState == WindowState.Maximized);
-        _services.UpdateSettingsNow(s => s with { Window = placement });
+        if (_services is not null && _normalSize.Width > 0)
+        {
+            var placement = WindowPlacementService.Capture(_normalPosition, _normalSize, WindowState == WindowState.Maximized);
+            _services.UpdateSettingsNow(s => s with { Window = placement });
+        }
+
+        // Schließen per Knopf/Alt+F4 → in den Infobereich (Benachrichtigungen kommen weiter); Beenden der App, Abmelden
+        // vom Desktop und SIGTERM schließen wirklich
+        if (!ExitRequested && e.CloseReason is WindowCloseReason.WindowClosing or WindowCloseReason.Undefined && CloseToTray?.Invoke() == true)
+        {
+            e.Cancel = true;
+            Hide();
+            HiddenToTray?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private void OnScrimPressed(object? sender, PointerPressedEventArgs e)

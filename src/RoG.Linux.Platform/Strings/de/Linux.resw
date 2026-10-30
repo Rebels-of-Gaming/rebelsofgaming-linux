@@ -205,4 +205,28 @@
   <data name="Linux_DiscordVoiceGuest" xml:space="preserve">
     <value>Melde dich an, um zu sehen, wer gerade im Discord-Voice ist.</value>
   </data>
+  <data name="Linux_CloseToTrayHint" xml:space="preserve">
+    <value>Das Fenster verschwindet in den Infobereich, Benachrichtigungen kommen weiter. Beenden über das Symbol (Rechtsklick → Beenden).</value>
+  </data>
+  <data name="Linux_TrayUnavailable" xml:space="preserve">
+    <value>Kein Infobereich gefunden – das Fenster beendet die App beim Schließen. Unter GNOME zeigt die Erweiterung „AppIndicator and KStatusNotifierItem Support“ das Symbol an.</value>
+  </data>
+  <data name="Linux_Autostart" xml:space="preserve">
+    <value>Beim Anmelden am Desktop starten</value>
+  </data>
+  <data name="Linux_AutostartHint" xml:space="preserve">
+    <value>Startet ohne Fenster im Infobereich (gibt es keinen, mit Fenster) und meldet neue Nachrichten.</value>
+  </data>
+  <data name="Linux_AutostartPortalHint" xml:space="preserve">
+    <value>Das System fragt beim Einschalten einmal nach; ändern lässt es sich auch in den Einstellungen des Systems (Hintergrund-Apps).</value>
+  </data>
+  <data name="Linux_AutostartReason" xml:space="preserve">
+    <value>Rebels of Gaming beim Anmelden im Infobereich starten, um neue Nachrichten und Benachrichtigungen zu melden.</value>
+  </data>
+  <data name="Linux_AutostartDenied" xml:space="preserve">
+    <value>Abgelehnt – erlauben lässt es sich in den Einstellungen des Systems unter Hintergrund-Apps.</value>
+  </data>
+  <data name="Linux_AutostartFailed" xml:space="preserve">
+    <value>Der Autostart ließ sich nicht ändern.</value>
+  </data>
 </root>

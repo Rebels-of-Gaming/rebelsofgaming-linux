@@ -205,4 +205,28 @@
   <data name="Linux_DiscordVoiceGuest" xml:space="preserve">
     <value>Connecte-toi pour voir qui est en vocal sur Discord.</value>
   </data>
+  <data name="Linux_CloseToTrayHint" xml:space="preserve">
+    <value>La fenêtre passe dans la zone de notification et les notifications continuent. Quitter via l’icône (clic droit → Quitter).</value>
+  </data>
+  <data name="Linux_TrayUnavailable" xml:space="preserve">
+    <value>Aucune zone de notification trouvée – fermer la fenêtre quitte l’app. Sous GNOME, l’extension « AppIndicator and KStatusNotifierItem Support » affiche l’icône.</value>
+  </data>
+  <data name="Linux_Autostart" xml:space="preserve">
+    <value>Démarrer à l’ouverture de session</value>
+  </data>
+  <data name="Linux_AutostartHint" xml:space="preserve">
+    <value>Démarre sans fenêtre dans la zone de notification (avec une fenêtre s’il n’y en a pas) et signale les nouveaux messages.</value>
+  </data>
+  <data name="Linux_AutostartPortalHint" xml:space="preserve">
+    <value>Le système demande une fois à l’activation ; tu peux aussi le modifier dans les paramètres du système (applications en arrière-plan).</value>
+  </data>
+  <data name="Linux_AutostartReason" xml:space="preserve">
+    <value>Démarrer Rebels of Gaming dans la zone de notification à l’ouverture de session pour signaler les nouveaux messages et notifications.</value>
+  </data>
+  <data name="Linux_AutostartDenied" xml:space="preserve">
+    <value>Refusé – tu peux l’autoriser dans les paramètres du système, rubrique applications en arrière-plan.</value>
+  </data>
+  <data name="Linux_AutostartFailed" xml:space="preserve">
+    <value>Impossible de modifier le démarrage automatique.</value>
+  </data>
 </root>
