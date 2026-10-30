@@ -299,7 +299,27 @@ public sealed class FakeSecretService : IPathMethodHandler
 /// <summary><c>org.freedesktop.Notifications</c>: merkt sich jede Benachrichtigung.</summary>
 public sealed class FakeNotificationService : IPathMethodHandler
 {
-    public sealed record Shown(string AppName, string Icon, string Summary, string Body, string? DesktopEntry);
+    public sealed record Shown(string AppName, string Icon, string Summary, string Body, string? DesktopEntry, string[] Actions, string? Category);
+
+    /// <summary>Verbindung des Dienstes (von <see cref="PrivateBus.ServeAsync"/>) – zum Senden von Signalen.</summary>
+    public DBusConnection? Connection { get; set; }
+
+    /// <summary>Klick simulieren: Signal <c>ActionInvoked(id, key)</c>.</summary>
+    public void Invoke(uint id, string key)
+    {
+        var writer = Connection!.GetMessageWriter();
+        try
+        {
+            writer.WriteSignalHeader(null, Path, "org.freedesktop.Notifications", "ActionInvoked", "us");
+            writer.WriteUInt32(id);
+            writer.WriteString(key);
+            Connection.TrySendMessage(writer.CreateMessage());
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
 
     public List<Shown> Notifications { get; } = [];
 
@@ -322,10 +342,11 @@ public sealed class FakeNotificationService : IPathMethodHandler
         var icon = reader.ReadString();
         var summary = reader.ReadString();
         var body = reader.ReadString();
-        reader.ReadArrayOfString();
+        var actions = reader.ReadArrayOfString();
         var hints = reader.ReadDictionaryOfStringToVariantValue();
         reader.ReadInt32();
-        Notifications.Add(new Shown(app, icon, summary, body, hints.TryGetValue("desktop-entry", out var entry) ? entry.GetString() : null));
+        Notifications.Add(new Shown(app, icon, summary, body, hints.TryGetValue("desktop-entry", out var entry) ? entry.GetString() : null,
+            actions, hints.TryGetValue("category", out var category) ? category.GetString() : null));
         var id = (uint)Notifications.Count;
         Replies.Send(context, "u", (ref MessageWriter w) => w.WriteUInt32(id));
         return ValueTask.CompletedTask;

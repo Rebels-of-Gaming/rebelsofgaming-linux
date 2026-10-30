@@ -108,9 +108,22 @@ public sealed class FakeLauncher : RoG.Core.Features.Servers.IExternalLauncher
     }
 }
 
+/// <summary>Benachrichtigungen im Speicher; <see cref="Click"/> simuliert einen Klick.</summary>
 public sealed class SilentNotifier : IDesktopNotifier
 {
+    public List<DesktopNotification> Shown { get; } = [];
+
+    public event EventHandler<uint>? Activated;
+
     public Task<bool> ShowAsync(string title, string body, CancellationToken cancellationToken = default) => Task.FromResult(true);
+
+    public Task<uint?> NotifyAsync(DesktopNotification notification, CancellationToken cancellationToken = default)
+    {
+        Shown.Add(notification);
+        return Task.FromResult<uint?>((uint)Shown.Count);
+    }
+
+    public void Click(uint id) => Activated?.Invoke(this, id);
 }
 
 public static class TestTokens

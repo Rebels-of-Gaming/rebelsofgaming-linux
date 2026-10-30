@@ -86,6 +86,27 @@ public class DBusIntegrationTests
     }
 
     [Fact]
+    public async Task Clickable_notification_reports_its_activation()
+    {
+        await using var bus = await PrivateBus.StartAsync();
+        var service = new FakeNotificationService();
+        service.Connection = await bus.ServeAsync("org.freedesktop.Notifications", service);
+        using var notifier = new FreedesktopNotifier(bus.Address);
+        var clicked = new TaskCompletionSource<uint>();
+        notifier.Activated += (_, id) => clicked.TrySetResult(id);
+
+        var id = await notifier.NotifyAsync(new DesktopNotification("Nyx", "Scrim heute?", "Öffnen", "im.received"));
+        Assert.Equal(1u, id);
+        var shown = Assert.Single(service.Notifications);
+        Assert.Equal(["default", "Öffnen"], shown.Actions);
+        Assert.Equal("im.received", shown.Category);
+
+        service.Invoke(7, "other"); // andere Aktion: ignoriert
+        service.Invoke(1, "default");
+        Assert.Equal(1u, await clicked.Task.WaitAsync(TimeSpan.FromSeconds(5)));
+    }
+
+    [Fact]
     public async Task Second_instance_forwards_its_deep_link_over_dbus_and_exits()
     {
         await using var bus = await PrivateBus.StartAsync();
