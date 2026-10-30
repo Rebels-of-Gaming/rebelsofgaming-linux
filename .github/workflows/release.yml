@@ -29,7 +29,7 @@ jobs:
   check:
     name: Tag prüfen
     if: github.ref_type == 'tag'
-    runs-on: [self-hosted, Linux, rog]
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          submodules: false
+          submodules: true
 
       - name: Tag liegt auf main
         run: |
@@ -66,7 +66,7 @@ jobs:
   build:
     name: Paket ${{ matrix.arch }}
     needs: check
-    runs-on: [self-hosted, Linux, rog]
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     strategy:
       fail-fast: true
@@ -75,27 +75,12 @@ jobs:
         # arm64-Rechner; Tests laufen nur für x86_64
         arch: [x86_64, aarch64]
     env:
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}/../.dotnet
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          submodules: false
+          submodules: true
 
-      # Wie in ci.yml: geteilter Kern über den Deploy-Key (nur lesen, nur rebelsofgaming-windows)
-      - name: Geteilten Kern holen (Submodul external/rog-windows)
-        env:
-          DEPLOY_KEY: ${{ secrets.ROG_WINDOWS_DEPLOY_KEY }}
-        run: |
-          if [ -z "$DEPLOY_KEY" ]; then
-            echo "::error::Secret ROG_WINDOWS_DEPLOY_KEY fehlt (docs/LINUX-BAUPLAN.md, Abschnitt CI)"
-            exit 1
-          fi
-          keyfile="$RUNNER_TEMP/rog-windows-deploy-key"
-          (umask 077 && printf '%s\n' "$DEPLOY_KEY" > "$keyfile")
-          trap 'rm -f "$keyfile"' EXIT
-          export GIT_SSH_COMMAND="ssh -i $keyfile -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
-          git -c "url.git@github.com:.insteadOf=https://github.com/" submodule update --init external/rog-windows
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -122,14 +107,14 @@ jobs:
   publish:
     name: Manifest (+ Upload/Flathub, deaktiviert)
     needs: [check, build]
-    runs-on: [self-hosted, Linux, rog]
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       VERSION: ${{ needs.check.outputs.version }}
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: false
+          submodules: true
 
       - uses: actions/download-artifact@v4
         with:

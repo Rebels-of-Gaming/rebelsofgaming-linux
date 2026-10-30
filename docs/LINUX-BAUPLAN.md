@@ -267,6 +267,11 @@ Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
 
 ## CI
 
+**Seit 30.10.2026 (Repos öffentlich, GPL-3.0):** CI und Release-Workflow laufen auf **GitHub-Runnern** (`ubuntu-24.04`, für
+öffentliche Repos kostenlos) statt auf den eigenen Runnern – Pull-Requests aus Forks dürfen nie auf unseren Maschinen
+laufen. Der Kern kommt als öffentliches Submodul (`submodules: true`); Deploy-Key und Secret `ROG_WINDOWS_DEPLOY_KEY`
+sind entfernt. Der Abschnitt darunter beschreibt den früheren Stand.
+
 `.github/workflows/ci.yml`: Build + Tests auf den eigenen Linux-Runnern (`[self-hosted, Linux, rog]`, wie das
 Windows-Repo), .NET über `actions/setup-dotnet` ins Benutzerverzeichnis.
 

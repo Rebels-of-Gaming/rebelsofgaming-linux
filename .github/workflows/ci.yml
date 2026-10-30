@@ -9,35 +9,17 @@ on:
 jobs:
   linux:
     name: Build + Tests (Linux)
-    runs-on: [self-hosted, Linux, rog]
+    # Öffentliches Repo: GitHub-Runner – Pull-Requests aus Forks laufen nie auf unseren eigenen Maschinen
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      # Eigene Runner ohne root: .NET ins Benutzerverzeichnis statt /usr/share/dotnet (wie im Windows-Repo)
-      DOTNET_INSTALL_DIR: ${{ github.workspace }}/../.dotnet
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: '1'
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: false
-
-      # Der geteilte Kern liegt im privaten Repo rebelsofgaming-windows. GITHUB_TOKEN darf nur dieses Repo lesen –
-      # deshalb ein Deploy-Key (nur lesen, nur rebelsofgaming-windows) als Secret ROG_WINDOWS_DEPLOY_KEY.
-      # Einrichtung: docs/LINUX-BAUPLAN.md, Abschnitt „CI“.
-      - name: Geteilten Kern holen (Submodul external/rog-windows)
-        env:
-          DEPLOY_KEY: ${{ secrets.ROG_WINDOWS_DEPLOY_KEY }}
-        run: |
-          if [ -z "$DEPLOY_KEY" ]; then
-            echo "::error::Secret ROG_WINDOWS_DEPLOY_KEY fehlt – Deploy-Key für rebelsofgaming-windows anlegen (docs/LINUX-BAUPLAN.md, Abschnitt CI)"
-            exit 1
-          fi
-          keyfile="$RUNNER_TEMP/rog-windows-deploy-key"
-          (umask 077 && printf '%s\n' "$DEPLOY_KEY" > "$keyfile")
-          trap 'rm -f "$keyfile"' EXIT
-          export GIT_SSH_COMMAND="ssh -i $keyfile -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
-          git -c url."git@github.com:".insteadOf="https://github.com/" submodule update --init external/rog-windows
-          git -C external/rog-windows log -1 --format='Kern: %h %s'
+          # geteilter Kern (öffentliches Repo rebelsofgaming-windows)
+          submodules: true
 
       - uses: actions/setup-dotnet@v6
         with:

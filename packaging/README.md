@@ -104,7 +104,7 @@ nicht aus). Ablauf heute:
 
 1. **Tag prüfen:** Commit liegt auf `main`; Tag = `RoGLinuxVersion`; die AppStream-Datei hat
    `<release version="X.Y.Z" date="…" type="stable">`.
-2. **Paket x86_64 + aarch64:** Kern per Deploy-Key, Build + Tests (x86_64), `make-tarball.sh`; Tarball + `.sha256`
+2. **Paket x86_64 + aarch64:** Kern als öffentliches Submodul, Build + Tests (x86_64), `make-tarball.sh`; Tarball + `.sha256`
    als Workflow-Artefakt (90 Tage).
 3. **Manifest:** Prüfsummen kontrollieren, `release-manifest.sh` → fertiges Flathub-Manifest als Artefakt.
 4. **Deaktiviert (TODO):** Upload nach `rog-public/apps/linux/<version>/` (nie überschreiben, danach Prüfsumme über
