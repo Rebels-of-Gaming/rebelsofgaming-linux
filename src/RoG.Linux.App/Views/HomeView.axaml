@@ -1,0 +1,137 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.HomeView"
+             x:DataType="vm:HomeViewModel">
+  <!-- Startseite wie HomePage der Windows-App: Begrüßung, Hinweise, Live-Ticker, neueste News, nächste Termine -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="{StaticResource RoGPagePadding}" Spacing="20">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="display" Text="{l:T HomePage_Title.Text}" />
+          <TextBlock Classes="muted" Text="{Binding Greeting}" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+
+      <!-- Gastmodus: Hinweis mit Anmelden, schließbar -->
+      <Border Classes="hint info" IsVisible="{Binding ShowGuestHint}">
+        <Grid ColumnDefinitions="*,Auto,Auto">
+          <StackPanel Spacing="2" VerticalAlignment="Center">
+            <TextBlock Classes="body strong" Text="{l:T HomePage_GuestHint.Title}" />
+            <TextBlock Classes="muted" Text="{l:T HomePage_GuestHint.Message}" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="secondary" Margin="12,0,0,0" VerticalAlignment="Center"
+                  Command="{Binding SignInCommand}" Content="{l:T Linux_SignIn}" />
+          <Button Grid.Column="2" Classes="icon" Margin="4,0,0,0" VerticalAlignment="Center" Command="{Binding DismissGuestHintCommand}"
+                  ToolTip.Tip="{l:T Linux_Close}" AutomationProperties.Name="{l:T Linux_Close}">
+            <PathIcon Data="{StaticResource IconClose}" Width="16" Height="16" />
+          </Button>
+        </Grid>
+      </Border>
+
+      <!-- Offene Abstimmungen (nur Stimmberechtigte) -->
+      <Button Classes="primary" HorizontalAlignment="Left" IsVisible="{Binding HasVotes}" Command="{Binding OpenVotesCommand}">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <PathIcon Data="{StaticResource IconVote}" Width="18" Height="18" />
+          <TextBlock Text="{Binding VotesText}" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+
+      <!-- Onboarding-Checkliste -->
+      <Border Classes="card" IsVisible="{Binding HasOnboarding}">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="section" Text="{l:T HomePage_OnboardingTitle.Text}" />
+          <ProgressBar Maximum="100" Value="{Binding OnboardingProgress}" Classes="rog" />
+          <TextBlock Classes="muted small" Text="{Binding OnboardingText}" />
+          <ItemsControl ItemsSource="{Binding OnboardingSteps}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:OnboardingStepViewModel">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,3">
+                  <Border Classes="check" Classes.done="{Binding Done}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="1" Classes="body" Classes.muted="{Binding Done}" Text="{Binding Label}" Margin="10,0" VerticalAlignment="Center" />
+                  <Button Grid.Column="2" Classes="link" Command="{Binding OpenCommand}" IsVisible="{Binding CanOpen}" VerticalAlignment="Center">
+                    <TextBlock Text="{l:T HomePage_OnboardingDo.Content}" />
+                  </Button>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <!-- Live-Ticker -->
+      <TextBlock Classes="section" Text="{l:T HomePage_LiveTitle.Text}" />
+      <Panel MinHeight="120">
+        <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                     EmptyText="{l:T HomePage_LiveEmpty.Text}" RetryCommand="{Binding RefreshCommand}" />
+        <ItemsControl ItemsSource="{Binding Stats}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T HomePage_LiveTitle.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="200" Spacing="16" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:LiveStatItem">
+              <Border Classes="card stat" AutomationProperties.Name="{Binding AutomationName}">
+                <StackPanel Spacing="6">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <PathIcon Classes="tone" Classes.green="{Binding IsGreen}" Classes.gold="{Binding IsGold}"
+                              Classes.red="{Binding IsRed}" Classes.blue="{Binding IsBlue}"
+                              Data="{Binding Icon}" Width="16" Height="16" VerticalAlignment="Top" Margin="0,2,8,0" />
+                    <!-- immer Platz für zwei Zeilen: Werte stehen in jeder Reihe auf gleicher Höhe -->
+                    <TextBlock Grid.Column="1" Classes="section" Text="{Binding Label}" MaxLines="2" MinHeight="44"
+                               TextWrapping="Wrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Top" />
+                  </Grid>
+                  <TextBlock Classes="title" Text="{Binding Value}" />
+                  <TextBlock Classes="muted small" Text="{Binding Hint}" IsVisible="{Binding HasHint}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Panel>
+
+      <!-- Neueste News und nächste Termine -->
+      <c:AdaptiveGrid MinItemWidth="300" Spacing="16" MaxColumns="2" IsVisible="{Binding HasTeasers}">
+        <Border Classes="card" Padding="12,16" IsVisible="{Binding HasNews}">
+          <StackPanel Spacing="6">
+            <TextBlock Classes="section" Text="{l:T HomePage_NewsTitle.Text}" Margin="8,0" />
+            <ItemsControl ItemsSource="{Binding LatestNews}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:HomeLinkItem">
+                  <Button Classes="row" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding Title}">
+                    <StackPanel Spacing="2">
+                      <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                      <TextBlock Classes="muted small" Text="{Binding Meta}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <Border Classes="card" Padding="12,16" IsVisible="{Binding HasEvents}">
+          <StackPanel Spacing="6">
+            <TextBlock Classes="section" Text="{l:T HomePage_EventsTitle.Text}" Margin="8,0" />
+            <ItemsControl ItemsSource="{Binding NextEvents}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:HomeLinkItem">
+                  <Button Classes="row" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding Title}">
+                    <StackPanel Spacing="2">
+                      <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                      <TextBlock Classes="muted small" Text="{Binding Meta}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </c:AdaptiveGrid>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

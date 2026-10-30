@@ -46,4 +46,70 @@
   <data name="Linux_SignOutFailed" xml:space="preserve">
     <value>Auf dem Server konnte das Gerät nicht abgemeldet werden – lokal ist der Zugang gelöscht. Entferne es auf der Website unter Konto → Apps &amp; Geräte.</value>
   </data>
+  <data name="Settings_LanguageSystem" xml:space="preserve">
+    <value>Systemsprache</value>
+  </data>
+  <data name="SettingsPage_LicensesText.Text" xml:space="preserve">
+    <value>Schrift Barlow Condensed © The Barlow Project Authors, SIL Open Font License 1.1. Avalonia UI, .NET, CommunityToolkit.Mvvm, Tmds.DBus und AngleSharp: MIT-Lizenz. Symbole nach Material Design Icons, Apache License 2.0.</value>
+  </data>
+  <data name="Linux_NavSettings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Linux_OpenMenu" xml:space="preserve">
+    <value>Menü öffnen</value>
+  </data>
+  <data name="Linux_CloseMenu" xml:space="preserve">
+    <value>Menü schließen</value>
+  </data>
+  <data name="Linux_ThemeHeader" xml:space="preserve">
+    <value>Design</value>
+  </data>
+  <data name="Linux_ThemeDark" xml:space="preserve">
+    <value>RoG-Dunkel (Standard)</value>
+  </data>
+  <data name="Linux_ThemeSystem" xml:space="preserve">
+    <value>Wie das System (hell oder dunkel)</value>
+  </data>
+  <data name="Linux_ThemeLight" xml:space="preserve">
+    <value>Hell</value>
+  </data>
+  <data name="Linux_DesktopTitle" xml:space="preserve">
+    <value>LINUX-DESKTOP</value>
+  </data>
+  <data name="Linux_NotificationsToggle" xml:space="preserve">
+    <value>Desktop-Benachrichtigungen zeigen</value>
+  </data>
+  <data name="Linux_NotificationsHint" xml:space="preserve">
+    <value>Gilt, solange die App läuft. Glocke und neue Nachrichten melden sich ab einer der nächsten Versionen.</value>
+  </data>
+  <data name="Linux_TestNotification" xml:space="preserve">
+    <value>TEST-BENACHRICHTIGUNG</value>
+  </data>
+  <data name="Linux_TestNotificationTitle" xml:space="preserve">
+    <value>Rebels of Gaming</value>
+  </data>
+  <data name="Linux_TestNotificationBody" xml:space="preserve">
+    <value>So sehen Benachrichtigungen der App aus.</value>
+  </data>
+  <data name="Linux_TestNotificationSent" xml:space="preserve">
+    <value>Benachrichtigung gesendet.</value>
+  </data>
+  <data name="Linux_TestNotificationFailed" xml:space="preserve">
+    <value>Kein Benachrichtigungsdienst erreichbar.</value>
+  </data>
+  <data name="Linux_PackageFlatpak" xml:space="preserve">
+    <value>Installiert als Flatpak</value>
+  </data>
+  <data name="Linux_PackageNative" xml:space="preserve">
+    <value>Direkt gestartet (ohne Flatpak)</value>
+  </data>
+  <data name="Linux_DisplayBackend" xml:space="preserve">
+    <value>Anzeige: {0}</value>
+  </data>
+  <data name="Linux_SteamDeck" xml:space="preserve">
+    <value>Steam Deck erkannt</value>
+  </data>
+  <data name="Linux_Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
 </root>

@@ -108,8 +108,8 @@ public class ViewModelTests
             var shell = new ShellViewModel(t.Services);
             await shell.InitializeAsync();
             Assert.False(shell.IsLoginVisible);
-            Assert.Equal("Nav_News", shell.CurrentItem?.Key);
-            Assert.IsType<NewsViewModel>(shell.CurrentPage);
+            Assert.Equal("Nav_Home", shell.CurrentItem?.Key);
+            Assert.IsType<HomeViewModel>(shell.CurrentPage);
         }
     }
 

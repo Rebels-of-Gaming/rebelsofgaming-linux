@@ -14,6 +14,7 @@ public sealed partial class NewsViewModel : LoadableViewModel
 {
     private readonly NewsService _news;
     private string? _cursor;
+    private string? _pendingSlug;
 
     public NewsViewModel(AppServices services)
         : base(services)
@@ -36,7 +37,12 @@ public sealed partial class NewsViewModel : LoadableViewModel
     [NotifyPropertyChangedFor(nameof(IsDetailOpen), nameof(ShowSelectHint))]
     public partial NewsItemViewModel? Selected { get; set; }
 
-    public bool IsDetailOpen => Selected is not null;
+    public bool IsDetailOpen => Selected is not null || IsLinkedDetailOpen;
+
+    /// <summary>Artikel aus einem Link (Startseite, <c>rog://news/…</c>), der nicht in der geladenen Liste steht.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDetailOpen), nameof(ShowSelectHint))]
+    public partial bool IsLinkedDetailOpen { get; set; }
 
     public bool ShowSelectHint => !IsDetailOpen;
 
@@ -58,10 +64,42 @@ public sealed partial class NewsViewModel : LoadableViewModel
         {
             Selected = Items.FirstOrDefault(i => i.Slug == selectedSlug);
         }
+
+        if (_pendingSlug is { } pending)
+        {
+            _pendingSlug = null;
+            Open(pending);
+        }
+    }
+
+    /// <summary>Artikel per Slug öffnen – aus der Liste, sonst direkt (älterer Artikel); vor dem Laden gemerkt.</summary>
+    public void Open(string slug)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(slug);
+        if (Items.FirstOrDefault(i => i.Slug == slug) is { } item)
+        {
+            IsLinkedDetailOpen = false;
+            Selected = item;
+        }
+        else if (Items.Count == 0 && (IsLoading || !ShowContent))
+        {
+            _pendingSlug = slug;
+        }
+        else
+        {
+            Selected = null;
+            IsLinkedDetailOpen = true;
+            _ = Detail.ShowAsync(slug);
+        }
     }
 
     partial void OnSelectedChanged(NewsItemViewModel? value)
     {
+        if (value is not null)
+        {
+            IsLinkedDetailOpen = false;
+        }
+
         if (value is not null && Detail.Slug != value.Slug)
         {
             _ = Detail.ShowAsync(value.Slug);
@@ -70,7 +108,11 @@ public sealed partial class NewsViewModel : LoadableViewModel
 
     /// <summary>Zurück zur Liste (schmales Fenster, Escape).</summary>
     [RelayCommand]
-    private void CloseDetail() => Selected = null;
+    private void CloseDetail()
+    {
+        Selected = null;
+        IsLinkedDetailOpen = false;
+    }
 
     [RelayCommand]
     private async Task LoadMoreAsync()

@@ -1,0 +1,90 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+  <!-- Einstellungen wie SettingsPage der Windows-App; „Windows“-Karte wird „Linux-Desktop“ -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="{StaticResource RoGPagePadding}" Spacing="16" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+      <TextBlock Classes="display" Text="{l:T SettingsPage_Title.Text}" />
+
+      <Border Classes="hint info" IsVisible="{Binding RestartRequired}">
+        <TextBlock Classes="body" Text="{l:T SettingsPage_RestartHint.Message}" />
+      </Border>
+
+      <!-- Allgemein -->
+      <Border Classes="card">
+        <StackPanel Spacing="16">
+          <TextBlock Classes="section" Text="{l:T SettingsPage_GeneralTitle.Text}" />
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T SettingsPage_Language.Header}" />
+            <ComboBox MinWidth="260" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                      AutomationProperties.Name="{l:T SettingsPage_Language.Header}" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T Linux_ThemeHeader}" />
+            <ComboBox MinWidth="260" ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}"
+                      AutomationProperties.Name="{l:T Linux_ThemeHeader}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Linux-Desktop -->
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="section" Text="{l:T Linux_DesktopTitle}" />
+          <ToggleSwitch IsChecked="{Binding Notifications}" Content="{l:T Linux_NotificationsToggle}"
+                        OnContent="" OffContent="" AutomationProperties.Name="{l:T Linux_NotificationsToggle}" />
+          <TextBlock Classes="muted small" Text="{l:T Linux_NotificationsHint}" />
+          <WrapPanel Orientation="Horizontal">
+            <Button Classes="secondary" Command="{Binding TestNotificationCommand}" Margin="0,0,12,0">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconBell}" Width="16" Height="16" />
+                <TextBlock Text="{l:T Linux_TestNotification}" />
+              </StackPanel>
+            </Button>
+            <TextBlock Classes="muted" Text="{Binding NotificationFeedback}" IsVisible="{Binding HasNotificationFeedback}" VerticalAlignment="Center" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Über die App -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="section" Text="{l:T SettingsPage_AboutTitle.Text}" />
+          <TextBlock Classes="body strong" Text="{Binding AppVersionText}" />
+          <TextBlock Classes="muted" Text="{Binding PlatformText}" />
+          <TextBlock Classes="muted small" Text="{Binding EnvironmentText}" />
+          <TextBlock Classes="muted small" Text="{Binding PackageText}" />
+          <TextBlock Classes="muted small" Text="{Binding DisplayText}" />
+          <WrapPanel Orientation="Horizontal" Margin="0,4,0,0">
+            <Button Classes="link pad" Command="{Binding OpenWebsiteCommand}"><TextBlock Text="{l:T SettingsPage_Website.Content}" /></Button>
+            <Button Classes="link pad" Command="{Binding OpenStatusCommand}"><TextBlock Text="{l:T SettingsPage_Status.Content}" /></Button>
+            <Button Classes="link pad" Command="{Binding OpenPrivacyCommand}"><TextBlock Text="{l:T SettingsPage_Privacy.Content}" /></Button>
+            <Button Classes="link pad" Command="{Binding OpenTermsCommand}"><TextBlock Text="{l:T SettingsPage_Terms.Content}" /></Button>
+            <Button Classes="link pad" Command="{Binding OpenImprintCommand}"><TextBlock Text="{l:T SettingsPage_Imprint.Content}" /></Button>
+            <Button Classes="link pad" Command="{Binding OpenChildSafetyCommand}"><TextBlock Text="{l:T SettingsPage_ChildSafety.Content}" /></Button>
+          </WrapPanel>
+          <!-- Copyright wie im Website-Footer: Clan, dahinter „Copyright by wahke“ mit Link -->
+          <WrapPanel Orientation="Horizontal">
+            <TextBlock Classes="muted small" Text="{Binding CopyrightText}" VerticalAlignment="Center" />
+            <TextBlock Classes="muted small" Text=" · " VerticalAlignment="Center" />
+            <TextBlock Classes="muted small" Text="{l:T SettingsPage_Credit.Text}" VerticalAlignment="Center" Margin="0,0,4,0" />
+            <Button Classes="link" Command="{Binding OpenCreditCommand}" VerticalAlignment="Center">
+              <TextBlock Classes="small" Text="{l:T SettingsPage_CreditName.Text}" />
+            </Button>
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Lizenzen -->
+      <Border Classes="card">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="section" Text="{l:T SettingsPage_LicensesTitle.Text}" />
+          <TextBlock Classes="muted" Text="{l:T SettingsPage_LicensesText.Text}" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

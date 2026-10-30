@@ -55,6 +55,55 @@ public static class FakeData
           "squads":[],"permissions":{"global":["news.write"]},"token":{"scopes":["news:read","messages:read","profile:read"]} }}
         """;
 
+    public static string Platform => """
+        {"data":{"name":"Rebels of Gaming API","version":"v1","app":{"version":"0.53.0","commit":"15bea9f","deployed_at":"2026-10-30T08:37:28Z"},"time":"2026-10-30T08:57:35Z"},"links":{"docs":"https://api.example.test/docs"}}
+        """;
+
+    /// <summary>Wie die Produktion am 30.10.2026 (Werte erfunden) – inkl. unbekanntem Symbol („swords“).</summary>
+    public static string Live => """
+        {"data":[
+          {"key":"online","label":"Mitglieder online","icon":"activity","tone":"green","value":12,"hint":null},
+          {"key":"voice","label":"Im Voice","icon":"volume","tone":"blue","value":4,"hint":"Discord und TeamSpeak"},
+          {"key":"servers","label":"Auf RoG-Servern","icon":"server","tone":"red","value":7,"hint":"ET: Sniper, CS2: Retake"},
+          {"key":"members","label":"Rebels insgesamt","icon":"users","tone":"default","value":148,"hint":null},
+          {"key":"next_event","label":"Nächstes Event","icon":"calendar","tone":"gold","value":"Di., 20:00","hint":"Scrim-Abend CS2"},
+          {"key":"recruiting","label":"Squads suchen Spieler","icon":"swords","tone":"red","value":3,"hint":null}
+        ],"meta":{"updated_at":"2026-10-30T08:57:19Z","ttl":60}}
+        """;
+
+    public static string Events => $$$"""
+        {"data":[
+          {{{Event("01EV1", "Scrim-Abend CS2", "2026-11-03T19:00:00Z", "2026-11-03T21:00:00Z")}}},
+          {{{Event("01EV2", "Clan-Abend November", "2026-11-06T19:30:00Z", null)}}},
+          {{{Event("01EV3", "ET-Turnier: Qualifikation", "2026-11-14T18:00:00Z", "2026-11-14T22:00:00Z")}}}
+        ],"links":{"next":null},"meta":{"per_page":50,"next_cursor":null}}
+        """;
+
+    public static string Votes => """
+        {"data":[]}
+        """;
+
+    public static string Onboarding => """
+        {"data":{"progress":60,"complete":false,"steps":[
+          {"key":"profile","label":"Profil ausfüllen","done":true,"url":null},
+          {"key":"discord","label":"Discord verbinden","done":true,"url":null},
+          {"key":"squad","label":"Einem Squad beitreten","done":true,"url":null},
+          {"key":"rules","label":"Regeln bestätigen","done":false,"url":"https://rebelsofgaming.com/de/rules"},
+          {"key":"event","label":"Zu einem Termin zusagen","done":false,"url":"https://rebelsofgaming.com/de/events"}
+        ]}}
+        """;
+
+    private static string Event(string id, string title, string starts, string? ends)
+    {
+        var endsJson = ends is null ? "null" : $"\"{ends}\"";
+        return $$$"""
+        {"id":"{{{id}}}","type":"event","type_label":"Event","color":"#E0324A","event_type":{"key":"event","system":true,"name":"Event","color":"#E0324A"},
+         "title":"{{{title}}}","description":null,"starts_at":"{{{starts}}}","ends_at":{{{endsJson}}},"squad":null,"mandatory":false,
+         "visibility":"public","location":{"type":null,"value":null,"label":null,"server":null},"max_participants":null,"detached":false,"cancelled":false,
+         "rsvp_counts":{"yes":5,"maybe":2,"no":0},"my_rsvp":null,"url":"https://rebelsofgaming.com/de/events/{{{id}}}","ics_url":"https://rebelsofgaming.com/ics/{{{id}}}"}
+        """;
+    }
+
     private static string News(string id, string slug, string title, string category, bool pinned, string published, int minutes, string? cover, string? body = null)
     {
         var coverJson = cover is null ? "null" : $$$"""{"url":"{{{Cdn}}}/news/{{{cover}}}.png","variants":[],"alt":{"de":"{{{title}}}"} }""";

@@ -1,6 +1,7 @@
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using RoG.Linux.App.ViewModels;
 using RoG.Linux.Tests.App;
 using RoG.Linux.Tests.Platform;
@@ -63,8 +64,86 @@ public class ScreenshotTests
             return Settle(100);
         });
 
+    [AvaloniaFact]
+    public async Task Home_steam_deck() =>
+        await Shoot("home_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), WaitForHome, AssertSidebarFits);
+
+    [AvaloniaFact]
+    public async Task Home_guest() =>
+        await Shoot("home_guest_1440x900", 1440, 900, await TestServices.CreateAsync(guest: true), WaitForHome);
+
+    [AvaloniaFact]
+    public async Task Home_light_theme() =>
+        await Shoot("home_light_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), async shell =>
+        {
+            await WaitForHome(shell);
+            Avalonia.Application.Current!.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Light;
+            await Settle(200);
+        });
+
+    [AvaloniaFact]
+    public async Task Home_narrow() =>
+        await Shoot("home_narrow_480x800", 480, 800, await TestServices.CreateAsync(TestTokens.Wahke), WaitForHome);
+
+    [AvaloniaFact]
+    public async Task Menu_narrow() =>
+        await Shoot("menu_narrow_480x800", 480, 800, await TestServices.CreateAsync(TestTokens.Wahke), async shell =>
+        {
+            await WaitForHome(shell);
+            shell.TogglePaneCommand.Execute(null);
+            await Settle(150);
+        });
+
+    [AvaloniaFact]
+    public async Task Compact_sidebar() =>
+        await Shoot("home_compact_760x800", 760, 800, await TestServices.CreateAsync(TestTokens.Wahke), WaitForHome, AssertSidebarFits);
+
+    [AvaloniaFact]
+    public async Task Settings_steam_deck() =>
+        await Shoot("settings_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), async shell =>
+        {
+            shell.NavigateTo("Nav_Settings");
+            await Settle(400);
+        }, AssertSidebarFits);
+
+    [AvaloniaFact]
+    public async Task Settings_english_narrow() =>
+        await Shoot("settings_en_narrow_480x900", 480, 900, await TestServices.CreateAsync(guest: true, language: "en"), async shell =>
+        {
+            shell.NavigateTo("Nav_Settings");
+            await Settle(400);
+        });
+
+    [AvaloniaFact]
+    public async Task Messages_narrow() =>
+        await Shoot("messages_narrow_480x800", 480, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenChat);
+
+    [AvaloniaFact]
+    public async Task Account_narrow() =>
+        await Shoot("account_narrow_480x800", 480, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell =>
+        {
+            shell.NavigateTo("Nav_Account");
+            return Settle(400);
+        });
+
+    private static async Task WaitForHome(ShellViewModel shell)
+    {
+        var home = Assert.IsType<HomeViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => home.ShowContent && home.HasTeasers);
+        await Settle(300);
+    }
+
+    /// <summary>Steam Deck: alle Bereiche der Seitenleiste ohne Scrollen sichtbar.</summary>
+    private static void AssertSidebarFits(Avalonia.Controls.Window window)
+    {
+        var pane = window.GetVisualDescendants().OfType<RoG.Linux.App.Views.NavPane>().First(p => p.IsEffectivelyVisible);
+        var scroll = pane.GetVisualDescendants().OfType<Avalonia.Controls.ScrollViewer>().First();
+        Assert.True(scroll.Extent.Height <= scroll.Viewport.Height + 0.5, $"Seitenleiste scrollt: {scroll.Extent.Height} > {scroll.Viewport.Height}");
+    }
+
     private static async Task OpenArticle(ShellViewModel shell)
     {
+        shell.NavigateTo("Nav_News");
         var news = Assert.IsType<NewsViewModel>(shell.CurrentPage);
         await ViewModelTests.WaitUntil(() => news.ShowContent);
         news.Selected = news.Items[0];
@@ -82,7 +161,7 @@ public class ScreenshotTests
         await Settle(300);
     }
 
-    private static async Task Shoot(string name, int width, int height, TestServices t, Func<ShellViewModel, Task> arrange)
+    private static async Task Shoot(string name, int width, int height, TestServices t, Func<ShellViewModel, Task> arrange, Action<Avalonia.Controls.Window>? check = null)
     {
         using (t)
         {
@@ -100,8 +179,10 @@ public class ScreenshotTests
             var frame = window.CaptureRenderedFrame();
             Assert.NotNull(frame);
             Assert.Equal(width, frame.PixelSize.Width);
-            frame.Save(Path.Combine(s_folder, name + ".png"));
+            frame.Save(Path.Combine(s_folder, name + ".png"), new Avalonia.Media.Imaging.PngBitmapEncoderOptions());
+            check?.Invoke(window);
             window.Close();
+            Avalonia.Application.Current!.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
         }
     }
 

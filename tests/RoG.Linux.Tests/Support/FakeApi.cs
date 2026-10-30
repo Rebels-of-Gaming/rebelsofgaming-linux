@@ -33,6 +33,11 @@ public sealed class FakeApi : HttpMessageHandler
             ("GET", var p) when p.EndsWith("/messages", StringComparison.Ordinal) => FakeData.Messages,
             ("POST", var p) when p.EndsWith("/read", StringComparison.Ordinal) => """{"data":{"unread":1}}""",
             ("GET", "/v1/me") => FakeData.Me,
+            ("GET", "/v1") => FakeData.Platform,
+            ("GET", "/v1/live") => FakeData.Live,
+            ("GET", "/v1/events") => FakeData.Events,
+            ("GET", "/v1/votes") => FakeData.Votes,
+            ("GET", "/v1/me/onboarding") => FakeData.Onboarding,
             ("POST", "/v1/auth/logout") => """{"data":{"revoked":true}}""",
             _ => null,
         };
