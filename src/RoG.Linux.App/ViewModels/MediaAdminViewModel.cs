@@ -36,7 +36,7 @@ public sealed class MediaAdminViewModel
 }
 
 /// <summary>Gemeinsames der beiden Reiter: Feedback/Rückfrage (eigene oder von der Verwaltungsseite), Laden, Fehler.</summary>
-public abstract partial class MediaAdminTabViewModel : ObservableObject, ILazyTab
+public abstract partial class MediaAdminTabViewModel : ObservableObject, ILazyTab, IOverlayTab
 {
     private bool _loaded;
 

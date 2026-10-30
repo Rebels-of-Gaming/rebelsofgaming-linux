@@ -40,7 +40,6 @@ public class ModerationTests
             Assert.True(new ReportsAdminViewModel(t.Services, f, c).IsAvailable);
             Assert.True(new ModBansAdminViewModel(t.Services, f, c).IsAvailable);
             Assert.True(new WordFilterViewModel(t.Services, f, c).IsAvailable);
-            Assert.True(new ModLogViewModel(t.Services, f, c).IsAvailable);
             var appeals = new BanAppealsViewModel(t.Services, f, c);
             Assert.True(appeals.IsAvailable);
             Assert.True(appeals.IsManager);
@@ -57,7 +56,6 @@ public class ModerationTests
             Assert.False(reports.Access.CanBan);
             Assert.False(reports.Member.CanAct);
             Assert.False(new WordFilterViewModel(t.Services, f, c).IsAvailable);
-            Assert.False(new ModLogViewModel(t.Services, f, c).IsAvailable);
             Assert.False(new BanAppealsViewModel(t.Services, f, c).IsAvailable);
             var bans = new ModBansAdminViewModel(t.Services, f, c);
             await bans.EnsureLoadedAsync();
@@ -76,7 +74,7 @@ public class ModerationTests
             var tabs = new ModerationTabViewModel[]
             {
                 new ReportsAdminViewModel(t.Services, f, c), new ModBansAdminViewModel(t.Services, f, c), new WordFilterViewModel(t.Services, f, c),
-                new ModLogViewModel(t.Services, f, c), new BanAppealsViewModel(t.Services, f, c),
+                new BanAppealsViewModel(t.Services, f, c),
             };
             Assert.All(tabs, tab => Assert.False(tab.IsAvailable));
             var before = t.Api.Requests.Count;
@@ -320,12 +318,6 @@ public class ModerationTests
         await delete;
         Assert.Contains(t.Api.Writes, w => w.Method == "DELETE" && w.Path == "/v1/moderation/words/01JWF0000000000000000000W2");
         Assert.Equal(2, words.Items.Count);
-
-        var log = new ModLogViewModel(t.Services, feedback, confirm);
-        await log.EnsureLoadedAsync();
-        Assert.Equal(3, log.Items.Count);
-        Assert.Contains("Wahke · ban.created · Kaito", log.Items[0], StringComparison.Ordinal);
-        Assert.True(log.HasMore);
     }
 
     [AvaloniaFact]

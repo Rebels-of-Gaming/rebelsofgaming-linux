@@ -16,7 +16,7 @@ namespace RoG.Linux.App.ViewModels;
 /// <c>roles:write</c>. Die Hierarchie („nur unterhalb der eigenen Position“) prüft der Server; seine Ablehnung erscheint
 /// als Rückmeldung. Logik aus <see cref="MemberAdminService"/> des Kerns.
 /// </summary>
-public sealed partial class MembersAdminViewModel : LoadableViewModel, ILazyTab, IDetailPage
+public sealed partial class MembersAdminViewModel : LoadableViewModel, ILazyTab, IOverlayTab, IDetailPage
 {
     private static readonly string[] s_statuses = ["active", "suspended", "former"];
     private readonly MemberAdminService _admin;

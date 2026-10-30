@@ -62,8 +62,12 @@ public class AdminScreenshotTests
         shell => OpenAdmin(shell, AdminTab.Website));
 
     [AvaloniaFact]
-    public async Task Pending_tab_1280() => await ScreenshotTests.Shoot("admin_pending_1280x800", 1280, 800, await As(FakeAdminRoutes.MeAdmin),
+    public async Task Members_tab_in_page_1280() => await ScreenshotTests.Shoot("admin_members_page_1280x800", 1280, 800, await As(FakeAdminRoutes.MeAdmin),
         shell => OpenAdmin(shell, AdminTab.Members));
+
+    [AvaloniaFact]
+    public async Task Reports_tab_in_page_1280() => await ScreenshotTests.Shoot("admin_reports_page_1280x800", 1280, 800, await As(FakeAdminRoutes.MeAdmin),
+        shell => OpenAdmin(shell, AdminTab.Reports));
 
     [AvaloniaFact]
     public async Task Mod_log_1280() => await ScreenshotTests.Shoot("admin_modlog_1280x800", 1280, 800, await As(FakeAdminRoutes.MeModerator),

@@ -48,7 +48,6 @@
     <DataTemplate DataType="vm:ModBansAdminViewModel"><views:ModBansAdminView /></DataTemplate>
     <DataTemplate DataType="vm:BanAppealsViewModel"><views:BanAppealsView /></DataTemplate>
     <DataTemplate DataType="vm:WordFilterViewModel"><views:WordFilterView /></DataTemplate>
-    <DataTemplate DataType="vm:ModLogViewModel"><views:ModLogView /></DataTemplate>
     <DataTemplate DataType="vm:MinecraftMapViewModel"><views:MinecraftMapView /></DataTemplate>
     <DataTemplate DataType="vm:MinecraftAdminViewModel"><views:MinecraftAdminView /></DataTemplate>
     <DataTemplate DataType="vm:CoinsAdminViewModel"><views:CoinsAdminView /></DataTemplate>

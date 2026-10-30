@@ -139,9 +139,6 @@ public class ModerationScreenshotTests
     [AvaloniaFact]
     public Task Words_narrow() => ShootTab("moderation_words_narrow_480x900", 480, 900, (t, f, c) => new WordFilterViewModel(t.Services, f, c));
 
-    [AvaloniaFact]
-    public Task Log_steam_deck() => ShootTab("moderation_log_1280x800", 1280, 800, (t, f, c) => new ModLogViewModel(t.Services, f, c));
-
     // --- Melden im Hauptfenster -------------------------------------------------------------------------------------
 
     private static async Task<TestServices> Member()

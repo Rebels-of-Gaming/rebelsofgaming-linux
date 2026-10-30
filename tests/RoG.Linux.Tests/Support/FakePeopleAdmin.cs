@@ -53,6 +53,7 @@ internal static class FakePeopleAdminRoutes
     {
         api.Overrides["/v1/me"] = me;
         api.Overrides["/v1/squads/" + SquadSlug + "/roles"] = SquadRoles;
+        api.Overrides["/v1/roles"] = Roles; // die Minecraft-Fakes beantworten /v1/roles mit eigenen Rollen
     }
 
     private static string? Route(HttpRequestMessage request, string path, string body)

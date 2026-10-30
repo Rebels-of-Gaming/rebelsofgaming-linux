@@ -36,7 +36,7 @@ public sealed record ModerationAccess(bool CanReports, bool CanWarn, bool CanBan
 /// Gemeinsame Grundlage der Verwaltungs-Reiter dieser Moderation: Laden beim ersten Öffnen (<see cref="ILazyTab"/>),
 /// Rückmeldung und Rückfrage der Verwaltungsseite, Escape über <see cref="CloseOverlay"/>.
 /// </summary>
-public abstract partial class ModerationTabViewModel : LoadableViewModel, ILazyTab
+public abstract partial class ModerationTabViewModel : LoadableViewModel, ILazyTab, IOverlayTab
 {
     private bool _loaded;
 
@@ -571,61 +571,6 @@ public sealed partial class WordItemViewModel(WordFilter word, WordFilterViewMod
 
     [RelayCommand]
     private Task DeleteAsync() => owner.DeleteAsync(this);
-}
-
-// --- Mod-Log -------------------------------------------------------------------------------------------------------
-
-/// <summary>Reiter „Mod-Log“ (wie Windows): Zeit · wer · Aktion · wen. Sichtbar mit <c>moderation.log</c> + <c>moderation:read</c>.</summary>
-public sealed partial class ModLogViewModel : ModerationTabViewModel
-{
-    private readonly ModerationService _moderation;
-    private string? _cursor;
-
-    public ModLogViewModel(AppServices services, FeedbackViewModel feedback, InlineConfirmViewModel confirm)
-        : base(services, feedback, confirm)
-    {
-        _moderation = new ModerationService(services.Api.Client);
-    }
-
-    public override bool IsAvailable => Access.CanLog;
-
-    public ObservableCollection<string> Items { get; } = [];
-
-    [ObservableProperty]
-    public partial bool HasMore { get; set; }
-
-    protected override bool HasData => Items.Count > 0;
-
-    protected override async Task LoadCoreAsync(CancellationToken cancellationToken)
-    {
-        var page = await _moderation.LogAsync(null, cancellationToken);
-        Items.Clear();
-        Append(page);
-    }
-
-    private void Append(Page<ModLogEntry> page)
-    {
-        foreach (var e in page.Items)
-        {
-            Items.Add(string.Join(" · ", new[] { Time(e.CreatedAt), e.Actor, e.Action, e.Target }.Where(s => !string.IsNullOrEmpty(s))));
-        }
-
-        _cursor = page.NextCursor;
-        HasMore = page.NextCursor is not null;
-    }
-
-    [RelayCommand]
-    private async Task LoadMoreAsync()
-    {
-        if (_cursor is { } cursor)
-        {
-            Page<ModLogEntry>? page = null;
-            if (await RunAsync(async () => page = await _moderation.LogAsync(cursor)))
-            {
-                Append(page!);
-            }
-        }
-    }
 }
 
 // --- Mitglied moderieren -------------------------------------------------------------------------------------------

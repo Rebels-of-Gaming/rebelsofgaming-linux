@@ -275,7 +275,28 @@ public sealed partial class AdminViewModel : ObservableObject, IDetailPage, IRef
         LogTab = a.Log ? new ModerationLogViewModel(_services, Feedback) : null;
         WebsiteTab = a.Website ? new AdminWebsiteViewModel(_services, Feedback) : null;
 
-        // Teile K/L/M/N, z. B.: MembersTab = a.Members ? new MembersAdminViewModel(_services, Feedback, Confirm) : null;
+        MembersTab = a.Members ? new MembersAdminViewModel(_services, Feedback, Confirm) { ShowBars = false } : null;
+        ApplicationsTab = a.Applications ? new ApplicationsAdminViewModel(_services, Feedback, Confirm) { ShowBars = false } : null;
+        ReportsTab = a.Reports ? new ReportsAdminViewModel(_services, Feedback, Confirm) : null;
+        BansTab = a.Bans ? new ModBansAdminViewModel(_services, Feedback, Confirm) : null;
+        AppealsTab = a.Appeals ? new BanAppealsViewModel(_services, Feedback, Confirm) : null;
+        WordsTab = a.Words ? new WordFilterViewModel(_services, Feedback, Confirm) : null;
+        MinecraftTab = a.Minecraft ? new MinecraftAdminViewModel(_services, Feedback, Confirm) : null;
+        CoinsTab = a.Coins ? new CoinsAdminViewModel(_services, Feedback, Confirm) : null;
+        NetworkTab = a.Network ? new MinecraftOpsViewModel(_services, Feedback, Confirm) : null;
+        GalleryTab = a.Gallery ? new GalleryAdminViewModel(_services, Feedback, Confirm) : null;
+        UploadsTab = a.Uploads ? new UploadReportsAdminViewModel(_services, Feedback, Confirm) : null;
+
+        // „Mitglied moderieren“ aus dem Mitglieder-Reiter (Teil der Moderation)
+        if (MembersTab is MembersAdminViewModel members && ReportsTab is ReportsAdminViewModel reports && reports.Member.CanAct)
+        {
+            members.CanModerate = true;
+            members.Moderate = async id =>
+            {
+                SelectedTab = AdminTab.Reports;
+                await reports.Member.OpenAsync(id, null);
+            };
+        }
     }
 
     private void Build()

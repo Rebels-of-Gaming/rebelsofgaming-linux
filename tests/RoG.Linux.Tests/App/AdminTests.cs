@@ -42,12 +42,17 @@ public class AdminTests
         Assert.IsType<AdminOverviewViewModel>(vm.OverviewTab);
         Assert.IsType<ModerationLogViewModel>(vm.LogTab);
         Assert.IsType<AdminWebsiteViewModel>(vm.WebsiteTab);
-        Assert.Null(vm.MembersTab); // Teil K hängt sich ein
+        Assert.IsType<MembersAdminViewModel>(vm.MembersTab);
+        Assert.IsType<ReportsAdminViewModel>(vm.ReportsTab);
+        Assert.IsType<ModBansAdminViewModel>(vm.BansTab);
+        Assert.IsType<WordFilterViewModel>(vm.WordsTab);
+        Assert.Null(vm.MinecraftTab); // ohne minecraft.manage
         Assert.False(vm.SelectedPending);
 
         // Reiter ohne ViewModel: „kommt“
         vm.Tabs.Single(x => x.Tab == AdminTab.Members).IsSelected = true;
         Assert.Equal(AdminTab.Members, vm.SelectedTab);
+        vm.MembersTab = null;
         Assert.True(vm.SelectedPending);
         Assert.Null(vm.SelectedContent);
 

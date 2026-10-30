@@ -12,7 +12,7 @@ namespace RoG.Linux.App.ViewModels;
 /// und Rückfrage kommen von der Seite (eine Leiste für alle Reiter), Laden beim ersten Öffnen (<see cref="ILazyTab"/>),
 /// Escape schließt eine offene Rückfrage (<see cref="CloseOverlay"/>). Fehler als übersetzte Rückmeldung.
 /// </summary>
-public abstract partial class MinecraftAdminTabBase : ObservableObject, ILazyTab
+public abstract partial class MinecraftAdminTabBase : ObservableObject, ILazyTab, IOverlayTab
 {
     private bool _loaded;
 

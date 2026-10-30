@@ -16,7 +16,7 @@ namespace RoG.Linux.App.ViewModels;
 /// Aufgaben und Nachrichten nur mit <c>applications.review</c> + Scope <c>applications:write</c>. Welche Squads man sieht
 /// und ob ein Schritt gerade erlaubt ist, entscheidet der Server. Logik aus <see cref="ApplicationAdminService"/>.
 /// </summary>
-public sealed partial class ApplicationsAdminViewModel : LoadableViewModel, ILazyTab, IDetailPage
+public sealed partial class ApplicationsAdminViewModel : LoadableViewModel, ILazyTab, IOverlayTab, IDetailPage
 {
     private static readonly string[] s_statuses = ["open", "submitted", "trial", "voting", "accepted", "rejected"];
     private readonly ApplicationAdminService _admin;
