@@ -307,4 +307,10 @@
   <data name="Linux_UploadFileTypes" xml:space="preserve">
     <value>Images and videos</value>
   </data>
+  <data name="Linux_AlbumEmpty" xml:space="preserve">
+    <value>This album is still empty.</value>
+  </data>
+  <data name="Linux_Video" xml:space="preserve">
+    <value>video</value>
+  </data>
 </root>

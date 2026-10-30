@@ -33,6 +33,9 @@ finish-args:
   - --device=dri
   # Geräte-Token im Schlüsselbund (Secret Service); später ggf. Secret-Portal
   - --talk-name=org.freedesktop.secrets
+  # Downloads (Medien → Downloads) landen im Downloads-Ordner des Benutzers (Uploads/Einreichen laufen über das
+  # FileChooser-Portal und brauchen kein Dateisystem-Recht)
+  - --filesystem=xdg-download
   # Tray-Symbol (StatusNotifierItem): Anmeldung beim Watcher des Panels mit dem eindeutigen Busnamen – kein eigener
   # Name nötig. Ohne Panel (GNOME ohne AppIndicator-Erweiterung) schließt das Fenster die App wie gewohnt.
   - --talk-name=org.kde.StatusNotifierWatcher

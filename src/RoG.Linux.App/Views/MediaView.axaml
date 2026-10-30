@@ -1,0 +1,181 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MediaView"
+             x:DataType="vm:MediaViewModel">
+  <!-- Medien wie MediaPage der Windows-App: Reiter Galerie · Downloads, Großansicht als Überlagerung -->
+  <Panel>
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,8">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Button Classes="icon" Command="{Binding BackToAlbumsCommand}" IsVisible="{Binding ShowItems}" Margin="-8,0,4,0"
+                  ToolTip.Tip="{l:T MediaPage_BackToAlbums.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T MediaPage_BackToAlbums.AutomationProperties.Name}">
+            <PathIcon Data="{StaticResource IconBack}" Width="18" Height="18" />
+          </Button>
+          <TextBlock Grid.Column="1" Classes="display" Text="{l:T MediaPage_Title.Text}" />
+          <Button Grid.Column="2" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                  ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+            <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+          </Button>
+        </Grid>
+        <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1">
+          <WrapPanel Orientation="Horizontal">
+            <ToggleButton Classes="segment" IsChecked="{Binding IsGalleryTab}" Content="{l:T MediaPage_TabGallery.Text, Upper=True}" />
+            <ToggleButton Classes="segment" IsChecked="{Binding IsDownloadsTab}" Content="{l:T MediaPage_TabDownloads.Text, Upper=True}" />
+          </WrapPanel>
+        </Border>
+        <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+        <c:FeedbackBar DataContext="{Binding Downloads.Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      </StackPanel>
+
+      <Panel>
+        <!-- Galerie: Alben -->
+        <Panel IsVisible="{Binding IsGalleryTab}">
+          <Panel IsVisible="{Binding ShowAlbums}">
+            <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                         EmptyText="{l:T MediaPage_GalleryState.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+            <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding Albums}" Margin="24,4,24,24">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="260" Spacing="16" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:AlbumItemViewModel">
+                    <Button Classes="row tile" Padding="0" Command="{Binding $parent[UserControl].((vm:MediaViewModel)DataContext).OpenAlbumCommand}"
+                            CommandParameter="{Binding}" AutomationProperties.Name="{Binding Title}">
+                      <StackPanel>
+                        <Border Height="150" Background="{DynamicResource RoGBg3Brush}" CornerRadius="8,8,0,0" ClipToBounds="True">
+                          <Panel>
+                            <Image Source="avares://rebelsofgaming/Assets/rog-badge-512.png" Width="56" Height="56" Opacity="0.3" IsVisible="{Binding HasNoCover}" />
+                            <Image Source="{Binding Cover}" Stretch="UniformToFill" />
+                          </Panel>
+                        </Border>
+                        <StackPanel Margin="14,10" Spacing="2">
+                          <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Panel>
+
+          <!-- Galerie: Album -->
+          <DockPanel IsVisible="{Binding ShowItems}">
+            <StackPanel DockPanel.Dock="Top" Margin="24,4,24,12" Spacing="10">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="title" Text="{Binding AlbumTitle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="1" Classes="primary" Command="{Binding ToggleSubmitCommand}" IsVisible="{Binding CanUpload}" Content="{l:T MediaPage_Submit.Content}" />
+              </Grid>
+              <Border Classes="card" IsVisible="{Binding IsSubmitOpen}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+                <StackPanel Spacing="10">
+                  <TextBlock Classes="section" Text="{l:T Gallery_SubmitTitle}" />
+                  <StackPanel>
+                    <TextBlock Classes="label" Text="{l:T Gallery_Caption}" />
+                    <TextBox Text="{Binding Caption}" MaxLength="300" AutomationProperties.Name="{l:T Gallery_Caption}" />
+                  </StackPanel>
+                  <CheckBox IsChecked="{Binding RightsConfirmed}">
+                    <TextBlock Classes="body" Text="{l:T Gallery_Rights}" />
+                  </CheckBox>
+                  <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button Classes="primary" Click="OnSubmitPickClick" IsEnabled="{Binding RightsConfirmed}" Content="{l:T UploadsPage_Pick.Content}" />
+                    <ProgressBar IsIndeterminate="True" Width="120" IsVisible="{Binding IsUploading}" VerticalAlignment="Center" />
+                  </StackPanel>
+                </StackPanel>
+              </Border>
+            </StackPanel>
+            <Panel>
+              <c:StateView IsLoading="{Binding IsLoadingItems}" ErrorMessage="{Binding ItemsError}" IsEmpty="{Binding ShowItemsEmpty}"
+                           EmptyText="{l:T Linux_AlbumEmpty}" />
+              <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Items}" Margin="24,0,24,24">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="200" Spacing="10" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:GalleryItemViewModel">
+                      <Button Classes="row tile" Padding="0" Command="{Binding $parent[UserControl].((vm:MediaViewModel)DataContext).ViewCommand}"
+                              CommandParameter="{Binding}" AutomationProperties.Name="{Binding AutomationName}" ToolTip.Tip="{Binding Caption}">
+                        <Border Height="140" CornerRadius="8" ClipToBounds="True" Background="{DynamicResource RoGBg3Brush}">
+                          <Panel>
+                            <Image Source="{Binding Thumb}" Stretch="UniformToFill" />
+                            <Border IsVisible="{Binding IsVideo}" Width="44" Height="44" CornerRadius="22" Background="#99000000">
+                              <PathIcon Data="{StaticResource IconPlay}" Width="22" Height="22" Foreground="#FFFFFFFF" />
+                            </Border>
+                          </Panel>
+                        </Border>
+                      </Button>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </Panel>
+          </DockPanel>
+        </Panel>
+
+        <!-- Downloads -->
+        <Panel IsVisible="{Binding IsDownloadsTab}">
+          <Panel DataContext="{Binding Downloads}" x:DataType="vm:DownloadsViewModel">
+            <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                         EmptyText="{l:T MediaPage_DownloadsState.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+            <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding Items}" Margin="24,4,24,24" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:DownloadItemViewModel">
+                    <Border Classes="card" AutomationProperties.Name="{Binding Title}">
+                      <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                          <PathIcon Data="{StaticResource IconDownload}" Width="22" Height="22" Margin="0,2,12,0" VerticalAlignment="Top" Foreground="{DynamicResource RoGRedBrush}" />
+                          <StackPanel Grid.Column="1" Spacing="2">
+                            <TextBlock Classes="body strong" Text="{Binding Title}" />
+                            <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                          </StackPanel>
+                        </Grid>
+                        <TextBlock Classes="muted" Text="{Binding Changelog}" IsVisible="{Binding HasChangelog}" />
+                        <ProgressBar Value="{Binding Progress}" Maximum="100" Height="6" IsVisible="{Binding IsBusy}" />
+                        <WrapPanel Orientation="Horizontal">
+                          <Button Classes="primary" Margin="0,0,12,0" Command="{Binding DownloadCommand}" IsEnabled="{Binding CanDownload}" Content="{l:T MediaPage_Download.Content}" />
+                          <Button Classes="secondary" Command="{Binding ShowInFolderCommand}" IsVisible="{Binding IsSaved}" Content="{l:T MediaPage_ShowInFolder.Content}" />
+                        </WrapPanel>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Panel>
+        </Panel>
+      </Panel>
+    </DockPanel>
+
+    <!-- Großansicht -->
+    <Grid IsVisible="{Binding IsViewerOpen}" Background="#F2101216" RowDefinitions="Auto,*,Auto" x:Name="Viewer" Focusable="True">
+      <Grid ColumnDefinitions="*,Auto" Margin="16,12">
+        <TextBlock Classes="body" Foreground="#FFF1EFEA" Text="{Binding Viewed.Caption}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        <Button Grid.Column="1" Classes="icon" Command="{Binding CloseViewerCommand}" Foreground="#FFF1EFEA"
+                ToolTip.Tip="{l:T MediaPage_CloseViewer.AutomationProperties.Name}" AutomationProperties.Name="{l:T MediaPage_CloseViewer.AutomationProperties.Name}">
+          <PathIcon Data="{StaticResource IconClose}" Width="18" Height="18" />
+        </Button>
+      </Grid>
+      <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto">
+        <Button Classes="icon" Margin="12,0" Command="{Binding PreviousCommand}" Foreground="#FFF1EFEA"
+                ToolTip.Tip="{l:T MediaPage_Previous.AutomationProperties.Name}" AutomationProperties.Name="{l:T MediaPage_Previous.AutomationProperties.Name}">
+          <PathIcon Data="{StaticResource IconChevronLeft}" Width="24" Height="24" />
+        </Button>
+        <Image Grid.Column="1" Source="{Binding Viewed.Full}" Stretch="Uniform" />
+        <Button Grid.Column="2" Classes="icon" Margin="12,0" Command="{Binding NextCommand}" Foreground="#FFF1EFEA"
+                ToolTip.Tip="{l:T MediaPage_Next.AutomationProperties.Name}" AutomationProperties.Name="{l:T MediaPage_Next.AutomationProperties.Name}">
+          <PathIcon Data="{StaticResource IconChevronRight}" Width="24" Height="24" />
+        </Button>
+      </Grid>
+      <TextBlock Grid.Row="2" Classes="muted small" Margin="16,8,16,16" Text="{Binding Viewed.Meta}" Foreground="#FFA8ACB6" />
+    </Grid>
+  </Panel>
+</UserControl>

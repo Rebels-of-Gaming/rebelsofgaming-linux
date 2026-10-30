@@ -27,6 +27,12 @@ public sealed record AppServicesOptions
     /// <summary>Innerer HTTP-Handler der API (Tests: Fake-Server).</summary>
     public HttpMessageHandler? ApiHandler { get; init; }
 
+    /// <summary>„Im Ordner zeigen“; Standard <c>org.freedesktop.FileManager1</c> bzw. <c>xdg-open</c>.</summary>
+    public IFileManager? FileManager { get; init; }
+
+    /// <summary>Zielordner für Downloads; Standard xdg-user-dirs (<c>XDG_DOWNLOAD_DIR</c>).</summary>
+    public string? DownloadDirectory { get; init; }
+
     /// <summary>HTTP-Handler für Uploads in den Speicher der Plattform (vorab signierte Adressen, ohne Token).</summary>
     public HttpMessageHandler? StorageHandler { get; init; }
 
@@ -199,6 +205,12 @@ public sealed class AppServices : IDisposable
     /// <summary>„Beim Anmelden starten“ (Portal in Flatpak, sonst <c>~/.config/autostart</c>).</summary>
     public IAutostart Autostart { get; }
 
+    /// <summary>„Im Ordner zeigen“ nach einem Download.</summary>
+    public IFileManager FileManager { get; private init; } = new FreedesktopFileManager();
+
+    /// <summary>Downloads-Ordner (xdg-user-dirs; in Flatpak mit <c>--filesystem=xdg-download</c>).</summary>
+    public string DownloadDirectory { get; private init; } = string.Empty;
+
     /// <summary>
     /// Direkter Upload in den Speicher der Plattform (vorab signierte Adresse aus <c>POST /v1/uploads</c>) – eigener
     /// Client ohne Token und ohne RoG-Pipeline, lange Zeitgrenze für Videos.
@@ -300,6 +312,8 @@ public sealed class AppServices : IDisposable
             launcher,
             connector)
         {
+            FileManager = options.FileManager ?? new FreedesktopFileManager(),
+            DownloadDirectory = options.DownloadDirectory ?? paths.DownloadDirectory,
             PersistentCache = persistentCache,
             StorageHttp = options.StorageHandler is null
                 ? new HttpClient { Timeout = TimeSpan.FromMinutes(15) }

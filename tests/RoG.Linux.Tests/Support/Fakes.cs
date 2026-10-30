@@ -165,10 +165,33 @@ public sealed class FakeStorage : HttpMessageHandler
 
     public System.Net.HttpStatusCode Status { get; set; } = System.Net.HttpStatusCode.OK;
 
+    /// <summary>Downloads (signierte GET-Adresse): Inhalt der Antwort.</summary>
+    public byte[] GetContent { get; set; } = FakeData.DownloadBytes;
+
+    public List<Uri> Gets { get; } = [];
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        if (request.Method == HttpMethod.Get)
+        {
+            Gets.Add(request.RequestUri!);
+            return new HttpResponseMessage(Status) { Content = new ByteArrayContent(GetContent) };
+        }
+
         var bytes = request.Content is null ? [] : await request.Content.ReadAsByteArrayAsync(cancellationToken);
         Puts.Add((request.Method, request.RequestUri!, bytes.LongLength, request.Content?.Headers.ContentType?.MediaType, request.Headers.Authorization is not null));
         return new HttpResponseMessage(Status);
+    }
+}
+
+/// <summary>Dateimanager im Speicher („Im Ordner zeigen“).</summary>
+public sealed class RecordingFileManager : RoG.Linux.Platform.Desktop.IFileManager
+{
+    public List<string> Shown { get; } = [];
+
+    public Task<bool> ShowAsync(string path, CancellationToken cancellationToken = default)
+    {
+        Shown.Add(path);
+        return Task.FromResult(true);
     }
 }

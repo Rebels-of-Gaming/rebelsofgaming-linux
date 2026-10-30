@@ -221,6 +221,21 @@ public class ScreenshotTests
         });
 
     [AvaloniaFact]
+    public async Task Media_albums() => await Shoot("media_albums_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), shell => OpenMedia(shell, 0));
+
+    [AvaloniaFact]
+    public async Task Media_album() => await Shoot("media_album_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenMedia(shell, 1));
+
+    [AvaloniaFact]
+    public async Task Media_viewer() => await Shoot("media_viewer_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenMedia(shell, 2));
+
+    [AvaloniaFact]
+    public async Task Media_downloads() => await Shoot("media_downloads_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenMedia(shell, 3));
+
+    [AvaloniaFact]
+    public async Task Media_album_narrow() => await Shoot("media_album_narrow_480x900", 480, 900, await TestServices.CreateAsync(TestTokens.Wahke), shell => OpenMedia(shell, 1));
+
+    [AvaloniaFact]
     public async Task Settings_full() =>
         await Shoot("settings_full_1280x2000", 1280, 2000, await TestServices.CreateAsync(guest: true), shell =>
         {
@@ -355,6 +370,37 @@ public class ScreenshotTests
         await servers.Servers[1].ConnectCommand.ExecuteAsync(null);
         await Settle(300);
         servers.Pause();
+    }
+
+    /// <summary>0 Alben, 1 Album (mit Einreichen), 2 Großansicht, 3 Downloads.</summary>
+    private static async Task OpenMedia(ShellViewModel shell, int mode)
+    {
+        shell.NavigateTo("Nav_Media");
+        var media = Assert.IsType<MediaViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => media.ShowContent);
+        await ViewModelTests.WaitUntil(() => media.Albums[0].Cover is not null);
+        if (mode is 1 or 2)
+        {
+            media.OpenAlbumCommand.Execute(media.Albums[0]);
+            await ViewModelTests.WaitUntil(() => media.Items.Count == 3 && media.Items.All(i => i.Thumb is not null || i.IsVideo));
+            if (mode == 1)
+            {
+                await ViewModelTests.WaitUntil(() => media.CanUpload);
+                media.ToggleSubmitCommand.Execute(null);
+            }
+            else
+            {
+                media.ViewCommand.Execute(media.Items[0]);
+                await ViewModelTests.WaitUntil(() => media.Viewed?.Full is not null);
+            }
+        }
+        else if (mode == 3)
+        {
+            media.IsDownloadsTab = true;
+            await ViewModelTests.WaitUntil(() => media.Downloads.ShowContent);
+        }
+
+        await Settle(400);
     }
 
     private static async Task OpenUploads(ShellViewModel shell, bool links)

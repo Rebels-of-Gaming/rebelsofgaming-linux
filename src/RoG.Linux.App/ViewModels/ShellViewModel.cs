@@ -40,7 +40,7 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_Tools", "Shell_NavTools.Content", "IconTools", "tools", false),
             Item("Nav_Members", "Shell_NavMembers.Content", "IconMembers", "members", true),
             Item("Nav_Matches", "Shell_NavMatches.Content", "IconMatches", "matches", false),
-            Item("Nav_Media", "Shell_NavMedia.Content", "IconMedia", "gallery", false),
+            Item("Nav_Media", "Shell_NavMedia.Content", "IconMedia", "gallery", true),
             Item("Nav_Uploads", "Shell_NavUploads.Content", "IconUploads", "uploads", true),
             Item("Nav_Info", "Shell_NavInfo.Content", "IconInfo", "about", true),
         ];
@@ -430,6 +430,7 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Messages" => new MessagesViewModel(_services, ShowLogin),
         "Nav_Forum" => new ForumViewModel(_services),
         "Nav_Uploads" => new UploadsViewModel(_services, ShowLogin),
+        "Nav_Media" => new MediaViewModel(_services),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
         _ => new PlaceholderViewModel(_services, item),
     };

@@ -30,6 +30,42 @@ public sealed class LinuxPaths
     /// <summary>Wegwerfbare Caches (Bilder).</summary>
     public string CacheDirectory { get; }
 
+    /// <summary>
+    /// Downloads-Ordner nach xdg-user-dirs (<c>$XDG_CONFIG_HOME/user-dirs.dirs</c>, Eintrag <c>XDG_DOWNLOAD_DIR</c>),
+    /// sonst <c>~/Downloads</c>. In Flatpak ist er mit <c>--filesystem=xdg-download</c> freigegeben.
+    /// </summary>
+    public string DownloadDirectory
+    {
+        get
+        {
+            var home = _env("HOME") is { Length: > 0 } h ? h : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            try
+            {
+                var file = Path.Combine(ConfigHome, "user-dirs.dirs");
+                if (File.Exists(file))
+                {
+                    foreach (var line in File.ReadLines(file))
+                    {
+                        if (line.StartsWith("XDG_DOWNLOAD_DIR=", StringComparison.Ordinal))
+                        {
+                            var value = line["XDG_DOWNLOAD_DIR=".Length..].Trim().Trim('"').Replace("$HOME", home, StringComparison.Ordinal);
+                            if (Path.IsPathRooted(value))
+                            {
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (IOException)
+            {
+                // Standard
+            }
+
+            return Path.Combine(home, "Downloads");
+        }
+    }
+
     /// <summary>Läuft die App in einer Flatpak-Sandbox?</summary>
     public bool IsFlatpak => _env("FLATPAK_ID") is { Length: > 0 } || File.Exists("/.flatpak-info");
 

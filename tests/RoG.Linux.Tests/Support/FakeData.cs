@@ -442,4 +442,36 @@ public static class FakeData
     public static string ShortLinkCreated => """
         {"data":{"id":"01L3","code":"ts","short_url":"https://rogclan.de/ts","url":"https://rebelsofgaming.com/de/servers/teamspeak","title":"TeamSpeak","active":true,"blocked":false,"clicks":0,"created_at":"2026-10-30T09:00:00Z"}}
         """;
+
+    public static string GalleryAlbums => $$$"""
+        {"data":[
+          {"id":"01GA1","slug":"clanabend-2026","title":"Clanabend Oktober 2026","description":"Fotos und Clips vom Clanabend","squad":null,"items_count":3,"cover":"{{{Cdn}}}/gallery/cover-1.webp"},
+          {"id":"01GA2","slug":"scrims","title":"Scrim-Highlights","description":null,"squad":"Squad CS2","items_count":0,"cover":null}
+        ]}
+        """;
+
+    public static string GalleryAlbum => """{"data":{"id":"01GA1","slug":"clanabend-2026","title":"Clanabend Oktober 2026","can_upload":true}}""";
+
+    public static string GalleryItems => $$$"""
+        {"data":[
+          {"id":"01GI1","kind":"image","status":"published","caption":"Gruppenfoto","user":{"name":"Nyx"},"image":{"thumb":"{{{Cdn}}}/gallery/1-thumb.webp","medium":"{{{Cdn}}}/gallery/1-medium.webp","full":"{{{Cdn}}}/gallery/1.webp"},"created_at":"2026-10-25T21:00:00Z"},
+          {"id":"01GI2","kind":"video","status":"published","caption":"Ace von Kaito","user":{"name":"Kaito"},"poster_url":"{{{Cdn}}}/gallery/2-poster.webp","video_url":"https://www.youtube-nocookie.com/embed/abc","web_url":"https://rebelsofgaming.com/de/gallery/clanabend-2026/01GI2","created_at":"2026-10-25T22:00:00Z"},
+          {"id":"01GI3","kind":"image","status":"published","caption":null,"user":{"name":"Wahke"},"image":{"thumb":"{{{Cdn}}}/gallery/3-thumb.webp","medium":"{{{Cdn}}}/gallery/3-medium.webp","full":"{{{Cdn}}}/gallery/3.webp"},"created_at":"2026-10-26T10:00:00Z"},
+          {"id":"01GI4","kind":"image","status":"pending","caption":"wartet","user":{"name":"Fitti"},"image":{"thumb":"{{{Cdn}}}/gallery/4-thumb.webp"},"created_at":"2026-10-26T11:00:00Z"}
+        ]}
+        """;
+
+    public static readonly byte[] DownloadBytes = System.Text.Encoding.UTF8.GetBytes("// RoG ET-Config\nseta r_mode 6\n");
+
+    public static string Downloads => """
+        {"data":[
+          {"id":"01DL1","slug":"et-config","title":"ET: Legacy Clan-Config","category":{"name":"Configs"},"game":"Enemy Territory","downloads_count":128,
+           "latest":{"id":"01DV1","version":"2.3","changelog":"Neue Binds für Voice-Chat.","filename":"rog-et.cfg","size":2097152,"status":"ready","scan_status":"clean"},"url":"https://rebelsofgaming.com/de/downloads/et-config"},
+          {"id":"01DL2","slug":"mappack","title":"Mappack Herbst","category":{"name":"Maps"},"game":null,"downloads_count":12,
+           "latest":{"id":"01DV2","version":"1.0","changelog":null,"filename":"maps.zip","size":0,"status":"processing","scan_status":"pending"},"url":null}
+        ]}
+        """;
+
+    public static string DownloadLink => "{\"data\":{\"url\":\"https://s3.example.test/rog-private/rog-et.cfg?sig=1\",\"filename\":\"../rog-et.cfg\",\"size\":" + DownloadBytes.Length
+        + ",\"sha256\":\"" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(DownloadBytes)) + "\"}}";
 }
