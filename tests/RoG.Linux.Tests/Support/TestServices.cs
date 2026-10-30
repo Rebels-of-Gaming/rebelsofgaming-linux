@@ -7,8 +7,10 @@ namespace RoG.Linux.Tests.Support;
 /// <summary>App-Verdrahtung mit Fakes: Einstellungen im Temp-Ordner, Schlüsselbund im Speicher, Fake-API und -Bilder.</summary>
 public sealed class TestServices : IDisposable
 {
-    private TestServices(AppServices services, FakeApi api, FakeSecretBackend secrets, RecordingBrowser browser, string folder)
+    private TestServices(AppServices services, FakeApi api, FakeSecretBackend secrets, RecordingBrowser browser, string folder, FakeClipboard clipboard, FakeLauncher launcher)
     {
+        Clipboard = clipboard;
+        Launcher = launcher;
         Services = services;
         Api = api;
         Secrets = secrets;
@@ -26,6 +28,10 @@ public sealed class TestServices : IDisposable
 
     public string Folder { get; }
 
+    public FakeClipboard Clipboard { get; }
+
+    public FakeLauncher Launcher { get; }
+
     public static async Task<TestServices> CreateAsync(StoredToken? token = null, bool guest = false, string language = "de", bool keyring = true)
     {
         var folder = Path.Combine(Path.GetTempPath(), "rog-linux-tests", Guid.NewGuid().ToString("N"));
@@ -39,6 +45,8 @@ public sealed class TestServices : IDisposable
 
         var api = new FakeApi();
         var browser = new RecordingBrowser();
+        var clipboard = new FakeClipboard();
+        var launcher = new FakeLauncher();
         var services = await AppServices.CreateAsync(new AppServicesOptions
         {
             SettingsDirectory = folder,
@@ -47,6 +55,8 @@ public sealed class TestServices : IDisposable
             ImageHandler = new FakeImages(),
             Browser = browser,
             Notifier = new SilentNotifier(),
+            Clipboard = clipboard,
+            Launcher = launcher,
             Environment = "production",
             Language = language,
         });
@@ -55,7 +65,7 @@ public sealed class TestServices : IDisposable
             await services.UpdateSettingsAsync(s => s with { GuestMode = true });
         }
 
-        return new TestServices(services, api, secrets, browser, folder);
+        return new TestServices(services, api, secrets, browser, folder, clipboard, launcher);
     }
 
     public void Dispose()

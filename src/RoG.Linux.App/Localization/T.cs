@@ -28,5 +28,9 @@ public sealed class T : MarkupExtension
 
     public string Key { get; set; } = string.Empty;
 
-    public override object ProvideValue(IServiceProvider serviceProvider) => Loc.Get(Key);
+    /// <summary>In Versalien (Anzeige-Schrift, Umschalter), z. B. <c>{l:T SquadsPage_ModeGames.Text, Upper=True}</c>.</summary>
+    public bool Upper { get; set; }
+
+    public override object ProvideValue(IServiceProvider serviceProvider) =>
+        Upper ? Loc.Get(Key).ToUpper(System.Globalization.CultureInfo.CurrentCulture) : Loc.Get(Key);
 }

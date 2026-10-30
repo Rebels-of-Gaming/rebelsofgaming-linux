@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Controls.FeedbackBar"
+             x:DataType="vm:FeedbackViewModel"
+             IsVisible="{Binding IsOpen}">
+  <!-- Rückmeldung nach „Verbinden“, „Kopieren“ usw. – Ton als Kante und Symbol (nicht nur Farbe) -->
+  <Border Classes="hint" Classes.success="{Binding IsSuccess}" Classes.info="{Binding IsInfo}" Classes.error="{Binding IsError}"
+          Background="{DynamicResource RoGBg3Brush}">
+    <Grid ColumnDefinitions="Auto,*,Auto">
+      <Panel Width="20" Height="20" VerticalAlignment="Top" Margin="0,2,10,0">
+        <PathIcon Data="{StaticResource IconCheckCircle}" Width="18" Height="18" Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding IsSuccess}" />
+        <PathIcon Data="{StaticResource IconInfo}" Width="18" Height="18" Foreground="{DynamicResource RoGBlueBrush}" IsVisible="{Binding IsInfo}" />
+        <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Foreground="{DynamicResource RoGRedBrush}" IsVisible="{Binding IsError}" />
+      </Panel>
+      <SelectableTextBlock Grid.Column="1" Classes="body" Text="{Binding Message}" VerticalAlignment="Center" />
+      <Button Grid.Column="2" Classes="icon" Width="32" Height="32" Padding="8" VerticalAlignment="Top" Margin="8,-4,-6,-4"
+              Command="{Binding CloseCommand}" ToolTip.Tip="{l:T Linux_Close}" AutomationProperties.Name="{l:T Linux_Close}">
+        <PathIcon Data="{StaticResource IconClose}" Width="14" Height="14" />
+      </Button>
+    </Grid>
+  </Border>
+</UserControl>

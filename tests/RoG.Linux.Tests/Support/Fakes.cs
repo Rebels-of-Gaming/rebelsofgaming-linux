@@ -47,6 +47,15 @@ public sealed class RecordingProcessLauncher : IProcessLauncher
 {
     public List<(string File, IReadOnlyList<string> Args)> Calls { get; } = [];
 
+    /// <summary>Antwort für <see cref="ReadAsync"/> (z. B. Ausgabe von <c>xdg-mime</c>); <c>null</c> = Programm fehlt.</summary>
+    public string? Output { get; set; }
+
+    public Task<string?> ReadAsync(string fileName, IReadOnlyList<string> arguments, TimeSpan wait, CancellationToken cancellationToken = default)
+    {
+        Calls.Add((fileName, arguments));
+        return Task.FromResult(Output);
+    }
+
     public Task<bool> RunAsync(string fileName, IReadOnlyList<string> arguments, TimeSpan wait, CancellationToken cancellationToken = default)
     {
         Calls.Add((fileName, arguments));
@@ -61,6 +70,40 @@ public sealed class RecordingBrowser : IBrowserLauncher
     public Task<bool> OpenAsync(Uri uri, CancellationToken cancellationToken = default)
     {
         Opened.Add(uri);
+        return Task.FromResult(true);
+    }
+}
+
+/// <summary>Zwischenablage im Speicher; <see cref="Locked"/> simuliert eine belegte Zwischenablage.</summary>
+public sealed class FakeClipboard : RoG.Core.Features.Servers.IClipboardService
+{
+    public string? Text { get; private set; }
+
+    public bool Locked { get; set; }
+
+    public void SetText(string text)
+    {
+        if (Locked)
+        {
+            throw new InvalidOperationException("gesperrt");
+        }
+
+        Text = text;
+    }
+}
+
+/// <summary>Spiele-Links: merkt sich gestartete Adressen; <see cref="Installed"/> = Schemata mit Programm.</summary>
+public sealed class FakeLauncher : RoG.Core.Features.Servers.IExternalLauncher
+{
+    public List<Uri> Launched { get; } = [];
+
+    public HashSet<string> Installed { get; } = new(StringComparer.OrdinalIgnoreCase) { "steam" };
+
+    public Task<bool> CanLaunchAsync(Uri uri) => Task.FromResult(Installed.Contains(uri.Scheme));
+
+    public Task<bool> LaunchAsync(Uri uri)
+    {
+        Launched.Add(uri);
         return Task.FromResult(true);
     }
 }

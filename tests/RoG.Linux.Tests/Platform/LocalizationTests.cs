@@ -70,7 +70,24 @@ public class LocalizationTests
         // Jeder Schlüssel aus den AXAML-Dateien muss in den Ressourcen stehen (sonst stünde der Schlüssel in der Oberfläche)
         var root = RepoRoot();
         var keys = Directory.EnumerateFiles(Path.Combine(root, "src", "RoG.Linux.App"), "*.axaml", SearchOption.AllDirectories)
-            .SelectMany(f => System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(f), @"\{l:T ([^}]+)\}").Select(m => m.Groups[1].Value.Trim()))
+            .SelectMany(f => System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(f), @"\{l:T ([^,}]+)[^}]*\}").Select(m => m.Groups[1].Value.Trim()))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        Assert.NotEmpty(keys);
+        foreach (var language in new[] { "de", "en", "fr" })
+        {
+            var l = new ReswLocalizer(language);
+            Assert.All(keys, k => Assert.NotEqual(k, l.GetString(k)));
+        }
+    }
+
+    [Fact]
+    public void Linux_keys_used_in_code_exist()
+    {
+        // Linux-Texte, die ViewModels per T(…)/Format(…) holen („Linux_…“ als Zeichenkette im Code)
+        var root = RepoRoot();
+        var keys = Directory.EnumerateFiles(Path.Combine(root, "src", "RoG.Linux.App"), "*.cs", SearchOption.AllDirectories)
+            .SelectMany(f => System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(f), "\"(Linux_[A-Za-z0-9_]+)\"").Select(m => m.Groups[1].Value))
             .Distinct(StringComparer.Ordinal)
             .ToList();
         Assert.NotEmpty(keys);

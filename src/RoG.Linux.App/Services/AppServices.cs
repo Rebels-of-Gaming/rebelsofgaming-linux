@@ -34,6 +34,12 @@ public sealed record AppServicesOptions
 
     public IDesktopNotifier? Notifier { get; init; }
 
+    /// <summary>Spiele-Links (<c>steam://</c>, <c>et://</c> …); Standard <c>xdg-open</c>.</summary>
+    public RoG.Core.Features.Servers.IExternalLauncher? Launcher { get; init; }
+
+    /// <summary>Zwischenablage; Standard die des Hauptfensters.</summary>
+    public RoG.Core.Features.Servers.IClipboardService? Clipboard { get; init; }
+
     /// <summary>Umgebung erzwingen (Startargument, Tests); sonst Einstellungen.</summary>
     public string? Environment { get; init; }
 
@@ -58,7 +64,8 @@ public sealed class AppServices : IDisposable
         ReswLocalizer localizer,
         IBrowserLauncher browser,
         IDesktopNotifier notifier,
-        ImageLoader images)
+        ImageLoader images,
+        RoG.Core.Features.Servers.ServerConnector serverConnector)
     {
         SettingsStore = settingsStore;
         Settings = settings;
@@ -73,6 +80,7 @@ public sealed class AppServices : IDisposable
         Browser = browser;
         Notifier = notifier;
         Images = images;
+        ServerConnector = serverConnector;
         Account = new AccountService(api.Client, tokens);
         Devices = new LinuxDeviceRegistration(api.Client, tokens);
         api.Handler.Unauthorized += (_, _) => Unauthorized?.Invoke(this, EventArgs.Empty);
@@ -122,6 +130,9 @@ public sealed class AppServices : IDisposable
 
     public ImageLoader Images { get; }
 
+    /// <summary>„Verbinden“ und „Adresse kopieren“ für Gameserver (Kern) mit <c>xdg-open</c> und Zwischenablage.</summary>
+    public RoG.Core.Features.Servers.ServerConnector ServerConnector { get; }
+
     public AccountService Account { get; }
 
     public LinuxDeviceRegistration Devices { get; }
@@ -169,6 +180,8 @@ public sealed class AppServices : IDisposable
         api.Http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(AppIdentity.UserAgentProduct, AppVersion));
 
         var images = new ImageLoader(options.ImageHandler);
+        var xdg = new XdgLauncher();
+        var connector = new RoG.Core.Features.Servers.ServerConnector(options.Launcher ?? xdg, options.Clipboard ?? new AvaloniaClipboard());
         return new AppServices(
             settingsStore,
             settings,
@@ -178,9 +191,10 @@ public sealed class AppServices : IDisposable
             tokens,
             api,
             new ReswLocalizer(language),
-            options.Browser ?? new XdgLauncher(),
+            options.Browser ?? xdg,
             options.Notifier ?? new FreedesktopNotifier(),
-            images);
+            images,
+            connector);
     }
 
     /// <summary>Einstellung ändern und speichern – nacheinander, weil der Speicher über eine feste Temp-Datei schreibt.</summary>
