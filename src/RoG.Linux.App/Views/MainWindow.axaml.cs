@@ -9,8 +9,8 @@ namespace RoG.Linux.App.Views;
 
 /// <summary>
 /// Hauptfenster. Tastatur: Strg+1 … Strg+9 öffnen die ersten Bereiche der Seitenleiste, Strg+, die Einstellungen,
-/// Strg+K die Suche, Strg+F das Suchfeld der Mitglieder,
-/// F5 aktualisiert, Escape schließt das Menü (schmale Ansicht) bzw. das Detail (Liste-Detail-Seiten), Tab/Umschalt+Tab
+/// Strg+K die Suche, Strg+F das Suchfeld der Mitglieder, Strg+N neue Nachricht bzw. neues Thema, Alt+←/→ zurück/vor,
+/// Strg+W schließen (Infobereich), Strg+Q beenden, F1 Tastenkürzel, F5/Strg+R aktualisiert, Escape schließt das Menü (schmale Ansicht) bzw. das Detail (Liste-Detail-Seiten), Tab/Umschalt+Tab
 /// und Pfeile wie gewohnt. Merkt Größe, Lage und „maximiert“ beim Schließen (<see cref="WindowPlacementService"/>).
 /// </summary>
 public sealed partial class MainWindow : Window
@@ -136,12 +136,50 @@ public sealed partial class MainWindow : Window
             this.GetVisualDescendants().OfType<MembersView>().FirstOrDefault()?.FocusSearch();
             e.Handled = true;
         }
-        else if (e.Key == Key.F5 && shell.CurrentPage is IRefreshablePage refreshable)
+        else if (e.KeyModifiers == KeyModifiers.Alt && e.Key == Key.Left)
+        {
+            e.Handled = shell.GoBack();
+        }
+        else if (e.KeyModifiers == KeyModifiers.Alt && e.Key == Key.Right)
+        {
+            e.Handled = shell.GoForward();
+        }
+        else if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.N)
+        {
+            // Strg+N: im Forum mit Schreibrecht neues Thema, sonst Nachrichten (Suche fokussiert)
+            if (shell.CurrentPage is ForumViewModel { CanCreateThread: true } forum)
+            {
+                forum.StartNewThreadCommand.Execute(null);
+            }
+            else if (shell.NavigateTo("Nav_Messages"))
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => this.GetVisualDescendants().OfType<MessagesView>().FirstOrDefault()?.FocusSearch(), Avalonia.Threading.DispatcherPriority.Background);
+            }
+
+            e.Handled = true;
+        }
+        else if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.W)
+        {
+            Close(); // in den Infobereich, wenn eingestellt
+            e.Handled = true;
+        }
+        else if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.Q)
+        {
+            ExitRequested = true;
+            Close();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = shell.NavigateTo("Nav_Settings");
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => this.GetVisualDescendants().OfType<SettingsView>().FirstOrDefault()?.ShowShortcuts(), Avalonia.Threading.DispatcherPriority.Background);
+        }
+        else if ((e.Key == Key.F5 || (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.R)) && shell.CurrentPage is IRefreshablePage refreshable)
         {
             _ = refreshable.RefreshAsync();
             e.Handled = true;
         }
-        else if (e.Key == Key.F5 && shell.CurrentPage is LoadableViewModel page)
+        else if ((e.Key == Key.F5 || (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.R)) && shell.CurrentPage is LoadableViewModel page)
         {
             _ = page.LoadAsync();
             e.Handled = true;

@@ -64,6 +64,23 @@
         </StackPanel>
       </Border>
 
+      <!-- Tastenkürzel (F1) -->
+      <Border x:Name="ShortcutsCard" Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="section" Text="{l:T Linux_ShortcutsTitle}" />
+          <ItemsControl ItemsSource="{Binding Shortcuts}" AutomationProperties.Name="{l:T Linux_ShortcutsTitle}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ShortcutRow">
+                <Grid ColumnDefinitions="200,*" Margin="0,3" AutomationProperties.Name="{Binding Description}">
+                  <TextBlock Classes="body strong" FontFamily="{StaticResource RoGMonoFont}" FontSize="13" Text="{Binding Keys}" TextWrapping="Wrap" Margin="0,0,12,0" />
+                  <TextBlock Grid.Column="1" Classes="body" Text="{Binding Description}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
       <!-- Über die App -->
       <Border Classes="card">
         <StackPanel Spacing="10">

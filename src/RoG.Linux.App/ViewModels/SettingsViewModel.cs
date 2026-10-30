@@ -9,6 +9,9 @@ using RoG.Linux.Platform.Desktop;
 
 namespace RoG.Linux.App.ViewModels;
 
+/// <summary>Zeile der Tastenkürzel-Liste.</summary>
+public sealed record ShortcutRow(string Keys, string Description);
+
 /// <summary>Eine Auswahl in einer ComboBox (Wert + Anzeigetext).</summary>
 public sealed record SettingsOption(string Value, string Label)
 {
@@ -158,6 +161,31 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     public IReadOnlyList<SettingsOption> Languages { get; }
+
+    /// <summary>Tastenkürzel (F1 springt hierher).</summary>
+    public IReadOnlyList<ShortcutRow> Shortcuts { get; } = BuildShortcuts();
+
+    private static IReadOnlyList<ShortcutRow> BuildShortcuts()
+    {
+        string Ctrl(string key) => Localization.Loc.Get("Linux_KeyCtrl") + "+" + key;
+        string Alt(string key) => Localization.Loc.Get("Linux_KeyAlt") + "+" + key;
+        string T(string key) => Localization.Loc.Get(key);
+        return
+        [
+            new(Ctrl("K"), T("Linux_ShortcutSearch")),
+            new(Ctrl("1") + " … " + Ctrl("9"), T("Linux_ShortcutSections")),
+            new(Ctrl("N"), T("Linux_ShortcutNew")),
+            new(Ctrl("F"), T("Linux_ShortcutFind")),
+            new("F5 · " + Ctrl("R"), T("Linux_ShortcutRefresh")),
+            new(Alt("←") + " · " + Alt("→"), T("Linux_ShortcutHistory")),
+            new("Enter · " + Localization.Loc.Get("Linux_KeyShift") + "+Enter", T("Linux_ShortcutChat")),
+            new(Ctrl("Enter"), T("Linux_ShortcutForum")),
+            new("Esc", T("Linux_ShortcutEscape")),
+            new(Ctrl(","), T("Linux_ShortcutSettings")),
+            new(Ctrl("W") + " · " + Ctrl("Q"), T("Linux_ShortcutClose")),
+            new("F1", T("Linux_ShortcutHelp")),
+        ];
+    }
 
     public IReadOnlyList<SettingsOption> Themes { get; }
 

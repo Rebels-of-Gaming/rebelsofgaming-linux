@@ -49,5 +49,16 @@ public sealed partial class ChatWindow : Window
         return window;
     }
 
+    /// <summary>Strg+W schließt das Chat-Fenster.</summary>
+    protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (!e.Handled && e.KeyModifiers == Avalonia.Input.KeyModifiers.Control && e.Key == Avalonia.Input.Key.W)
+        {
+            e.Handled = true;
+            Close();
+        }
+    }
+
     private void OnTopChanged(object? sender, RoutedEventArgs e) => Topmost = OnTop.IsChecked == true;
 }

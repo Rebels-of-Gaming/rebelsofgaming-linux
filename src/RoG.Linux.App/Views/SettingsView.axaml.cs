@@ -8,4 +8,7 @@ public sealed partial class SettingsView : UserControl
     {
         InitializeComponent();
     }
+
+    /// <summary>F1: zu den Tastenkürzeln scrollen.</summary>
+    public void ShowShortcuts() => ShortcutsCard.BringIntoView();
 }

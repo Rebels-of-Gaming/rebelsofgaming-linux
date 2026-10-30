@@ -204,6 +204,14 @@ public class ScreenshotTests
     public async Task Servers_discord_guest() => await Shoot("servers_discord_guest_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), shell => OpenServerTab(shell, "discord"));
 
     [AvaloniaFact]
+    public async Task Settings_full() =>
+        await Shoot("settings_full_1280x2000", 1280, 2000, await TestServices.CreateAsync(guest: true), shell =>
+        {
+            shell.NavigateTo("Nav_Settings");
+            return Settle(300);
+        });
+
+    [AvaloniaFact]
     public async Task Forum_thread() => await Shoot("forum_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenForumThread);
 
     [AvaloniaFact]

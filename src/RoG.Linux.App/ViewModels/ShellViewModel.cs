@@ -221,6 +221,23 @@ public sealed partial class ShellViewModel : ObservableObject
             i.IsSelected = ReferenceEquals(i, item);
         }
 
+        // Verlauf für Alt+←/→ (nicht beim Blättern selbst und nicht doppelt)
+        if (!_historyMove && (CurrentItem is null || CurrentItem.Key != item.Key))
+        {
+            if (_historyIndex < _history.Count - 1)
+            {
+                _history.RemoveRange(_historyIndex + 1, _history.Count - _historyIndex - 1);
+            }
+
+            _history.Add(item.Key);
+            if (_history.Count > 50)
+            {
+                _history.RemoveAt(0);
+            }
+
+            _historyIndex = _history.Count - 1;
+        }
+
         if (CurrentPage is ServersViewModel servers && item.Key != "Nav_Servers")
         {
             servers.Pause();
@@ -246,6 +263,40 @@ public sealed partial class ShellViewModel : ObservableObject
         }
 
         _ = _services.UpdateSettingsAsync(s => s with { LastSection = item.Key });
+    }
+
+    private readonly List<string> _history = [];
+    private int _historyIndex = -1;
+    private bool _historyMove;
+
+    public bool CanGoBack => _historyIndex > 0;
+
+    public bool CanGoForward => _historyIndex < _history.Count - 1;
+
+    /// <summary>Alt+←: vorheriger Bereich.</summary>
+    public bool GoBack() => MoveInHistory(-1);
+
+    /// <summary>Alt+→: nächster Bereich.</summary>
+    public bool GoForward() => MoveInHistory(1);
+
+    private bool MoveInHistory(int step)
+    {
+        var target = _historyIndex + step;
+        if (IsLoginVisible || target < 0 || target >= _history.Count)
+        {
+            return false;
+        }
+
+        _historyIndex = target;
+        _historyMove = true;
+        try
+        {
+            return NavigateTo(_history[target]);
+        }
+        finally
+        {
+            _historyMove = false;
+        }
     }
 
     /// <summary>Bereich per Schlüssel öffnen (Tastenkürzel, Deep Links, Tests).</summary>
@@ -413,6 +464,9 @@ public sealed partial class ShellViewModel : ObservableObject
         Login = null;
         // Seiten neu aufbauen: Inhalte gehören zum Konto (bzw. Gastmodus)
         _pages.Clear();
+        _history.Clear();
+        _historyIndex = -1;
+        CurrentItem = null;
         var last = _services.Settings.LastSection;
         var start = MainItems.Concat(FooterItems).FirstOrDefault(i => i.Key == last && i.Implemented) ?? MainItems.First(i => i.Key == "Nav_Home");
         Navigate(start);

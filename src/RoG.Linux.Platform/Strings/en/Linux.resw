@@ -256,4 +256,52 @@
   <data name="Linux_ForumThreadsEmpty" xml:space="preserve">
     <value>No topics in this section yet.</value>
   </data>
+  <data name="Linux_ShortcutsTitle" xml:space="preserve">
+    <value>KEYBOARD SHORTCUTS</value>
+  </data>
+  <data name="Linux_KeyCtrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="Linux_KeyAlt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="Linux_KeyShift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="Linux_ShortcutSearch" xml:space="preserve">
+    <value>Open search</value>
+  </data>
+  <data name="Linux_ShortcutSections" xml:space="preserve">
+    <value>Sidebar sections</value>
+  </data>
+  <data name="Linux_ShortcutNew" xml:space="preserve">
+    <value>New message (in the forum: new topic)</value>
+  </data>
+  <data name="Linux_ShortcutFind" xml:space="preserve">
+    <value>Search members</value>
+  </data>
+  <data name="Linux_ShortcutRefresh" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="Linux_ShortcutHistory" xml:space="preserve">
+    <value>Back / forward</value>
+  </data>
+  <data name="Linux_ShortcutChat" xml:space="preserve">
+    <value>Chat: send / new line</value>
+  </data>
+  <data name="Linux_ShortcutForum" xml:space="preserve">
+    <value>Forum: send reply</value>
+  </data>
+  <data name="Linux_ShortcutEscape" xml:space="preserve">
+    <value>Close detail, menu or quote</value>
+  </data>
+  <data name="Linux_ShortcutSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Linux_ShortcutClose" xml:space="preserve">
+    <value>Close window / quit the app</value>
+  </data>
+  <data name="Linux_ShortcutHelp" xml:space="preserve">
+    <value>This list</value>
+  </data>
 </root>

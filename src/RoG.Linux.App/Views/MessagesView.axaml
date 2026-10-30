@@ -19,7 +19,7 @@
             <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
           </Button>
         </Grid>
-        <TextBox Text="{Binding SearchText}" PlaceholderText="{l:T MessagesPage_Search.PlaceholderText}"
+        <TextBox x:Name="SearchBox" Text="{Binding SearchText}" PlaceholderText="{l:T MessagesPage_Search.PlaceholderText}"
                  IsVisible="{Binding ShowConversations}" Margin="0,0,8,0"
                  AutomationProperties.Name="{l:T MessagesPage_Search.AutomationProperties.Name}" />
       </StackPanel>

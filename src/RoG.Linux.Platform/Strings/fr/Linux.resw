@@ -256,4 +256,52 @@
   <data name="Linux_ForumThreadsEmpty" xml:space="preserve">
     <value>Aucun sujet dans cette section pour l’instant.</value>
   </data>
+  <data name="Linux_ShortcutsTitle" xml:space="preserve">
+    <value>RACCOURCIS CLAVIER</value>
+  </data>
+  <data name="Linux_KeyCtrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="Linux_KeyAlt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="Linux_KeyShift" xml:space="preserve">
+    <value>Maj</value>
+  </data>
+  <data name="Linux_ShortcutSearch" xml:space="preserve">
+    <value>Ouvrir la recherche</value>
+  </data>
+  <data name="Linux_ShortcutSections" xml:space="preserve">
+    <value>Sections de la barre latérale</value>
+  </data>
+  <data name="Linux_ShortcutNew" xml:space="preserve">
+    <value>Nouveau message (dans le forum : nouveau sujet)</value>
+  </data>
+  <data name="Linux_ShortcutFind" xml:space="preserve">
+    <value>Rechercher des membres</value>
+  </data>
+  <data name="Linux_ShortcutRefresh" xml:space="preserve">
+    <value>Recharger</value>
+  </data>
+  <data name="Linux_ShortcutHistory" xml:space="preserve">
+    <value>Précédent / suivant</value>
+  </data>
+  <data name="Linux_ShortcutChat" xml:space="preserve">
+    <value>Chat : envoyer / nouvelle ligne</value>
+  </data>
+  <data name="Linux_ShortcutForum" xml:space="preserve">
+    <value>Forum : envoyer la réponse</value>
+  </data>
+  <data name="Linux_ShortcutEscape" xml:space="preserve">
+    <value>Fermer le détail, le menu ou la citation</value>
+  </data>
+  <data name="Linux_ShortcutSettings" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="Linux_ShortcutClose" xml:space="preserve">
+    <value>Fermer la fenêtre / quitter l’app</value>
+  </data>
+  <data name="Linux_ShortcutHelp" xml:space="preserve">
+    <value>Cette liste</value>
+  </data>
 </root>

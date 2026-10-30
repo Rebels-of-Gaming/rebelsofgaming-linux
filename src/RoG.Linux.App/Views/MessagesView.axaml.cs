@@ -12,6 +12,9 @@ public sealed partial class MessagesView : UserControl
         InitializeComponent();
     }
 
+    /// <summary>Strg+N: Suchfeld der Unterhaltungen.</summary>
+    public void FocusSearch() => SearchBox.Focus();
+
     protected override void OnDataContextChanged(EventArgs e)
     {
         base.OnDataContextChanged(e);
