@@ -463,4 +463,67 @@
   <data name="Linux_RconEmpty" xml:space="preserve">
     <value>Noch keine RCON-Befehle in dieser Sitzung. Die Ausgabe wird nicht gespeichert.</value>
   </data>
+  <data name="Linux_ConfigDiscardTitle" xml:space="preserve">
+    <value>Ungespeicherte Änderungen verwerfen?</value>
+  </data>
+  <data name="Linux_ConfigHasErrors" xml:space="preserve">
+    <value>Die Config hat Fehler – bitte erst korrigieren.</value>
+  </data>
+  <data name="Linux_ConfigSaveTitle" xml:space="preserve">
+    <value>Diese Änderungen speichern?</value>
+  </data>
+  <data name="Linux_ConfigSaveText" xml:space="preserve">
+    <value>{0} wird überschrieben ({1}). Die bisherige Fassung bleibt im Versionsverlauf.</value>
+  </data>
+  <data name="Linux_ConfigApprovalHint" xml:space="preserve">
+    <value>Die Änderung wird als Antrag eingereicht – jemand mit Freigaberecht muss zustimmen (Vier-Augen-Prinzip).</value>
+  </data>
+  <data name="Linux_ConfigImport" xml:space="preserve">
+    <value>Aus Datei laden</value>
+  </data>
+  <data name="Linux_ConfigImportPicker" xml:space="preserve">
+    <value>Config aus Datei laden</value>
+  </data>
+  <data name="Linux_ConfigImportTypes" xml:space="preserve">
+    <value>Text- und Config-Dateien</value>
+  </data>
+  <data name="Linux_ConfigImportTooLarge" xml:space="preserve">
+    <value>Die Datei ist zu groß (max. 512 KB).</value>
+  </data>
+  <data name="Linux_ConfigImportNotText" xml:space="preserve">
+    <value>Das ist keine Textdatei (UTF-8).</value>
+  </data>
+  <data name="Linux_ConfigImported" xml:space="preserve">
+    <value>Inhalt aus „{0}“ übernommen – vor dem Speichern prüfen.</value>
+  </data>
+  <data name="Linux_ConfigDirty" xml:space="preserve">
+    <value>Nicht gespeichert</value>
+  </data>
+  <data name="Linux_ConfigReadOnly" xml:space="preserve">
+    <value>Nur lesen – zum Bearbeiten fehlt dir das Recht.</value>
+  </data>
+  <data name="Linux_ConfigVersionsEmpty" xml:space="preserve">
+    <value>Noch keine Versionen.</value>
+  </data>
+  <data name="Linux_ConfigLineNumbers" xml:space="preserve">
+    <value>Zeilennummern</value>
+  </data>
+  <data name="Linux_ConfigReloadFile" xml:space="preserve">
+    <value>Neu laden</value>
+  </data>
+  <data name="Linux_ConfigDiffLabel" xml:space="preserve">
+    <value>Änderungen gegenüber dem Server</value>
+  </data>
+  <data name="Linux_FilesDownloadTooLarge" xml:space="preserve">
+    <value>Herunterladen geht nur für Textdateien bis 512 KB.</value>
+  </data>
+  <data name="Linux_FilesUploadHint" xml:space="preserve">
+    <value>Hochladen geht über „Aus Datei laden“ im Reiter Configs – nur Dateien der Whitelist, mit Prüfung und Versionen.</value>
+  </data>
+  <data name="Linux_FilesPath" xml:space="preserve">
+    <value>Pfad</value>
+  </data>
+  <data name="Linux_BackupDownloadOpened" xml:space="preserve">
+    <value>Download im Browser gestartet – der Link gilt nur kurz.</value>
+  </data>
 </root>

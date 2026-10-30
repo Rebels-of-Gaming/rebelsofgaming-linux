@@ -1,0 +1,176 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ServerFilesView"
+             x:DataType="vm:ServerFilesViewModel">
+  <!-- Reiter „Dateien“ (wie FilesPanel der Windows-App): Pfadleiste, Liste mit Ordnern/Dateien, Vorschau rechts
+       (schmal: statt der Liste), Sicherung kopieren/umbenennen/löschen, Textdatei herunterladen. -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://rebelsofgaming/Themes/ServerIcons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Button.crumb">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="6,4" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="Foreground" Value="{DynamicResource RoGMutedBrush}" />
+      <Setter Property="FontFamily" Value="{StaticResource RoGMonoFont}" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
+    </Style>
+    <Style Selector="Button.crumb:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+      <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
+    </Style>
+    <Style Selector="Button.crumb.current">
+      <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.icon.small">
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Padding" Value="9" />
+    </Style>
+  </UserControl.Styles>
+
+  <DockPanel Margin="16,12,16,16">
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">
+      <!-- Pfadleiste -->
+      <Grid ColumnDefinitions="Auto,Auto,*">
+        <Button Classes="icon" Command="{Binding UpCommand}" ToolTip.Tip="{l:T Files_Up.ToolTipService.ToolTip}"
+                AutomationProperties.Name="{l:T Files_Up.AutomationProperties.Name}">
+          <PathIcon Data="{StaticResource IconArrowUp}" Width="18" Height="18" />
+        </Button>
+        <Button Grid.Column="1" Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:T Linux_Refresh}"
+                AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+        </Button>
+        <ItemsControl Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Center" ItemsSource="{Binding Crumbs}"
+                      AutomationProperties.Name="{l:T Linux_FilesPath}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:FileCrumbViewModel">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="›" Classes="muted" VerticalAlignment="Center" Margin="2,0" IsVisible="{Binding HasSeparator}" />
+                <Button Classes="crumb" Classes.current="{Binding IsCurrent}" Command="{Binding OpenCommand}" Content="{Binding Name}"
+                        AutomationProperties.Name="{Binding Name}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Grid>
+      <TextBlock Classes="muted small" Text="{l:T Linux_FilesUploadHint}" IsVisible="{Binding CanWrite}" />
+      <Panel MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+        <Panel.IsVisible>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="ShowOwnFeedback" />
+            <Binding Path="Feedback.IsOpen" />
+          </MultiBinding>
+        </Panel.IsVisible>
+        <c:FeedbackBar DataContext="{Binding Feedback}" />
+      </Panel>
+      <Button Classes="link" IsVisible="{Binding HasSavedPath}" Command="{Binding ShowInFolderCommand}" HorizontalAlignment="Left"
+              Content="{l:T MediaPage_ShowInFolder.Content}" />
+      <c:ConfirmBar DataContext="{Binding Confirm}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+
+      <!-- Neuer Name (Sicherungskopie, Umbenennen) im Inhalt -->
+      <Border x:Name="PromptBar" Classes="hint" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding Prompt.IsOpen}"
+              MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+        <StackPanel Spacing="10" DataContext="{Binding Prompt}" x:DataType="vm:InlinePromptViewModel">
+          <TextBlock Classes="body strong" Text="{Binding Title}" />
+          <TextBox x:Name="PromptBox" Text="{Binding Text}" FontFamily="{StaticResource RoGMonoFont}" AutomationProperties.Name="{Binding Title}" />
+          <TextBlock Classes="muted small" Text="{Binding Hint}" />
+          <WrapPanel Orientation="Horizontal">
+            <Button Classes="primary" Margin="0,0,12,0" Command="{Binding AcceptCommand}" Content="{l:T Common_Confirm}" />
+            <Button Classes="secondary" Command="{Binding CancelCommand}" Content="{l:T Common_Cancel}" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+
+    <Grid x:Name="Body" ColumnDefinitions="*,*">
+      <!-- Liste -->
+      <Panel x:Name="ListArea">
+        <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                     EmptyText="{l:T Files_Empty.Text}" RetryCommand="{Binding RefreshCommand}" />
+        <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Items}" AutomationProperties.Name="{l:T Files_List.AutomationProperties.Name}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Spacing="4" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:FileItemViewModel">
+                <Grid ColumnDefinitions="*,Auto">
+                  <Button Classes="row" Padding="10,8" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding Name}">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <Panel Width="20" Height="20" Margin="0,1,12,0" VerticalAlignment="Top">
+                        <PathIcon Data="{StaticResource IconFolder}" Width="20" Height="20" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding IsFolder}" />
+                        <PathIcon Data="{StaticResource IconFile}" Width="20" Height="20" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding IsFile}" />
+                      </Panel>
+                      <StackPanel Grid.Column="1" Spacing="1">
+                        <TextBlock Classes="body" Classes.strong="{Binding IsFolder}" Text="{Binding Name}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                        <TextBlock Classes="muted small" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                      </StackPanel>
+                    </Grid>
+                  </Button>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
+                    <Button Classes="icon small" Command="{Binding CopyCommand}" IsVisible="{Binding CanCopy}"
+                            ToolTip.Tip="{l:T Files_Copy.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T Files_Copy.AutomationProperties.Name}">
+                      <PathIcon Data="{StaticResource IconCopy}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="icon small" Command="{Binding RenameCommand}" IsVisible="{Binding CanChange}"
+                            ToolTip.Tip="{l:T Files_Rename.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T Files_Rename.AutomationProperties.Name}">
+                      <PathIcon Data="{StaticResource IconPencil}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="icon small" Command="{Binding DeleteCommand}" IsVisible="{Binding CanChange}"
+                            ToolTip.Tip="{l:T Files_Delete.ToolTipService.ToolTip}" AutomationProperties.Name="{l:T Files_Delete.AutomationProperties.Name}">
+                      <PathIcon Data="{StaticResource IconTrash}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="icon small" Command="{Binding DownloadCommand}" IsVisible="{Binding CanDownload}"
+                            ToolTip.Tip="{l:T Backup_Download.Content}" AutomationProperties.Name="{l:T Backup_Download.Content}">
+                      <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16" />
+                    </Button>
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Panel>
+
+      <!-- Vorschau -->
+      <Border x:Name="PreviewArea" Grid.Column="1" Classes="card" Padding="0" Margin="16,0,0,0" ClipToBounds="True">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="14,8,6,8" IsVisible="{Binding HasPreview}">
+            <TextBlock Classes="body strong" Text="{Binding PreviewTitle}" FontFamily="{StaticResource RoGMonoFont}" FontSize="14"
+                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+            <Button Grid.Column="1" Classes="icon small" Command="{Binding ClosePreviewCommand}" ToolTip.Tip="{l:T Linux_Close}"
+                    AutomationProperties.Name="{l:T Linux_Close}">
+              <PathIcon Data="{StaticResource IconClose}" Width="14" Height="14" />
+            </Button>
+          </Grid>
+          <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" IsVisible="{Binding IsPreviewLoading}" />
+          <Panel>
+            <TextBlock Classes="muted" Text="{l:T Files_Preview.PlaceholderText}" IsVisible="{Binding !HasPreview}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24" TextAlignment="Center" />
+            <ScrollViewer IsVisible="{Binding HasPreview}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                          BorderBrush="{DynamicResource RoGLineBrush}">
+              <SelectableTextBlock Text="{Binding Preview}" FontFamily="{StaticResource RoGMonoFont}" FontSize="13" LineHeight="19"
+                                   Foreground="{DynamicResource RoGInkBrush}" Margin="14,4,14,14"
+                                   AutomationProperties.Name="{l:T Files_Preview.AutomationProperties.Name}" />
+            </ScrollViewer>
+          </Panel>
+        </DockPanel>
+      </Border>
+    </Grid>
+  </DockPanel>
+</UserControl>

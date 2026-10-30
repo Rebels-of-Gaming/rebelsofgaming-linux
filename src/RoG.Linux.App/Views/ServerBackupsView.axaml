@@ -1,0 +1,112 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ServerBackupsView"
+             x:DataType="vm:ServerBackupsViewModel">
+  <!-- Reiter „Backups“ (wie BackupsPanel der Windows-App): anlegen mit Namen, Liste mit Herunterladen, Sperren,
+       Wiederherstellen und Löschen (Rückfrage im Inhalt). -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://rebelsofgaming/Themes/ServerIcons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <DockPanel Margin="16,12,16,16">
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+      <WrapPanel Orientation="Horizontal" IsVisible="{Binding CanManage}">
+        <TextBox Width="300" Margin="0,0,12,8" Text="{Binding NewName}" MaxLength="191" PlaceholderText="{l:T Backup_Name.PlaceholderText}" VerticalAlignment="Center"
+                 AutomationProperties.Name="{l:T Backup_Name.PlaceholderText}" />
+        <Button Classes="primary" Margin="0,0,4,8" Command="{Binding CreateCommand}" Content="{l:T Backup_Create.Content}" />
+        <Button Classes="icon" Margin="0,2,0,8" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                ToolTip.Tip="{l:T Backup_Reload.Content}" AutomationProperties.Name="{l:T Backup_Reload.Content}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+        </Button>
+      </WrapPanel>
+      <Panel>
+        <Panel.IsVisible>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="ShowOwnFeedback" />
+            <Binding Path="Feedback.IsOpen" />
+          </MultiBinding>
+        </Panel.IsVisible>
+        <c:FeedbackBar DataContext="{Binding Feedback}" />
+      </Panel>
+      <c:ConfirmBar DataContext="{Binding Confirm}" />
+    </StackPanel>
+
+    <Panel>
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                   EmptyText="{l:T Backup_Empty.Text}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+        <!-- Lesebreite: volle Breite bis 720 px, linksbündig -->
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" MaxWidth="{StaticResource RoGReadingWidth}" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+        <ItemsControl ItemsSource="{Binding Items}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:BackupItemViewModel">
+              <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding Name}">
+                <StackPanel Spacing="10">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <Panel Width="22" Height="22" Margin="0,2,12,0" VerticalAlignment="Top">
+                      <PathIcon Data="{StaticResource IconArchive}" Width="20" Height="20" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding IsReady}" />
+                      <PathIcon Data="{StaticResource IconLock}" Width="20" Height="20" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Locked}" />
+                      <PathIcon Data="{StaticResource IconAlert}" Width="20" Height="20" Foreground="{DynamicResource RoGRedBrush}" IsVisible="{Binding IsFailed}" />
+                      <PathIcon Data="{StaticResource IconClock}" Width="20" Height="20" Foreground="{DynamicResource RoGBlueBrush}" IsVisible="{Binding IsRunning}" />
+                    </Panel>
+                    <StackPanel Grid.Column="1" Spacing="2">
+                      <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                    </StackPanel>
+                  </Grid>
+                  <WrapPanel Orientation="Horizontal" IsVisible="{Binding CanManage}">
+                    <Button Classes="secondary" Margin="0,0,10,8" Command="{Binding DownloadCommand}" IsEnabled="{Binding CanDownload}"
+                            AutomationProperties.Name="{l:T Backup_Download.Content}">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16" />
+                        <TextBlock Text="{l:T Backup_Download.Content}" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                    <Button Classes="secondary" Margin="0,0,10,8" Command="{Binding ToggleLockCommand}" AutomationProperties.Name="{Binding LockLabel}">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Panel Width="16" Height="16">
+                          <PathIcon Data="{StaticResource IconLock}" Width="16" Height="16" IsVisible="{Binding !Locked}" />
+                          <PathIcon Data="{StaticResource IconUnlock}" Width="16" Height="16" IsVisible="{Binding Locked}" />
+                        </Panel>
+                        <TextBlock Text="{Binding LockLabel}" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                    <Button Classes="secondary" Margin="0,0,10,8" Command="{Binding RestoreCommand}" IsEnabled="{Binding CanRestore}"
+                            AutomationProperties.Name="{l:T Backup_Restore.Content}">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource IconRestore}" Width="16" Height="16" />
+                        <TextBlock Text="{l:T Backup_Restore.Content}" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                    <Button Classes="secondary" Margin="0,0,10,8" Command="{Binding DeleteCommand}" IsEnabled="{Binding CanDelete}"
+                            AutomationProperties.Name="{l:T Backup_Delete.Content}">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource IconTrash}" Width="16" Height="16" />
+                        <TextBlock Text="{l:T Backup_Delete.Content}" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        </Grid>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</UserControl>
