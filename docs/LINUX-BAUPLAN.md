@@ -566,6 +566,10 @@ docs/                       LINUX-BAUPLAN.md
   und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · Einreichung
   bei Flathub (nur auf Auftrag).
 
+- **F14 – Clan-„Tools“ mit WebKitGTK?** Nächster Bauschritt nach Stufe 10 wären die Tools in einem abgeschotteten
+  WebKitGTK-Fenster. Das braucht im Flatpak die GNOME-Runtime (WebKitGTK ist nicht in freedesktop) – Paket deutlich
+  größer, Runtime-Wechsel schwer umkehrbar. Vorschlag: Tools vorerst im System-Browser öffnen (heute schon so) und
+  WebKitGTK erst angehen, wenn einzelne Tools nachweislich in der App gebraucht werden.
 - **F10 – Lizenz für Flathub?** Flathub verlangt `project_license`; der Quelltext ist privat. Vorschlag:
   `LicenseRef-proprietary=<URL>` mit einer kurzen Nutzungslizenz auf der Website, die die Weitergabe über Flathub
   erlaubt (ohne URL lehnt Flathub ab).
