@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ENTWURF – AppStream-Metadaten für Flathub/GNOME Software/KDE Discover. Nicht eingereicht.
+  Vor einer Einreichung: Screenshots (öffentliche URLs), Lizenz (siehe Bauplan, offene Frage F1), Release-Daten.
+  Prüfen: flatpak run org.freedesktop.appstream-glib validate <datei>  bzw.  appstreamcli validate <datei>
+-->
+<component type="desktop-application">
+  <id>com.rebelsofgaming.RebelsOfGaming</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LicenseRef-proprietary</project_license>
+
+  <name>Rebels of Gaming</name>
+  <summary>Clan platform of the Rebels of Gaming</summary>
+  <summary xml:lang="de">Clan-Plattform der Rebels of Gaming</summary>
+  <summary xml:lang="fr">Plateforme du clan Rebels of Gaming</summary>
+
+  <developer id="com.rebelsofgaming">
+    <name>Rebels of Gaming</name>
+  </developer>
+
+  <description>
+    <p>
+      The native app for the Rebels of Gaming multigaming clan: read news, chat with members,
+      see game servers and stay up to date – built for the Linux desktop and the Steam Deck.
+    </p>
+    <p xml:lang="de">
+      Die native App des Multigaming-Clans Rebels of Gaming: News lesen, mit Mitgliedern schreiben,
+      Gameserver sehen und auf dem Laufenden bleiben – gebaut für den Linux-Desktop und das Steam Deck.
+    </p>
+    <p xml:lang="fr">
+      L’application native du clan multigaming Rebels of Gaming : lire les actus, discuter avec les membres,
+      voir les serveurs de jeu et rester informé – conçue pour le bureau Linux et le Steam Deck.
+    </p>
+    <p>Sign-in happens in your browser (Discord or e-mail); the app only keeps a device token in your system keyring.</p>
+    <p xml:lang="de">Die Anmeldung läuft im Browser (Discord oder E-Mail); die App speichert nur ein Geräte-Token im Schlüsselbund des Systems.</p>
+  </description>
+
+  <launchable type="desktop-id">com.rebelsofgaming.RebelsOfGaming.desktop</launchable>
+
+  <url type="homepage">https://rebelsofgaming.com/</url>
+  <url type="help">https://wiki.rebelsofgaming.com/</url>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#E0324A</color>
+    <color type="primary" scheme_preference="dark">#1C1F26</color>
+  </branding>
+
+  <!-- Nutzer schreiben einander (moderiert); keine Käufe, keine Werbung, kein Tracking -->
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-info">mild</content_attribute>
+  </content_rating>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  <recommends>
+    <display_length compare="ge">768</display_length>
+  </recommends>
+  <requires>
+    <internet>always</internet>
+  </requires>
+
+  <categories>
+    <category>Network</category>
+    <category>Chat</category>
+  </categories>
+
+  <provides>
+    <binary>rebelsofgaming</binary>
+  </provides>
+
+  <!-- Screenshots erst mit öffentlichen URLs (z. B. cdn.rogclan.de) -->
+  <screenshots>
+    <screenshot type="default">
+      <caption>News</caption>
+      <image>https://cdn.rogclan.de/apps/linux/screenshots/news.png</image>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="0.1.0" date="2026-10-30" type="development">
+      <description>
+        <p>First preview: sign-in, news, messages (read-only).</p>
+      </description>
+    </release>
+  </releases>
+</component>

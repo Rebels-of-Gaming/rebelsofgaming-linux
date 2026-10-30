@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Name=Rebels of Gaming
+GenericName=Clan-App
+GenericName[en]=Clan app
+GenericName[fr]=Application du clan
+Comment=Clan-Plattform der Rebels of Gaming: News, Nachrichten, Server und mehr
+Comment[en]=Rebels of Gaming clan platform: news, messages, servers and more
+Comment[fr]=Plateforme du clan Rebels of Gaming : actus, messages, serveurs et plus
+Icon=com.rebelsofgaming.RebelsOfGaming
+Exec=rebelsofgaming %u
+Terminal=false
+StartupNotify=true
+StartupWMClass=com.rebelsofgaming.RebelsOfGaming
+Categories=Network;Chat;
+Keywords=RoG;Rebels;Clan;Gaming;Discord;Steam;
+# rog://-Links (Benachrichtigungen, Website) öffnen die App – Auswertung folgt in Stufe 3
+MimeType=x-scheme-handler/rog;
+SingleMainWindow=true
