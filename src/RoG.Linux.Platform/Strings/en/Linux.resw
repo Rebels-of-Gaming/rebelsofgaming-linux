@@ -348,6 +348,7 @@
   </data>
   <data name="Error_rules_acceptance_required" xml:space="preserve">
     <value>Please accept the rules first (banner at the top or Info → Rules) – until then you can read but not post.</value>
+  </data>
   <data name="Linux_MatchReport" xml:space="preserve">
     <value>REPORT</value>
   </data>
@@ -359,6 +360,7 @@
   </data>
   <data name="Linux_StatsGuest" xml:space="preserve">
     <value>Statistics are for members only. Sign in to see leaderboards and weekly awards.</value>
+  </data>
   <data name="Linux_MapHint" xml:space="preserve">
     <value>Member map – drag or use the arrow keys to move, mouse wheel or plus/minus to zoom</value>
   </data>
