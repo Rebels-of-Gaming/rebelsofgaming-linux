@@ -20,16 +20,20 @@
           <Panel Grid.Column="1" Width="41">
             <PathIcon Data="{Binding Icon}" Width="20" Height="20" HorizontalAlignment="Center" />
             <!-- Zähler als Punkt auf dem Symbol, wenn nur Symbole sichtbar sind -->
-            <Ellipse Width="8" Height="8" Fill="{DynamicResource RoGRedBrush}" HorizontalAlignment="Right" VerticalAlignment="Top"
-                     Margin="0,6,8,0" IsVisible="{Binding HasBadge}" />
+            <Panel IsVisible="{Binding !$parent[views:NavPane].ShowLabels}">
+              <Ellipse Width="8" Height="8" Fill="{DynamicResource RoGRedBrush}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                       Margin="0,6,8,0" IsVisible="{Binding HasBadge}" />
+            </Panel>
           </Panel>
           <TextBlock Grid.Column="2" Classes="navlabel" Text="{Binding Label}" TextTrimming="CharacterEllipsis"
                      IsVisible="{Binding $parent[views:NavPane].ShowLabels}" />
-          <Border Grid.Column="3" IsVisible="{Binding HasBadge}" Background="{DynamicResource RoGRedBrush}"
-                  CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" Margin="0,0,10,0">
-            <TextBlock Text="{Binding BadgeText}" FontSize="11" FontWeight="SemiBold"
-                       Foreground="{DynamicResource RoGOnAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-          </Border>
+          <Panel Grid.Column="3" IsVisible="{Binding $parent[views:NavPane].ShowLabels}">
+            <Border IsVisible="{Binding HasBadge}" Background="{DynamicResource RoGRedBrush}"
+                    CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" Margin="0,0,10,0">
+              <TextBlock Text="{Binding BadgeText}" FontSize="11" FontWeight="SemiBold"
+                         Foreground="{DynamicResource RoGOnAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </Panel>
         </Grid>
       </Button>
     </DataTemplate>

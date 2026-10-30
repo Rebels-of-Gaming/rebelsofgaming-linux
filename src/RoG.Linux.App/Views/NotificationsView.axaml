@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.NotificationsView"
+             x:DataType="vm:NotificationsViewModel">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" MaxWidth="808" />
+      <ColumnDefinition Width="Auto" />
+    </Grid.ColumnDefinitions>
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,12">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Classes="display" Text="{l:T NotificationsPage_Title.Text}" />
+          <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                  ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+            <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+          </Button>
+        </Grid>
+        <WrapPanel IsVisible="{Binding ShowList}" ItemSpacing="16" LineSpacing="8">
+          <CheckBox IsChecked="{Binding UnreadOnly}" Content="{l:T NotificationsPage_UnreadOnly.Header}" />
+          <Button Classes="secondary" Command="{Binding MarkAllReadCommand}" IsEnabled="{Binding HasUnread}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" />
+              <TextBlock Text="{l:T NotificationsPage_MarkAll.Content}" />
+            </StackPanel>
+          </Button>
+        </WrapPanel>
+      </StackPanel>
+      <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="24,0,24,16" HorizontalAlignment="Stretch"
+              IsVisible="{Binding HasMore}" IsEnabled="{Binding !IsLoadingMore}"
+              Command="{Binding LoadMoreCommand}" Content="{l:T Common_LoadMore.Content}" />
+      <Panel>
+        <StackPanel Spacing="16" Margin="24" IsVisible="{Binding IsGuest}" VerticalAlignment="Center" HorizontalAlignment="Center">
+          <PathIcon Data="{StaticResource IconBell}" Width="48" Height="48" Foreground="{DynamicResource RoGLineBrush}" />
+          <TextBlock Classes="muted" Text="{l:T NotificationsPage_Guest.Text}" TextAlignment="Center" />
+          <Button Classes="primary" HorizontalAlignment="Center" Command="{Binding SignInCommand}" Content="{l:T Linux_SignIn}" />
+        </StackPanel>
+        <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                     EmptyText="{l:T NotificationsPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" IsVisible="{Binding ShowList}" />
+        <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Items}" Margin="16,0,24,16" AutomationProperties.Name="{l:T NotificationsPage_List.AutomationProperties.Name}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:NotificationRowViewModel">
+                <Button Classes="row tile" Padding="14,12" Command="{Binding OpenCommand}"
+                        AutomationProperties.Name="{Binding Title}">
+                  <Grid ColumnDefinitions="Auto,*,Auto">
+                    <PathIcon Data="{Binding Icon}" Width="20" Height="20" VerticalAlignment="Top" Margin="0,2,14,0"
+                              Foreground="{DynamicResource RoGMutedBrush}" />
+                    <StackPanel Grid.Column="1" Spacing="3">
+                      <TextBlock Classes="body" Classes.strong="{Binding IsUnread}" Text="{Binding Title}" TextWrapping="Wrap" />
+                      <TextBlock Classes="muted small" Text="{Binding Body}" IsVisible="{Binding HasBody}" MaxLines="3" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Classes="muted small" Text="{Binding Time}" />
+                    </StackPanel>
+                    <Ellipse Grid.Column="2" Width="10" Height="10" Fill="{DynamicResource RoGRedBrush}" VerticalAlignment="Center" Margin="12,0,0,0"
+                             IsVisible="{Binding IsUnread}" />
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Panel>
+    </DockPanel>
+  </Grid>
+</UserControl>

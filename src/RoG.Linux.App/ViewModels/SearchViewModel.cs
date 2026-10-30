@@ -116,10 +116,7 @@ public sealed partial class SearchViewModel(AppServices services) : LoadableView
             return;
         }
 
-        if (AppRoute.FromWebUrl(hit.Url, Services.Environment) is not { } route || !Services.Navigate(route))
-        {
-            _ = Services.Browser.OpenAsync(hit.Url);
-        }
+        _ = Services.OpenLinkAsync(hit.Url);
     }
 }
 

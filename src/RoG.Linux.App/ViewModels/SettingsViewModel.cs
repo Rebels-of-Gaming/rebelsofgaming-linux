@@ -55,6 +55,14 @@ public sealed partial class SettingsViewModel : ObservableObject
             + (LinuxDeviceName.IsSteamDeck() ? " · " + services.T("Linux_SteamDeck") : string.Empty);
         DisplayText = services.Format("Linux_DisplayBackend", WindowPlacementService.ActualBackend);
         CopyrightText = services.Format(StringKeys.SettingsPageClanCopyright, ClanFounded, DateTime.Now.Year);
+        UpdateRealtimeText();
+        services.Realtime.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(RealtimeService.State))
+            {
+                UpdateRealtimeText();
+            }
+        };
         _loaded = true;
         _ = LoadPlatformAsync();
     }
@@ -94,6 +102,19 @@ public sealed partial class SettingsViewModel : ObservableObject
     public string DisplayText { get; }
 
     public string CopyrightText { get; }
+
+    /// <summary>„Echtzeit: verbunden“ usw. – Diagnose für Reverb (Glocke, Server, Live-Ticker).</summary>
+    [ObservableProperty]
+    public partial string RealtimeText { get; set; } = string.Empty;
+
+    private void UpdateRealtimeText() => RealtimeText = _services.Format("Linux_RealtimeState", _services.T(_services.Realtime.State switch
+    {
+        RoG.Core.Realtime.RealtimeState.Connecting => "Linux_RealtimeConnecting",
+        RoG.Core.Realtime.RealtimeState.Connected => "Linux_RealtimeConnected",
+        RoG.Core.Realtime.RealtimeState.Reconnecting => "Linux_RealtimeReconnecting",
+        RoG.Core.Realtime.RealtimeState.Failed => "Linux_RealtimeFailed",
+        _ => "Linux_RealtimeDisconnected",
+    }));
 
     /// <summary>Plattform-Version (<c>GET /v1</c>) – Fehler nur als Hinweis.</summary>
     public async Task LoadPlatformAsync()

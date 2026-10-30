@@ -80,7 +80,7 @@
     <value>Desktop-Benachrichtigungen zeigen</value>
   </data>
   <data name="Linux_NotificationsHint" xml:space="preserve">
-    <value>Gilt, solange die App läuft. Glocke und neue Nachrichten melden sich ab einer der nächsten Versionen.</value>
+    <value>Gilt, solange die App läuft: neue Benachrichtigungen der Glocke und neue Direktnachrichten, wenn das Fenster nicht im Vordergrund ist. Ein Klick öffnet das Ziel in der App.</value>
   </data>
   <data name="Linux_TestNotification" xml:space="preserve">
     <value>TEST-BENACHRICHTIGUNG</value>
@@ -171,5 +171,26 @@
   </data>
   <data name="Linux_SearchHint" xml:space="preserve">
     <value>Mindestens 2 Zeichen eingeben – gesucht wird in News, Squads, Mitgliedern, Terminen, Forum, Wiki und mehr.</value>
+  </data>
+  <data name="Linux_NotificationOpen" xml:space="preserve">
+    <value>Öffnen</value>
+  </data>
+  <data name="Linux_RealtimeState" xml:space="preserve">
+    <value>Echtzeit: {0}</value>
+  </data>
+  <data name="Linux_RealtimeDisconnected" xml:space="preserve">
+    <value>nicht verbunden</value>
+  </data>
+  <data name="Linux_RealtimeConnecting" xml:space="preserve">
+    <value>verbindet …</value>
+  </data>
+  <data name="Linux_RealtimeConnected" xml:space="preserve">
+    <value>verbunden</value>
+  </data>
+  <data name="Linux_RealtimeReconnecting" xml:space="preserve">
+    <value>verbindet neu …</value>
+  </data>
+  <data name="Linux_RealtimeFailed" xml:space="preserve">
+    <value>abgelehnt – die App lädt ohne Live-Aktualisierung</value>
   </data>
 </root>

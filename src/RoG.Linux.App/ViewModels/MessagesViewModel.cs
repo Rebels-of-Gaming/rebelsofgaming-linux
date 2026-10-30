@@ -128,7 +128,7 @@ public sealed partial class MessagesViewModel(AppServices services, Action reque
     {
         try
         {
-            await _messages.MarkReadAsync(id);
+            Services.Realtime.SetUnreadMessages(await _messages.MarkReadAsync(id));
         }
         catch (Exception ex) when (ex is RoG.Core.Api.ApiProblemException or HttpRequestException)
         {

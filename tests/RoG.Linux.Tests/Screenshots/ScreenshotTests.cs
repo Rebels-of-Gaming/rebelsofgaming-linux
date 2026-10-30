@@ -222,6 +222,32 @@ public class ScreenshotTests
             await Settle(300);
         });
 
+    // ---- Stufe 3 ----
+
+    [AvaloniaFact]
+    public async Task Notifications_steam_deck() =>
+        await Shoot("notifications_1280x800", 1280, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenBell, AssertSidebarFits);
+
+    [AvaloniaFact]
+    public async Task Notifications_narrow() =>
+        await Shoot("notifications_narrow_480x800", 480, 800, await TestServices.CreateAsync(TestTokens.Wahke), OpenBell);
+
+    [AvaloniaFact]
+    public async Task Notifications_guest() =>
+        await Shoot("notifications_guest_1280x800", 1280, 800, await TestServices.CreateAsync(guest: true), async shell =>
+        {
+            shell.NavigateTo("Nav_Notifications");
+            await Settle(400);
+        });
+
+    private static async Task OpenBell(ShellViewModel shell)
+    {
+        shell.NavigateTo("Nav_Notifications");
+        var bell = Assert.IsType<NotificationsViewModel>(shell.CurrentPage);
+        await ViewModelTests.WaitUntil(() => bell.ShowContent);
+        await Settle(300);
+    }
+
     private static async Task OpenSquad(ShellViewModel shell, SquadTab tab)
     {
         // Profil für „Intern“ (Line-up enthält Wahke)

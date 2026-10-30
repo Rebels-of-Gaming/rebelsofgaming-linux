@@ -284,9 +284,9 @@ public sealed partial class OnboardingStepViewModel(OnboardingStep step, AppServ
     private async Task OpenAsync()
     {
         // Regeln, Termine … nativ in der App, sonst Website
-        if (step.Url is { } url && (AppRoute.FromWebUrl(url, services.Environment) is not { } route || !services.Navigate(route)))
+        if (step.Url is { } url)
         {
-            await services.Browser.OpenAsync(url);
+            await services.OpenLinkAsync(url);
         }
     }
 }

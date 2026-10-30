@@ -42,6 +42,20 @@ public sealed partial class App : Application
         window.Show();
 
         var shell = (ShellViewModel)window.DataContext!;
+        // Desktop-Benachrichtigungen nur, wenn das Fenster nicht im Vordergrund ist; Klick → Fenster nach vorn + Ziel
+        services.Realtime.IsAppFocused = () => window.IsActive;
+        services.Realtime.ActivationRequested += (_, target) =>
+        {
+            BringToFront(window);
+            switch (target)
+            {
+                case RoG.Core.Navigation.AppRoute route when shell.Navigate(route):
+                    break;
+                case Uri url:
+                    _ = services.Browser.OpenAsync(url);
+                    break;
+            }
+        };
         await shell.InitializeAsync();
         if (LaunchOptions.Current.DeepLink is { } link)
         {

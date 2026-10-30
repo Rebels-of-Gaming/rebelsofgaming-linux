@@ -290,7 +290,7 @@
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
-    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="Height" Value="36" />
     <Setter Property="CornerRadius" Value="{StaticResource RoGControlRadius}" />
@@ -393,6 +393,14 @@
     <Setter Property="Foreground" Value="{DynamicResource RoGInkBrush}" />
   </Style>
   <Style Selector="Button.row:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
+  </Style>
+
+  <!-- Zeile als Kachel (Listen aus Knöpfen: Suche, Info, Glocke, Line-up, Intern) -->
+  <Style Selector="Button.row.tile /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource RoGBg2Brush}" />
+  </Style>
+  <Style Selector="Button.row.tile:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
   </Style>
 

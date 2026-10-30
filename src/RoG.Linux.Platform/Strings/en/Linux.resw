@@ -80,7 +80,7 @@
     <value>Show desktop notifications</value>
   </data>
   <data name="Linux_NotificationsHint" xml:space="preserve">
-    <value>Applies while the app is running. The bell and new messages will notify you starting with one of the next versions.</value>
+    <value>Applies while the app is running: new bell notifications and new direct messages when the window is in the background. Clicking opens the target in the app.</value>
   </data>
   <data name="Linux_TestNotification" xml:space="preserve">
     <value>TEST NOTIFICATION</value>
@@ -171,5 +171,26 @@
   </data>
   <data name="Linux_SearchHint" xml:space="preserve">
     <value>Type at least 2 characters – searches news, squads, members, events, forum, wiki and more.</value>
+  </data>
+  <data name="Linux_NotificationOpen" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Linux_RealtimeState" xml:space="preserve">
+    <value>Realtime: {0}</value>
+  </data>
+  <data name="Linux_RealtimeDisconnected" xml:space="preserve">
+    <value>not connected</value>
+  </data>
+  <data name="Linux_RealtimeConnecting" xml:space="preserve">
+    <value>connecting …</value>
+  </data>
+  <data name="Linux_RealtimeConnected" xml:space="preserve">
+    <value>connected</value>
+  </data>
+  <data name="Linux_RealtimeReconnecting" xml:space="preserve">
+    <value>reconnecting …</value>
+  </data>
+  <data name="Linux_RealtimeFailed" xml:space="preserve">
+    <value>rejected – the app works without live updates</value>
   </data>
 </root>

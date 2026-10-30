@@ -237,6 +237,30 @@ public static class FakeData
         ]}
         """;
 
+    public static string Notifications => $$$"""
+        {"data":[
+          {{{Notification("01N1", "forum.mention", "Nyx hat dich in „Taktik für Supply“ erwähnt", "@Wahke übernimmst du die Engineers?", "https://rebelsofgaming.com/de/forum/t/01T1/taktik", "forum", null)}}},
+          {{{Notification("01N2", "events.reminder", "Scrim-Abend CS2 beginnt in einer Stunde", null, "https://rebelsofgaming.com/de/events/01EV1", "calendar", null)}}},
+          {{{Notification("01N3", "news.published", "Neue News: Herbst-Scrims", "Wir suchen Gegner für die neue Serie.", "https://rebelsofgaming.com/de/news/scrim-serie-herbst-2026", "news", null)}}},
+          {{{Notification("01N4", "squads.joined", "Willkommen im Squad Enemy Territory", null, "https://rebelsofgaming.com/de/squads/enemy-territory", "users", "2026-10-28T10:00:00Z")}}}
+        ],"meta":{"per_page":30,"next_cursor":null}}
+        """;
+
+    public static string NotificationsUnread => $$$"""
+        {"data":[
+          {{{Notification("01N1", "forum.mention", "Nyx hat dich in „Taktik für Supply“ erwähnt", "@Wahke übernimmst du die Engineers?", "https://rebelsofgaming.com/de/forum/t/01T1/taktik", "forum", null)}}}
+        ],"meta":{"per_page":30,"next_cursor":null}}
+        """;
+
+    private static string Notification(string id, string type, string title, string? body, string url, string icon, string? readAt)
+    {
+        var bodyJson = body is null ? "null" : System.Text.Json.JsonSerializer.Serialize(body);
+        var readJson = readAt is null ? "null" : $"\"{readAt}\"";
+        return $$$"""
+            {"id":"{{{id}}}","type":"{{{type}}}","title":{{{System.Text.Json.JsonSerializer.Serialize(title)}}},"body":{{{bodyJson}}},"url":"{{{url}}}","icon":"{{{icon}}}","read_at":{{{readJson}}},"created_at":"2026-10-30T08:{{{id[^1]}}}0:00Z"}
+            """;
+    }
+
     private static string Squad(string id, string slug, string name, string tagline, string gameShort, string game, string recruiting, int members, string leader, string? description = null, string? training = null)
     {
         var desc = description is null ? "null" : System.Text.Json.JsonSerializer.Serialize(description);

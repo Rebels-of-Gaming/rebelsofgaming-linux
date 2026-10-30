@@ -159,7 +159,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:SquadMemberViewModel">
-                    <Button Classes="row" Command="{Binding OpenCommand}" Background="{DynamicResource RoGBg2Brush}"
+                    <Button Classes="row tile" Command="{Binding OpenCommand}"
                             AutomationProperties.Name="{Binding Name}">
                       <Grid ColumnDefinitions="Auto,*">
                         <c:AvatarView Size="40" Source="{Binding Avatar}" DisplayName="{Binding Name}" />

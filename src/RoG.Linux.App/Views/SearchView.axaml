@@ -38,7 +38,7 @@
             <DataTemplate x:DataType="vm:SearchRowViewModel">
               <Panel>
                 <TextBlock Classes="group" Text="{Binding Title}" IsVisible="{Binding IsGroup}" />
-                <Button Classes="row" Background="{DynamicResource RoGBg2Brush}" Padding="14,10" IsVisible="{Binding IsHit}"
+                <Button Classes="row tile" Padding="14,10" IsVisible="{Binding IsHit}"
                         Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding Title}">
                   <StackPanel Spacing="2">
                     <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" MaxLines="2" />

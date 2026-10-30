@@ -28,10 +28,10 @@
                 <DataTemplate x:DataType="vm:InfoRowViewModel">
                   <Panel>
                     <TextBlock Classes="group" Text="{Binding Title}" IsVisible="{Binding IsGroup}" />
-                    <Button Classes="row" Classes.selected="{Binding IsSelected}" Background="{DynamicResource RoGBg2Brush}" Padding="14,10"
+                    <Button Classes="row tile" Classes.selected="{Binding IsSelected}" Padding="14,10"
                             IsVisible="{Binding IsItem}" Command="{Binding SelectCommand}" AutomationProperties.Name="{Binding Title}">
                       <Button.Styles>
-                        <Style Selector="Button.row.selected">
+                        <Style Selector="Button.row.selected /template/ ContentPresenter#PART_ContentPresenter">
                           <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
                           <Setter Property="BorderThickness" Value="3,0,0,0" />
                           <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />

@@ -46,13 +46,47 @@ public sealed partial class ShellViewModel : ObservableObject
         ];
         FooterItems =
         [
-            Item("Nav_Notifications", "Shell_NavNotifications.Content", "IconBell", "notifications", false),
+            Item("Nav_Notifications", "Shell_NavNotifications.Content", "IconBell", "notifications", true),
             Item("Nav_Account", "Shell_NavAccount.Content", "IconAccount", "settings/account", true),
             Item("Nav_Settings", "Linux_NavSettings", "IconSettings", "settings", true),
         ];
         SearchItem = Item("Nav_Search", "Linux_SearchTitle", "IconSearch", "search", true);
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
         _services.Navigator = Navigate;
+        _services.IsNative = route => s_sections.TryGetValue(route.Section, out var key) && AllItems.FirstOrDefault(i => i.Key == key)?.Implemented == true;
+
+        // Echtzeit: Zähler an Glocke und Nachrichten, Live-Ereignisse an die offenen Seiten
+        var realtime = _services.Realtime;
+        realtime.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(RealtimeService.UnreadNotifications))
+            {
+                SetBadge("Nav_Notifications", realtime.UnreadNotifications);
+            }
+            else if (e.PropertyName == nameof(RealtimeService.UnreadMessages))
+            {
+                SetBadge("Nav_Messages", realtime.UnreadMessages);
+            }
+        };
+        realtime.NotificationReceived += (_, n) => (Page("Nav_Notifications") as NotificationsViewModel)?.Prepend(n);
+        realtime.ServerStatusChanged += (_, s) => (Page("Nav_Servers") as ServersViewModel)?.Apply(s);
+        realtime.LiveChanged += (_, _) =>
+        {
+            if (Page("Nav_Home") is HomeViewModel home && home.ShowContent)
+            {
+                _ = home.LoadAsync(silent: true);
+            }
+        };
+    }
+
+    private object? Page(string key) => _pages.GetValueOrDefault(key);
+
+    private void SetBadge(string key, int count)
+    {
+        if (AllItems.FirstOrDefault(i => i.Key == key) is { } item)
+        {
+            item.Badge = count;
+        }
     }
 
     public ObservableCollection<NavItem> MainItems { get; }
@@ -148,6 +182,8 @@ public sealed partial class ShellViewModel : ObservableObject
         {
             await LoadUserAsync();
         }
+
+        await _services.Realtime.StartAsync(token?.UserId);
     }
 
     [RelayCommand]
@@ -213,9 +249,33 @@ public sealed partial class ShellViewModel : ObservableObject
     public bool Navigate(AppRoute route)
     {
         ArgumentNullException.ThrowIfNull(route);
-        if (IsLoginVisible || !s_sections.TryGetValue(route.Section, out var key) || !NavigateTo(key))
+        if (IsLoginVisible)
         {
             return false;
+        }
+
+        // Bereiche ohne eigene Seite (Votes, Verwaltung, Bans, Bestenlisten, Karte) bzw. Einträge in Bereichen, die die
+        // App noch nicht nativ hat (Forum-Thema, Wiki-Seite …): genau diese Seite der Website öffnen
+        var web = WebFallback(route);
+        if (!s_sections.TryGetValue(route.Section, out var key))
+        {
+            if (web is null)
+            {
+                return false;
+            }
+
+            _ = _services.Browser.OpenAsync(web);
+            return true;
+        }
+
+        if (!NavigateTo(key))
+        {
+            return false;
+        }
+
+        if (web is not null && CurrentItem is { Implemented: false })
+        {
+            _ = _services.Browser.OpenAsync(web);
         }
 
         if (route.Key is { Length: > 0 } key2 && CurrentPage is IRoutablePage page)
@@ -226,9 +286,27 @@ public sealed partial class ShellViewModel : ObservableObject
         return true;
     }
 
-    /// <summary><c>rog://…</c> (Startargument oder zweite Instanz). Unbekannte Links werden ignoriert.</summary>
-    public bool OpenDeepLink(Uri link) =>
-        AppRoute.FromAppUri(link, _services.Environment) is { } route && Navigate(route);
+    /// <summary>
+    /// <c>rog://…</c> (Startargument, zweite Instanz, Benachrichtigung). Unbekannte Links werden ignoriert; solange der
+    /// Login zu sehen ist, wartet der Link und öffnet sich nach Anmeldung bzw. „Ohne Anmeldung umsehen“.
+    /// </summary>
+    public bool OpenDeepLink(Uri link)
+    {
+        if (AppRoute.FromAppUri(link, _services.Environment) is not { } route)
+        {
+            return false;
+        }
+
+        if (IsLoginVisible)
+        {
+            _pendingRoute = route;
+            return true;
+        }
+
+        return Navigate(route);
+    }
+
+    private AppRoute? _pendingRoute;
 
     private static readonly Dictionary<AppSection, string> s_sections = new()
     {
@@ -253,6 +331,27 @@ public sealed partial class ShellViewModel : ObservableObject
         [AppSection.Search] = "Nav_Search",
     };
 
+    /// <summary>Adresse der Website für Ziele, die die App (noch) nicht nativ zeigt; <c>null</c> = nativ bzw. ohne Eintrag.</summary>
+    private Uri? WebFallback(AppRoute route)
+    {
+        var env = _services.Environment;
+        var lang = _services.Language;
+        string Escaped(string k) => string.Join('/', k.Split('/').Select(Uri.EscapeDataString));
+        return route.Section switch
+        {
+            AppSection.Votes => env.WebPage(lang, "votes"),
+            AppSection.Admin => env.AdminBaseUrl ?? env.WebPage(lang, "admin"),
+            AppSection.Bans => env.WebPage(lang, route.Key is { } b ? "bans/" + Escaped(b) : "bans"),
+            AppSection.Leaderboards => env.WebPage(lang, "minecraft/leaderboards"),
+            AppSection.MinecraftMap => env.WebPage(lang, "minecraft/karte"),
+            AppSection.Forum when route.Key is { } f => env.WebPage(lang, f.Contains('/', StringComparison.Ordinal) ? "forum/" + Escaped(f) : "forum/t/" + Uri.EscapeDataString(f)),
+            AppSection.Wiki when route.Key is { } w => new Uri(env.WikiBaseUrl, Escaped(w)),
+            AppSection.Tools when route.Key is { } k => env.WebPage(lang, "tools/" + Escaped(k)),
+            AppSection.Matches when route.Key is { } m => env.WebPage(lang, "matches/" + Escaped(m)),
+            _ => null,
+        };
+    }
+
     private IEnumerable<NavItem> AllItems => MainItems.Concat(FooterItems).Append(SearchItem);
 
     private object CreatePage(NavItem item) => item.Key switch
@@ -266,6 +365,7 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Calendar" => new EventsViewModel(_services),
         "Nav_Info" => new InfoViewModel(_services),
         "Nav_Search" => new SearchViewModel(_services),
+        "Nav_Notifications" => new NotificationsViewModel(_services, ShowLogin),
         "Nav_Messages" => new MessagesViewModel(_services, ShowLogin),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
         _ => new PlaceholderViewModel(_services, item),
@@ -278,10 +378,19 @@ public sealed partial class ShellViewModel : ObservableObject
         login.Completed += async (_, _) =>
         {
             ShowShell();
-            if (await _services.Tokens.GetAsync() is not null)
+            if (_pendingRoute is { } pending)
+            {
+                _pendingRoute = null;
+                Navigate(pending);
+            }
+
+            var token = await _services.Tokens.GetAsync();
+            if (token is not null)
             {
                 await LoadUserAsync();
             }
+
+            await _services.Realtime.StartAsync(token?.UserId);
         };
         Login = login;
     }
@@ -313,6 +422,7 @@ public sealed partial class ShellViewModel : ObservableObject
     /// <summary>Abmelden: Token auf dem Server widerrufen und lokal löschen, Caches leeren, Login zeigen.</summary>
     public async Task SignOutAsync()
     {
+        await _services.Realtime.StopAsync();
         await _services.Account.LogoutAsync();
         _services.CurrentUser = null;
         _services.ClearCaches();
@@ -324,6 +434,7 @@ public sealed partial class ShellViewModel : ObservableObject
 
     private async Task OnUnauthorizedAsync()
     {
+        await _services.Realtime.StopAsync();
         await _services.Tokens.ClearAsync();
         _services.CurrentUser = null;
         _services.ClearCaches();

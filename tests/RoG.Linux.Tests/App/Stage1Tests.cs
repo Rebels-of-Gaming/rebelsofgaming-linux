@@ -98,7 +98,7 @@ public class Stage1Tests
         Assert.IsType<ServersViewModel>(shell.CurrentPage);
 
         Assert.False(shell.OpenDeepLink(new Uri("rog://auth/callback?code=x")));
-        Assert.False(shell.OpenDeepLink(new Uri("rog://admin")));
+        Assert.False(shell.OpenDeepLink(new Uri("rog://unknown")));
         Assert.Equal("Nav_Servers", shell.CurrentItem?.Key);
     }
 

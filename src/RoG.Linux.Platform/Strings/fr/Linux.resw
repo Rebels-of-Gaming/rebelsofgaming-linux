@@ -80,7 +80,7 @@
     <value>Afficher les notifications du bureau</value>
   </data>
   <data name="Linux_NotificationsHint" xml:space="preserve">
-    <value>S’applique tant que l’app est ouverte. La cloche et les nouveaux messages te notifieront dans une prochaine version.</value>
+    <value>S’applique tant que l’app est ouverte : nouvelles notifications de la cloche et nouveaux messages privés quand la fenêtre est en arrière-plan. Un clic ouvre la cible dans l’app.</value>
   </data>
   <data name="Linux_TestNotification" xml:space="preserve">
     <value>NOTIFICATION DE TEST</value>
@@ -171,5 +171,26 @@
   </data>
   <data name="Linux_SearchHint" xml:space="preserve">
     <value>Saisis au moins 2 caractères – recherche dans les news, squads, membres, événements, forum, wiki et plus.</value>
+  </data>
+  <data name="Linux_NotificationOpen" xml:space="preserve">
+    <value>Ouvrir</value>
+  </data>
+  <data name="Linux_RealtimeState" xml:space="preserve">
+    <value>Temps réel : {0}</value>
+  </data>
+  <data name="Linux_RealtimeDisconnected" xml:space="preserve">
+    <value>non connecté</value>
+  </data>
+  <data name="Linux_RealtimeConnecting" xml:space="preserve">
+    <value>connexion …</value>
+  </data>
+  <data name="Linux_RealtimeConnected" xml:space="preserve">
+    <value>connecté</value>
+  </data>
+  <data name="Linux_RealtimeReconnecting" xml:space="preserve">
+    <value>reconnexion …</value>
+  </data>
+  <data name="Linux_RealtimeFailed" xml:space="preserve">
+    <value>refusé – l’app fonctionne sans mises à jour en direct</value>
   </data>
 </root>

@@ -84,7 +84,11 @@ public sealed class AppServices : IDisposable
         Account = new AccountService(api.Client, tokens);
         Devices = new LinuxDeviceRegistration(api.Client, tokens);
         api.Handler.Unauthorized += (_, _) => Unauthorized?.Invoke(this, EventArgs.Empty);
+        Realtime = new RealtimeService(this);
     }
+
+    /// <summary>Echtzeit (Reverb), Zähler für Glocke/Nachrichten, Desktop-Benachrichtigungen.</summary>
+    public RealtimeService Realtime { get; }
 
     private readonly SemaphoreSlim _settingsGate = new(1, 1);
     private readonly LinuxSettingsStore _linuxStore;
@@ -103,6 +107,23 @@ public sealed class AppServices : IDisposable
     public Func<AppRoute, bool>? Navigator { get; set; }
 
     public bool Navigate(AppRoute route) => Navigator?.Invoke(route) ?? false;
+
+    /// <summary>Zeigt die App dieses Ziel selbst an (Bereich mit eigener Seite)? Von der Shell gesetzt.</summary>
+    public Func<AppRoute, bool>? IsNative { get; set; }
+
+    /// <summary>
+    /// Adresse der Website/des Wikis öffnen: als Seite der App, wenn es sie nativ gibt (<see cref="AppRoute.FromWebUrl"/>),
+    /// sonst genau diese Adresse im Browser (z. B. ein Forum-Thema, solange das Forum noch nicht in der App ist).
+    /// </summary>
+    public Task OpenLinkAsync(Uri url)
+    {
+        ArgumentNullException.ThrowIfNull(url);
+        return RouteFor(url) is { } route && Navigate(route) ? Task.CompletedTask : Browser.OpenAsync(url);
+    }
+
+    /// <summary>Route in der App für eine Adresse – nur, wenn die App sie nativ zeigt; sonst <c>null</c>.</summary>
+    public AppRoute? RouteFor(Uri url) =>
+        AppRoute.FromWebUrl(url, Environment) is { } route && (IsNative?.Invoke(route) ?? true) ? route : null;
 
     /// <summary>Läuft die App als Flatpak? (Über-Bereich, Hinweise)</summary>
     public bool IsFlatpak { get; } = new LinuxPaths().IsFlatpak;
@@ -253,6 +274,8 @@ public sealed class AppServices : IDisposable
 
     public void Dispose()
     {
+        // Reverb-Verbindung schließen, ohne den UI-Thread zu blockieren (höchstens 3 s)
+        Task.Run(() => Realtime.DisposeAsync().AsTask()).Wait(TimeSpan.FromSeconds(3));
         Api.Dispose();
         Images.Dispose();
         _settingsGate.Dispose();

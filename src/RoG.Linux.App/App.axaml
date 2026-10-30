@@ -22,10 +22,11 @@
     <DataTemplate DataType="vm:EventsViewModel"><views:EventsView /></DataTemplate>
     <DataTemplate DataType="vm:InfoViewModel"><views:InfoView /></DataTemplate>
     <DataTemplate DataType="vm:SearchViewModel"><views:SearchView /></DataTemplate>
+    <DataTemplate DataType="vm:NotificationsViewModel"><views:NotificationsView /></DataTemplate>
     <!-- Bausteine, die mehrere Seiten zeigen -->
     <DataTemplate DataType="vm:ServerItemViewModel"><views:ServerCard /></DataTemplate>
     <DataTemplate DataType="vm:InternalRowViewModel">
-      <Button Classes="row" Background="{DynamicResource RoGBg2Brush}" Padding="12,10" Command="{Binding OpenCommand}"
+      <Button Classes="row tile" Padding="12,10" Command="{Binding OpenCommand}"
               AutomationProperties.Name="{Binding Title}">
         <Grid ColumnDefinitions="Auto,*,Auto">
           <PathIcon Data="{Binding Icon}" Width="18" Height="18" Foreground="{DynamicResource RoGMutedBrush}" VerticalAlignment="Top" Margin="0,2,12,0" />

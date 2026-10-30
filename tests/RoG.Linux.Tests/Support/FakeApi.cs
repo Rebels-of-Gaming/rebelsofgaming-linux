@@ -57,6 +57,11 @@ public sealed class FakeApi : HttpMessageHandler
             ("GET", "/v1/pages") => FakeData.Pages,
             ("GET", "/v1/legal") => FakeData.Legal,
             ("GET", "/v1/search") => FakeData.Search,
+            ("GET", "/v1/notifications") => request.RequestUri!.Query.Contains("unread", StringComparison.Ordinal) ? FakeData.NotificationsUnread : FakeData.Notifications,
+            ("GET", "/v1/notifications/unread-count") => """{"data":{"unread":3}}""",
+            ("GET", "/v1/messages/unread-count") => """{"data":{"unread":2}}""",
+            ("POST", "/v1/notifications/read-all") => """{"data":{"unread":0}}""",
+            ("POST", var p) when p.StartsWith("/v1/notifications/", StringComparison.Ordinal) && p.EndsWith("/read", StringComparison.Ordinal) => """{"data":{"unread":2}}""",
             _ => null,
         };
         return Task.FromResult(body is null

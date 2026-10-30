@@ -138,7 +138,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:EventRowViewModel">
-                    <Button Classes="row" Background="{DynamicResource RoGBg2Brush}" Padding="12"
+                    <Button Classes="row tile" Padding="12"
                             Command="{Binding $parent[UserControl].((vm:EventsViewModel)DataContext).OpenRowCommand}" CommandParameter="{Binding}">
                       <ContentControl Content="{Binding}" ContentTemplate="{StaticResource EventRow}" />
                     </Button>

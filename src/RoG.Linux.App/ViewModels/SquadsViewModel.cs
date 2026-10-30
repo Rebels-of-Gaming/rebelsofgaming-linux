@@ -604,10 +604,7 @@ public sealed partial class SquadInternalViewModel(AppServices services) : Loada
             return false;
         }
 
-        if (AppRoute.FromWebUrl(url, Services.Environment) is not { } route || !Services.Navigate(route))
-        {
-            _ = Services.Browser.OpenAsync(url);
-        }
+        _ = Services.OpenLinkAsync(url);
 
         return true;
     }
