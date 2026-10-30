@@ -1,19 +1,49 @@
 [Desktop Entry]
 Type=Application
+Version=1.5
 Name=Rebels of Gaming
-GenericName=Clan-App
-GenericName[en]=Clan app
+GenericName=Clan app
+GenericName[de]=Clan-App
 GenericName[fr]=Application du clan
-Comment=Clan-Plattform der Rebels of Gaming: News, Nachrichten, Server und mehr
-Comment[en]=Rebels of Gaming clan platform: news, messages, servers and more
+Comment=Rebels of Gaming clan platform: news, messages, servers and more
+Comment[de]=Clan-Plattform der Rebels of Gaming: News, Nachrichten, Server und mehr
 Comment[fr]=Plateforme du clan Rebels of Gaming : actus, messages, serveurs et plus
 Icon=com.rebelsofgaming.RebelsOfGaming
 Exec=rebelsofgaming %u
 Terminal=false
 StartupNotify=true
+# X11-WM-Klasse und Wayland-App-ID = App-ID (Owner-Entscheidung F2)
 StartupWMClass=com.rebelsofgaming.RebelsOfGaming
-Categories=Network;Chat;
-Keywords=RoG;Rebels;Clan;Gaming;Discord;Steam;
+Categories=Network;Chat;InstantMessaging;
+Keywords=RoG;Rebels;Clan;Gaming;Multigaming;Community;Forum;Chat;Server;Discord;Steam;Steam Deck;
+Keywords[de]=RoG;Rebels;Clan;Gaming;Multigaming;Community;Forum;Chat;Nachrichten;Server;Gameserver;Termine;Discord;Steam;Steam Deck;
+Keywords[fr]=RoG;Rebels;Clan;Gaming;Multigaming;Communauté;Forum;Chat;Messages;Serveur;Discord;Steam;Steam Deck;
 # rog://-Links öffnen die App; läuft sie schon, übernimmt die laufende Instanz den Link (Single-Instance über D-Bus)
 MimeType=x-scheme-handler/rog;
 SingleMainWindow=true
+Actions=messages;notifications;servers;events;
+
+# Schnellzugriffe (Rechtsklick auf das Symbol im Dock/Startmenü) – über rog://, die laufende Instanz übernimmt
+[Desktop Action messages]
+Name=Messages
+Name[de]=Nachrichten
+Name[fr]=Messages
+Exec=rebelsofgaming rog://messages
+
+[Desktop Action notifications]
+Name=Notifications
+Name[de]=Benachrichtigungen
+Name[fr]=Notifications
+Exec=rebelsofgaming rog://notifications
+
+[Desktop Action servers]
+Name=Servers
+Name[de]=Server
+Name[fr]=Serveurs
+Exec=rebelsofgaming rog://servers
+
+[Desktop Action events]
+Name=Events
+Name[de]=Termine
+Name[fr]=Événements
+Exec=rebelsofgaming rog://events

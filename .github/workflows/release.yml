@@ -1,0 +1,187 @@
+# ENTWURF – Release-Pipeline der Linux-App (Owner-Entscheidung F1, docs/LINUX-BAUPLAN.md).
+#
+# Läuft NUR bei einem Tag vX.Y.Z, der auf main liegt – nie bei Pushes auf develop oder main und nicht bei PRs.
+# Heute: prüfen, bauen (x86_64 + aarch64 per Cross-Publish), testen, Tarballs + SHA-256 + fertiges Flathub-Manifest
+# als Workflow-Artefakte. Upload nach rog-public und der PR ins Flathub-Repo sind auskommentiert.
+#
+# TODO (Owner-Freigabe nötig, siehe packaging/README.md „Release-Pipeline freischalten“):
+#  1. Zugang für den Bucket rog-public (nur Schreiben unter apps/linux/) als Secrets anlegen
+#  2. Flathub-Repo der App (nach Annahme der Einreichung) + Token mit Schreibrecht nur darauf als Secret
+#  3. Danach die Schritte „Upload“ und „Flathub-PR“ einkommentieren
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+  DOTNET_NOLOGO: '1'
+
+jobs:
+  check:
+    name: Tag prüfen
+    if: github.ref_type == 'tag'
+    runs-on: [self-hosted, Linux, rog]
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      - name: Tag liegt auf main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag ${GITHUB_REF_NAME} liegt nicht auf main – Releases nur von main (CLAUDE.md)"
+            exit 1
+          fi
+
+      - name: Version = Tag = AppStream
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          props="$(sed -n 's:.*<RoGLinuxVersion>\(.*\)</RoGLinuxVersion>.*:\1:p' Directory.Build.props)"
+          if [ "$tag" != "$props" ]; then
+            echo "::error::Tag v$tag passt nicht zu RoGLinuxVersion $props (Directory.Build.props)"
+            exit 1
+          fi
+          metainfo=packaging/linux/com.rebelsofgaming.RebelsOfGaming.metainfo.xml
+          if ! grep -Eq "<release version=\"$tag\"[^>]*type=\"stable\"" "$metainfo"; then
+            echo "::error::$metainfo braucht einen Eintrag <release version=\"$tag\" date=\"…\" type=\"stable\">"
+            exit 1
+          fi
+          echo "version=$tag" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Paket ${{ matrix.arch }}
+    needs: check
+    runs-on: [self-hosted, Linux, rog]
+    timeout-minutes: 40
+    strategy:
+      fail-fast: true
+      matrix:
+        # aarch64 wird auf dem x86_64-Runner per Cross-Publish (linux-arm64) gebaut – .NET braucht dafür keinen
+        # arm64-Rechner; Tests laufen nur für x86_64
+        arch: [x86_64, aarch64]
+    env:
+      DOTNET_INSTALL_DIR: ${{ github.workspace }}/../.dotnet
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      # Wie in ci.yml: geteilter Kern über den Deploy-Key (nur lesen, nur rebelsofgaming-windows)
+      - name: Geteilten Kern holen (Submodul external/rog-windows)
+        env:
+          DEPLOY_KEY: ${{ secrets.ROG_WINDOWS_DEPLOY_KEY }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "::error::Secret ROG_WINDOWS_DEPLOY_KEY fehlt (docs/LINUX-BAUPLAN.md, Abschnitt CI)"
+            exit 1
+          fi
+          keyfile="$RUNNER_TEMP/rog-windows-deploy-key"
+          (umask 077 && printf '%s\n' "$DEPLOY_KEY" > "$keyfile")
+          trap 'rm -f "$keyfile"' EXIT
+          export GIT_SSH_COMMAND="ssh -i $keyfile -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          git -c "url.git@github.com:.insteadOf=https://github.com/" submodule update --init external/rog-windows
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Build + Tests
+        if: matrix.arch == 'x86_64'
+        run: |
+          dotnet build RoG.Linux.sln -c Release
+          dotnet test RoG.Linux.sln -c Release --no-build --blame-hang-timeout 5m --blame-hang-dump-type none
+
+      - name: Paket bauen
+        run: packaging/scripts/make-tarball.sh "${{ matrix.arch }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rebelsofgaming-${{ needs.check.outputs.version }}-linux-${{ matrix.arch }}
+          path: |
+            artifacts/dist/rebelsofgaming-${{ needs.check.outputs.version }}-linux-${{ matrix.arch }}.tar.gz
+            artifacts/dist/rebelsofgaming-${{ needs.check.outputs.version }}-linux-${{ matrix.arch }}.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 90
+
+  publish:
+    name: Manifest (+ Upload/Flathub, deaktiviert)
+    needs: [check, build]
+    runs-on: [self-hosted, Linux, rog]
+    timeout-minutes: 15
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: rebelsofgaming-${{ needs.check.outputs.version }}-linux-*
+          path: artifacts/dist
+          merge-multiple: true
+
+      - name: Prüfsummen kontrollieren
+        working-directory: artifacts/dist
+        run: sha256sum -c ./*.sha256
+
+      - name: Flathub-Manifest mit URLs und Prüfsummen
+        run: packaging/scripts/release-manifest.sh "$VERSION" artifacts/dist artifacts/release/com.rebelsofgaming.RebelsOfGaming.yml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flathub-manifest-${{ needs.check.outputs.version }}
+          path: artifacts/release/com.rebelsofgaming.RebelsOfGaming.yml
+          if-no-files-found: error
+          retention-days: 90
+
+      # TODO (Owner-Freigabe: Secrets + Bucket-Rechte) – Upload nach rog-public, ausgeliefert über cdn.rogclan.de.
+      # Bestehende Dateien werden nie überschrieben (Flathub-Builds müssen reproduzierbar bleiben).
+      # - name: Upload nach rog-public (apps/linux/<version>/)
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
+      #     AWS_DEFAULT_REGION: us-east-1
+      #     S3_ENDPOINT: https://s3.wahke.lu
+      #   run: |
+      #     prefix="s3://rog-public/apps/linux/$VERSION/"
+      #     if aws --endpoint-url "$S3_ENDPOINT" s3 ls "$prefix" | grep -q .; then
+      #       echo "::error::$prefix existiert schon – Version erhöhen statt überschreiben"; exit 1
+      #     fi
+      #     for f in artifacts/dist/*.tar.gz artifacts/dist/*.tar.gz.sha256; do
+      #       aws --endpoint-url "$S3_ENDPOINT" s3 cp "$f" "$prefix" --acl public-read
+      #     done
+      #     for f in artifacts/dist/*.tar.gz; do
+      #       url="https://cdn.rogclan.de/apps/linux/$VERSION/$(basename "$f")"
+      #       test "$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)" = "$(cut -d' ' -f1 "$f.sha256")"
+      #     done
+
+      # TODO (Owner-Freigabe: Flathub-Repo der App + Token nur dafür) – PR mit neuem Manifest. Flathub baut den PR
+      # zur Probe; Zusammenführen bleibt Handarbeit des Owners.
+      # - name: PR ins Flathub-Repo
+      #   env:
+      #     GH_TOKEN: ${{ secrets.FLATHUB_APP_REPO_TOKEN }}
+      #   run: |
+      #     git clone "https://x-access-token:${GH_TOKEN}@github.com/flathub/com.rebelsofgaming.RebelsOfGaming.git" flathub
+      #     cd flathub
+      #     git switch -c "release-$VERSION"
+      #     cp ../artifacts/release/com.rebelsofgaming.RebelsOfGaming.yml .
+      #     git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -am "Update to $VERSION"
+      #     git push origin "release-$VERSION"
+      #     gh pr create --title "Update to $VERSION" --body "Release $VERSION der Linux-App" --head "release-$VERSION"

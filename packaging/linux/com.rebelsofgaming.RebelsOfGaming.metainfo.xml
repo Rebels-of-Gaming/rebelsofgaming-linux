@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ENTWURF – AppStream-Metadaten für Flathub/GNOME Software/KDE Discover. Nicht eingereicht.
-  App-ID endgültig (Owner-Entscheidung F2). Quelltext privat, Flathub bekommt Binärpakete (F1) → proprietäre Lizenz.
-  Vor einer Einreichung: Screenshots (öffentliche URLs unter cdn.rogclan.de), Release-Daten.
-  Prüfen: flatpak run org.freedesktop.appstream-glib validate <datei>  bzw.  appstreamcli validate <datei>
+  AppStream-Metadaten für Flathub, GNOME Software und KDE Discover (Stufe 10). NICHT eingereicht.
+  App-ID endgültig (Owner-Entscheidung F2); Flathub bekommt Binärpakete, der Quelltext bleibt privat (F1).
+
+  Vor einer Einreichung (Checkliste: packaging/README.md):
+   - project_license: Owner-Entscheidung (Platzhalter LicenseRef-proprietary, Optionen in packaging/README.md)
+   - Screenshots unter https://cdn.rogclan.de/apps/linux/screenshots/ hochladen (Dateien: packaging/screenshots/)
+   - Release-Eintrag: Version, Datum und type="stable" zum Tag vX.Y.Z setzen (neuester Eintrag zuerst)
+  Prüfen: „appstreamcli validate“ (pedantisch) und „flatpak-builder-lint appstream“ – Befehle in packaging/README.md
 -->
 <component type="desktop-application">
   <id>com.rebelsofgaming.RebelsOfGaming</id>
   <metadata_license>CC0-1.0</metadata_license>
+  <!-- PLATZHALTER – Owner-Entscheidung offen, siehe packaging/README.md „Lizenz“ -->
   <project_license>LicenseRef-proprietary</project_license>
 
   <name>Rebels of Gaming</name>
-  <summary>Clan platform of the Rebels of Gaming</summary>
-  <summary xml:lang="de">Clan-Plattform der Rebels of Gaming</summary>
-  <summary xml:lang="fr">Plateforme du clan Rebels of Gaming</summary>
+  <!-- Flathub: höchstens 35 Zeichen, ohne App-Namen, ohne Punkt am Ende -->
+  <summary>News, chat and servers of your clan</summary>
+  <summary xml:lang="de">News, Chat und Server deines Clans</summary>
+  <summary xml:lang="fr">Actus, chat et serveurs de ton clan</summary>
 
   <developer id="com.rebelsofgaming">
     <name>Rebels of Gaming</name>
@@ -21,70 +27,188 @@
 
   <description>
     <p>
-      The native app for the Rebels of Gaming multigaming clan: read news, chat with members,
-      see game servers and stay up to date – built for the Linux desktop and the Steam Deck.
+      The official app of the Rebels of Gaming, a multigaming clan since 2020. Everything the clan platform offers –
+      natively on the Linux desktop and the Steam Deck, in German, English and French.
     </p>
     <p xml:lang="de">
-      Die native App des Multigaming-Clans Rebels of Gaming: News lesen, mit Mitgliedern schreiben,
-      Gameserver sehen und auf dem Laufenden bleiben – gebaut für den Linux-Desktop und das Steam Deck.
+      Die offizielle App der Rebels of Gaming, Multigaming-Clan seit 2020. Alles, was die Clan-Plattform bietet –
+      nativ auf dem Linux-Desktop und dem Steam Deck, auf Deutsch, Englisch und Französisch.
     </p>
     <p xml:lang="fr">
-      L’application native du clan multigaming Rebels of Gaming : lire les actus, discuter avec les membres,
-      voir les serveurs de jeu et rester informé – conçue pour le bureau Linux et le Steam Deck.
+      L’application officielle des Rebels of Gaming, clan multigaming depuis 2020. Tout ce que propose la plateforme
+      du clan – en natif sur le bureau Linux et le Steam Deck, en allemand, anglais et français.
     </p>
-    <p>Sign-in happens in your browser (Discord or e-mail); the app only keeps a device token in your system keyring.</p>
-    <p xml:lang="de">Die Anmeldung läuft im Browser (Discord oder E-Mail); die App speichert nur ein Geräte-Token im Schlüsselbund des Systems.</p>
+    <ul>
+      <li>News, forum with polls and reactions, wiki with offline reading</li>
+      <li xml:lang="de">News, Forum mit Umfragen und Reaktionen, Wiki mit Offline-Lesen</li>
+      <li xml:lang="fr">Actus, forum avec sondages et réactions, wiki lisible hors ligne</li>
+      <li>Direct messages in real time, also in their own window, with notifications on the desktop</li>
+      <li xml:lang="de">Direktnachrichten in Echtzeit, auch im eigenen Fenster, mit Benachrichtigungen auf dem Desktop</li>
+      <li xml:lang="fr">Messages privés en temps réel, aussi dans leur propre fenêtre, avec notifications sur le bureau</li>
+      <li>Squads, members with online status, friends, calendar with sign-ups, matches and statistics</li>
+      <li xml:lang="de">Squads, Mitglieder mit Online-Status, Freunde, Kalender mit Zusagen, Matches und Statistiken</li>
+      <li xml:lang="fr">Squads, membres avec statut en ligne, amis, calendrier avec inscriptions, matchs et statistiques</li>
+      <li>Game servers with live status and one-click connect, Minecraft, TeamSpeak and Discord voice</li>
+      <li xml:lang="de">Gameserver mit Live-Status und Verbinden per Klick, Minecraft, TeamSpeak und Discord-Voice</li>
+      <li xml:lang="fr">Serveurs de jeu avec statut en direct et connexion en un clic, Minecraft, TeamSpeak et vocal Discord</li>
+      <li>Gallery, downloads, uploads and short links; applications and votes for squads</li>
+      <li xml:lang="de">Galerie, Downloads, Uploads und Kurzlinks; Bewerbungen und Abstimmungen für Squads</li>
+      <li xml:lang="fr">Galerie, téléchargements, envois et liens courts ; candidatures et votes pour les squads</li>
+      <li>With the right permissions: server control with live console, moderation and administration</li>
+      <li xml:lang="de">Mit den passenden Rechten: Server-Steuerung mit Live-Konsole, Moderation und Verwaltung</li>
+      <li xml:lang="fr">Avec les droits nécessaires : contrôle des serveurs avec console en direct, modération et administration</li>
+    </ul>
+    <p>
+      Many pages can be read as a guest. Sign-in happens in your browser (Discord or e-mail); the app keeps only a
+      device token in your system keyring. No tracking, no advertising.
+    </p>
+    <p xml:lang="de">
+      Viele Seiten lassen sich als Gast lesen. Die Anmeldung läuft im Browser (Discord oder E-Mail); die App speichert
+      nur ein Geräte-Token im Schlüsselbund des Systems. Kein Tracking, keine Werbung.
+    </p>
+    <p xml:lang="fr">
+      De nombreuses pages sont lisibles en invité. La connexion se fait dans ton navigateur (Discord ou e-mail) ;
+      l’application ne garde qu’un jeton d’appareil dans le trousseau du système. Pas de pistage, pas de publicité.
+    </p>
   </description>
 
   <launchable type="desktop-id">com.rebelsofgaming.RebelsOfGaming.desktop</launchable>
 
+  <!-- Nur echte Adressen der Plattform (RoG.Core/Config/environments.json); ein öffentlicher Bugtracker existiert nicht -->
   <url type="homepage">https://rebelsofgaming.com/</url>
   <url type="help">https://wiki.rebelsofgaming.com/</url>
 
+  <!-- RoG-Rot (hell) und RoG-Dunkel (dunkel) aus dem Design der Plattform -->
   <branding>
     <color type="primary" scheme_preference="light">#E0324A</color>
     <color type="primary" scheme_preference="dark">#1C1F26</color>
   </branding>
 
-  <!-- Nutzer schreiben einander (moderiert); keine Käufe, keine Werbung, kein Tracking -->
+  <!--
+    OARS 1.1: Direktnachrichten und Forum mit Wortfilter, Meldungen und Moderation (moderate); Profile zeigen Namen,
+    optional Stadt/Land, Online-Status und verknüpfte Spiele-Konten (Steam, Discord …) anderen Mitgliedern (intense);
+    Mitgliederkarte nur mit Zustimmung und nur Stadt-Genauigkeit (intense, da Ort geteilt wird). Kein Sprach-/Videochat
+    in der App (TeamSpeak/Discord sind eigene Programme), keine Käufe, keine Werbung, kein Glücksspiel.
+  -->
   <content_rating type="oars-1.1">
-    <content_attribute id="social-chat">intense</content_attribute>
-    <content_attribute id="social-info">mild</content_attribute>
+    <content_attribute id="social-chat">moderate</content_attribute>
+    <content_attribute id="social-info">intense</content_attribute>
+    <content_attribute id="social-contacts">intense</content_attribute>
+    <content_attribute id="social-location">intense</content_attribute>
   </content_rating>
 
+  <!-- Eingaben: Maus/Touchpad, Tastatur (alle Kürzel, sichtbarer Fokus), Touch (Steam Deck, Tablets) -->
   <supports>
     <control>pointing</control>
     <control>keyboard</control>
     <control>touch</control>
+    <!-- Controller (SDL) kommt mit dem Steam-Deck-Teil von Stufe 10 – vor der Einreichung prüfen, sonst Zeile entfernen -->
+    <control>gamepad</control>
   </supports>
-  <recommends>
-    <display_length compare="ge">768</display_length>
-  </recommends>
+  <!-- Kleinstes Fenster 360 logische Pixel (MainWindow MinWidth); ab 600 px Seitenleiste mit Symbolen -->
   <requires>
-    <internet>always</internet>
+    <display_length compare="ge">360</display_length>
   </requires>
+  <recommends>
+    <internet>always</internet>
+  </recommends>
 
   <categories>
     <category>Network</category>
     <category>Chat</category>
+    <category>InstantMessaging</category>
   </categories>
+
+  <keywords>
+    <keyword>RoG</keyword>
+    <keyword>clan</keyword>
+    <keyword xml:lang="de">Clan</keyword>
+    <keyword xml:lang="fr">clan</keyword>
+    <keyword>gaming</keyword>
+    <keyword>multigaming</keyword>
+    <keyword>community</keyword>
+    <keyword xml:lang="de">Community</keyword>
+    <keyword xml:lang="fr">communauté</keyword>
+    <keyword>forum</keyword>
+    <keyword>game server</keyword>
+    <keyword xml:lang="de">Gameserver</keyword>
+    <keyword xml:lang="fr">serveur de jeu</keyword>
+    <keyword>Steam Deck</keyword>
+  </keywords>
 
   <provides>
     <binary>rebelsofgaming</binary>
+    <!-- Single-Instance: org.freedesktop.Application unter der App-ID auf dem Session-Bus -->
+    <dbus type="user">com.rebelsofgaming.RebelsOfGaming</dbus>
   </provides>
 
-  <!-- Screenshots erst mit öffentlichen URLs (z. B. cdn.rogclan.de) -->
+  <!--
+    Englisch als Standard, Deutsch als Sprachvariante. 1280×800 (16:10) aus den Headless-Tests
+    (StoreScreenshotTests); Dateien unter packaging/screenshots/. Die URLs sind PLATZHALTER nach dem Muster aus F1 –
+    noch nicht hochgeladen. Flathub spiegelt die Bilder beim Bau auf eigene Server.
+  -->
   <screenshots>
     <screenshot type="default">
-      <caption>News</caption>
-      <image>https://cdn.rogclan.de/apps/linux/screenshots/news.png</image>
+      <caption>Home page with live ticker and your start with the clan</caption>
+      <caption xml:lang="de">Startseite mit Live-Ticker und deinem Start im Clan</caption>
+      <caption xml:lang="fr">Accueil avec le direct et tes premiers pas dans le clan</caption>
+      <image type="source" width="1280" height="800">https://cdn.rogclan.de/apps/linux/screenshots/home-en.png</image>
+      <image type="source" width="1280" height="800" xml:lang="de">https://cdn.rogclan.de/apps/linux/screenshots/home-de.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Direct messages in real time</caption>
+      <caption xml:lang="de">Direktnachrichten in Echtzeit</caption>
+      <caption xml:lang="fr">Messages privés en temps réel</caption>
+      <image type="source" width="1280" height="800">https://cdn.rogclan.de/apps/linux/screenshots/messages-en.png</image>
+      <image type="source" width="1280" height="800" xml:lang="de">https://cdn.rogclan.de/apps/linux/screenshots/messages-de.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Game servers with live status and one-click connect</caption>
+      <caption xml:lang="de">Gameserver mit Live-Status und Verbinden per Klick</caption>
+      <caption xml:lang="fr">Serveurs de jeu avec statut en direct et connexion en un clic</caption>
+      <image type="source" width="1280" height="800">https://cdn.rogclan.de/apps/linux/screenshots/servers-en.png</image>
+      <image type="source" width="1280" height="800" xml:lang="de">https://cdn.rogclan.de/apps/linux/screenshots/servers-de.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Calendar with sign-ups and the server for the event</caption>
+      <caption xml:lang="de">Kalender mit Zusagen und dem Server zum Termin</caption>
+      <caption xml:lang="fr">Calendrier avec inscriptions et le serveur de l’événement</caption>
+      <image type="source" width="1280" height="800">https://cdn.rogclan.de/apps/linux/screenshots/calendar-en.png</image>
+      <image type="source" width="1280" height="800" xml:lang="de">https://cdn.rogclan.de/apps/linux/screenshots/calendar-de.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Clan news, drawn natively</caption>
+      <caption xml:lang="de">Clan-News, nativ dargestellt</caption>
+      <caption xml:lang="fr">Actus du clan, affichées en natif</caption>
+      <image type="source" width="1280" height="800">https://cdn.rogclan.de/apps/linux/screenshots/news-en.png</image>
+      <image type="source" width="1280" height="800" xml:lang="de">https://cdn.rogclan.de/apps/linux/screenshots/news-de.png</image>
     </screenshot>
   </screenshots>
 
+  <!--
+    0.1.0 ist NICHT veröffentlicht: type="development" (Software-Center zeigen es nicht als stabile Version).
+    Zur ersten Veröffentlichung einen Eintrag mit der Tag-Version, dem Tag-Datum und type="stable" OBEN einfügen.
+  -->
   <releases>
     <release version="0.1.0" date="2026-10-30" type="development">
       <description>
-        <p>First preview: start page with live ticker, settings (language, theme), sign-in, news, messages (read-only), native Wayland.</p>
+        <p>Preview with the full range of the clan platform:</p>
+        <p xml:lang="de">Vorschau mit dem vollen Umfang der Clan-Plattform:</p>
+        <p xml:lang="fr">Aperçu avec toutes les fonctions de la plateforme du clan :</p>
+        <ul>
+          <li>News, forum, wiki with offline reading, direct messages in real time</li>
+          <li xml:lang="de">News, Forum, Wiki mit Offline-Lesen, Direktnachrichten in Echtzeit</li>
+          <li xml:lang="fr">Actus, forum, wiki lisible hors ligne, messages privés en temps réel</li>
+          <li>Squads, members, friends, calendar, matches, gallery, downloads, uploads and short links</li>
+          <li xml:lang="de">Squads, Mitglieder, Freunde, Kalender, Matches, Galerie, Downloads, Uploads und Kurzlinks</li>
+          <li xml:lang="fr">Squads, membres, amis, calendrier, matchs, galerie, téléchargements, envois et liens courts</li>
+          <li>Game servers, Minecraft, TeamSpeak and Discord voice; server control, moderation and administration with permissions</li>
+          <li xml:lang="de">Gameserver, Minecraft, TeamSpeak und Discord-Voice; Server-Steuerung, Moderation und Verwaltung mit Rechten</li>
+          <li xml:lang="fr">Serveurs de jeu, Minecraft, TeamSpeak et vocal Discord ; contrôle des serveurs, modération et administration avec les droits</li>
+          <li>Native Wayland, tray icon, desktop notifications, rog:// links, app lock with PIN or fingerprint</li>
+          <li xml:lang="de">Natives Wayland, Tray-Symbol, Desktop-Benachrichtigungen, rog://-Links, App-Sperre mit PIN oder Fingerabdruck</li>
+          <li xml:lang="fr">Wayland natif, icône de la zone de notification, notifications du bureau, liens rog://, verrouillage par code PIN ou empreinte</li>
+        </ul>
       </description>
     </release>
   </releases>

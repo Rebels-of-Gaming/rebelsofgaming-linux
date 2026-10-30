@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Baut das Binärpaket für Flathub (Owner-Entscheidung F1, 30.10.2026): self-contained Publish + Desktop-Dateien als
 #   artifacts/dist/rebelsofgaming-<version>-linux-<arch>.tar.gz  (+ .sha256)
-# Später lädt die CI das Paket öffentlich nach https://cdn.rogclan.de/apps/linux/<version>/ (Bucket rog-public) und
-# trägt URL + sha256 ins Flathub-Manifest ein. Der Upload ist bewusst NICHT Teil dieses Skripts.
+# Layout im Archiv: rebelsofgaming-<version>-linux-<arch>/{rebelsofgaming,share}/ – flatpak-builder streift den
+# obersten Ordner ab, das Manifest kopiert dist/rebelsofgaming nach /app/lib und dist/share nach /app/share.
+# Die Release-Pipeline (.github/workflows/release.yml) baut beide Architekturen, erzeugt mit release-manifest.sh das
+# Manifest mit URL + sha256 und lädt später (nach Owner-Freigabe) nach https://cdn.rogclan.de/apps/linux/<version>/
+# (Bucket rog-public) hoch. Der Upload ist bewusst NICHT Teil dieses Skripts.
 #
 #   packaging/scripts/make-tarball.sh [x86_64|aarch64]
 set -euo pipefail

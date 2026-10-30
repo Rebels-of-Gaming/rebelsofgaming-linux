@@ -1,75 +1,86 @@
 # ENTWURF – Flatpak-Manifest der Linux-App. Nicht bei Flathub eingereicht (nur auf Auftrag des Owners).
 #
 # Owner-Entscheidungen (30.10.2026, docs/LINUX-BAUPLAN.md):
-#  - F1: Der Quelltext bleibt privat. Flathub baut aus fertigen Binärpaketen, die die CI öffentlich unter
+#  - F1: Der Quelltext bleibt privat. Flathub baut aus fertigen Binärpaketen, die die Release-Pipeline öffentlich unter
 #        https://cdn.rogclan.de/apps/linux/<version>/ (Bucket rog-public der Website) ablegt; hier nur URL + sha256.
 #        Paket bauen: packaging/scripts/make-tarball.sh <x86_64|aarch64> (self-contained .NET, kein SDK im Flatpak).
-#        Upload und automatisches Eintragen von URL/sha256 folgen mit der Release-Pipeline (noch nicht umgesetzt).
+#        Entwurf der Pipeline: .github/workflows/release.yml (Upload und Flathub-PR noch deaktiviert).
 #  - F2: App-ID com.rebelsofgaming.RebelsOfGaming (endgültig) – gleich in .desktop, AppStream, Symbol, D-Bus-Namen
 #        (Single-Instance), Schlüsselbund-Attribut, WM-Klasse (X11) und xdg_toplevel-App-ID (Wayland).
 #  - F3: Avalonia 12 mit nativem Wayland → wayland + fallback-x11 statt erzwungenem X11.
 #
-# Vor einer Einreichung: echte Prüfsummen (CI), Screenshots unter cdn.rogclan.de, appstreamcli validate,
-# flatpak-builder-lint, Domain-Nachweis https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt.
-#
-# Lokal testen (Paket vorher mit make-tarball.sh bauen, dann url → path: ../../artifacts/dist/<datei> ersetzen):
-#   flatpak-builder --user --install --force-clean build-dir packaging/flatpak/com.rebelsofgaming.RebelsOfGaming.yml
-#   flatpak run com.rebelsofgaming.RebelsOfGaming
+# Prüfen und lokal bauen: packaging/README.md (flatpak-builder-lint, packaging/scripts/flatpak-local.sh).
+# Vor einer Einreichung: echte Prüfsummen (Release-Pipeline), Screenshots unter cdn.rogclan.de, Lizenz (Owner),
+# Domain-Nachweis https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt.
 id: com.rebelsofgaming.RebelsOfGaming
 runtime: org.freedesktop.Platform
-runtime-version: '25.08'
+runtime-version: '26.08'
 sdk: org.freedesktop.Sdk
 command: rebelsofgaming
 
 finish-args:
-  # API, Bilder vom CDN, Loopback-Rücksprung des Logins (127.0.0.1)
+  # Netz: API, Echtzeit (Reverb), Bilder über die Plattform, Loopback-Rücksprung des Browser-Logins (127.0.0.1)
   - --share=network
-  # Avalonia 12: natives Wayland; ohne Wayland-Sitzung (oder im Spielmodus des Steam Deck) X11/XWayland
+  # Anzeige: Avalonia 12 spricht natives Wayland; ohne Wayland-Sitzung (und im Spielmodus des Steam Deck/Gamescope)
+  # X11 bzw. XWayland. fallback-x11 gibt X11 nur frei, wenn keine Wayland-Sitzung läuft.
   - --socket=wayland
   - --socket=fallback-x11
-  # X11-Rückfall: gemeinsamer Speicher (MIT-SHM) für schnelles Zeichnen
+  # Nur für den X11-Rückfall: gemeinsamer Speicher (MIT-SHM) zum Zeichnen – ohne ist X11 sehr langsam
   - --share=ipc
-  # GPU-Beschleunigung (EGL/OpenGL)
+  # GPU-Beschleunigung (EGL/OpenGL über Skia); ohne Recht zeichnet die App deutlich langsamer in Software
   - --device=dri
   # Controller (Steam Deck, Gamepads) über SDL: /dev/input (evdev; Hot-Plug per inotify, udev gibt es in der Sandbox
   # nicht). Bewusst nicht --device=all: das gäbe Zugriff auf alle Geräte (Kamera, USB …) und zeigt auf Flathub
   # „potenziell unsicher“. Folge: SDL-HIDAPI über /dev/hidraw* fällt weg (Sonderfunktionen einzelner Controller wie
   # Gyro/Touchpad); Tasten und Sticks gehen über evdev. Im Spielmodus des Steam Deck liefert Steam Input ohnehin einen
   # virtuellen Controller unter /dev/input. Braucht Flatpak ≥ 1.15.6 – ältere Versionen ignorieren das Recht, dann
-  # bleibt die App ohne Controller bedienbar. SDL selbst bringt die Runtime mit (freedesktop 25.08: SDL3 + sdl2-compat).
+  # bleibt die App ohne Controller bedienbar. SDL selbst bringt die Runtime mit (freedesktop 25.08/26.08: SDL3 + sdl2-compat).
   - --device=input
-  # Geräte-Token im Schlüsselbund (Secret Service); später ggf. Secret-Portal
+  # Geräte-Token und Offline-Schlüssel im Schlüsselbund (Secret Service, org.freedesktop.secrets). Das Secret-Portal
+  # liefert nur einen Schlüssel je App, keine benannten Einträge je Umgebung – deshalb (noch) direkt.
   - --talk-name=org.freedesktop.secrets
-  # App-Sperre: optional Entsperren per Fingerabdruck über fprintd (System-Bus). Die Berechtigung prüft fprintd selbst
-  # per Polkit (net.reactivated.fprint.device.verify, aktive Sitzung ohne Rückfrage) – die App bringt keine Polkit-Regel mit.
-  - --system-talk-name=net.reactivated.Fprint
-  # Downloads (Medien → Downloads) landen im Downloads-Ordner des Benutzers (Uploads/Einreichen laufen über das
-  # FileChooser-Portal und brauchen kein Dateisystem-Recht)
-  - --filesystem=xdg-download
   # Tray-Symbol (StatusNotifierItem): Anmeldung beim Watcher des Panels mit dem eindeutigen Busnamen – kein eigener
-  # Name nötig. Ohne Panel (GNOME ohne AppIndicator-Erweiterung) schließt das Fenster die App wie gewohnt.
+  # Name nötig. Ohne Panel (GNOME ohne AppIndicator-Erweiterung) beendet das Schließen des Fensters die App.
   - --talk-name=org.kde.StatusNotifierWatcher
-  # Single-Instance: Die App besitzt ihre eigene App-ID als D-Bus-Namen – das erlaubt Flatpak ohne weiteres Recht.
-  # Ohne weitere Rechte über Portale: Desktop-Benachrichtigungen (Notification-Portal), Autostart beim Anmelden
-  # (Background-Portal, fragt einmal nach), Farbschema („Wie das System“, Settings-Portal), Links (OpenURI-Portal).
+  # App-Sperre: optional Entsperren per Fingerabdruck über fprintd (System-Bus). Die Berechtigung prüft fprintd selbst
+  # per Polkit (net.reactivated.fprint.device.verify, aktive Sitzung ohne Rückfrage) – die App bringt keine Regel mit.
+  - --system-talk-name=net.reactivated.Fprint
+  # Medien → Downloads speichert in den Downloads-Ordner des Benutzers und zeigt die Datei dort („Im Ordner zeigen“).
+  # Uploads, Einreichen und Anhänge wählen Dateien über das FileChooser-Portal und brauchen kein Dateisystem-Recht.
+  - --filesystem=xdg-download
+  # Ohne weiteres Recht:
+  #  - Single-Instance: die App besitzt ihre App-ID als D-Bus-Namen (Flatpak erlaubt den eigenen Namen immer)
+  #  - Portale: Benachrichtigungen (Notification), Autostart beim Anmelden (Background, fragt einmal nach),
+  #    Dateiauswahl (FileChooser), Bildschirmfoto hochladen (Screenshot), Farbschema „Wie das System“ (Settings),
+  #    Links, rog:// an Spiele und den Browser (OpenURI)
 
 modules:
   - name: rebelsofgaming
     buildsystem: simple
+    # Fertige Binärdateien (.NET-Laufzeit, SkiaSharp, HarfBuzz): nicht strippen und keine Debug-Erweiterung abspalten –
+    # die Pakete sind bereits ohne Symbole gebaut (DebugType=none), und Strippen fremder .so bringt nur Risiko
+    build-options:
+      no-debuginfo: true
+      strip: false
     sources:
-      # Self-contained Publish + share/ (Desktop-Datei, AppStream, Symbol, Lizenzen) je Architektur
+      # Self-contained Publish + share/ (Desktop-Datei, AppStream, Symbol, Lizenzen) je Architektur, gebaut mit
+      # packaging/scripts/make-tarball.sh. Das Archiv enthält einen Ordner rebelsofgaming-<version>-linux-<arch>/,
+      # den flatpak-builder beim Entpacken abstreift (strip-components 1) → dist/rebelsofgaming/, dist/share/.
       - type: archive
         only-arches: [x86_64]
         url: https://cdn.rogclan.de/apps/linux/0.1.0/rebelsofgaming-0.1.0-linux-x86_64.tar.gz
-        sha256: 0000000000000000000000000000000000000000000000000000000000000000  # setzt die Release-Pipeline
+        # PLATZHALTER – setzt die Release-Pipeline (Datei *.tar.gz.sha256)
+        sha256: '0000000000000000000000000000000000000000000000000000000000000000'
         dest: dist
       - type: archive
         only-arches: [aarch64]
         url: https://cdn.rogclan.de/apps/linux/0.1.0/rebelsofgaming-0.1.0-linux-aarch64.tar.gz
-        sha256: 0000000000000000000000000000000000000000000000000000000000000000  # setzt die Release-Pipeline
+        # PLATZHALTER – setzt die Release-Pipeline (Datei *.tar.gz.sha256)
+        sha256: '0000000000000000000000000000000000000000000000000000000000000000'
         dest: dist
     build-commands:
       - mkdir -p /app/lib /app/bin
       - cp -a dist/rebelsofgaming /app/lib/rebelsofgaming
-      - printf '#!/bin/sh\nexec /app/lib/rebelsofgaming/rebelsofgaming "$@"\n' > /app/bin/rebelsofgaming && chmod 755 /app/bin/rebelsofgaming
+      - printf '#!/bin/sh\nexec /app/lib/rebelsofgaming/rebelsofgaming "$@"\n' > /app/bin/rebelsofgaming
+      - chmod 755 /app/bin/rebelsofgaming
       - cp -a dist/share/. /app/share/
