@@ -98,14 +98,20 @@ public class LocalizationTests
         }
     }
 
-    internal static string RepoRoot()
+    internal static string RepoRoot([System.Runtime.CompilerServices.CallerFilePath] string source = "")
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "RoG.Linux.sln")))
-        {
-            dir = dir.Parent;
-        }
+        // Ausgabe neben dem Repo (bin/ als Symlink woandershin): dann vom Pfad dieser Quelldatei aus suchen
+        return Find(AppContext.BaseDirectory) ?? Find(Path.GetDirectoryName(source)) ?? throw new InvalidOperationException("RoG.Linux.sln nicht gefunden");
 
-        return dir?.FullName ?? throw new InvalidOperationException("RoG.Linux.sln nicht gefunden");
+        static string? Find(string? start)
+        {
+            var dir = string.IsNullOrEmpty(start) ? null : new DirectoryInfo(start);
+            while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "RoG.Linux.sln")))
+            {
+                dir = dir.Parent;
+            }
+
+            return dir?.FullName;
+        }
     }
 }

@@ -1,0 +1,135 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.BansView"
+             x:DataType="vm:BansViewModel">
+  <!-- Öffentliche Ban-Liste wie BansPage der Windows-App: gekürzte Kennungen, Einspruch über ein Forum-Thema -->
+  <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}">
+    <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="24,24,24,8" Spacing="12">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="display" Text="{l:T BansPage_Title.Text}" TextWrapping="Wrap" />
+            <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                    ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+              <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+            </Button>
+          </Grid>
+          <TextBlock Classes="muted" Text="{l:T BansPage_Intro.Text}" TextWrapping="Wrap" />
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}"
+                    AutomationProperties.Name="{l:T BansPage_StatusFilter.AutomationProperties.Name}" />
+          <TextBox x:Name="SearchBox" Text="{Binding Search}" PlaceholderText="{l:T BansPage_Search.PlaceholderText}"
+                   AutomationProperties.Name="{l:T BansPage_Search.AutomationProperties.Name}">
+            <TextBox.InnerRightContent>
+              <Button Classes="icon" Command="{Binding SearchNowCommand}" Width="32" Height="32" Padding="7"
+                      ToolTip.Tip="{l:T BansPage_Search.AutomationProperties.Name}" AutomationProperties.Name="{l:T BansPage_Search.AutomationProperties.Name}">
+                <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" />
+              </Button>
+            </TextBox.InnerRightContent>
+            <TextBox.KeyBindings>
+              <KeyBinding Gesture="Enter" Command="{Binding SearchNowCommand}" />
+            </TextBox.KeyBindings>
+          </TextBox>
+        </StackPanel>
+        <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="12,0,12,12" HorizontalAlignment="Stretch"
+                IsVisible="{Binding HasMore}" IsEnabled="{Binding !IsLoadingMore}"
+                Command="{Binding LoadMoreCommand}" Content="{l:T Common_LoadMore.Content}" />
+        <Panel>
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T BansPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+          <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                   IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T BansPage_List.AutomationProperties.Name}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:PublicBanItemViewModel">
+                <StackPanel Spacing="2" AutomationProperties.Name="{Binding AutomationName}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Ellipse Width="10" Height="10" Fill="{Binding StatusBrush}" VerticalAlignment="Center" />
+                    <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                  <TextBlock Classes="muted" FontFamily="{StaticResource RoGMonoFont}" FontSize="12" Text="{Binding Identity}" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Classes="muted small" Text="{Binding Meta}" MaxLines="2" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Panel>
+      </DockPanel>
+    </Border>
+
+    <!-- Ban -->
+    <Panel>
+      <TextBlock Classes="muted" Text="{l:T BansPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsVisible="{Binding ShowSelectHint}" Margin="32" TextWrapping="Wrap" />
+      <c:StateView DataContext="{Binding Detail}" x:DataType="vm:BanDetailViewModel"
+                   IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}"
+                   IsVisible="{Binding $parent[UserControl].((vm:BansViewModel)DataContext).IsDetailOpen}" />
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer.IsVisible>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="Detail.ShowContent" />
+            <Binding Path="IsDetailOpen" />
+          </MultiBinding>
+        </ScrollViewer.IsVisible>
+        <StackPanel DataContext="{Binding Detail}" x:DataType="vm:BanDetailViewModel"
+                    MaxWidth="{StaticResource RoGReadingWidth}" Margin="32,24,32,40" HorizontalAlignment="Left" Spacing="16">
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding $parent[UserControl].((vm:BansViewModel)DataContext).CloseDetailCommand}"
+                  IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+              <TextBlock Text="{l:T Common_Back}" />
+            </StackPanel>
+          </Button>
+          <StackPanel Spacing="4">
+            <SelectableTextBlock Classes="title" Text="{Binding Title}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="1" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Ellipse Width="10" Height="10" Fill="{Binding StatusBrushValue}" VerticalAlignment="Center" />
+              <TextBlock Classes="muted" Text="{Binding StatusText}" />
+            </StackPanel>
+            <SelectableTextBlock Classes="muted" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding Identity}" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Classes="section" Text="{l:T BansPage_Reason.Text}" />
+            <SelectableTextBlock Classes="body" Text="{Binding Reason}" TextWrapping="Wrap" IsVisible="{Binding HasReason}" />
+            <TextBlock Classes="muted" Text="{Binding Facts}" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <StackPanel Spacing="8">
+            <TextBlock Classes="section" Text="{l:T BansPage_AppealTitle.Text}" />
+            <TextBlock Classes="body" Text="{Binding AppealText}" TextWrapping="Wrap" />
+            <TextBlock Classes="muted" Text="{Binding AppealHint}" TextWrapping="Wrap" IsVisible="{Binding HasAppealHint}" />
+            <c:FeedbackBar DataContext="{Binding Feedback}" />
+            <StackPanel Spacing="8" IsVisible="{Binding CanAppeal}">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="label" Text="{l:T BansPage_Statement.Header}" />
+                <TextBox MinHeight="140" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="3000" Text="{Binding Statement}"
+                         PlaceholderText="{l:T BansPage_Statement.PlaceholderText}" AutomationProperties.Name="{l:T BansPage_Statement.Header}" />
+              </StackPanel>
+              <StackPanel Spacing="4">
+                <TextBlock Classes="label" Text="{l:T BansPage_Code.Header}" />
+                <TextBox MaxWidth="240" HorizontalAlignment="Left" MinWidth="200" MaxLength="16" Text="{Binding Code}"
+                         PlaceholderText="{l:T BansPage_Code.PlaceholderText}" AutomationProperties.Name="{l:T BansPage_Code.Header}" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button Classes="primary" Command="{Binding SubmitCommand}" IsEnabled="{Binding !IsSending}" Content="{l:T BansPage_Submit.Content}" />
+                <ProgressBar IsIndeterminate="True" Width="80" IsVisible="{Binding IsSending}" VerticalAlignment="Center" />
+              </StackPanel>
+            </StackPanel>
+          </StackPanel>
+
+          <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+            <Button Classes="secondary" Command="{Binding OpenThreadCommand}" IsVisible="{Binding HasThread}" Content="{l:T BansPage_OpenThread.Content}" />
+            <Button Classes="secondary" Command="{Binding OpenWebCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+                <TextBlock Text="{l:T BansPage_OpenWeb.Content}" />
+              </StackPanel>
+            </Button>
+          </WrapPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </c:ListDetailPanel>
+</UserControl>

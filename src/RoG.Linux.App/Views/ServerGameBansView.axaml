@@ -1,0 +1,216 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ServerGameBansView"
+             x:DataType="vm:ServerGameBansViewModel">
+  <!-- Reiter „Spiel-Bans“ im Steuer-Fenster (wie GameBansPanel der Windows-App): Plugin-Schlüssel, neuer Ban, Liste -->
+  <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="900" Margin="16,8,16,24" HorizontalAlignment="Left" Spacing="16">
+      <Panel IsVisible="{Binding HasOwnFeedback}">
+        <c:FeedbackBar DataContext="{Binding Feedback}" />
+      </Panel>
+
+      <!-- Rückfragen im Inhalt (statt ContentDialog) -->
+      <c:ConfirmBar x:Name="ConfirmBar" DataContext="{Binding Confirmation}" />
+      <Border x:Name="PromptPanel" Classes="hint info" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding Prompt.IsOpen}">
+        <StackPanel DataContext="{Binding Prompt}" x:DataType="vm:GameBanPromptViewModel" Spacing="10">
+          <TextBlock Classes="body strong" Text="{Binding Title}" TextWrapping="Wrap" />
+          <SelectableTextBlock Classes="body" Text="{Binding Text}" TextWrapping="Wrap" />
+          <StackPanel Spacing="4" IsVisible="{Binding AsksDuration}">
+            <TextBlock Classes="label" Text="{l:T GameBans_NewDuration}" TextWrapping="Wrap" />
+            <NumericUpDown Value="{Binding Minutes}" Minimum="0" Increment="60" FormatString="0" HorizontalAlignment="Left" MinWidth="180"
+                           AutomationProperties.Name="{l:T GameBans_NewDuration}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_LiftReason}" IsVisible="{Binding !AsksDuration}" />
+            <TextBlock Classes="label" Text="{l:T GameBans_NewReason}" IsVisible="{Binding AsksDuration}" />
+            <TextBox x:Name="PromptReason" Text="{Binding Reason}" MaxLength="200" AutomationProperties.Name="{l:T GameBans_NewReason}">
+              <TextBox.KeyBindings>
+                <KeyBinding Gesture="Enter" Command="{Binding AcceptCommand}" />
+              </TextBox.KeyBindings>
+            </TextBox>
+          </StackPanel>
+          <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+            <Button Classes="primary" Command="{Binding AcceptCommand}" Content="{l:T Common_Confirm}" />
+            <Button Classes="secondary" Command="{Binding CancelCommand}" Content="{l:T Common_Cancel}" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+      <Border x:Name="TokenPanel" Classes="hint success" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding Token.IsOpen}">
+        <StackPanel DataContext="{Binding Token}" x:DataType="vm:PluginTokenViewModel" Spacing="10">
+          <TextBlock Classes="body strong" Text="{l:T GameBans_TokenTitle}" />
+          <TextBlock Classes="body" Text="{l:T GameBans_TokenText}" TextWrapping="Wrap" />
+          <TextBox Text="{Binding Value}" IsReadOnly="True" FontFamily="{StaticResource RoGMonoFont}" TextWrapping="Wrap"
+                   AutomationProperties.Name="{l:T GameBans_TokenTitle}" />
+          <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+            <Button Classes="primary" Command="{Binding CopyTokenCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconCopy}" Width="16" Height="16" />
+                <TextBlock Text="{l:T GameBans_TokenCopy}" />
+              </StackPanel>
+            </Button>
+            <Button Classes="secondary" Command="{Binding DoneCommand}" Content="{l:T GameBans_TokenDone}" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Plugin-Schlüssel -->
+      <Border Classes="card" IsVisible="{Binding HasKeySection}">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="section" Text="{l:T GameBans_KeyTitle.Text}" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Ellipse Width="10" Height="10" Fill="{Binding KeyBrush}" VerticalAlignment="Center" />
+            <TextBlock Classes="body strong" Text="{Binding KeyStatus}" TextWrapping="Wrap" />
+          </StackPanel>
+          <SelectableTextBlock Classes="muted small" Text="{Binding KeyDetails}" IsVisible="{Binding HasKeyDetails}" TextWrapping="Wrap" />
+          <TextBlock Classes="muted small" Text="{l:T GameBans_KeyHint.Text}" TextWrapping="Wrap" />
+          <TextBlock Classes="body strong" Margin="0,4,0,0" Text="{l:T GameBans_RightsTitle.Text}" />
+          <CheckBox IsChecked="{Binding MayIssue}"><TextBlock Text="{l:T GameBans_MayIssue.Content}" TextWrapping="Wrap" /></CheckBox>
+          <StackPanel Spacing="4" IsVisible="{Binding IsManager}">
+            <CheckBox IsChecked="{Binding MayLift}"><TextBlock Text="{l:T GameBans_MayLift.Content}" TextWrapping="Wrap" /></CheckBox>
+            <CheckBox IsChecked="{Binding MayLiftAny}"><TextBlock Text="{l:T GameBans_MayLiftAny.Content}" TextWrapping="Wrap" /></CheckBox>
+            <CheckBox IsChecked="{Binding MayIp}"><TextBlock Text="{l:T GameBans_MayIp.Content}" TextWrapping="Wrap" /></CheckBox>
+            <CheckBox IsChecked="{Binding MayBanMembers}"><TextBlock Text="{l:T GameBans_MayBanMembers.Content}" TextWrapping="Wrap" /></CheckBox>
+            <CheckBox IsChecked="{Binding MayLink}"><TextBlock Text="{l:T GameBans_MayLink.Content}" TextWrapping="Wrap" /></CheckBox>
+            <TextBlock Classes="muted small" Margin="28,-4,0,0" Text="{l:T GameBans_MayLinkHint.Text}" TextWrapping="Wrap" />
+            <CheckBox IsChecked="{Binding MayEconomy}"><TextBlock Text="{l:T GameBans_MayEconomy.Content}" TextWrapping="Wrap" /></CheckBox>
+            <TextBlock Classes="muted small" Margin="28,-4,0,0" Text="{l:T GameBans_MayEconomyHint.Text}" TextWrapping="Wrap" />
+            <StackPanel Spacing="4" Margin="0,4,0,0">
+              <TextBlock Classes="label" Text="{l:T GameBans_MaxScope.Header}" />
+              <ComboBox MinWidth="200" ItemsSource="{Binding MaxScopeOptions}" SelectedItem="{Binding SelectedMaxScope}"
+                        AutomationProperties.Name="{l:T GameBans_MaxScope.Header}" />
+            </StackPanel>
+          </StackPanel>
+          <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8" Margin="0,4,0,0">
+            <Button Classes="primary" Command="{Binding CreateKeyCommand}" Content="{Binding KeyActionText}" />
+            <Button Classes="secondary" Command="{Binding SaveRightsCommand}" IsVisible="{Binding KeyExists}" Content="{l:T GameBans_SaveRights.Content}" />
+            <Button Classes="secondary" Command="{Binding RevokeKeyCommand}" IsVisible="{Binding KeyExists}" Content="{l:T GameBans_Revoke.Content}" />
+          </WrapPanel>
+          <StackPanel Margin="0,8,0,0" Spacing="6" IsVisible="{Binding IsManager}">
+            <TextBlock Classes="body strong" Text="{l:T GameBans_IncidentHeading.Text}" />
+            <TextBlock Classes="muted small" Text="{l:T GameBans_IncidentHint.Text}" TextWrapping="Wrap" />
+            <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="label" Text="{l:T GameBans_IncidentReason.Header}" />
+                <TextBox Width="320" MaxLength="200" Text="{Binding IncidentReason}" AutomationProperties.Name="{l:T GameBans_IncidentReason.Header}" />
+              </StackPanel>
+              <Button Classes="secondary" VerticalAlignment="Bottom" Command="{Binding LiftPluginBansCommand}" Content="{l:T GameBans_IncidentLift.Content}" />
+            </WrapPanel>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Neuer Ban -->
+      <StackPanel Spacing="8" IsVisible="{Binding CanBans}">
+        <TextBlock Classes="section" Text="{l:T GameBans_NewTitle.Text}" />
+        <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_Identifier.Header}" />
+            <TextBox Width="300" MaxLength="64" Text="{Binding Identifier}" PlaceholderText="{l:T GameBans_Identifier.PlaceholderText}"
+                     AutomationProperties.Name="{l:T GameBans_Identifier.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_IdentifierType.Header}" />
+            <TextBox Width="160" MaxLength="16" Text="{Binding IdentifierType}" PlaceholderText="{l:T GameBans_IdentifierType.PlaceholderText}"
+                     AutomationProperties.Name="{l:T GameBans_IdentifierType.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_Name.Header}" />
+            <TextBox Width="200" MaxLength="64" Text="{Binding PlayerName}" AutomationProperties.Name="{l:T GameBans_Name.Header}" />
+          </StackPanel>
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_ScopeBox.Header}" />
+            <ComboBox MinWidth="180" ItemsSource="{Binding ScopeOptions}" SelectedItem="{Binding SelectedScope}"
+                      AutomationProperties.Name="{l:T GameBans_ScopeBox.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_Minutes.Header}" />
+            <NumericUpDown Width="180" Minimum="0" Increment="60" FormatString="0" Value="{Binding Minutes}"
+                           AutomationProperties.Name="{l:T GameBans_Minutes.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4" IsVisible="{Binding IsManager}">
+            <TextBlock Classes="label" Text="{l:T GameBans_Ip.Header}" />
+            <TextBox Width="260" Text="{Binding Ip}" PlaceholderText="{l:T GameBans_Ip.PlaceholderText}" AutomationProperties.Name="{l:T GameBans_Ip.Header}" />
+          </StackPanel>
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_Reason.Header}" />
+            <TextBox Width="420" MaxLength="200" Text="{Binding Reason}" AutomationProperties.Name="{l:T GameBans_Reason.Header}" />
+          </StackPanel>
+          <Button Classes="primary" VerticalAlignment="Bottom" Command="{Binding CreateCommand}" Content="{l:T GameBans_Create.Content}" />
+        </WrapPanel>
+        <TextBlock Classes="muted small" Text="{l:T GameBans_NewHint.Text}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <!-- Liste -->
+      <StackPanel Spacing="8" IsVisible="{Binding CanBans}">
+        <TextBlock Classes="section" Text="{l:T GameBans_ListTitle.Text}" />
+        <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_StatusBox.Header}" />
+            <ComboBox MinWidth="160" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}"
+                      AutomationProperties.Name="{l:T GameBans_StatusBox.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T GameBans_Search.Header}" />
+            <TextBox Width="240" Text="{Binding Search}" PlaceholderText="{l:T GameBans_Search.PlaceholderText}"
+                     AutomationProperties.Name="{l:T GameBans_Search.Header}">
+              <TextBox.KeyBindings>
+                <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+              </TextBox.KeyBindings>
+            </TextBox>
+          </StackPanel>
+          <Button Classes="secondary" VerticalAlignment="Bottom" Command="{Binding SearchCommand}" Content="{l:T GameBans_SearchButton.Content}" />
+          <Button Classes="icon" VerticalAlignment="Bottom" Command="{Binding ReloadCommand}"
+                  ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+            <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+          </Button>
+        </WrapPanel>
+        <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+        <Border Classes="hint error" IsVisible="{Binding ListError, Converter={x:Static ObjectConverters.IsNotNull}}">
+          <TextBlock Classes="body" Text="{Binding ListError}" TextWrapping="Wrap" />
+        </Border>
+        <TextBlock Classes="muted" Text="{l:T GameBans_Empty.Text}" IsVisible="{Binding IsEmpty}" TextWrapping="Wrap" />
+        <ItemsControl ItemsSource="{Binding Items}" AutomationProperties.Name="{l:T GameBans_ListTitle.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:GameBanItemViewModel">
+              <Border Classes="card" Padding="14,12" AutomationProperties.Name="{Binding AutomationName}">
+                <StackPanel Spacing="4">
+                  <WrapPanel Orientation="Horizontal" ItemSpacing="8">
+                    <Ellipse Width="10" Height="10" Fill="{Binding StatusBrush}" VerticalAlignment="Center" />
+                    <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Classes="muted" Text="{Binding StatusText}" />
+                  </WrapPanel>
+                  <SelectableTextBlock Classes="muted" FontFamily="{StaticResource RoGMonoFont}" FontSize="12" Text="{Binding Identity}" TextWrapping="Wrap" />
+                  <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                  <SelectableTextBlock FontSize="12" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding PublicInfo}" TextWrapping="Wrap"
+                                       IsVisible="{Binding HasPublicInfo}" />
+                  <TextBlock Classes="body" FontSize="12" Text="{Binding Deliveries}" TextWrapping="Wrap" IsVisible="{Binding HasDeliveries}" />
+                  <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8" Margin="0,4,0,0">
+                    <Button Classes="secondary" Command="{Binding EditCommand}" IsVisible="{Binding IsActive}" Content="{l:T GameBans_Edit.Content}" />
+                    <Button Classes="secondary" Command="{Binding LiftCommand}" IsVisible="{Binding IsActive}" Content="{l:T GameBans_Lift.Content}" />
+                    <Button Classes="secondary" Command="{Binding DetailsCommand}" Content="{l:T GameBans_Details.Content}" />
+                    <Button Classes="secondary" Command="{Binding TogglePublicCommand}" Content="{Binding ToggleText}" />
+                    <Button Classes="link pad" Command="{Binding OpenPublicCommand}" IsVisible="{Binding HasPublicUrl}" VerticalAlignment="Center">
+                      <TextBlock Text="{l:T GameBans_OpenPublic.Content}" />
+                    </Button>
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Classes="secondary" HorizontalAlignment="Center" Command="{Binding LoadMoreCommand}" IsVisible="{Binding HasMore}"
+                Content="{l:T GameBans_More.Content}" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

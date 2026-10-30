@@ -1,0 +1,95 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RoG.Linux.App.ViewModels"
+        xmlns:c="using:RoG.Linux.App.Controls"
+        xmlns:l="using:RoG.Linux.App.Localization"
+        x:Class="RoG.Linux.App.Views.ServerProvisionWindow"
+        x:DataType="vm:ServerProvisionViewModel"
+        Width="820" Height="860" MinWidth="360" MinHeight="400"
+        Icon="avares://rebelsofgaming/Assets/rog-badge-512.png"
+        Background="{DynamicResource RoGBgBrush}"
+        Title="{Binding Title}">
+  <!-- „Neuer Gameserver“ (Pterodactyl über die Website) und Verwaltung eines so angelegten Servers: Status, Ablauf, Löschen -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Margin="24,20,24,8" Spacing="10" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+      <TextBlock Classes="display" Text="{Binding Title}" TextWrapping="Wrap" />
+      <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+      <c:FeedbackBar DataContext="{Binding Feedback}" />
+      <c:ConfirmBar DataContext="{Binding Confirmation}" />
+    </StackPanel>
+
+    <Panel>
+      <c:StateView IsLoading="{Binding IsLoadingCatalog}" ErrorMessage="{Binding LoadError}" RetryCommand="{Binding RetryCommand}"
+                   IsVisible="{Binding !IsManaging}" />
+      <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="24,8,24,32" HorizontalAlignment="Left" Spacing="16">
+
+          <!-- Anlegen -->
+          <StackPanel Spacing="16" IsVisible="{Binding ShowCreate}">
+            <TextBlock Classes="muted" Text="{l:T Provision_Intro.Text}" TextWrapping="Wrap" />
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="{l:T Provision_Node.Header}" />
+              <ComboBox MinWidth="320" MaxWidth="560" HorizontalAlignment="Left" ItemsSource="{Binding Nodes}" SelectedItem="{Binding SelectedNode}"
+                        AutomationProperties.Name="{l:T Provision_Node.Header}" />
+              <TextBlock Classes="muted small" Text="{Binding NodeInfo}" IsVisible="{Binding HasNodeInfo}" TextWrapping="Wrap" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="{l:T Provision_Egg.Header}" />
+              <ComboBox MinWidth="320" MaxWidth="560" HorizontalAlignment="Left" ItemsSource="{Binding Eggs}" SelectedItem="{Binding SelectedEgg}"
+                        PlaceholderText="{l:T Provision_Egg.Header}" AutomationProperties.Name="{l:T Provision_Egg.Header}" />
+              <TextBlock Classes="muted small" Text="{Binding EggInfo}" IsVisible="{Binding HasEggInfo}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <c:AdminFieldsView Fields="{Binding Fields}" />
+
+            <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding CreateCommand}" Content="{l:T Provision_Create.Content}" />
+          </StackPanel>
+
+          <!-- Verwalten -->
+          <StackPanel Spacing="16" IsVisible="{Binding ShowManagePanel}">
+            <SelectableTextBlock Classes="title" Text="{Binding ServerName}" TextWrapping="Wrap" />
+
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <TextBlock Classes="section" Text="{l:T Provision_StatusTitle.Text}" />
+                <TextBlock Classes="body" Text="{Binding StatusText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding RefreshStatusCommand}" Content="{l:T Provision_Refresh.Content}" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <TextBlock Classes="section" Text="{l:T Provision_ExpiryTitle.Text}" />
+                <TextBlock Classes="body" Text="{Binding ExpiryText}" TextWrapping="Wrap" />
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="label" Text="{l:T Provision_ExpiryChoice.Header}" />
+                  <ComboBox MinWidth="200" ItemsSource="{Binding ExpiryOptions}" SelectedItem="{Binding SelectedExpiry}"
+                            AutomationProperties.Name="{l:T Provision_ExpiryChoice.Header}" />
+                </StackPanel>
+                <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+                  <Button Classes="secondary" Command="{Binding SetExpiryCommand}" Content="{l:T Provision_SetExpiry.Content}" />
+                  <Button Classes="secondary" Command="{Binding ExtendExpiryCommand}" IsVisible="{Binding HasExpiry}" Content="{l:T Provision_ExtendExpiry.Content}" />
+                  <Button Classes="secondary" Command="{Binding RemoveExpiryCommand}" IsVisible="{Binding HasExpiry}" Content="{l:T Provision_RemoveExpiry.Content}" />
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+
+            <!-- Gefahrenzone -->
+            <Border Classes="card" BorderBrush="{DynamicResource RoGRedBrush}" BorderThickness="1" IsVisible="{Binding Deletable}">
+              <StackPanel Spacing="8">
+                <TextBlock Classes="section" Foreground="{DynamicResource RoGRedBrush}" Text="{l:T Provision_DangerTitle.Text}" />
+                <TextBlock Classes="body" Text="{l:T Provision_DangerText.Text}" TextWrapping="Wrap" />
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="label" Text="{l:T Provision_ConfirmName.Header}" TextWrapping="Wrap" />
+                  <TextBox Text="{Binding ConfirmName}" AutomationProperties.Name="{l:T Provision_ConfirmName.Header}" />
+                </StackPanel>
+                <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding DeleteCommand}" IsEnabled="{Binding CanDelete}"
+                        Content="{l:T Provision_Delete.Content}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</Window>

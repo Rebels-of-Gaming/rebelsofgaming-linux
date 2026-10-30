@@ -41,6 +41,11 @@
           <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
         </Button>
       </Grid>
+      <!-- Neuer Gameserver (servers.create + servers:manage), öffentliche Ban-Liste -->
+      <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+        <Button Classes="primary" Command="{Binding ProvisionCommand}" IsVisible="{Binding CanProvision}" Content="{l:T ServersPage_Provision.Content}" />
+        <Button Classes="secondary" Command="{Binding OpenBanListCommand}" Content="{l:T ServersPage_BanList.Content}" />
+      </WrapPanel>
       <!-- Reiter -->
       <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1">
         <WrapPanel Orientation="Horizontal">

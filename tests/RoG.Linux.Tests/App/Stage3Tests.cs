@@ -163,7 +163,6 @@ public class Stage3Tests
 
     [AvaloniaTheory]
     [InlineData("rog://admin", "https://admin.rebelsofgaming.com/")]
-    [InlineData("rog://bans/01B1", "https://rebelsofgaming.com/de/bans/01B1")]
     [InlineData("rog://wiki/Minecraft/Befehle", "https://wiki.rebelsofgaming.com/Minecraft/Befehle")]
     [InlineData("rog://open?url=https://rebelsofgaming.com/de/tools/zeitrechner", "https://rebelsofgaming.com/de/tools/zeitrechner")]
     public async Task Deep_links_without_a_native_page_open_the_exact_website_page(string link, string web)
@@ -189,6 +188,7 @@ public class Stage3Tests
     [InlineData("rog://settings", "Nav_Settings")]
     [InlineData("rog://friends", "Nav_Friends")]
     [InlineData("rog://matches", "Nav_Matches")]
+    [InlineData("rog://bans", "Nav_Bans")]
     [InlineData("rog://forum", "Nav_Forum")]
     [InlineData("rog://wiki", "Nav_Wiki")]
     [InlineData("rog://tools", "Nav_Tools")]

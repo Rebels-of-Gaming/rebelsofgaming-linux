@@ -30,6 +30,10 @@
         </StackPanel>
       </Grid>
 
+      <!-- über die Website angelegt: Installation, Ablauf -->
+      <TextBlock Classes="small" Foreground="{Binding ProvisioningBrush}" Text="{Binding ProvisioningText}" TextWrapping="Wrap"
+                 IsVisible="{Binding HasProvisioning}" />
+
       <StackPanel Spacing="4" IsVisible="{Binding ShowPlayers}">
         <TextBlock Classes="body" FontSize="14" Text="{Binding PlayersText}" />
         <ProgressBar Value="{Binding FillPercent}" Maximum="100" Height="4" MinHeight="4" CornerRadius="2" />
@@ -64,7 +68,20 @@
             <TextBlock Text="{l:T ServerCard_Control.Content}" />
           </StackPanel>
         </Button>
+        <Button Classes="secondary" Command="{Binding ManageCommand}" IsVisible="{Binding CanManageProvisioning}"
+                Content="{l:T ServerCard_Provisioning.Content}" />
       </WrapPanel>
+
+      <!-- zugewiesene Ports (über die Website angelegt), Hauptport gekennzeichnet -->
+      <Expander Header="{Binding PortsHeader}" IsVisible="{Binding HasPorts}" HorizontalAlignment="Stretch">
+        <ItemsControl ItemsSource="{Binding Ports}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <SelectableTextBlock Text="{Binding}" FontFamily="{StaticResource RoGMonoFont}" FontSize="13" Margin="0,2" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Expander>
 
       <Expander Header="{Binding PlayersHeader}" IsVisible="{Binding HasPlayerList}" HorizontalAlignment="Stretch">
         <ItemsControl ItemsSource="{Binding Players}">

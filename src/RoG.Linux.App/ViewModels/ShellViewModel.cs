@@ -57,6 +57,7 @@ public sealed partial class ShellViewModel : ObservableObject
         [
             Item("Nav_Votes", "VotesPage_Title.Text", "IconVote", "votes", true),
             Item("Nav_Leaderboards", "LeaderboardsPage_Title.Text", "IconTrophy", "minecraft/leaderboards", true),
+            Item("Nav_Bans", "BansPage_Title.Text", "IconShield", "bans", true),
         ];
         Acceptance = new AcceptanceViewModel(services);
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
@@ -331,7 +332,7 @@ public sealed partial class ShellViewModel : ObservableObject
             return false;
         }
 
-        // Bereiche ohne eigene Seite (Verwaltung, Bans, Karte) bzw. Einträge in Bereichen, die die
+        // Bereiche ohne eigene Seite (Verwaltung, Karte) bzw. Einträge in Bereichen, die die
         // App noch nicht nativ hat (Forum-Thema, Wiki-Seite …): genau diese Seite der Website öffnen
         var web = WebFallback(route);
         if (!s_sections.TryGetValue(route.Section, out var key))
@@ -408,6 +409,7 @@ public sealed partial class ShellViewModel : ObservableObject
         [AppSection.Search] = "Nav_Search",
         [AppSection.Votes] = "Nav_Votes",
         [AppSection.Leaderboards] = "Nav_Leaderboards",
+        [AppSection.Bans] = "Nav_Bans",
     };
 
     /// <summary>Adresse der Website für Ziele, die die App (noch) nicht nativ zeigt; <c>null</c> = nativ bzw. ohne Eintrag.</summary>
@@ -419,7 +421,6 @@ public sealed partial class ShellViewModel : ObservableObject
         return route.Section switch
         {
             AppSection.Admin => env.AdminBaseUrl ?? env.WebPage(lang, "admin"),
-            AppSection.Bans => env.WebPage(lang, route.Key is { } b ? "bans/" + Escaped(b) : "bans"),
             AppSection.MinecraftMap => env.WebPage(lang, "minecraft/karte"),
             AppSection.Wiki when route.Key is { } w => new Uri(env.WikiBaseUrl, Escaped(w)),
             AppSection.Tools when route.Key is { } k => env.WebPage(lang, "tools/" + Escaped(k)),
@@ -449,6 +450,7 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Matches" => new MatchesViewModel(_services, ShowLogin),
         "Nav_Leaderboards" => new LeaderboardsViewModel(_services),
         "Nav_Friends" => new FriendsViewModel(_services, ShowLogin),
+        "Nav_Bans" => new BansViewModel(_services),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
         _ => new PlaceholderViewModel(_services, item),
     };

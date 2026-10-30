@@ -157,6 +157,37 @@ public sealed partial class ServersViewModel : LoadableViewModel, IRoutablePage,
 
     public FeedbackViewModel Feedback { get; } = new();
 
+    /// <summary>„Neuer Gameserver“: Recht <c>servers.create</c> (nur mit 2FA vergeben) und Scope <c>servers:manage</c>.</summary>
+    public bool CanProvision => Services.CurrentUser is { } me && me.Can(ServerProvisioningService.Permission) && me.HasScope(ServerProvisioningService.Scope);
+
+    /// <summary>Provisioning-Fenster öffnen (neuer Server bzw. Verwaltung) – die Ansicht öffnet das Fenster.</summary>
+    public event EventHandler<ServerProvisionRequest>? ProvisionRequested;
+
+    [RelayCommand]
+    private void Provision() => RequestProvision(null);
+
+    private void RequestProvision(GameServer? server)
+    {
+        var request = new ServerProvisionRequest(server?.Slug ?? string.Empty, () =>
+        {
+            var vm = new ServerProvisionViewModel(Services, server);
+            vm.Changed += (_, _) => _ = LoadAsync(silent: true);
+            return vm;
+        });
+        ProvisionRequested?.Invoke(this, request);
+    }
+
+    /// <summary>Öffentliche Ban-Liste (wie „Ban-Liste“ der Windows-App).</summary>
+    [RelayCommand]
+    private void OpenBanList() => Services.Navigate(new RoG.Core.Navigation.AppRoute(RoG.Core.Navigation.AppSection.Bans));
+
+    private ServerItemViewModel Card(GameServer server, bool highlighted) => new(server, Services, Feedback)
+    {
+        IsHighlighted = highlighted,
+        CanManageProvisioning = server.Provisioning is not null && CanProvision,
+        ManageProvisioning = () => RequestProvision(server),
+    };
+
     protected override bool HasData => Servers.Count > 0;
 
     protected override async Task LoadCoreAsync(CancellationToken cancellationToken)
@@ -165,7 +196,7 @@ public sealed partial class ServersViewModel : LoadableViewModel, IRoutablePage,
         Servers.Clear();
         foreach (var server in servers)
         {
-            Servers.Add(new ServerItemViewModel(server, Services, Feedback) { IsHighlighted = server.Slug == _highlight });
+            Servers.Add(Card(server, server.Slug == _highlight));
         }
 
         UpdateTimers();
@@ -209,7 +240,7 @@ public sealed partial class ServersViewModel : LoadableViewModel, IRoutablePage,
             if (s.Id == update.Id || (update.Slug.Length > 0 && s.Slug == update.Slug))
             {
                 var changed = s with { Online = update.Online, Map = update.Map, Players = update.Players, MaxPlayers = update.MaxPlayers };
-                Servers[i] = new ServerItemViewModel(changed, Services, Feedback) { IsHighlighted = Servers[i].IsHighlighted };
+                Servers[i] = Card(changed, Servers[i].IsHighlighted);
             }
         }
     }
@@ -310,6 +341,36 @@ public sealed partial class ServerItemViewModel : ObservableObject
 
     public string CopyAutomationName { get; }
 
+    /// <summary>Über die Website angelegt: Installationsstand und Ablauf als Hinweis auf der Karte.</summary>
+    public bool HasProvisioning => Server.Provisioning is not null;
+
+    public string ProvisioningText => Server.Provisioning is not { } p ? string.Empty : string.Join(" · ", new[]
+    {
+        _services.T("Provision_Status_" + p.Status),
+        p.ExpiresAt is { } at ? _services.Format(StringKeys.ProvisionExpiresAt, at.ToLocalTime().ToString("g", _services.Culture)) : null,
+    }.Where(s => !string.IsNullOrEmpty(s)));
+
+    /// <summary>Rot: fehlgeschlagen oder läuft in 24 h ab; Gold: wird installiert; sonst gedämpft.</summary>
+    public Avalonia.Media.IBrush ProvisioningBrush => UiResources.Brush(
+        Server.Provisioning is { } p && (p.IsFailed || p.ExpiresSoon(DateTimeOffset.Now)) ? "RoGRedBrush" : Server.Provisioning?.IsInstalling == true ? "RoGGoldBrush" : "RoGMutedBrush");
+
+    /// <summary>Alle zugewiesenen Ports (über die Website angelegt), Hauptport zuerst und gekennzeichnet.</summary>
+    public IReadOnlyList<string> Ports => Server.Provisioning is { } p
+        ? p.Ports.Select(a => a.Primary ? $"{a.Address} · {_services.T(StringKeys.ServersPrimaryPort)}" : a.Address).ToList()
+        : [];
+
+    public bool HasPorts => Server.Provisioning?.Ports.Count > 0;
+
+    public string PortsHeader => _services.Format(StringKeys.ServersPortsHeader, Server.Provisioning?.Ports.Count ?? 0);
+
+    /// <summary>„Verwalten“ (Provisioning-Fenster) – nur mit <c>servers.create</c> + <c>servers:manage</c>.</summary>
+    public bool CanManageProvisioning { get; init; }
+
+    public Action? ManageProvisioning { get; init; }
+
+    [RelayCommand]
+    private void Manage() => ManageProvisioning?.Invoke();
+
     /// <summary>Per Link geöffnet (<c>rog://servers/slug</c>) – Karte mit roter Kante.</summary>
     [ObservableProperty]
     public partial bool IsHighlighted { get; set; }
@@ -329,3 +390,6 @@ public sealed partial class ServerItemViewModel : ObservableObject
         _feedback.Show(_services.Format(ok ? StringKeys.ServersCopied : StringKeys.ServersCopyFailed, Address), ok ? MessageTone.Success : MessageTone.Error);
     }
 }
+
+/// <summary>Provisioning-Fenster: <see cref="Key"/> = Slug (leer = neuer Server), <see cref="Create"/> baut das ViewModel.</summary>
+public sealed record ServerProvisionRequest(string Key, Func<ServerProvisionViewModel> Create);

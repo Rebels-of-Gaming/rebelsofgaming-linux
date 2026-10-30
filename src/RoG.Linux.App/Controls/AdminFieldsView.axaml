@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Controls.AdminFieldsView"
+             x:DataType="c:AdminFieldsView"
+             Focusable="False">
+  <!-- Felder des allgemeinen Verwaltungs-Editors (Text, Schalter, Auswahl, Übersetzungen) – „Neuer Gameserver“ -->
+  <ItemsControl ItemsSource="{Binding $parent[c:AdminFieldsView].Fields}" Focusable="False">
+    <ItemsControl.ItemsPanel>
+      <ItemsPanelTemplate><StackPanel Spacing="14" /></ItemsPanelTemplate>
+    </ItemsControl.ItemsPanel>
+    <ItemsControl.ItemTemplate>
+      <DataTemplate x:DataType="vm:AdminFieldViewModel">
+        <StackPanel Spacing="4">
+          <!-- Text (ein- oder mehrzeilig, Zahl, Liste) -->
+          <TextBlock Classes="label" Text="{Binding Label}" TextWrapping="Wrap" IsVisible="{Binding !IsToggle}" />
+          <TextBox IsVisible="{Binding IsText}" Text="{Binding Text}" AcceptsReturn="{Binding AcceptsReturn}" TextWrapping="Wrap"
+                   MinHeight="{Binding MinTextHeight}" MaxLength="{Binding MaxLength}" PlaceholderText="{Binding Placeholder}"
+                   IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="{Binding Label}" />
+          <!-- Schalter -->
+          <ToggleSwitch IsVisible="{Binding IsToggle}" IsChecked="{Binding IsOn}" IsEnabled="{Binding IsEnabled}" OnContent="" OffContent=""
+                        AutomationProperties.Name="{Binding Label}">
+            <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
+          </ToggleSwitch>
+          <!-- Auswahl -->
+          <ComboBox IsVisible="{Binding IsChoice}" MinWidth="260" MaxWidth="560" HorizontalAlignment="Left" ItemsSource="{Binding Choices}"
+                    SelectedItem="{Binding SelectedChoice}" IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="{Binding Label}" />
+          <!-- Übersetzungen -->
+          <StackPanel IsVisible="{Binding IsTranslated}" Spacing="6">
+            <TextBlock Classes="muted small" Text="{Binding PartialHint}" IsVisible="{Binding HasPartialHint}" TextWrapping="Wrap" />
+            <TextBox IsVisible="{Binding ShowDe}" Text="{Binding De}" AcceptsReturn="{Binding AcceptsReturn}" TextWrapping="Wrap"
+                     MinHeight="{Binding MinTextHeight}" MaxLength="{Binding MaxLength}" IsEnabled="{Binding IsEnabled}"
+                     PlaceholderText="{l:T AdminForm_LangDe.Header}" AutomationProperties.Name="{l:T AdminForm_LangDe.Header}" />
+            <TextBox IsVisible="{Binding ShowEn}" Text="{Binding En}" AcceptsReturn="{Binding AcceptsReturn}" TextWrapping="Wrap"
+                     MinHeight="{Binding MinTextHeight}" MaxLength="{Binding MaxLength}" IsEnabled="{Binding IsEnabled}"
+                     PlaceholderText="{l:T AdminForm_LangEn.Header}" AutomationProperties.Name="{l:T AdminForm_LangEn.Header}" />
+            <TextBox IsVisible="{Binding ShowFr}" Text="{Binding Fr}" AcceptsReturn="{Binding AcceptsReturn}" TextWrapping="Wrap"
+                     MinHeight="{Binding MinTextHeight}" MaxLength="{Binding MaxLength}" IsEnabled="{Binding IsEnabled}"
+                     PlaceholderText="{l:T AdminForm_LangFr.Header}" AutomationProperties.Name="{l:T AdminForm_LangFr.Header}" />
+          </StackPanel>
+          <TextBlock Classes="muted small" Text="{Binding Help}" IsVisible="{Binding HasHelp}" TextWrapping="Wrap" />
+          <TextBlock Classes="error" FontSize="12" Text="{Binding Error}" IsVisible="{Binding HasError}" TextWrapping="Wrap" />
+        </StackPanel>
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>
