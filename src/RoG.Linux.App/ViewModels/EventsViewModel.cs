@@ -518,12 +518,20 @@ public sealed partial class EventDetailViewModel(AppServices services, EventServ
     public void Show(EventItem item)
     {
         ArgumentNullException.ThrowIfNull(item);
+        var changed = _id != item.Id;
         _id = item.Id;
         Feedback.Close();
         ErrorMessage = null;
         _ = ApplyAsync(item);
         _ = RefreshAsync(item.Id);
+        if (changed)
+        {
+            _ = Social.ShowAsync(RoG.Core.Features.Social.SocialSources.Event, item.Id);
+        }
     }
+
+    /// <summary>Karte „Social Media“ (nur mit Recht <c>social.publish</c>).</summary>
+    public SocialStatusViewModel Social { get; } = new(services);
 
     /// <summary>Per ID (Link): laden mit Ladezustand.</summary>
     public Task ShowAsync(string id)
@@ -531,6 +539,7 @@ public sealed partial class EventDetailViewModel(AppServices services, EventServ
         _id = id;
         _item = null;
         Feedback.Close();
+        _ = Social.ShowAsync(RoG.Core.Features.Social.SocialSources.Event, id);
         return LoadAsync();
     }
 

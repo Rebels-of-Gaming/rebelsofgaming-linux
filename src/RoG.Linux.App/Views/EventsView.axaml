@@ -251,6 +251,8 @@
             <TextBlock Classes="section" Text="{l:T EventsPage_Participants.Text}" />
             <SelectableTextBlock Classes="body" Text="{Binding ParticipantsText}" />
           </StackPanel>
+
+          <c:SocialStatusCard DataContext="{Binding Social}" />
         </StackPanel>
       </ScrollViewer>
     </Panel>

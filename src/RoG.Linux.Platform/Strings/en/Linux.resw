@@ -787,4 +787,34 @@
   <data name="Linux_ResourcePackTypes" xml:space="preserve">
     <value>Resource pack (.zip)</value>
   </data>
+  <data name="Linux_GalleryVideo" xml:space="preserve">
+    <value>Clip</value>
+  </data>
+  <data name="Linux_StorageUserUploads" xml:space="preserve">
+    <value>{0} uploads</value>
+  </data>
+  <data name="Linux_ReportedBy" xml:space="preserve">
+    <value>reported by {0}</value>
+  </data>
+  <data name="Linux_NewsDraftsEmpty" xml:space="preserve">
+    <value>No drafts or scheduled news.</value>
+  </data>
+  <data name="Linux_NewsPreview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Linux_NewsPreviewHint" xml:space="preserve">
+    <value>Preview of the selected language (empty fields show German). Embeds such as YouTube or Twitch appear as links here – the website rendering is what counts.</value>
+  </data>
+  <data name="Linux_NewsCoverType" xml:space="preserve">
+    <value>Only images (PNG, JPG, WebP) can be used as a cover.</value>
+  </data>
+  <data name="Linux_MatchNoSquads" xml:space="preserve">
+    <value>You can't enter matches for any squad.</value>
+  </data>
+  <data name="Linux_MatchNoPlayers" xml:space="preserve">
+    <value>No members in this squad.</value>
+  </data>
+  <data name="Linux_MatchAttachmentTypes" xml:space="preserve">
+    <value>Images, PDF, ZIP/7z</value>
+  </data>
 </root>

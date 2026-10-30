@@ -1,0 +1,97 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.UploadsAdminView"
+             x:DataType="vm:UploadReportsAdminViewModel">
+  <!-- Reiter „Uploads“ der Verwaltung (wie UploadsPanel der Windows-App): Meldungen und Speicher -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Margin="16,8,16,8" Spacing="10">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <Button Classes="secondary" Command="{Binding LoadCommand}" Content="{l:T Backup_Reload.Content}" />
+        <ProgressBar IsIndeterminate="True" Width="120" VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+      </StackPanel>
+      <Panel IsVisible="{Binding HasOwnFeedback}">
+        <c:FeedbackBar DataContext="{Binding Feedback}" />
+      </Panel>
+      <Panel IsVisible="{Binding HasOwnConfirmation}">
+        <c:ConfirmBar DataContext="{Binding Confirmation}" />
+      </Panel>
+    </StackPanel>
+    <Panel>
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}" />
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding IsLoaded}">
+        <WrapPanel x:Name="Columns" Orientation="Horizontal" Margin="16,0,16,24" ItemSpacing="24" LineSpacing="16">
+          <!-- Meldungen -->
+          <StackPanel x:Name="ReportsColumn" Spacing="12" MaxWidth="{StaticResource RoGReadingWidth}">
+            <Border Classes="card" IsVisible="{Binding ShowEmpty}">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource IconCheckCircle}" Width="18" Height="18" Foreground="{DynamicResource RoGGreenBrush}" />
+                <TextBlock Classes="muted" Text="{l:T AdminPage_UploadsEmpty.Text}" TextWrapping="Wrap" VerticalAlignment="Center" />
+              </StackPanel>
+            </Border>
+            <ItemsControl ItemsSource="{Binding Reports}" AutomationProperties.Name="{l:T AdminPage_TabUploads.Text}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="12" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:UploadReportItemViewModel">
+                  <Border Classes="card" AutomationProperties.Name="{Binding AutomationName}">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <Button Classes="row tile" Padding="0" VerticalAlignment="Top" Command="{Binding OpenCommand}" IsEnabled="{Binding HasDirect}"
+                              AutomationProperties.Name="{Binding Title}" ToolTip.Tip="{l:T Common_OpenInBrowser.Content}">
+                        <Border Width="120" Height="80" CornerRadius="8" ClipToBounds="True" Background="{DynamicResource RoGBg3Brush}">
+                          <Panel>
+                            <PathIcon Data="{StaticResource IconUploads}" Width="24" Height="24" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding HasNoThumb}" />
+                            <Image Source="{Binding Thumb}" Stretch="UniformToFill" />
+                          </Panel>
+                        </Border>
+                      </Button>
+                      <StackPanel Grid.Column="1" Spacing="6" Margin="12,0,0,0">
+                        <Border Classes="chip red" HorizontalAlignment="Left" IsVisible="{Binding IsChildSafety}">
+                          <TextBlock Text="{l:T AdminPage_ChildSafetyBadge.Text}" />
+                        </Border>
+                        <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                        <SelectableTextBlock Classes="body" Text="{Binding Reason}" TextWrapping="Wrap" IsVisible="{Binding HasReason}" />
+                        <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                        <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+                          <Button Classes="secondary" Command="{Binding KeepCommand}" Content="{l:T AdminPage_UploadKeep.Content}" />
+                          <Button Classes="primary" Command="{Binding DeleteCommand}" Content="{l:T AdminPage_UploadDelete.Content}" />
+                        </WrapPanel>
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <!-- Speicher -->
+          <Border x:Name="StorageColumn" Classes="card" Width="300" VerticalAlignment="Top" IsVisible="{Binding HasStorage}">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="section" Text="{l:T AdminPage_StorageTitle.Text}" />
+              <SelectableTextBlock Classes="body" Text="{Binding StorageText}" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding StorageUsers}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Spacing="4" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:StorageUserRow">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel>
+                        <TextBlock Classes="body" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="muted small" Text="{Binding Uploads}" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="1" Classes="body strong" Text="{Binding Size}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </WrapPanel>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</UserControl>

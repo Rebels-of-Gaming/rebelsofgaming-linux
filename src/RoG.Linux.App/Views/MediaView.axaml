@@ -71,6 +71,7 @@
                 <TextBlock Classes="title" Text="{Binding AlbumTitle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                 <Button Grid.Column="1" Classes="primary" Command="{Binding ToggleSubmitCommand}" IsVisible="{Binding CanUpload}" Content="{l:T MediaPage_Submit.Content}" />
               </Grid>
+              <c:SocialStatusCard DataContext="{Binding Social}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
               <Border Classes="card" IsVisible="{Binding IsSubmitOpen}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
                 <StackPanel Spacing="10">
                   <TextBlock Classes="section" Text="{l:T Gallery_SubmitTitle}" />

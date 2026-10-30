@@ -26,7 +26,11 @@ public sealed partial class MediaViewModel : LoadableViewModel, IDetailPage
         _media = new MediaService(services.Api.Client, services.StorageHttp);
         Downloads = new DownloadsViewModel(services, _media);
         Report = new ReportFormViewModel(services);
+        Social = new SocialStatusViewModel(services);
     }
+
+    /// <summary>Karte „Social Media“ am geöffneten Album (Galerie-Posts entstehen je Album, nur mit <c>social.publish</c>).</summary>
+    public SocialStatusViewModel Social { get; }
 
     public ObservableCollection<AlbumItemViewModel> Albums { get; } = [];
 
@@ -147,6 +151,7 @@ public sealed partial class MediaViewModel : LoadableViewModel, IDetailPage
         Items.Clear();
         IsSubmitOpen = false;
         ItemsError = null;
+        _ = Social.ShowAsync(RoG.Core.Features.Social.SocialSources.Gallery, value?.Id);
         if (value is not null)
         {
             _ = LoadItemsAsync(value.Slug);

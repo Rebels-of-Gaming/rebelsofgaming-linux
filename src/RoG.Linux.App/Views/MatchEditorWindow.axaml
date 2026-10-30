@@ -1,0 +1,152 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RoG.Linux.App.ViewModels"
+        xmlns:c="using:RoG.Linux.App.Controls"
+        xmlns:l="using:RoG.Linux.App.Localization"
+        x:Class="RoG.Linux.App.Views.MatchEditorWindow"
+        x:DataType="vm:MatchEditorViewModel"
+        Width="1080" Height="800" MinWidth="360" MinHeight="400"
+        Icon="avares://rebelsofgaming/Assets/rog-badge-512.png"
+        Background="{DynamicResource RoGBgBrush}"
+        Title="{Binding Heading}">
+  <!-- Match eintragen/bearbeiten (wie MatchEditorWindow der Windows-App): Formular links, Line-up rechts; schmal untereinander -->
+  <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <Grid x:Name="Layout" ColumnDefinitions="Auto,320" RowDefinitions="Auto,Auto" Margin="24,16,24,32" HorizontalAlignment="Left">
+      <StackPanel x:Name="FormColumn" Spacing="14" Width="640">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <TextBlock Classes="title" Text="{Binding Heading}" VerticalAlignment="Center" AutomationProperties.HeadingLevel="1" />
+          <ProgressBar IsIndeterminate="True" Width="80" VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+        </StackPanel>
+        <c:FeedbackBar DataContext="{Binding Feedback}" />
+        <c:ConfirmBar DataContext="{Binding Confirmation}" />
+        <Border Classes="hint info" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding NoSquads}">
+          <TextBlock Classes="body" Text="{l:T Linux_MatchNoSquads}" TextWrapping="Wrap" />
+        </Border>
+
+        <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="12">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T MatchEdit_Squad.Header}" />
+            <ComboBox MinWidth="220" ItemsSource="{Binding SquadOptions}" SelectedItem="{Binding SelectedSquad}"
+                      AutomationProperties.Name="{l:T MatchEdit_Squad.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T MatchEdit_Type.Header}" />
+            <ComboBox MinWidth="160" ItemsSource="{Binding TypeOptions}" SelectedItem="{Binding SelectedType}"
+                      AutomationProperties.Name="{l:T MatchEdit_Type.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T MatchEdit_Status.Header}" />
+            <ComboBox MinWidth="160" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}"
+                      AutomationProperties.Name="{l:T MatchEdit_Status.Header}" />
+          </StackPanel>
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="12">
+          <StackPanel Spacing="4" Width="300">
+            <TextBlock Classes="label" Text="{l:T MatchEdit_Opponent.Header}" />
+            <TextBox Text="{Binding Opponent}" MaxLength="120" AutomationProperties.Name="{l:T MatchEdit_Opponent.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4" Width="140">
+            <TextBlock Classes="label" Text="{l:T MatchEdit_OpponentTag.Header}" />
+            <TextBox Text="{Binding OpponentTag}" MaxLength="20" AutomationProperties.Name="{l:T MatchEdit_OpponentTag.Header}" />
+          </StackPanel>
+        </WrapPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T MatchEdit_OpponentUrl.Header}" />
+          <TextBox Text="{Binding OpponentUrl}" MaxLength="500" AutomationProperties.Name="{l:T MatchEdit_OpponentUrl.Header}" />
+        </StackPanel>
+        <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="12">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T MatchEdit_Date.Header}" />
+            <CalendarDatePicker SelectedDate="{Binding PlayedDate}" MinWidth="180" AutomationProperties.Name="{l:T MatchEdit_Date.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T MatchEdit_Time.Header}" />
+            <TimePicker SelectedTime="{Binding PlayedTime}" ClockIdentifier="24HourClock" MinuteIncrement="5"
+                        AutomationProperties.Name="{l:T MatchEdit_Time.Header}" />
+          </StackPanel>
+        </WrapPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T MatchEdit_Maps.Header}" TextWrapping="Wrap" />
+          <TextBox Text="{Binding MapsText}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="100" FontFamily="{StaticResource RoGMonoFont}"
+                   AutomationProperties.Name="{l:T MatchEdit_Maps.Header}" />
+        </StackPanel>
+        <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Left">
+          <TextBlock Classes="label" Text="{l:T MatchEdit_ScoreOwn.Header}" TextWrapping="Wrap" MaxWidth="170" VerticalAlignment="Bottom" Margin="0,0,12,4" />
+          <TextBlock Grid.Column="1" Classes="label" Text="{l:T MatchEdit_ScoreOpponent.Header}" TextWrapping="Wrap" MaxWidth="170" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+          <NumericUpDown Grid.Row="1" Width="160" Minimum="0" Increment="1" FormatString="0" Value="{Binding ScoreOwn}" HorizontalAlignment="Left" Margin="0,0,12,0"
+                         AutomationProperties.Name="{l:T MatchEdit_ScoreOwn.Header}" />
+          <NumericUpDown Grid.Row="1" Grid.Column="1" Width="160" Minimum="0" Increment="1" FormatString="0" Value="{Binding ScoreOpponent}" HorizontalAlignment="Left"
+                         AutomationProperties.Name="{l:T MatchEdit_ScoreOpponent.Header}" />
+        </Grid>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T MatchEdit_Links.Header}" TextWrapping="Wrap" />
+          <TextBox Text="{Binding LinksText}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="72" AutomationProperties.Name="{l:T MatchEdit_Links.Header}" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T MatchEdit_Report.Header}" TextWrapping="Wrap" />
+          <TextBox Text="{Binding Report}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="140" AutomationProperties.Name="{l:T MatchEdit_Report.Header}" />
+        </StackPanel>
+        <CheckBox IsChecked="{Binding Published}" Content="{l:T MatchEdit_Published.Content}" />
+        <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+          <Button Classes="primary" Command="{Binding SaveCommand}" Content="{l:T MatchEdit_Save.Content}" HotKey="Ctrl+S" />
+          <Button Classes="secondary" Command="{Binding DeleteCommand}" IsVisible="{Binding IsSaved}" Content="{l:T MatchEdit_Delete.Content}" />
+        </WrapPanel>
+
+        <!-- Anhänge -->
+        <StackPanel Spacing="8" Margin="0,12,0,0">
+          <TextBlock Classes="section" Text="{l:T MatchEdit_AttachmentsTitle.Text}" />
+          <TextBlock Classes="muted small" Text="{l:T MatchEdit_AttachmentsHint.Text}" TextWrapping="Wrap" />
+          <Button Classes="secondary" HorizontalAlignment="Left" Click="OnAttachClick" IsEnabled="{Binding IsSaved}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconAttachment}" Width="16" Height="16" />
+              <TextBlock Text="{l:T MatchEdit_Attach.Content}" />
+            </StackPanel>
+          </Button>
+          <ItemsControl ItemsSource="{Binding Attachments}" IsVisible="{Binding HasAttachments}" AutomationProperties.Name="{l:T MatchEdit_AttachmentsTitle.Text}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Spacing="4" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:MatchAttachmentItem">
+                <Grid ColumnDefinitions="*,Auto">
+                  <Button Classes="link pad" HorizontalAlignment="Left" Command="{Binding OpenCommand}" IsVisible="{Binding CanOpen}">
+                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                  </Button>
+                  <TextBlock Classes="body" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" IsVisible="{Binding !CanOpen}" />
+                  <Button Grid.Column="1" Classes="link pad" Command="{Binding RemoveCommand}" Content="{l:T MatchEdit_RemoveAttachmentLink.Content}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Line-up -->
+      <StackPanel x:Name="LineupColumn" Grid.Column="1" Spacing="8" Margin="32,0,0,0">
+        <TextBlock Classes="section" Text="{l:T MatchEdit_LineupTitle.Text}" />
+        <TextBlock Classes="muted small" Text="{l:T MatchEdit_LineupHint.Text}" TextWrapping="Wrap" />
+        <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoadingPlayers}" />
+        <TextBlock Classes="muted" Text="{l:T Linux_MatchNoPlayers}" TextWrapping="Wrap" IsVisible="{Binding ShowPlayersEmpty}" />
+        <ItemsControl ItemsSource="{Binding Players}" AutomationProperties.Name="{l:T MatchEdit_LineupTitle.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:MatchPlayerItem">
+              <StackPanel Spacing="4" AutomationProperties.Name="{Binding Name}">
+                <CheckBox IsChecked="{Binding Selected}" Content="{Binding Name}" />
+                <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="4" Margin="28,0,0,0" IsVisible="{Binding Selected}">
+                  <CheckBox IsChecked="{Binding Substitute}" Content="{l:T SquadAdmin_Substitute.Content}" />
+                  <TextBox Width="150" MaxLength="40" Text="{Binding Position}" PlaceholderText="{l:T MatchEdit_Position.PlaceholderText}"
+                           AutomationProperties.Name="{l:T MatchEdit_Position.PlaceholderText}" />
+                </WrapPanel>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <c:SocialStatusCard DataContext="{Binding Social}" Margin="0,16,0,0" />
+      </StackPanel>
+    </Grid>
+  </ScrollViewer>
+</Window>

@@ -27,6 +27,43 @@ public sealed partial class NewsViewModel : LoadableViewModel, IDetailPage, IRou
 
     public NewsDetailViewModel Detail { get; }
 
+    /// <summary>Redaktion: Rechte aus <c>/v1/me</c> und Token-Scope <c>news:write</c>.</summary>
+    public NewsRights Rights => NewsRights.For(Services.CurrentUser);
+
+    /// <summary>„Schreiben“ (Redaktion öffnen): <c>news.write</c> oder <c>news.publish</c> + Scope <c>news:write</c>.</summary>
+    public bool CanWrite => Rights.Write;
+
+    /// <summary>Veröffentlichte News bearbeiten darf nur, wer veröffentlichen darf (<c>news.publish</c>).</summary>
+    public bool CanEditAll => Rights.Publish;
+
+    /// <summary>Redaktion öffnen (Slug oder <c>null</c> = neu) – die Ansicht öffnet das Fenster.</summary>
+    public event EventHandler<NewsEditorRequest>? EditorRequested;
+
+    [RelayCommand]
+    private void Write() => RequestEditor(null);
+
+    [RelayCommand]
+    private void Edit()
+    {
+        if (Detail.Slug is { } slug)
+        {
+            RequestEditor(slug);
+        }
+    }
+
+    private void RequestEditor(string? slug) => EditorRequested?.Invoke(this, new NewsEditorRequest(Services, Rights, slug, changed =>
+    {
+        if (changed)
+        {
+            // Liste und offenen Artikel auffrischen (Titel, Status, Titelbild)
+            _ = LoadAsync(silent: true);
+            if (Detail.Slug is { } open)
+            {
+                _ = Detail.ShowAsync(open);
+            }
+        }
+    }));
+
     [ObservableProperty]
     public partial bool HasMore { get; set; }
 
@@ -149,6 +186,9 @@ public sealed partial class NewsViewModel : LoadableViewModel, IDetailPage, IRou
         }
     }
 }
+
+/// <summary>„Schreiben“/„Bearbeiten“: Redaktionsfenster öffnen; <see cref="Closed"/> bekommt „geändert“.</summary>
+public sealed record NewsEditorRequest(AppServices Services, NewsRights Rights, string? Slug, Action<bool> Closed);
 
 /// <summary>Listeneintrag mit Titelbild (asynchron geladen, Platzhalter = RoG-Abzeichen).</summary>
 public sealed partial class NewsItemViewModel : ObservableObject

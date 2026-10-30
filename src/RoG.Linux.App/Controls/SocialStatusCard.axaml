@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Controls.SocialStatusCard"
+             x:DataType="vm:SocialStatusViewModel"
+             IsVisible="{Binding IsShown}">
+  <!-- Karte „Social Media“ an einer Quelle (News, Termin, Clanwar, Galerie) wie SocialStatusCard der Windows-App -->
+  <Border Classes="card">
+    <StackPanel Spacing="10">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="section" Text="{l:T SocialCard_Title.Text}" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="icon" Command="{Binding RefreshCommand}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="16" Height="16" />
+        </Button>
+      </Grid>
+      <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+      <TextBlock Classes="body strong" Text="{Binding StateText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      <TextBlock Classes="muted" Text="{Binding DetailText}" TextWrapping="Wrap" IsVisible="{Binding HasDetail}" />
+
+      <ItemsControl ItemsSource="{Binding Targets}" AutomationProperties.Name="{l:T SocialCard_Title.Text}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:SocialTargetViewModel">
+            <Grid ColumnDefinitions="*,Auto" AutomationProperties.Name="{Binding AutomationName}">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="body" Text="{Binding Name}" TextWrapping="Wrap" />
+                <TextBlock Classes="muted small" Text="{Binding StatusText}" TextWrapping="Wrap" />
+                <SelectableTextBlock Classes="small" Foreground="{DynamicResource RoGRedBrush}" Text="{Binding Error}" TextWrapping="Wrap"
+                                     IsVisible="{Binding HasError}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="8,0,0,0">
+                <Button Classes="link pad" Command="{Binding OpenCommand}" IsVisible="{Binding HasLink}" Content="{l:T SocialCard_OpenPost.Content}" />
+                <Button Classes="link pad" Command="{Binding RetryCommand}" IsVisible="{Binding CanRetry}" Content="{l:T SocialCard_RetryOne.Content}" />
+              </StackPanel>
+            </Grid>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <c:FeedbackBar DataContext="{Binding Feedback}" />
+      <c:ConfirmBar DataContext="{Binding Confirmation}" />
+
+      <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+        <Button Classes="primary" Command="{Binding RetryFailedCommand}" IsVisible="{Binding ShowRetryFailed}" Content="{l:T SocialCard_RetryFailed.Content}" />
+        <Button Classes="secondary" Command="{Binding RedraftCommand}" IsVisible="{Binding ShowRedraft}" Content="{l:T SocialCard_Redraft.Content}" />
+        <Button Classes="link pad" Command="{Binding OpenInAdminCommand}" IsVisible="{Binding HasAdminLink}" Content="{l:T SocialCard_Admin.Content}" />
+      </WrapPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

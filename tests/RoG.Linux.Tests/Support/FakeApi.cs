@@ -62,7 +62,7 @@ public sealed class FakeApi : HttpMessageHandler
 
         var body = Overrides.TryGetValue(path, out var custom) ? custom : (request.Method.Method, path) switch
         {
-            ("GET", "/v1/news") => FakeData.NewsList,
+            ("GET", "/v1/news") when !request.RequestUri!.Query.Contains("status", StringComparison.Ordinal) => FakeData.NewsList,
             ("GET", "/v1/news/scrim-serie-herbst-2026") => FakeData.NewsArticle,
             ("GET", var p) when p.StartsWith("/v1/news/", StringComparison.Ordinal) && p.EndsWith("/comments", StringComparison.Ordinal) => FakeData.NewsComments,
             ("GET", var p) when p.StartsWith("/v1/news/", StringComparison.Ordinal) => FakeData.NewsArticle,

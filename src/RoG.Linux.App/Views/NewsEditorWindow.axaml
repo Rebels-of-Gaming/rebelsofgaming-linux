@@ -1,0 +1,156 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RoG.Linux.App.ViewModels"
+        xmlns:c="using:RoG.Linux.App.Controls"
+        xmlns:l="using:RoG.Linux.App.Localization"
+        x:Class="RoG.Linux.App.Views.NewsEditorWindow"
+        x:DataType="vm:NewsEditorViewModel"
+        Width="1100" Height="760" MinWidth="360" MinHeight="400"
+        Icon="avares://rebelsofgaming/Assets/rog-badge-512.png"
+        Background="{DynamicResource RoGBgBrush}"
+        Title="{l:T NewsEdit_Window}">
+  <!-- News-Redaktion (wie NewsEditorWindow der Windows-App): Entwürfe links, Editor rechts; schmal nur eines von beiden -->
+  <c:ListDetailPanel x:Name="Panel" ListWidth="280" IsDetailOpen="{Binding IsEditorOpen}">
+    <!-- Entwürfe -->
+    <Border Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+      <DockPanel Margin="12,16,12,12">
+        <StackPanel DockPanel.Dock="Top" Spacing="12">
+          <TextBlock Classes="kicker" Text="{l:T NewsEdit_WindowTitle.Text}" />
+          <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding NewDraftCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Data="{StaticResource IconPlus}" Width="14" Height="14" />
+              <TextBlock Text="{l:T NewsEdit_NewButton.Content}" />
+            </StackPanel>
+          </Button>
+          <TextBlock Classes="section" Text="{l:T NewsEdit_DraftsTitle.Text}" />
+        </StackPanel>
+        <Panel>
+          <c:StateView IsLoading="{Binding IsLoadingDrafts}" ErrorMessage="{Binding DraftsError}" IsEmpty="{Binding ShowDraftsEmpty}"
+                       EmptyText="{l:T Linux_NewsDraftsEmpty}" RetryCommand="{Binding LoadDraftsCommand}" />
+          <ListBox Classes="cards" Padding="0" ItemsSource="{Binding Drafts}" SelectedItem="{Binding SelectedDraft}" SelectionMode="Single"
+                   AutomationProperties.Name="{l:T NewsEdit_DraftsTitle.Text}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:NewsDraftItem">
+                <StackPanel Spacing="2" AutomationProperties.Name="{Binding AutomationName}">
+                  <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconClock}" Width="12" Height="12" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Scheduled}" />
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Panel>
+      </DockPanel>
+    </Border>
+
+    <!-- Editor -->
+    <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="24,16,24,32" HorizontalAlignment="Left" Spacing="14">
+        <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding ShowDraftsCommand}"
+                IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T NewsEdit_DraftsTitle.Text}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+            <TextBlock Text="{l:T NewsEdit_DraftsTitle.Text}" />
+          </StackPanel>
+        </Button>
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <TextBlock Classes="title" Text="{Binding Heading}" VerticalAlignment="Center" AutomationProperties.HeadingLevel="1" />
+          <ProgressBar IsIndeterminate="True" Width="80" VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+        </StackPanel>
+        <c:FeedbackBar DataContext="{Binding Feedback}" />
+        <c:ConfirmBar DataContext="{Binding Confirmation}" />
+
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T NewsEdit_Language.Header}" />
+          <ComboBox MinWidth="200" ItemsSource="{Binding LanguageOptions}" SelectedItem="{Binding SelectedLanguage}"
+                    AutomationProperties.Name="{l:T NewsEdit_Language.Header}" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T NewsEdit_TitleBox.Header}" />
+          <TextBox Text="{Binding Title}" MaxLength="160" AutomationProperties.Name="{l:T NewsEdit_TitleBox.Header}" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T NewsEdit_Teaser.Header}" />
+          <TextBox Text="{Binding Teaser}" MaxLength="400" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64"
+                   AutomationProperties.Name="{l:T NewsEdit_Teaser.Header}" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="label" Text="{l:T NewsEdit_Body.Header}" VerticalAlignment="Bottom" />
+            <ToggleButton Grid.Column="1" Classes="secondary" IsChecked="{Binding IsPreviewOpen}"
+                          Content="{l:T Linux_NewsPreview}" />
+          </Grid>
+          <TextBox Text="{Binding Body}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="260" FontFamily="{StaticResource RoGMonoFont}"
+                   AutomationProperties.Name="{l:T NewsEdit_Body.Header}" />
+          <TextBlock Classes="muted small" Text="{l:T NewsEdit_MarkdownHint.Text}" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Vorschau der gewählten Sprache -->
+        <Border Classes="card" IsVisible="{Binding IsPreviewOpen}">
+          <StackPanel Spacing="12">
+            <TextBlock Classes="kicker" Text="{l:T Linux_NewsPreview}" />
+            <Border CornerRadius="{StaticResource RoGCardRadius}" ClipToBounds="True" HorizontalAlignment="Left" IsVisible="{Binding HasCover}">
+              <Image Source="{Binding Cover}" MaxHeight="240" Stretch="Uniform" AutomationProperties.Name="{l:T NewsEdit_CoverTitle.Text}" />
+            </Border>
+            <TextBlock Classes="title" Text="{Binding PreviewTitle}" TextWrapping="Wrap" />
+            <TextBlock Classes="muted" Text="{Binding PreviewTeaser}" TextWrapping="Wrap" IsVisible="{Binding HasPreviewTeaser}" />
+            <c:RichContentView Document="{Binding PreviewBody}" />
+            <TextBlock Classes="muted small" Text="{l:T Linux_NewsPreviewHint}" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+
+        <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="12">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T NewsEdit_Category.Header}" />
+            <ComboBox MinWidth="200" ItemsSource="{Binding CategoryOptions}" SelectedItem="{Binding SelectedCategory}"
+                      AutomationProperties.Name="{l:T NewsEdit_Category.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T NewsEdit_Visibility.Header}" />
+            <ComboBox MinWidth="180" ItemsSource="{Binding VisibilityOptions}" SelectedItem="{Binding SelectedVisibility}"
+                      AutomationProperties.Name="{l:T NewsEdit_Visibility.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T NewsEdit_Status.Header}" />
+            <ComboBox MinWidth="180" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}"
+                      AutomationProperties.Name="{l:T NewsEdit_Status.Header}" />
+          </StackPanel>
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="12" IsVisible="{Binding IsScheduled}">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T NewsEdit_Date.Header}" />
+            <CalendarDatePicker SelectedDate="{Binding PublishDate}" MinWidth="180" AutomationProperties.Name="{l:T NewsEdit_Date.Header}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T NewsEdit_Time.Header}" />
+            <TimePicker SelectedTime="{Binding PublishTime}" ClockIdentifier="24HourClock" MinuteIncrement="5"
+                        AutomationProperties.Name="{l:T NewsEdit_Time.Header}" />
+          </StackPanel>
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal" ItemSpacing="20" LineSpacing="4">
+          <CheckBox IsChecked="{Binding Pinned}" Content="{l:T NewsEdit_Pinned.Content}" IsVisible="{Binding Rights.Publish}" />
+          <CheckBox IsChecked="{Binding CommentsEnabled}" Content="{l:T NewsEdit_Comments.Content}" />
+          <CheckBox IsChecked="{Binding PostToDiscord}" Content="{l:T NewsEdit_Discord.Content}" />
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+          <Button Classes="primary" Command="{Binding SaveCommand}" Content="{l:T NewsEdit_Save.Content}" HotKey="Ctrl+S" />
+          <Button Classes="secondary" Command="{Binding DeleteCommand}" IsVisible="{Binding CanDelete}" Content="{l:T NewsEdit_Delete.Content}" />
+        </WrapPanel>
+
+        <!-- Titelbild -->
+        <StackPanel Spacing="8" Margin="0,12,0,0">
+          <TextBlock Classes="section" Text="{l:T NewsEdit_CoverTitle.Text}" />
+          <TextBlock Classes="muted small" Text="{l:T NewsEdit_CoverHint.Text}" TextWrapping="Wrap" />
+          <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+            <Button Classes="secondary" Click="OnSetCoverClick" IsEnabled="{Binding IsSaved}" Content="{l:T NewsEdit_SetCover.Content}" />
+            <Button Classes="secondary" Command="{Binding RemoveCoverCommand}" IsEnabled="{Binding IsSaved}" Content="{l:T NewsEdit_RemoveCover.Content}" />
+          </WrapPanel>
+        </StackPanel>
+
+        <c:SocialStatusCard DataContext="{Binding Social}" Margin="0,12,0,0" />
+      </StackPanel>
+    </ScrollViewer>
+  </c:ListDetailPanel>
+</Window>

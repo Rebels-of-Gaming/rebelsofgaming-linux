@@ -14,6 +14,9 @@ using RoG.Linux.App.Services;
 
 namespace RoG.Linux.App.ViewModels;
 
+/// <summary>„Match eintragen“/„Bearbeiten“: Editorfenster öffnen; <see cref="Closed"/> bekommt „geändert“.</summary>
+public sealed record MatchEditorRequest(AppServices Services, string? MatchId, Action<bool> Closed);
+
 /// <summary>Reiter der Matches-Seite (wie die Windows-App).</summary>
 public enum MatchesTab
 {
@@ -28,7 +31,7 @@ public enum MatchesTab
 /// Ergebnis, Maps, Line-up, Links und Bericht), <b>Hall of Fame</b> (Trophäen, Meilensteine, Ehrenmitglieder),
 /// <b>Statistiken</b> (<see cref="StatsViewModel"/>) und <b>Turniere</b>. Matches, Hall of Fame und Turniere gehen auch im
 /// Gastmodus (nur veröffentlichte Matches); <c>rog://matches/{slug|id}</c> öffnet ein Match. Eintragen/Bearbeiten
-/// (<c>matches.manage</c>) kommt mit der Verwaltung (Bauplan Stufe 9).
+/// (<c>matches.manage</c> + Scope <c>matches:write</c>) öffnet den <c>MatchEditorWindow</c>.
 /// </summary>
 public sealed partial class MatchesViewModel : LoadableViewModel, IDetailPage, IRoutablePage, IRefreshablePage
 {
@@ -55,6 +58,34 @@ public sealed partial class MatchesViewModel : LoadableViewModel, IDetailPage, I
     public StatsViewModel Stats { get; }
 
     public TournamentsViewModel Tournaments { get; }
+
+    /// <summary>„Match eintragen“/„Bearbeiten“: <c>matches.manage</c> (global oder in einem Squad) + Scope <c>matches:write</c>.</summary>
+    public bool CanManage => MatchAdminService.CanManageAny(Services.CurrentUser);
+
+    /// <summary>Editor öffnen (Match-ID oder <c>null</c> = neu) – die Ansicht öffnet das Fenster.</summary>
+    public event EventHandler<MatchEditorRequest>? EditorRequested;
+
+    [RelayCommand]
+    private void AddMatch() => RequestEditor(null);
+
+    [RelayCommand]
+    private void EditMatch()
+    {
+        if ((Selected?.Id ?? Detail.Match?.Id) is { } id)
+        {
+            RequestEditor(id);
+        }
+    }
+
+    private void RequestEditor(string? matchId) => EditorRequested?.Invoke(this, new MatchEditorRequest(Services, matchId, changed =>
+    {
+        if (changed)
+        {
+            Selected = null;
+            IsLinkedDetailOpen = false;
+            _ = LoadAsync(silent: true);
+        }
+    }));
 
     [ObservableProperty]
     public partial bool HasMore { get; set; }

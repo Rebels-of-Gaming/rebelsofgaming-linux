@@ -787,4 +787,34 @@
   <data name="Linux_ResourcePackTypes" xml:space="preserve">
     <value>Pack de ressources (.zip)</value>
   </data>
+  <data name="Linux_GalleryVideo" xml:space="preserve">
+    <value>Clip</value>
+  </data>
+  <data name="Linux_StorageUserUploads" xml:space="preserve">
+    <value>{0} fichiers</value>
+  </data>
+  <data name="Linux_ReportedBy" xml:space="preserve">
+    <value>signalé par {0}</value>
+  </data>
+  <data name="Linux_NewsDraftsEmpty" xml:space="preserve">
+    <value>Aucun brouillon ni actualité planifiée.</value>
+  </data>
+  <data name="Linux_NewsPreview" xml:space="preserve">
+    <value>Aperçu</value>
+  </data>
+  <data name="Linux_NewsPreviewHint" xml:space="preserve">
+    <value>Aperçu de la langue choisie (les champs vides affichent l’allemand). Les intégrations comme YouTube ou Twitch apparaissent ici sous forme de lien – c’est l’affichage du site qui fait foi.</value>
+  </data>
+  <data name="Linux_NewsCoverType" xml:space="preserve">
+    <value>Seules des images (PNG, JPG, WebP) peuvent servir d’image de couverture.</value>
+  </data>
+  <data name="Linux_MatchNoSquads" xml:space="preserve">
+    <value>Tu ne peux saisir de matchs pour aucune squad.</value>
+  </data>
+  <data name="Linux_MatchNoPlayers" xml:space="preserve">
+    <value>Aucun membre dans cette squad.</value>
+  </data>
+  <data name="Linux_MatchAttachmentTypes" xml:space="preserve">
+    <value>Images, PDF, ZIP/7z</value>
+  </data>
 </root>

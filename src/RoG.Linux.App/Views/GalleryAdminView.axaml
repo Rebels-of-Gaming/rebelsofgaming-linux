@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.GalleryAdminView"
+             x:DataType="vm:GalleryAdminViewModel">
+  <!-- Reiter „Galerie“ der Verwaltung (wie GalleryPanel der Windows-App): eingereichte Einträge freigeben/ablehnen -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Margin="16,8,16,8" Spacing="10">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <Button Classes="secondary" Command="{Binding LoadCommand}" Content="{l:T Backup_Reload.Content}" />
+        <ProgressBar IsIndeterminate="True" Width="120" VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+      </StackPanel>
+      <Panel IsVisible="{Binding HasOwnFeedback}">
+        <c:FeedbackBar DataContext="{Binding Feedback}" />
+      </Panel>
+      <Panel IsVisible="{Binding HasOwnConfirmation}">
+        <c:ConfirmBar DataContext="{Binding Confirmation}" />
+      </Panel>
+    </StackPanel>
+    <Panel>
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding ShowEmpty}"
+                   EmptyText="{l:T AdminPage_GalleryEmpty.Text}" RetryCommand="{Binding LoadCommand}" />
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ItemsControl ItemsSource="{Binding Pending}" Margin="16,0,16,24" AutomationProperties.Name="{l:T AdminPage_TabGallery.Text}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="260" Spacing="12" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:PendingGalleryItemViewModel">
+              <Border Classes="card" Padding="12" AutomationProperties.Name="{Binding AutomationName}">
+                <StackPanel Spacing="8">
+                  <Button Classes="row tile" Padding="0" Command="{Binding OpenCommand}" HorizontalAlignment="Stretch"
+                          AutomationProperties.Name="{Binding Title}" ToolTip.Tip="{l:T Common_OpenInBrowser.Content}">
+                    <Border Height="150" CornerRadius="8" ClipToBounds="True" Background="{DynamicResource RoGBg3Brush}">
+                      <Panel>
+                        <Image Source="{Binding Thumb}" Stretch="UniformToFill" />
+                        <Border IsVisible="{Binding IsVideo}" Width="44" Height="44" CornerRadius="22" Background="#99000000">
+                          <PathIcon Data="{StaticResource IconPlay}" Width="22" Height="22" Foreground="#FFFFFFFF" />
+                        </Border>
+                      </Panel>
+                    </Border>
+                  </Button>
+                  <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                  <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+                    <Button Classes="primary" Command="{Binding ApproveCommand}" Content="{l:T Approval_Approve.Content}" />
+                    <Button Classes="secondary" Command="{Binding RejectCommand}" Content="{l:T Approval_Reject.Content}" />
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</UserControl>
