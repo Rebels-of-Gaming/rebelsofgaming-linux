@@ -6,7 +6,15 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+
+### Hinzugefügt (Stufe 8)
+
+- **Wiki** in der App: Bereiche, Seitenbaum, Suche, Kategorien, Inhaltsverzeichnis, Beobachten
+- Seiten **bearbeiten** mit Vorschau; hat jemand anderes gleichzeitig gespeichert, zeigt die App die Unterschiede
+- **Versionen** vergleichen, wiederherstellen, freigeben oder ablehnen (mit Recht); neue Seite anlegen; Bild einfügen
+- **Offline lesen**: gelesene Seiten bleiben verschlüsselt verfügbar, ganze Bereiche lassen sich vorab speichern
+- Links in News, Forum und Wiki öffnen Seiten der Plattform direkt in der App
 
 ### Hinzugefügt (Stufe 7)
 

@@ -5,6 +5,8 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
+**Stufe 8 (Wiki, 30.10.2026) – erledigt** (Bereiche, Seitenbaum, Seiten nativ, Inhaltsverzeichnis, Suche, Kategorien,
+Beobachten, Versionen mit Diff, Bearbeiten mit Vorschau und Konflikt-Auflösung, neue Seite, Bild einfügen, offline lesen).
 **Stufe 7 (Server-Steuerung, 30.10.2026) – erledigt** (Steuer-Fenster je Server mit Live-Konsole, Power, Ressourcen,
 Configs mit Diff/Versionen, Dateien, Backups, RCON, Sperren, Whitelist, Spiel-Bans + Plugin-Schlüssel, Vier-Augen-Freigaben;
 Gameserver einrichten/verwalten; öffentliche Ban-Liste mit Einspruch; App-Sperre mit PIN und Fingerabdruck).
@@ -79,9 +81,12 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Configs/Dateien/Backups** (Editor nur Whitelist-Dateien, Prüfen + Diff vor dem Speichern, Vier-Augen-Antrag, Versionen + Zurückspielen, „Aus Datei laden“ über das Portal, Herunterladen in den Downloads-Ordner; Dateien mit Pfadleiste, Vorschau, Kopie/Umbenennen/Löschen; Backups anlegen/sperren/wiederherstellen/löschen) | steht |
 | **Spiel-Bans + Plugin-Schlüssel**, **Gameserver einrichten/verwalten** (eigenes Fenster: Node, Egg, Felder, Limits, Ablauf; Status, Verlängern, Löschen mit Namensbestätigung) und **öffentliche Ban-Liste** mit Einspruch (`rog://bans`) | steht |
 | **App-Sperre** (statt Windows Hello: PIN 4–8 Ziffern als PBKDF2-Hash im Schlüsselbund, optional Fingerabdruck über fprintd; Sperre beim Start und nach Abwesenheit, Fehlversuche mit Wartezeit, „PIN vergessen? Abmelden“) | steht; fprintd gegen privaten Bus getestet, echtes Gerät vom Owner zu prüfen |
+| **Wiki** (Bereich wählen, Seitenbaum, Suche, Kategorien; Seite nativ mit Inhaltsverzeichnis, Wiki-Links öffnen in der App; Beobachten; Versionen mit Diff, Wiederherstellen/Freigeben/Ablehnen mit Recht + Rückfrage; Bearbeiten mit Vorschau über die API, Konflikt mit Diff und „Ihre Fassung übernehmen“; neue Seite; Bild einfügen über das Portal; `rog://wiki/…` nativ) | steht; gegen die Produktion geprüft (Gast, Bereich ohne öffentliche Seiten → Leerzustand) |
+| **Wiki offline** (jede gelesene Seite verschlüsselt in `$XDG_DATA_HOME/rebelsofgaming/wiki-<umgebung>/`, „Bereich offline speichern“, Plakette „Offline verfügbar“; ohne Schlüsselbund nur online) | steht |
+| **Links in Inhalten** (News, Forum, Wiki …) öffnen Plattform-Seiten nativ, wenn es sie in der App gibt | steht |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 457 xUnit-Tests (Stufe 7); 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 474 xUnit-Tests (Stufe 8); 457 xUnit-Tests (Stufe 7); 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -146,6 +151,8 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
   Neu (Stufe 2): **`SquadInternalService`** für `GET /v1/squads/{squad}/intern` (Forum, Squad-Gruppe, Termine, Downloads,
   Alben, `missing_scopes`) – liegt bis dahin in `src/RoG.Linux.App/Services/SquadInternalService.cs`; die Windows-App
   zeigt „Intern“ noch nicht. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
+  Neu (Stufe 8): `WikiOfflineStore.Prune(TimeSpan)` und Suche nach Bereich/Adresse (Deep Links ohne Netz entschlüsseln
+  sonst alle Kopien).
   Neu (Stufe 7): öffentlicher Helfer für freie Dateinamen (`MediaService.FreePath`/`SafeFileName` sind `internal`),
   `RollbackAsync` meldet wie `SaveAsync`, ob ein Vier-Augen-Antrag entstand (202), Auswertung von `.server.backup`
   (Backup-Liste live; fehlt auch unter Windows), Ressourcen-Formatierer (MB/Laufzeit) im Kern.
@@ -203,7 +210,9 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
 7. **Server-Steuerung** *(erledigt)* – Pterodactyl (Power, Ressourcen, Konsole im eigenen Fenster, Configs, Dateien,
    Backups, RCON, Sperren, Whitelist, Spiel-Bans, Freigaben), Gameserver einrichten, öffentliche Ban-Liste; App-Sperre
    mit PIN + fprintd (kein Polkit, L49). *Nicht enthalten:* freier Datei-Upload auf den Server (die API hat keinen, F9).
-8. **Wiki** – lesen, offline, bearbeiten, Versionen.
+8. **Wiki** *(erledigt)* – lesen, offline, bearbeiten (Vorschau, Konflikt), Versionen mit Diff, Kategorien, neue Seite,
+   Bild einfügen. *Nicht enthalten:* Melden von Seiten/Versionen (Moderation, Stufe 9); Datei-, Hilfe- und
+   Spezialseiten des Wikis öffnen im Browser.
 9. **Verwaltung + Moderation** – Bereiche aus der API wie in der Windows-App.
 10. **Feinschliff, Steam Deck, Flathub** – siehe unten.
 
@@ -263,7 +272,15 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 7)
+## Datenschutz (Stand Stufe 8)
+
+- **Neu in Stufe 8:** Wiki-Aufrufe nur an die eigene API (Bereiche, Baum, Seiten, Suche, Kategorien, Versionen,
+  Vorschau `/wiki/render`, Speichern, neue Seite, Beobachten, Datei registrieren; Bilder über den bestehenden
+  Uploader). **Lokal neu:** Offline-Kopien `$XDG_DATA_HOME/rebelsofgaming/wiki-<umgebung>/<seiten-id>.<sprache>.dat`
+  (Flatpak: `~/.var/app/<App-ID>/data/…`) – gerendertes HTML, Quelltext, Titel, Kategorien, Inhaltsverzeichnis,
+  Versions-ID, Zeitstempel, Beobachten-Status, ID der zuletzt Bearbeitenden; keine Tokens. AES-256-GCM mit dem
+  Cache-Schlüssel aus dem Schlüsselbund, ohne Schlüsselbund nichts auf der Platte. **Speicherdauer:** bis zum Abmelden
+  (auch bei 401) bzw. höchstens 30 Tage ohne Online-Aktualisierung (beim Start gelöscht; offline Lesen verlängert nicht).
 
 - **Neu in Stufe 7:** Aufrufe nur an die eigene API (`/v1/servers/{slug}/resources|power|commands|console-token|rcon|bans|whitelist|config-changes|configs…|files…|backups…|plugin-key|game-bans…`,
   `/v1/game-bans*`, `/v1/bans*` inkl. Einspruch, `/v1/servers/provisioning/*`) und eine **WebSocket-Verbindung zum
@@ -474,6 +491,11 @@ docs/                       LINUX-BAUPLAN.md
   4 freie Fehlversuche, dann 30 s, verdoppelt bis 15 min (übersteht Neustart); Fingerabdruck startet nur per Knopf (Gerät
   bleibt sonst für `sudo`/pam frei) und zählt nicht als PIN-Fehlversuch; „PIN vergessen“ = Sperre aus, PIN löschen,
   abmelden. Gäste werden nie gesperrt.
+- **L50 – Wiki offline wie Windows:** jede online gelesene Seite wird gespeichert (keine Umschaltung je Seite),
+  zusätzlich „Bereich offline speichern“; Speicherdauer wie L30 (30 Tage ohne Aktualisierung, Abmelden löscht alles),
+  weil die Kopien Mitglieder- und interne Bereiche enthalten können.
+- **L51 – Wiki-Versionen:** Wiederherstellen, Freigeben und Ablehnen fragen unter Linux nach (Windows nicht);
+  Konflikt-Diff steht über dem Editor.
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
