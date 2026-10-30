@@ -194,7 +194,7 @@ public sealed partial class AdminOverviewViewModel : LoadableViewModel, ILazyTab
         SystemBrush = UiResources.Brush(system.Status switch
         {
             "ok" => "RoGStatusOnlineBrush",
-            "down" => "RoGRedBrush",
+            "down" => "RoGRedTextBrush",
             _ => "RoGGoldBrush",
         });
 
@@ -285,7 +285,7 @@ public sealed class SystemCheckViewModel(SystemCheck check)
     public IBrush IconBrush { get; } = UiResources.Brush(check.Ok switch
     {
         true => "RoGStatusOnlineBrush",
-        false => "RoGRedBrush",
+        false => "RoGRedTextBrush",
         null => "RoGMutedBrush",
     });
 

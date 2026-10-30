@@ -4,6 +4,9 @@
   red #E0324A · action-red #D62C43 · gold #D4AE3C · green #3DDC84 (+ blue #4F8CFF für „im Voice“).
   90 % dunkel / 8 % Off-White / 2 % Akzent. Rot = Aktion/Status, Gold = Rang/Auszeichnung. Standard RoG-Dunkel, optional hell bzw. wie das System (Einstellungen).
   Seiten verwenden nur diese Schlüssel und Klassen – keine Einweg-Farben in Views.
+  Kontrast AA (Stufe 10, ContrastTests): rote SCHRIFT nutzt RoGRedText (Dunkel #FF6A7D, Hell #BF263E) – das Markenrot
+  erreicht als Text auf Dunkel nur 3,7:1 und bleibt für Kanten, Marker, Punkte. Auf roten Flächen weiße Schrift, Hover/
+  Gedrückt des Primär-Knopfs dunkler statt heller. Helle Palette: Gold/Grün/Blau abgedunkelt (≥ 4,5:1 auch auf bg3).
 -->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -29,8 +32,8 @@
           <Color x:Key="RoGGoldColor">#D4AE3C</Color>
           <Color x:Key="RoGGreenColor">#3DDC84</Color>
           <Color x:Key="RoGBlueColor">#4F8CFF</Color>
-          <Color x:Key="RoGOfflineColor">#6B7080</Color>
-          <Color x:Key="RoGOnAccentColor">#F1EFEA</Color>
+          <Color x:Key="RoGOfflineColor">#6E7384</Color>
+          <Color x:Key="RoGOnAccentColor">#FFFFFF</Color>
           <SolidColorBrush x:Key="RoGBgBrush" Color="#1C1F26" />
           <SolidColorBrush x:Key="RoGBg2Brush" Color="#242832" />
           <SolidColorBrush x:Key="RoGBg3Brush" Color="#2D3240" />
@@ -40,16 +43,19 @@
           <SolidColorBrush x:Key="RoGRedBrush" Color="#E0324A" />
           <SolidColorBrush x:Key="RoGActionRedBrush" Color="#D62C43" />
           <SolidColorBrush x:Key="RoGRedPressedBrush" Color="#F04A60" />
+          <SolidColorBrush x:Key="RoGRedTextBrush" Color="#FF6A7D" />
+          <SolidColorBrush x:Key="RoGActionRedHoverBrush" Color="#C42840" />
+          <SolidColorBrush x:Key="RoGActionRedPressedBrush" Color="#A51E34" />
           <SolidColorBrush x:Key="RoGGoldBrush" Color="#D4AE3C" />
           <SolidColorBrush x:Key="RoGGreenBrush" Color="#3DDC84" />
           <SolidColorBrush x:Key="RoGBlueBrush" Color="#4F8CFF" />
-          <SolidColorBrush x:Key="RoGOfflineBrush" Color="#6B7080" />
-          <SolidColorBrush x:Key="RoGOnAccentBrush" Color="#F1EFEA" />
+          <SolidColorBrush x:Key="RoGOfflineBrush" Color="#6E7384" />
+          <SolidColorBrush x:Key="RoGOnAccentBrush" Color="#FFFFFF" />
           <SolidColorBrush x:Key="RoGStatusOnlineBrush" Color="#3DDC84" />
           <SolidColorBrush x:Key="RoGStatusVoiceBrush" Color="#4F8CFF" />
           <SolidColorBrush x:Key="RoGStatusServerBrush" Color="#E0324A" />
           <SolidColorBrush x:Key="RoGStatusInGameBrush" Color="#D4AE3C" />
-          <SolidColorBrush x:Key="RoGStatusOfflineBrush" Color="#6B7080" />
+          <SolidColorBrush x:Key="RoGStatusOfflineBrush" Color="#6E7384" />
           <SolidColorBrush x:Key="TextControlBackground" Color="#2D3240" />
           <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#2D3240" />
           <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#242832" />
@@ -71,10 +77,10 @@
           <Color x:Key="RoGRedColor">#C42840</Color>
           <Color x:Key="RoGActionRedColor">#C42840</Color>
           <Color x:Key="RoGRedPressedColor">#A51E34</Color>
-          <Color x:Key="RoGGoldColor">#8C6D12</Color>
-          <Color x:Key="RoGGreenColor">#1B8A4F</Color>
-          <Color x:Key="RoGBlueColor">#2B66D9</Color>
-          <Color x:Key="RoGOfflineColor">#8A8F9A</Color>
+          <Color x:Key="RoGGoldColor">#7E6210</Color>
+          <Color x:Key="RoGGreenColor">#177643</Color>
+          <Color x:Key="RoGBlueColor">#2660D3</Color>
+          <Color x:Key="RoGOfflineColor">#868B96</Color>
           <Color x:Key="RoGOnAccentColor">#FFFFFF</Color>
           <SolidColorBrush x:Key="RoGBgBrush" Color="#F3F1EC" />
           <SolidColorBrush x:Key="RoGBg2Brush" Color="#FFFFFF" />
@@ -85,16 +91,19 @@
           <SolidColorBrush x:Key="RoGRedBrush" Color="#C42840" />
           <SolidColorBrush x:Key="RoGActionRedBrush" Color="#C42840" />
           <SolidColorBrush x:Key="RoGRedPressedBrush" Color="#A51E34" />
-          <SolidColorBrush x:Key="RoGGoldBrush" Color="#8C6D12" />
-          <SolidColorBrush x:Key="RoGGreenBrush" Color="#1B8A4F" />
-          <SolidColorBrush x:Key="RoGBlueBrush" Color="#2B66D9" />
-          <SolidColorBrush x:Key="RoGOfflineBrush" Color="#8A8F9A" />
+          <SolidColorBrush x:Key="RoGRedTextBrush" Color="#BF263E" />
+          <SolidColorBrush x:Key="RoGActionRedHoverBrush" Color="#A51E34" />
+          <SolidColorBrush x:Key="RoGActionRedPressedBrush" Color="#8E1A2D" />
+          <SolidColorBrush x:Key="RoGGoldBrush" Color="#7E6210" />
+          <SolidColorBrush x:Key="RoGGreenBrush" Color="#177643" />
+          <SolidColorBrush x:Key="RoGBlueBrush" Color="#2660D3" />
+          <SolidColorBrush x:Key="RoGOfflineBrush" Color="#868B96" />
           <SolidColorBrush x:Key="RoGOnAccentBrush" Color="#FFFFFF" />
-          <SolidColorBrush x:Key="RoGStatusOnlineBrush" Color="#1B8A4F" />
-          <SolidColorBrush x:Key="RoGStatusVoiceBrush" Color="#2B66D9" />
+          <SolidColorBrush x:Key="RoGStatusOnlineBrush" Color="#177643" />
+          <SolidColorBrush x:Key="RoGStatusVoiceBrush" Color="#2660D3" />
           <SolidColorBrush x:Key="RoGStatusServerBrush" Color="#C42840" />
-          <SolidColorBrush x:Key="RoGStatusInGameBrush" Color="#8C6D12" />
-          <SolidColorBrush x:Key="RoGStatusOfflineBrush" Color="#8A8F9A" />
+          <SolidColorBrush x:Key="RoGStatusInGameBrush" Color="#7E6210" />
+          <SolidColorBrush x:Key="RoGStatusOfflineBrush" Color="#868B96" />
           <SolidColorBrush x:Key="TextControlBackground" Color="#E8E5DE" />
           <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#E8E5DE" />
           <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#FFFFFF" />
@@ -108,6 +117,16 @@
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
       <SolidColorBrush x:Key="RoGTransparentBrush" Color="Transparent" />
+      <!--
+        Über Fotos/Videos und in der Großansicht: in beiden Designs gleich dunkel (ein Bild hat kein Design) –
+        Abdunklung, Symbol auf Bildern, Großansicht mit eigenem Text/Hover (Kontrast AA auf #101216).
+      -->
+      <SolidColorBrush x:Key="RoGScrimBrush" Color="#99000000" />
+      <SolidColorBrush x:Key="RoGOnMediaBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="RoGLightboxBrush" Color="#F2101216" />
+      <SolidColorBrush x:Key="RoGLightboxInkBrush" Color="#F1EFEA" />
+      <SolidColorBrush x:Key="RoGLightboxMutedBrush" Color="#A8ACB6" />
+      <SolidColorBrush x:Key="RoGLightboxHoverBrush" Color="#2D3240" />
 
       <!-- Schriften: Barlow Condensed (eingebettet, SIL OFL 1.1) für Anzeige-Texte in Versalien; Text = Systemschrift -->
       <FontFamily x:Key="RoGDisplayFont">avares://rebelsofgaming/Assets/Fonts#Barlow Condensed</FontFamily>
@@ -158,7 +177,7 @@
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="FontSize" Value="13" />
     <Setter Property="LetterSpacing" Value="1.2" />
-    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
   </Style>
   <!-- Kicker in Grün (z. B. „aus Minecraft“) -->
   <Style Selector="TextBlock.kicker.green">
@@ -224,11 +243,11 @@
     <Setter Property="BorderThickness" Value="0" />
   </Style>
   <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RoGActionRedHoverBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RoGOnAccentBrush}" />
   </Style>
   <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource RoGRedPressedBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RoGActionRedPressedBrush}" />
   </Style>
   <Style Selector="Button.secondary, ToggleButton.secondary">
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
@@ -253,7 +272,7 @@
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="MinHeight" Value="0" />
-    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>
   <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
@@ -286,14 +305,18 @@
   </Style>
   <Style Selector="ToggleButton.icon:checked /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
-    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
   </Style>
 
-  <!-- Sichtbarer Fokus (Tastatur): Off-White-Rahmen auf allen bedienbaren Elementen -->
+  <!--
+    Sichtbarer Fokus (Tastatur): Off-White-Rahmen auf allen bedienbaren Elementen. Innerhalb der Kante (Margin 0): die
+    Fokus-Ebene schneidet auf den sichtbaren Bereich des Elements zu – ein Rahmen außen (Margin -3) verschwand bei
+    Einträgen, die ihre Liste ganz ausfüllen (Seitenleiste, Listen), fast vollständig (Stufe 10, Tastatur-Test).
+  -->
   <Style Selector=":is(Control):focus-visible">
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border BorderBrush="{DynamicResource RoGInkBrush}" BorderThickness="2" CornerRadius="{StaticResource RoGControlRadius}" Margin="-3" />
+        <Border BorderBrush="{DynamicResource RoGInkBrush}" BorderThickness="2" CornerRadius="{StaticResource RoGControlRadius}" Margin="0" />
       </FocusAdornerTemplate>
     </Setter>
   </Style>
@@ -331,7 +354,7 @@
     <Setter Property="Background" Value="{DynamicResource RoGRedBrush}" />
   </Style>
   <Style Selector="Button.nav.selected PathIcon">
-    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
   </Style>
 
   <!-- Listen (News, Unterhaltungen): Karte je Eintrag, Auswahl mit roter Kante -->
@@ -389,7 +412,7 @@
     <Setter Property="Foreground" Value="{DynamicResource RoGGoldBrush}" />
   </Style>
   <Style Selector="PathIcon.tone.red">
-    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
   </Style>
   <Style Selector="PathIcon.tone.blue">
     <Setter Property="Foreground" Value="{DynamicResource RoGBlueBrush}" />
@@ -432,7 +455,7 @@
 
   <!-- Fortschritt im RoG-Rot -->
   <Style Selector="ProgressBar">
-    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
     <Setter Property="Background" Value="{DynamicResource RoGBg3Brush}" />
   </Style>
 
@@ -452,7 +475,36 @@
     <Setter Property="Padding" Value="6,0,12,0" />
   </Style>
   <Style Selector="Border.scrim">
-    <Setter Property="Background" Value="#99000000" />
+    <Setter Property="Background" Value="{DynamicResource RoGScrimBrush}" />
+  </Style>
+  <!-- Abspiel-Symbol auf Vorschaubildern (Videos) -->
+  <Style Selector="Border.playbadge">
+    <Setter Property="Width" Value="44" />
+    <Setter Property="Height" Value="44" />
+    <Setter Property="CornerRadius" Value="22" />
+    <Setter Property="Background" Value="{DynamicResource RoGScrimBrush}" />
+  </Style>
+  <Style Selector="Border.playbadge PathIcon">
+    <Setter Property="Width" Value="22" />
+    <Setter Property="Height" Value="22" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGOnMediaBrush}" />
+  </Style>
+  <!-- Großansicht (Galerie): immer dunkel, auch im hellen Design -->
+  <Style Selector="Grid.lightbox">
+    <Setter Property="Background" Value="{DynamicResource RoGLightboxBrush}" />
+  </Style>
+  <Style Selector="Grid.lightbox > Grid > TextBlock.body">
+    <Setter Property="Foreground" Value="{DynamicResource RoGLightboxInkBrush}" />
+  </Style>
+  <Style Selector="Grid.lightbox > TextBlock.muted">
+    <Setter Property="Foreground" Value="{DynamicResource RoGLightboxMutedBrush}" />
+  </Style>
+  <Style Selector="Grid.lightbox > Grid > Button.icon">
+    <Setter Property="Foreground" Value="{DynamicResource RoGLightboxInkBrush}" />
+  </Style>
+  <Style Selector="Grid.lightbox > Grid > Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource RoGLightboxHoverBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGLightboxInkBrush}" />
   </Style>
   <!-- Rückmeldung nach Aktionen (wie InfoBar der Windows-App): Erfolg grün, Hinweis blau, Fehler rot -->
   <Style Selector="Border.hint.success">
@@ -607,7 +659,7 @@
     <Setter Property="BorderThickness" Value="2" />
   </Style>
   <Style Selector="TextBlock.error">
-    <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
   </Style>
 
   <!-- Status-Text eines Servers -->

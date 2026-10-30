@@ -26,7 +26,7 @@
       <Setter Property="Foreground" Value="{DynamicResource RoGGreenBrush}" />
     </Style>
     <Style Selector="TextBlock.remove">
-      <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
     </Style>
     <Style Selector="TextBox.editor">
       <Setter Property="FontFamily" Value="{StaticResource RoGMonoFont}" />

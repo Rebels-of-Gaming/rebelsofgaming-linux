@@ -507,7 +507,7 @@ internal static class MatchText
     public static IBrush BrushOf(MatchOutcome outcome) => UiResources.Brush(outcome switch
     {
         MatchOutcome.Win => "RoGGreenBrush",
-        MatchOutcome.Loss => "RoGRedBrush",
+        MatchOutcome.Loss => "RoGRedTextBrush",
         MatchOutcome.Draw => "RoGGoldBrush",
         _ => "RoGMutedBrush",
     });

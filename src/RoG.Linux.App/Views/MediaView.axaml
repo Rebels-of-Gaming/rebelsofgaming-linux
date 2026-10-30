@@ -104,8 +104,8 @@
                         <Border Height="140" CornerRadius="8" ClipToBounds="True" Background="{DynamicResource RoGBg3Brush}">
                           <Panel>
                             <Image Source="{Binding Thumb}" Stretch="UniformToFill" />
-                            <Border IsVisible="{Binding IsVideo}" Width="44" Height="44" CornerRadius="22" Background="#99000000">
-                              <PathIcon Data="{StaticResource IconPlay}" Width="22" Height="22" Foreground="#FFFFFFFF" />
+                            <Border Classes="playbadge" IsVisible="{Binding IsVideo}">
+                              <PathIcon Data="{StaticResource IconPlay}" />
                             </Border>
                           </Panel>
                         </Border>
@@ -133,7 +133,7 @@
                     <Border Classes="card" AutomationProperties.Name="{Binding Title}">
                       <StackPanel Spacing="8">
                         <Grid ColumnDefinitions="Auto,*">
-                          <PathIcon Data="{StaticResource IconDownload}" Width="22" Height="22" Margin="0,2,12,0" VerticalAlignment="Top" Foreground="{DynamicResource RoGRedBrush}" />
+                          <PathIcon Data="{StaticResource IconDownload}" Width="22" Height="22" Margin="0,2,12,0" VerticalAlignment="Top" Foreground="{DynamicResource RoGRedTextBrush}" />
                           <StackPanel Grid.Column="1" Spacing="2">
                             <TextBlock Classes="body strong" Text="{Binding Title}" />
                             <TextBlock Classes="muted small" Text="{Binding Meta}" />
@@ -157,29 +157,29 @@
     </DockPanel>
 
     <!-- Großansicht -->
-    <Grid IsVisible="{Binding IsViewerOpen}" Background="#F2101216" RowDefinitions="Auto,*,Auto" x:Name="Viewer" Focusable="True">
+    <Grid Classes="lightbox" IsVisible="{Binding IsViewerOpen}" RowDefinitions="Auto,*,Auto" x:Name="Viewer" Focusable="True">
       <Grid ColumnDefinitions="*,Auto,Auto" Margin="16,12">
-        <TextBlock Classes="body" Foreground="#FFF1EFEA" Text="{Binding Viewed.Caption}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        <TextBlock Classes="body" Text="{Binding Viewed.Caption}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
         <Button Grid.Column="1" Classes="secondary" Margin="12,0,8,0" Command="{Binding ReportViewedCommand}" IsVisible="{Binding CanReport}"
                 Content="{l:T MediaPage_Report.Content}" AutomationProperties.Name="{l:T Common_Report.Content}" />
-        <Button Grid.Column="2" Classes="icon" Command="{Binding CloseViewerCommand}" Foreground="#FFF1EFEA"
+        <Button Grid.Column="2" Classes="icon" Command="{Binding CloseViewerCommand}"
                 ToolTip.Tip="{l:T MediaPage_CloseViewer.AutomationProperties.Name}" AutomationProperties.Name="{l:T MediaPage_CloseViewer.AutomationProperties.Name}">
           <PathIcon Data="{StaticResource IconClose}" Width="18" Height="18" />
         </Button>
       </Grid>
       <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto">
-        <Button Classes="icon" Margin="12,0" Command="{Binding PreviousCommand}" Foreground="#FFF1EFEA"
+        <Button Classes="icon" Margin="12,0" Command="{Binding PreviousCommand}"
                 ToolTip.Tip="{l:T MediaPage_Previous.AutomationProperties.Name}" AutomationProperties.Name="{l:T MediaPage_Previous.AutomationProperties.Name}">
           <PathIcon Data="{StaticResource IconChevronLeft}" Width="24" Height="24" />
         </Button>
         <Image Grid.Column="1" Source="{Binding Viewed.Full}" Stretch="Uniform" />
-        <Button Grid.Column="2" Classes="icon" Margin="12,0" Command="{Binding NextCommand}" Foreground="#FFF1EFEA"
+        <Button Grid.Column="2" Classes="icon" Margin="12,0" Command="{Binding NextCommand}"
                 ToolTip.Tip="{l:T MediaPage_Next.AutomationProperties.Name}" AutomationProperties.Name="{l:T MediaPage_Next.AutomationProperties.Name}">
           <PathIcon Data="{StaticResource IconChevronRight}" Width="24" Height="24" />
         </Button>
       </Grid>
       <c:ReportForm Grid.Row="1" DataContext="{Binding Report}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="16,0,16,8" />
-      <TextBlock Grid.Row="2" Classes="muted small" Margin="16,8,16,16" Text="{Binding Viewed.Meta}" Foreground="#FFA8ACB6" />
+      <TextBlock Grid.Row="2" Classes="muted small" Margin="16,8,16,16" Text="{Binding Viewed.Meta}" />
     </Grid>
   </Panel>
 </UserControl>

@@ -35,7 +35,7 @@ public sealed class StateView : UserControl
     {
         _loading = new StackPanel { Spacing = 12, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Width = 220 };
         var progress = new ProgressBar { IsIndeterminate = true };
-        progress.Bind(ProgressBar.ForegroundProperty, progress.GetResourceObservable("RoGRedBrush"));
+        progress.Bind(ProgressBar.ForegroundProperty, progress.GetResourceObservable("RoGRedTextBrush"));
         _loading.Children.Add(progress);
         _loading.Children.Add(new TextBlock { Text = Loc.Get("Common_Loading"), Classes = { "muted" }, HorizontalAlignment = HorizontalAlignment.Center });
         AutomationProperties.SetName(_loading, Loc.Get("Common_Loading"));

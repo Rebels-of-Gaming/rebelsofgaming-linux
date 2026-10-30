@@ -60,7 +60,7 @@
                     <Panel Width="22" Height="22" Margin="0,2,12,0" VerticalAlignment="Top">
                       <PathIcon Data="{StaticResource IconArchive}" Width="20" Height="20" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding IsReady}" />
                       <PathIcon Data="{StaticResource IconLock}" Width="20" Height="20" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Locked}" />
-                      <PathIcon Data="{StaticResource IconAlert}" Width="20" Height="20" Foreground="{DynamicResource RoGRedBrush}" IsVisible="{Binding IsFailed}" />
+                      <PathIcon Data="{StaticResource IconAlert}" Width="20" Height="20" Foreground="{DynamicResource RoGRedTextBrush}" IsVisible="{Binding IsFailed}" />
                       <PathIcon Data="{StaticResource IconClock}" Width="20" Height="20" Foreground="{DynamicResource RoGBlueBrush}" IsVisible="{Binding IsRunning}" />
                     </Panel>
                     <StackPanel Grid.Column="1" Spacing="2">

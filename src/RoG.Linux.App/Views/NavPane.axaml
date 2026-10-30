@@ -30,7 +30,7 @@
           <TextBlock Grid.Column="2" Classes="navlabel" Text="{Binding Label}" TextTrimming="CharacterEllipsis"
                      IsVisible="{Binding $parent[views:NavPane].ShowLabels}" />
           <Panel Grid.Column="3" IsVisible="{Binding $parent[views:NavPane].ShowLabels}">
-            <Border IsVisible="{Binding HasBadge}" Background="{DynamicResource RoGRedBrush}"
+            <Border IsVisible="{Binding HasBadge}" Background="{DynamicResource RoGActionRedBrush}"
                     CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" Margin="0,0,10,0">
               <TextBlock Text="{Binding BadgeText}" FontSize="11" FontWeight="SemiBold"
                          Foreground="{DynamicResource RoGOnAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />

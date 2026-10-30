@@ -39,7 +39,7 @@
           <Border x:Name="DropZone" Classes="dropzone" Margin="24,8,24,12">
             <StackPanel Spacing="12">
               <Grid ColumnDefinitions="Auto,*">
-                <PathIcon Data="{StaticResource IconUploads}" Width="28" Height="28" Margin="0,0,12,0" Foreground="{DynamicResource RoGRedBrush}" VerticalAlignment="Top" />
+                <PathIcon Data="{StaticResource IconUploads}" Width="28" Height="28" Margin="0,0,12,0" Foreground="{DynamicResource RoGRedTextBrush}" VerticalAlignment="Top" />
                 <TextBlock Grid.Column="1" Classes="body" Text="{l:T UploadsPage_DropHint.Text}" MaxWidth="620" HorizontalAlignment="Left" />
               </Grid>
               <WrapPanel Orientation="Horizontal">

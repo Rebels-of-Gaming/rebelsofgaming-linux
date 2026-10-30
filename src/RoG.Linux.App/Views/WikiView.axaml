@@ -21,7 +21,7 @@
       <Setter Property="Foreground" Value="{DynamicResource RoGGreenBrush}" />
     </Style>
     <Style Selector="Border.diffline.removed SelectableTextBlock">
-      <Setter Property="Foreground" Value="{DynamicResource RoGRedBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource RoGRedTextBrush}" />
     </Style>
   </UserControl.Styles>
 

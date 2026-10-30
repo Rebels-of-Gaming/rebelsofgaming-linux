@@ -21,7 +21,7 @@
           <Panel Width="24" Height="24">
             <c:AvatarView Size="24" Source="{Binding Avatar}" DisplayName="{Binding Text}" IsVisible="{Binding Avatar, Converter={x:Static ObjectConverters.IsNotNull}}" />
             <Panel IsVisible="{Binding Avatar, Converter={x:Static ObjectConverters.IsNull}}">
-              <PathIcon Data="{StaticResource IconMicOff}" Width="16" Height="16" Foreground="{DynamicResource RoGRedBrush}" IsVisible="{Binding IsMuted}" />
+              <PathIcon Data="{StaticResource IconMicOff}" Width="16" Height="16" Foreground="{DynamicResource RoGRedTextBrush}" IsVisible="{Binding IsMuted}" />
               <PathIcon Data="{StaticResource IconAway}" Width="16" Height="16" Foreground="{DynamicResource RoGMutedBrush}" IsVisible="{Binding ShowAwayIcon}" />
               <PathIcon Data="{StaticResource IconPerson}" Width="16" Height="16" Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding ShowActiveIcon}" />
             </Panel>

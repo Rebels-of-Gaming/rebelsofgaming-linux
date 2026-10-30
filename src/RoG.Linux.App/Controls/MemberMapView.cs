@@ -356,7 +356,7 @@ public sealed class MemberMapView : UserControl
         }
 
         var dot = new Ellipse { StrokeThickness = 2, Margin = new Thickness(cluster.Pins.Count > 1 ? 5 : 0) };
-        dot.Bind(Shape.FillProperty, dot.GetResourceObservable("RoGRedBrush"));
+        dot.Bind(Shape.FillProperty, dot.GetResourceObservable("RoGActionRedBrush"));
         dot.Bind(Shape.StrokeProperty, dot.GetResourceObservable("RoGInkBrush"));
         grid.Children.Add(dot);
         var text = new TextBlock

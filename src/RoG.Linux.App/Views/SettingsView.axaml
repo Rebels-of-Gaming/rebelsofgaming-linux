@@ -106,7 +106,7 @@
                         OnContent="" OffContent="" AutomationProperties.Name="{l:T Linux_Autostart}" />
           <TextBlock Classes="muted small" Text="{l:T Linux_AutostartHint}" />
           <TextBlock Classes="muted small" Text="{l:T Linux_AutostartPortalHint}" IsVisible="{Binding AutostartUsesPortal}" />
-          <TextBlock Classes="body" Foreground="{DynamicResource RoGRedBrush}" Text="{Binding AutostartFeedback}" IsVisible="{Binding HasAutostartFeedback}" />
+          <TextBlock Classes="body" Foreground="{DynamicResource RoGRedTextBrush}" Text="{Binding AutostartFeedback}" IsVisible="{Binding HasAutostartFeedback}" />
         </StackPanel>
       </Border>
 
@@ -181,7 +181,7 @@
                   <TextBox Width="170" Text="{Binding ConfirmPin}" PasswordChar="•" MaxLength="8" AutomationProperties.Name="{l:T Linux_AppLockConfirmPin}" />
                 </StackPanel>
               </WrapPanel>
-              <TextBlock Classes="body" Foreground="{DynamicResource RoGRedBrush}" Text="{Binding FormError}" IsVisible="{Binding HasFormError}" TextWrapping="Wrap" />
+              <TextBlock Classes="body" Foreground="{DynamicResource RoGRedTextBrush}" Text="{Binding FormError}" IsVisible="{Binding HasFormError}" TextWrapping="Wrap" />
               <WrapPanel Orientation="Horizontal">
                 <Button Classes="primary" Margin="0,0,12,0" Command="{Binding SavePinCommand}" Content="{l:T Linux_AppLockSavePin, Upper=True}" />
                 <Button Classes="secondary" Command="{Binding CancelPinCommand}" Content="{l:T Common_Cancel, Upper=True}" />

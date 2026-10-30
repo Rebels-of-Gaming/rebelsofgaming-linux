@@ -8,7 +8,7 @@
   <Border Classes="hint error" Background="{DynamicResource RoGBg3Brush}">
     <StackPanel Spacing="10">
       <Grid ColumnDefinitions="Auto,*">
-        <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Foreground="{DynamicResource RoGRedBrush}" VerticalAlignment="Top" Margin="0,2,10,0" />
+        <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Foreground="{DynamicResource RoGRedTextBrush}" VerticalAlignment="Top" Margin="0,2,10,0" />
         <StackPanel Grid.Column="1" Spacing="4">
           <TextBlock Classes="body strong" Text="{Binding Title}" IsVisible="{Binding HasTitle}" />
           <SelectableTextBlock Classes="body" Text="{Binding Text}" />

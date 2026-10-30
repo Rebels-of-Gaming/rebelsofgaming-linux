@@ -380,7 +380,7 @@
           </ItemsControl>
 
           <Rectangle Height="1" Fill="{DynamicResource RoGLineBrush}" Margin="0,4" />
-          <TextBlock Classes="section" Foreground="{DynamicResource RoGRedBrush}" Text="{l:T AccountPage_DeleteTitle.Text, Upper=True}" />
+          <TextBlock Classes="section" Foreground="{DynamicResource RoGRedTextBrush}" Text="{l:T AccountPage_DeleteTitle.Text, Upper=True}" />
           <TextBlock Classes="muted" Text="{l:T AccountPage_DeleteText.Text}" />
           <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding OpenDeleteCommand}" IsVisible="{Binding !IsDeleteOpen}"
                   Content="{l:T AccountPage_Delete.Content}" />

@@ -34,7 +34,7 @@
             </StackPanel>
 
             <StackPanel Spacing="12" IsVisible="{Binding IsBusy}">
-              <ProgressBar IsIndeterminate="True" Foreground="{DynamicResource RoGRedBrush}" Width="200" />
+              <ProgressBar IsIndeterminate="True" Foreground="{DynamicResource RoGRedTextBrush}" Width="200" />
               <TextBlock Classes="muted" Text="{l:T LoginPage_Waiting.Text}" HorizontalAlignment="Center" TextAlignment="Center" />
               <Button Classes="secondary" HorizontalAlignment="Center" Command="{Binding CancelCommand}"
                       Content="{l:T LoginPage_Cancel.Content}" />

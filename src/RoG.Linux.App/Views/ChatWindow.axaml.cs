@@ -49,11 +49,25 @@ public sealed partial class ChatWindow : Window
         return window;
     }
 
-    /// <summary>Strg+W schließt das Chat-Fenster.</summary>
+    /// <summary>
+    /// Strg+W schließt das Chat-Fenster; Escape wie in den anderen Fenstern auch – erst das Zitat (im Chat), dann das
+    /// Fenster, aber nicht mit angefangenem Text (sonst ginge der Entwurf verloren).
+    /// </summary>
     protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        if (!e.Handled && e.KeyModifiers == Avalonia.Input.KeyModifiers.Control && e.Key == Avalonia.Input.Key.W)
+        if (e.Handled)
+        {
+            return;
+        }
+
+        if (e.KeyModifiers == Avalonia.Input.KeyModifiers.Control && e.Key == Avalonia.Input.Key.W)
+        {
+            e.Handled = true;
+            Close();
+        }
+        else if (e.KeyModifiers == Avalonia.Input.KeyModifiers.None && e.Key == Avalonia.Input.Key.Escape
+            && DataContext is ChatViewModel chat && string.IsNullOrWhiteSpace(chat.Draft))
         {
             e.Handled = true;
             Close();

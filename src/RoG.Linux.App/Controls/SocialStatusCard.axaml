@@ -30,7 +30,7 @@
               <StackPanel Spacing="2">
                 <TextBlock Classes="body" Text="{Binding Name}" TextWrapping="Wrap" />
                 <TextBlock Classes="muted small" Text="{Binding StatusText}" TextWrapping="Wrap" />
-                <SelectableTextBlock Classes="small" Foreground="{DynamicResource RoGRedBrush}" Text="{Binding Error}" TextWrapping="Wrap"
+                <SelectableTextBlock Classes="small" Foreground="{DynamicResource RoGRedTextBrush}" Text="{Binding Error}" TextWrapping="Wrap"
                                      IsVisible="{Binding HasError}" />
               </StackPanel>
               <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="8,0,0,0">

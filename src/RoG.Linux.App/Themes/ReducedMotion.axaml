@@ -1,0 +1,23 @@
+<!--
+  „Bewegung reduzieren“ (Stufe 10): gilt in Fenstern mit der Klasse „reduce-motion“ – die setzt Services/MotionService,
+  wenn der Desktop es wünscht (Settings-Portal, auch live). Die App selbst hat keine eigenen Animationen; bewegt sich nur,
+  was das Fluent-Design mitbringt: Druck-Skalierung der Knöpfe, Ein-/Ausblenden der Bildlaufleisten und Fortschrittsbalken,
+  Gleiten des Schalterknopfs und die endlos laufende „unbestimmte“ Fortschrittsanzeige. Die Übergänge entfallen; die
+  laufende Anzeige wird durch eine ruhende, halb deckende Leiste ersetzt (der Zustand „lädt“ bleibt sichtbar).
+  Die Klasse am Fenster macht die Regeln zu Stil-Bedingungen – die haben Vorrang vor Werten aus Themes und Vorlagen.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style Selector="Window.reduce-motion :is(Control)">
+    <Setter Property="Transitions">
+      <Transitions />
+    </Setter>
+  </Style>
+  <Style Selector="Window.reduce-motion ProgressBar:indeterminate /template/ Border#IndeterminateProgressBarIndicator, Window.reduce-motion ProgressBar:indeterminate /template/ Border#IndeterminateProgressBarIndicator2">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="Window.reduce-motion ProgressBar:indeterminate /template/ Panel#IndeterminateRoot">
+    <Setter Property="Background" Value="{Binding $parent[ProgressBar].Foreground}" />
+    <Setter Property="Opacity" Value="0.5" />
+  </Style>
+</Styles>

@@ -22,8 +22,12 @@ work="$root/artifacts/dist/$name"
 rm -rf "$work"
 mkdir -p "$work"
 
+# ReadyToRun (vorkompiliert, Stufe 10): erstes Fenster unter Xvfb ~0,9 s statt ~1,5 s, Paket ~25 % größer.
+# Kein Trimming: RoG.Core (API-Client, System.Text.Json) und Avalonia nutzen Reflexion – das Risiko stiller Fehler zur
+# Laufzeit ist größer als der Gewinn an Paketgröße. ROG_READY_TO_RUN=false baut ohne Vorkompilierung.
+ready_to_run="${ROG_READY_TO_RUN:-true}"
 dotnet publish "$root/src/RoG.Linux.App/RoG.Linux.App.csproj" -c Release -r "$rid" --self-contained true \
-  -p:PublishTrimmed=false -p:DebugType=none -o "$work/rebelsofgaming"
+  -p:PublishTrimmed=false -p:PublishReadyToRun="$ready_to_run" -p:DebugType=none -o "$work/rebelsofgaming"
 
 # Layout wie unter /app im Flatpak (das Manifest kopiert es nur noch)
 install -Dm644 "$root/packaging/linux/$app_id.desktop" "$work/share/applications/$app_id.desktop"

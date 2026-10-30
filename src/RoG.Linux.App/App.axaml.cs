@@ -17,7 +17,11 @@ public sealed partial class App : Application
     /// <summary>Single-Instance aus <c>Main</c> (in Tests <c>null</c>).</summary>
     internal static SingleInstance? Instance { get; set; }
 
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+        MotionService.Attach();
+    }
 
     public override async void OnFrameworkInitializationCompleted()
     {
@@ -27,6 +31,7 @@ public sealed partial class App : Application
             return;
         }
 
+        StartupTrace.Mark("framework");
         var services = await AppServices.CreateAsync();
 
         // Zahlen/Datum im Kern (z. B. „1,2 GB“) folgen der App-Sprache, nicht der Locale des Systems (wie Windows)
@@ -34,7 +39,10 @@ public sealed partial class App : Application
         System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = services.Culture;
         System.Globalization.CultureInfo.CurrentCulture = services.Culture;
         System.Globalization.CultureInfo.CurrentUICulture = services.Culture;
+        StartupTrace.Mark("services");
         var window = CreateMainWindow(services);
+        StartupTrace.Mark("window-created");
+        window.Opened += (_, _) => StartupTrace.Mark("window-opened");
         WindowPlacementService.Restore(window, services.Settings.Window);
         if (services.GameMode)
         {
@@ -50,8 +58,13 @@ public sealed partial class App : Application
         var tray = new TrayService(services);
         services.Tray = tray;
         desktop.Exit += (_, _) => Task.Run(() => tray.DisposeAsync().AsTask()).Wait(TimeSpan.FromSeconds(2));
-        var trayVisible = await tray.StartAsync().WaitAsync(TimeSpan.FromSeconds(3)).ContinueWith(t => t.IsCompletedSuccessfully && t.Result, TaskScheduler.Default);
+        // Tray parallel anmelden: das Fenster wartet nicht darauf (Startzeit) – nur der Hintergrund-Start braucht das Ergebnis
+        var trayStart = tray.StartAsync().WaitAsync(TimeSpan.FromSeconds(3)).ContinueWith(t => t.IsCompletedSuccessfully && t.Result, TaskScheduler.Default);
         window.CloseToTray = () => tray.IsVisible && services.Settings.CloseToTray;
+        // „Bewegung reduzieren“ wie der Desktop (Settings-Portal, auch live) – im Hintergrund
+        var motion = new MotionSettings();
+        desktop.Exit += (_, _) => motion.DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(1));
+        _ = MotionService.StartAsync(motion);
         var trayHintShown = false;
         window.HiddenToTray += (_, _) =>
         {
@@ -71,9 +84,14 @@ public sealed partial class App : Application
 
         // Autostart (--background): ohne Fenster im Infobereich – nur, wenn es ein sichtbares Tray gibt
         // Beim Anmelden startet das Panel oft erst nach der App – bis zu 15 s auf das Tray warten
-        if (LaunchOptions.Current.Background && services.Settings.CloseToTray && !trayVisible)
+        var trayVisible = false;
+        if (LaunchOptions.Current.Background)
         {
-            trayVisible = await WaitForTrayAsync(tray, TimeSpan.FromSeconds(15));
+            trayVisible = await trayStart;
+            if (services.Settings.CloseToTray && !trayVisible)
+            {
+                trayVisible = await WaitForTrayAsync(tray, TimeSpan.FromSeconds(15));
+            }
         }
 
         var startHidden = LaunchOptions.Current.Background && trayVisible && services.Settings.CloseToTray;
@@ -126,6 +144,7 @@ public sealed partial class App : Application
             }
         };
         await shell.InitializeAsync();
+        StartupTrace.Mark("shell-initialized");
         if (LaunchOptions.Current.DeepLink is { } link)
         {
             shell.OpenDeepLink(link);

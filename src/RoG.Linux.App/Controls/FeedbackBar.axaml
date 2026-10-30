@@ -12,7 +12,7 @@
       <Panel Width="20" Height="20" VerticalAlignment="Top" Margin="0,2,10,0">
         <PathIcon Data="{StaticResource IconCheckCircle}" Width="18" Height="18" Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding IsSuccess}" />
         <PathIcon Data="{StaticResource IconInfo}" Width="18" Height="18" Foreground="{DynamicResource RoGBlueBrush}" IsVisible="{Binding IsInfo}" />
-        <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Foreground="{DynamicResource RoGRedBrush}" IsVisible="{Binding IsError}" />
+        <PathIcon Data="{StaticResource IconAlert}" Width="18" Height="18" Foreground="{DynamicResource RoGRedTextBrush}" IsVisible="{Binding IsError}" />
       </Panel>
       <SelectableTextBlock Grid.Column="1" Classes="body" Text="{Binding Message}" VerticalAlignment="Center" />
       <Button Grid.Column="2" Classes="icon" Width="32" Height="32" Padding="8" VerticalAlignment="Top" Margin="8,-4,-6,-4"

@@ -13,6 +13,7 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        Services.StartupTrace.Mark("main");
         LaunchOptions.Current = LaunchOptions.Parse(args, Environment.GetEnvironmentVariable);
         using var instance = Platform.Desktop.SingleInstance.Acquire(args);
         if (!instance.IsPrimary)

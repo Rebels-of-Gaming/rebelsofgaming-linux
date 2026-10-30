@@ -352,7 +352,7 @@ public sealed partial class ServerItemViewModel : ObservableObject
 
     /// <summary>Rot: fehlgeschlagen oder läuft in 24 h ab; Gold: wird installiert; sonst gedämpft.</summary>
     public Avalonia.Media.IBrush ProvisioningBrush => UiResources.Brush(
-        Server.Provisioning is { } p && (p.IsFailed || p.ExpiresSoon(DateTimeOffset.Now)) ? "RoGRedBrush" : Server.Provisioning?.IsInstalling == true ? "RoGGoldBrush" : "RoGMutedBrush");
+        Server.Provisioning is { } p && (p.IsFailed || p.ExpiresSoon(DateTimeOffset.Now)) ? "RoGRedTextBrush" : Server.Provisioning?.IsInstalling == true ? "RoGGoldBrush" : "RoGMutedBrush");
 
     /// <summary>Alle zugewiesenen Ports (über die Website angelegt), Hauptport zuerst und gekennzeichnet.</summary>
     public IReadOnlyList<string> Ports => Server.Provisioning is { } p

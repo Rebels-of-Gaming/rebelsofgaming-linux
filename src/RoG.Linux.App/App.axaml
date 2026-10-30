@@ -130,5 +130,6 @@
       </FluentTheme.Palettes>
     </FluentTheme>
     <StyleInclude Source="avares://rebelsofgaming/Themes/RoGTheme.axaml" />
+    <StyleInclude Source="avares://rebelsofgaming/Themes/ReducedMotion.axaml" />
   </Application.Styles>
 </Application>

@@ -77,7 +77,7 @@
             <!-- Gefahrenzone -->
             <Border Classes="card" BorderBrush="{DynamicResource RoGRedBrush}" BorderThickness="1" IsVisible="{Binding Deletable}">
               <StackPanel Spacing="8">
-                <TextBlock Classes="section" Foreground="{DynamicResource RoGRedBrush}" Text="{l:T Provision_DangerTitle.Text}" />
+                <TextBlock Classes="section" Foreground="{DynamicResource RoGRedTextBrush}" Text="{l:T Provision_DangerTitle.Text}" />
                 <TextBlock Classes="body" Text="{l:T Provision_DangerText.Text}" TextWrapping="Wrap" />
                 <StackPanel Spacing="4">
                   <TextBlock Classes="label" Text="{l:T Provision_ConfirmName.Header}" TextWrapping="Wrap" />

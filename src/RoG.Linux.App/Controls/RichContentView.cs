@@ -203,7 +203,7 @@ public sealed class RichContentView : UserControl
             {
                 Text = l.Ordered ? $"{number++}." : "•",
                 Classes = { "body" },
-                Foreground = Res<IBrush>("RoGRedBrush"),
+                Foreground = Res<IBrush>("RoGRedTextBrush"),
                 HorizontalAlignment = HorizontalAlignment.Left,
             });
             var content = new StackPanel { Spacing = 6 };
