@@ -5,17 +5,20 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RoG.Core.Api;
 using RoG.Core.Api.Generated;
+using RoG.Core.Navigation;
 using RoG.Linux.App.Services;
 
 namespace RoG.Linux.App.ViewModels;
 
 /// <summary>
 /// Hauptfenster: Login (solange weder Token noch Gastmodus) oder Seitenleiste + Seite – Bereiche und Reihenfolge wie in
-/// der Windows-App. Breit (≥ 840 px) aufgeklappt, sonst nur Symbole.
+/// der Windows-App (NavigationView „Auto“): ab 840 px aufgeklappt, ab 600 px nur Symbole, darunter Kopfleiste mit
+/// Menü-Knopf und Seitenleiste als Überlagerung.
 /// </summary>
 public sealed partial class ShellViewModel : ObservableObject
 {
     public const double ExpandedThreshold = 840;
+    public const double CompactThreshold = 600;
 
     private readonly AppServices _services;
     private readonly Dictionary<string, object> _pages = new(StringComparer.Ordinal);
@@ -25,7 +28,7 @@ public sealed partial class ShellViewModel : ObservableObject
         _services = services;
         MainItems =
         [
-            Item("Nav_Home", "Shell_NavHome.Content", "IconHome", string.Empty, false),
+            Item("Nav_Home", "Shell_NavHome.Content", "IconHome", string.Empty, true),
             Item("Nav_News", "Shell_NavNews.Content", "IconNews", "news", true),
             Item("Nav_Squads", "Shell_NavSquads.Content", "IconSquads", "squads", false),
             Item("Nav_Messages", "Shell_NavMessages.Content", "IconMessages", "messages", true),
@@ -45,8 +48,10 @@ public sealed partial class ShellViewModel : ObservableObject
         [
             Item("Nav_Notifications", "Shell_NavNotifications.Content", "IconBell", "notifications", false),
             Item("Nav_Account", "Shell_NavAccount.Content", "IconAccount", "settings/account", true),
+            Item("Nav_Settings", "Linux_NavSettings", "IconSettings", "settings", true),
         ];
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
+        _services.Navigator = Navigate;
     }
 
     public ObservableCollection<NavItem> MainItems { get; }
@@ -54,6 +59,10 @@ public sealed partial class ShellViewModel : ObservableObject
     public ObservableCollection<NavItem> FooterItems { get; }
 
     public string MenuToggleText => _services.T("Linux_MenuToggle");
+
+    public string OpenMenuText => _services.T("Linux_OpenMenu");
+
+    public string CloseMenuText => _services.T("Linux_CloseMenu");
 
     [ObservableProperty]
     public partial object? CurrentPage { get; set; }
@@ -69,20 +78,54 @@ public sealed partial class ShellViewModel : ObservableObject
 
     public bool IsShellVisible => Login is null;
 
+    /// <summary>Seitenleiste aufgeklappt (mit Beschriftung) statt nur Symbole – nur in der normalen Ansicht.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(PaneWidth))]
+    [NotifyPropertyChangedFor(nameof(PaneWidth), nameof(ShowLabels))]
     public partial bool IsPaneExpanded { get; set; } = true;
 
-    /// <summary>Seitenleiste: aufgeklappt mit Beschriftung, sonst nur Symbole.</summary>
-    public double PaneWidth => IsPaneExpanded ? 248 : 64;
+    /// <summary>Breite der festen Seitenleiste; in der schmalen Ansicht liegt sie als Überlagerung darüber.</summary>
+    public double PaneWidth => IsPaneExpanded ? 240 : 60;
+
+    public bool ShowLabels => IsPaneExpanded;
 
     /// <summary>Fensterbreite ≥ <see cref="ExpandedThreshold"/>? Vom Fenster gesetzt.</summary>
     [ObservableProperty]
     public partial bool IsWide { get; set; } = true;
 
+    /// <summary>Fensterbreite &lt; <see cref="CompactThreshold"/>: Kopfleiste + Menü als Überlagerung.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowSidePane))]
+    public partial bool IsNarrow { get; set; }
+
+    public bool ShowSidePane => !IsNarrow;
+
+    /// <summary>Überlagerte Seitenleiste (schmale Ansicht) offen?</summary>
+    [ObservableProperty]
+    public partial bool IsOverlayOpen { get; set; }
+
+    /// <summary>Titel der aktuellen Seite für die Kopfleiste der schmalen Ansicht.</summary>
+    public string CurrentTitle => CurrentItem?.Label ?? string.Empty;
+
     partial void OnLoginChanged(LoginViewModel? value) => OnPropertyChanged(nameof(IsLoginVisible));
 
     partial void OnIsWideChanged(bool value) => IsPaneExpanded = value;
+
+    partial void OnIsNarrowChanged(bool value)
+    {
+        if (!value)
+        {
+            IsOverlayOpen = false;
+        }
+    }
+
+    partial void OnCurrentItemChanged(NavItem? value) => OnPropertyChanged(nameof(CurrentTitle));
+
+    /// <summary>Fensterbreite (DIP) übernehmen: aufgeklappt / Symbole / schmal.</summary>
+    public void UpdateWidth(double width)
+    {
+        IsWide = width >= ExpandedThreshold;
+        IsNarrow = width < CompactThreshold;
+    }
 
     /// <summary>Start: Token vorhanden oder Gastmodus → Shell, sonst Login. Danach Profil laden und Gerät melden.</summary>
     public async Task InitializeAsync()
@@ -102,7 +145,20 @@ public sealed partial class ShellViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void TogglePane() => IsPaneExpanded = !IsPaneExpanded;
+    private void TogglePane()
+    {
+        if (IsNarrow)
+        {
+            IsOverlayOpen = !IsOverlayOpen;
+        }
+        else
+        {
+            IsPaneExpanded = !IsPaneExpanded;
+        }
+    }
+
+    [RelayCommand]
+    private void CloseOverlay() => IsOverlayOpen = false;
 
     [RelayCommand]
     public void Navigate(NavItem? item)
@@ -118,6 +174,7 @@ public sealed partial class ShellViewModel : ObservableObject
         }
 
         CurrentItem = item;
+        IsOverlayOpen = false;
         if (!_pages.TryGetValue(item.Key, out var page))
         {
             page = CreatePage(item);
@@ -141,8 +198,53 @@ public sealed partial class ShellViewModel : ObservableObject
         return item is not null;
     }
 
+    /// <summary>Ziel aus dem Kern (Startseite, Deep Link) öffnen; nicht nativ vorhandene Bereiche → Platzhalter.</summary>
+    public bool Navigate(AppRoute route)
+    {
+        ArgumentNullException.ThrowIfNull(route);
+        if (IsLoginVisible || !s_sections.TryGetValue(route.Section, out var key) || !NavigateTo(key))
+        {
+            return false;
+        }
+
+        if (route.Key is { Length: > 0 } slug && CurrentPage is NewsViewModel news)
+        {
+            news.Open(slug);
+        }
+
+        return true;
+    }
+
+    /// <summary><c>rog://…</c> (Startargument oder zweite Instanz). Unbekannte Links werden ignoriert.</summary>
+    public bool OpenDeepLink(Uri link) =>
+        AppRoute.FromAppUri(link, _services.Environment) is { } route && Navigate(route);
+
+    private static readonly Dictionary<AppSection, string> s_sections = new()
+    {
+        [AppSection.Home] = "Nav_Home",
+        [AppSection.News] = "Nav_News",
+        [AppSection.Squads] = "Nav_Squads",
+        [AppSection.Messages] = "Nav_Messages",
+        [AppSection.Friends] = "Nav_Friends",
+        [AppSection.Calendar] = "Nav_Calendar",
+        [AppSection.Servers] = "Nav_Servers",
+        [AppSection.Forum] = "Nav_Forum",
+        [AppSection.Wiki] = "Nav_Wiki",
+        [AppSection.Tools] = "Nav_Tools",
+        [AppSection.Members] = "Nav_Members",
+        [AppSection.Matches] = "Nav_Matches",
+        [AppSection.Media] = "Nav_Media",
+        [AppSection.Uploads] = "Nav_Uploads",
+        [AppSection.Info] = "Nav_Info",
+        [AppSection.Notifications] = "Nav_Notifications",
+        [AppSection.Account] = "Nav_Account",
+        [AppSection.Settings] = "Nav_Settings",
+    };
+
     private object CreatePage(NavItem item) => item.Key switch
     {
+        "Nav_Home" => new HomeViewModel(_services),
+        "Nav_Settings" => new SettingsViewModel(_services),
         "Nav_News" => new NewsViewModel(_services),
         "Nav_Messages" => new MessagesViewModel(_services, ShowLogin),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
@@ -171,7 +273,7 @@ public sealed partial class ShellViewModel : ObservableObject
         // Seiten neu aufbauen: Inhalte gehören zum Konto (bzw. Gastmodus)
         _pages.Clear();
         var last = _services.Settings.LastSection;
-        var start = MainItems.Concat(FooterItems).FirstOrDefault(i => i.Key == last && i.Implemented) ?? MainItems.First(i => i.Key == "Nav_News");
+        var start = MainItems.Concat(FooterItems).FirstOrDefault(i => i.Key == last && i.Implemented) ?? MainItems.First(i => i.Key == "Nav_Home");
         Navigate(start);
     }
 

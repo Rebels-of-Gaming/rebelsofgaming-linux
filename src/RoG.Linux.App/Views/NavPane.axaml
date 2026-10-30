@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:views="using:RoG.Linux.App.Views"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.NavPane"
+             x:Name="Root"
+             x:DataType="vm:ShellViewModel">
+  <UserControl.Resources>
+    <!-- Eintrag der Seitenleiste: Markierung, Symbol, Beschriftung, Zähler -->
+    <DataTemplate x:Key="NavItemTemplate" x:DataType="vm:NavItem">
+      <Button Classes="nav" Classes.selected="{Binding IsSelected}"
+              Command="{Binding $parent[views:NavPane].((vm:ShellViewModel)DataContext).NavigateCommand}"
+              CommandParameter="{Binding}"
+              ToolTip.Tip="{Binding Label}"
+              AutomationProperties.Name="{Binding Label}"
+              Margin="0,1">
+        <Grid ColumnDefinitions="3,41,*,Auto">
+          <Border Classes="navmarker" Width="3" Height="18" CornerRadius="2" VerticalAlignment="Center" />
+          <Panel Grid.Column="1" Width="41">
+            <PathIcon Data="{Binding Icon}" Width="20" Height="20" HorizontalAlignment="Center" />
+            <!-- Zähler als Punkt auf dem Symbol, wenn nur Symbole sichtbar sind -->
+            <Ellipse Width="8" Height="8" Fill="{DynamicResource RoGRedBrush}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                     Margin="0,6,8,0" IsVisible="{Binding HasBadge}" />
+          </Panel>
+          <TextBlock Grid.Column="2" Classes="navlabel" Text="{Binding Label}" TextTrimming="CharacterEllipsis"
+                     IsVisible="{Binding $parent[views:NavPane].ShowLabels}" />
+          <Border Grid.Column="3" IsVisible="{Binding HasBadge}" Background="{DynamicResource RoGRedBrush}"
+                  CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" Margin="0,0,10,0">
+            <TextBlock Text="{Binding BadgeText}" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{DynamicResource RoGOnAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+        </Grid>
+      </Button>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <Border Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+    <DockPanel>
+      <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*" Height="48" Margin="10,6,10,2">
+        <Button Classes="icon"
+                Command="{Binding TogglePaneCommand}"
+                ToolTip.Tip="{Binding MenuToggleText}"
+                AutomationProperties.Name="{Binding MenuToggleText}">
+          <PathIcon Data="{StaticResource IconMenu}" Width="20" Height="20" />
+        </Button>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="8,0,0,0"
+                    VerticalAlignment="Center" IsVisible="{Binding #Root.ShowLabels}">
+          <Image Source="avares://rebelsofgaming/Assets/rog-badge-512.png" Width="24" Height="24" />
+          <TextBlock Text="{l:T Shell_TitleBar.Text}"
+                     FontFamily="{StaticResource RoGDisplayFont}" FontWeight="SemiBold" FontSize="16"
+                     LetterSpacing="1.2" Foreground="{DynamicResource RoGInkBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+      </Grid>
+
+      <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding FooterItems}" Margin="8,4,8,8"
+                    ItemTemplate="{StaticResource NavItemTemplate}" />
+
+      <Border DockPanel.Dock="Bottom" Height="1" Background="{DynamicResource RoGLineBrush}" Margin="14,0" />
+
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding MainItems}" Margin="8,2,8,4" ItemTemplate="{StaticResource NavItemTemplate}" />
+      </ScrollViewer>
+    </DockPanel>
+  </Border>
+</UserControl>

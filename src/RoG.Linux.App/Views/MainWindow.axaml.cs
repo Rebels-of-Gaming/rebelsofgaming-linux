@@ -1,19 +1,32 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using RoG.Linux.App.Services;
 using RoG.Linux.App.ViewModels;
 
 namespace RoG.Linux.App.Views;
 
 /// <summary>
-/// Hauptfenster. Tastatur: Strg+1 … Strg+9 öffnen die ersten Bereiche der Seitenleiste, F5 aktualisiert,
-/// Escape schließt das Detail (Liste-Detail-Seiten), Tab/Umschalt+Tab und Pfeile wie gewohnt.
+/// Hauptfenster. Tastatur: Strg+1 … Strg+9 öffnen die ersten Bereiche der Seitenleiste, Strg+, die Einstellungen,
+/// F5 aktualisiert, Escape schließt das Menü (schmale Ansicht) bzw. das Detail (Liste-Detail-Seiten), Tab/Umschalt+Tab
+/// und Pfeile wie gewohnt. Merkt Größe, Lage und „maximiert“ beim Schließen (<see cref="WindowPlacementService"/>).
 /// </summary>
 public sealed partial class MainWindow : Window
 {
+    private readonly AppServices? _services;
+    private PixelPoint _normalPosition;
+    private Size _normalSize;
+
     public MainWindow()
+        : this(null)
     {
+    }
+
+    public MainWindow(AppServices? services)
+    {
+        _services = services;
         InitializeComponent();
+        PositionChanged += (_, e) => RememberNormal(e.Point, null);
     }
 
     private ShellViewModel? Shell => DataContext as ShellViewModel;
@@ -21,10 +34,52 @@ public sealed partial class MainWindow : Window
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        if (change.Property == BoundsProperty && Shell is { } shell)
+        if (change.Property == BoundsProperty)
         {
-            shell.IsWide = Bounds.Width >= ShellViewModel.ExpandedThreshold;
+            Shell?.UpdateWidth(Bounds.Width);
+            RememberNormal(null, Bounds.Size);
         }
+        else if (change.Property == DataContextProperty)
+        {
+            Shell?.UpdateWidth(Bounds.Width > 0 ? Bounds.Width : Width);
+        }
+    }
+
+    /// <summary>Lage/Größe nur im normalen Zustand merken – maximiert soll die vorherige Größe zurückkommen.</summary>
+    private void RememberNormal(PixelPoint? position, Size? size)
+    {
+        if (WindowState != WindowState.Normal)
+        {
+            return;
+        }
+
+        if (position is { } p)
+        {
+            _normalPosition = p;
+        }
+
+        if (size is { Width: > 0, Height: > 0 } s)
+        {
+            _normalSize = s;
+        }
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        if (_services is null || e.Cancel || _normalSize.Width <= 0)
+        {
+            return;
+        }
+
+        var placement = WindowPlacementService.Capture(_normalPosition, _normalSize, WindowState == WindowState.Maximized);
+        _services.UpdateSettingsNow(s => s with { Window = placement });
+    }
+
+    private void OnScrimPressed(object? sender, PointerPressedEventArgs e)
+    {
+        Shell?.CloseOverlayCommand.Execute(null);
+        e.Handled = true;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -44,6 +99,10 @@ public sealed partial class MainWindow : Window
                 e.Handled = true;
             }
         }
+        else if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.OemComma)
+        {
+            e.Handled = shell.NavigateTo("Nav_Settings");
+        }
         else if (e.Key == Key.F5 && shell.CurrentPage is LoadableViewModel page)
         {
             _ = page.LoadAsync();
@@ -51,6 +110,13 @@ public sealed partial class MainWindow : Window
         }
         else if (e.Key == Key.Escape)
         {
+            if (shell.IsOverlayOpen)
+            {
+                shell.IsOverlayOpen = false;
+                e.Handled = true;
+                return;
+            }
+
             switch (shell.CurrentPage)
             {
                 case NewsViewModel news when news.IsDetailOpen:

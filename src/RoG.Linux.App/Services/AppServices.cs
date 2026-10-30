@@ -6,6 +6,7 @@ using RoG.Core.Auth;
 using RoG.Core.Config;
 using RoG.Core.Features.Account;
 using RoG.Core.Localization;
+using RoG.Core.Navigation;
 using RoG.Core.Settings;
 using RoG.Linux.Platform;
 using RoG.Linux.Platform.Desktop;
@@ -49,6 +50,7 @@ public sealed class AppServices : IDisposable
     private AppServices(
         ISettingsStore settingsStore,
         AppSettings settings,
+        LinuxSettingsStore linuxStore,
         string language,
         RoGEnvironment environment,
         ITokenStore tokens,
@@ -60,6 +62,8 @@ public sealed class AppServices : IDisposable
     {
         SettingsStore = settingsStore;
         Settings = settings;
+        _linuxStore = linuxStore;
+        LinuxSettings = linuxStore.Load();
         Language = language;
         Culture = CultureInfo.GetCultureInfo(LanguageResolver.ToResourceTag(language));
         Environment = environment;
@@ -75,10 +79,25 @@ public sealed class AppServices : IDisposable
     }
 
     private readonly SemaphoreSlim _settingsGate = new(1, 1);
+    private readonly LinuxSettingsStore _linuxStore;
 
     public ISettingsStore SettingsStore { get; }
 
     public AppSettings Settings { get; private set; }
+
+    /// <summary>Linux-eigene Einstellungen (Design) aus <c>linux.json</c>.</summary>
+    public LinuxSettings LinuxSettings { get; private set; }
+
+    /// <summary>Design gewechselt (Einstellungen) – die App setzt die Theme-Variante.</summary>
+    public event EventHandler? LinuxSettingsChanged;
+
+    /// <summary>Bereich öffnen (von der Shell gesetzt): Startseite → News, Deep Links, Benachrichtigungen.</summary>
+    public Func<AppRoute, bool>? Navigator { get; set; }
+
+    public bool Navigate(AppRoute route) => Navigator?.Invoke(route) ?? false;
+
+    /// <summary>Läuft die App als Flatpak? (Über-Bereich, Hinweise)</summary>
+    public bool IsFlatpak { get; } = new LinuxPaths().IsFlatpak;
 
     /// <summary>Aktive Sprache: de, en oder fr.</summary>
     public string Language { get; }
@@ -134,7 +153,8 @@ public sealed class AppServices : IDisposable
     {
         options ??= new AppServicesOptions();
         var paths = new LinuxPaths();
-        var settingsStore = new JsonFileSettingsStore(Path.Combine(options.SettingsDirectory ?? paths.ConfigDirectory, "settings.json"));
+        var settingsDirectory = options.SettingsDirectory ?? paths.ConfigDirectory;
+        var settingsStore = new JsonFileSettingsStore(Path.Combine(settingsDirectory, "settings.json"));
         var settings = await settingsStore.LoadAsync();
 
         var language = options.Language ?? LanguageResolver.Resolve(settings.Language, CultureInfo.CurrentUICulture);
@@ -152,6 +172,7 @@ public sealed class AppServices : IDisposable
         return new AppServices(
             settingsStore,
             settings,
+            new LinuxSettingsStore(Path.Combine(settingsDirectory, "linux.json")),
             language,
             environment,
             tokens,
@@ -176,6 +197,30 @@ public sealed class AppServices : IDisposable
         {
             _settingsGate.Release();
         }
+    }
+
+    /// <summary>
+    /// Wie <see cref="UpdateSettingsAsync"/>, aber wartet auf das Speichern – für das Schließen des Fensters, wenn der
+    /// Prozess gleich endet. Läuft auf dem Thread-Pool, damit das Warten den UI-Thread nicht verklemmt.
+    /// </summary>
+    public void UpdateSettingsNow(Func<AppSettings, AppSettings> change) =>
+        Task.Run(() => UpdateSettingsAsync(change)).GetAwaiter().GetResult();
+
+    public async Task UpdateLinuxSettingsAsync(Func<LinuxSettings, LinuxSettings> change)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        await _settingsGate.WaitAsync();
+        try
+        {
+            LinuxSettings = change(LinuxSettings);
+            await _linuxStore.SaveAsync(LinuxSettings);
+        }
+        finally
+        {
+            _settingsGate.Release();
+        }
+
+        LinuxSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Texte für die Seite, die der Browser nach dem Login-Rücksprung zeigt.</summary>
