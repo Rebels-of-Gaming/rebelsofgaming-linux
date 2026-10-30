@@ -1,0 +1,242 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ApplicationsAdminView"
+             x:DataType="vm:ApplicationsAdminViewModel">
+  <!-- Verwaltung – Reiter „Bewerbungen“ (wie ApplicationsPanel der Windows-App): links Liste nach Status mit Suche,
+       rechts alles für die Entscheidung; Entscheiden mit Rückfrage im Inhalt (Nachricht, Tage bei „verlängern“). -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="16,8,16,0" IsVisible="{Binding ShowBars}">
+      <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <c:ConfirmBar DataContext="{Binding Confirm}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <c:ListDetailPanel x:Name="Panel" ListWidth="340" IsDetailOpen="{Binding IsDetailOpen}">
+      <!-- Liste -->
+      <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="16,12,12,8">
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}"
+                      AutomationProperties.Name="{l:T AdminPage_StatusFilter.AutomationProperties.Name}" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="SearchBox" Text="{Binding Search}" PlaceholderText="{l:T AdminPage_AppSearch.PlaceholderText}"
+                       AutomationProperties.Name="{l:T AdminPage_AppSearch.PlaceholderText}" />
+              <Button Grid.Column="1" Classes="icon" Margin="6,0,0,0" Command="{Binding SearchNowCommand}"
+                      ToolTip.Tip="{l:T Linux_AdminSearch}" AutomationProperties.Name="{l:T Linux_AdminSearch}">
+                <PathIcon Data="{StaticResource IconSearch}" Width="18" Height="18" />
+              </Button>
+            </Grid>
+          </StackPanel>
+          <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="12,0,12,12" HorizontalAlignment="Stretch"
+                  IsVisible="{Binding HasMore}" IsEnabled="{Binding !IsLoadingMore}"
+                  Command="{Binding LoadMoreCommand}" Content="{l:T Common_LoadMore.Content}" />
+          <Panel>
+            <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                         EmptyText="{l:T Linux_AppAdminEmpty}" RetryCommand="{Binding RefreshCommand}" />
+            <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                     IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AdminPage_TabApplications.Text}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:ApplicationAdminRowViewModel">
+                  <StackPanel Spacing="2" AutomationProperties.Name="{Binding Title}">
+                    <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Panel>
+        </DockPanel>
+      </Border>
+
+      <!-- Detail -->
+      <Panel>
+        <TextBlock Classes="muted" Text="{l:T Linux_AppAdminSelect}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="Wrap" Margin="32" IsVisible="{Binding ShowSelectHint}" />
+        <c:StateView IsLoading="{Binding IsDetailLoading}" />
+        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding ShowDetail}">
+          <StackPanel Margin="24,16,24,32" Spacing="12" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+            <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding CloseDetailCommand}"
+                    IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+                <TextBlock Text="{l:T Common_Back}" />
+              </StackPanel>
+            </Button>
+            <StackPanel Spacing="4">
+              <SelectableTextBlock Classes="title" Text="{Binding Header}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="2" />
+              <TextBlock Classes="muted" Text="{Binding Subtitle}" TextWrapping="Wrap" />
+            </StackPanel>
+            <Border Classes="card" Padding="14,10" IsVisible="{Binding HasVote}">
+              <Grid ColumnDefinitions="Auto,*">
+                <PathIcon Data="{StaticResource IconCheckCircle}" Width="18" Height="18" Margin="0,1,10,0" VerticalAlignment="Top"
+                          Foreground="{DynamicResource RoGGoldBrush}" />
+                <TextBlock Grid.Column="1" Classes="body" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding VoteText}" TextWrapping="Wrap" />
+              </Grid>
+            </Border>
+
+            <!-- Entscheidung -->
+            <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="8" IsVisible="{Binding CanReview}">
+              <StackPanel>
+                <TextBlock Classes="label" Text="{l:T AdminPage_Decision.Header}" />
+                <ComboBox MinWidth="220" ItemsSource="{Binding DecisionOptions}" SelectedItem="{Binding SelectedDecision}"
+                          PlaceholderText="{l:T Linux_AppAdminPickDecision}"
+                          AutomationProperties.Name="{l:T AdminPage_Decision.Header}" />
+              </StackPanel>
+              <Button Classes="primary" VerticalAlignment="Bottom" Command="{Binding DecideCommand}" Content="{l:T AdminPage_DecideButton.Content}" />
+              <Button Classes="secondary" VerticalAlignment="Bottom" Command="{Binding RemindCommand}" IsVisible="{Binding CanRemind}"
+                      Content="{l:T AdminPage_Remind.Content, Upper=True}" />
+            </WrapPanel>
+            <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding RemindCommand}" Content="{l:T AdminPage_Remind.Content, Upper=True}">
+              <Button.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                  <Binding Path="CanRemind" />
+                  <Binding Path="!CanReview" />
+                </MultiBinding>
+              </Button.IsVisible>
+            </Button>
+            <Border Classes="hint error" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding IsDecisionOpen}">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="body strong" Text="{Binding DecisionTitle}" TextWrapping="Wrap" />
+                <StackPanel>
+                  <TextBlock Classes="label" Text="{l:T AppAdmin_DecisionMessage}" />
+                  <TextBox x:Name="DecisionBox" Text="{Binding DecisionMessage}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" MaxLength="2000"
+                           AutomationProperties.Name="{l:T AppAdmin_DecisionMessage}" />
+                </StackPanel>
+                <StackPanel IsVisible="{Binding DecisionNeedsDays}">
+                  <TextBlock Classes="label" Text="{l:T Linux_AppAdminDays}" />
+                  <NumericUpDown Width="160" HorizontalAlignment="Left" Minimum="1" Maximum="90" Increment="1" FormatString="0"
+                                 Value="{Binding DecisionDays}" AutomationProperties.Name="{l:T Linux_AppAdminDays}" />
+                </StackPanel>
+                <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+                  <Button Classes="primary" Command="{Binding ConfirmDecisionCommand}" Content="{l:T Common_Confirm}" />
+                  <Button Classes="secondary" Command="{Binding CancelDecisionCommand}" Content="{l:T Common_Cancel}" />
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+
+            <!-- Antworten -->
+            <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T AdminPage_Answers.Text}" />
+            <ItemsControl ItemsSource="{Binding Answers}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ApplicationAnswerViewModel">
+                  <StackPanel Spacing="2">
+                    <TextBlock Classes="muted small" Text="{Binding Question}" TextWrapping="Wrap" />
+                    <SelectableTextBlock Classes="body" Text="{Binding Answer}" TextWrapping="Wrap" />
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Sperr-Check -->
+            <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T AdminPage_Checks.Text}" />
+            <ItemsControl ItemsSource="{Binding Checks}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ApplicationCheckViewModel">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <Panel Width="16" Height="16" Margin="0,2,10,0" VerticalAlignment="Top">
+                      <PathIcon Data="{StaticResource IconCheckCircle}" Width="16" Height="16" Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding Ok}" />
+                      <PathIcon Data="{StaticResource IconAlert}" Width="16" Height="16" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Warn}" />
+                    </Panel>
+                    <TextBlock Grid.Column="1" Classes="body" Text="{Binding Message}" TextWrapping="Wrap" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Aktivität -->
+            <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T AdminPage_Activity.Text}" />
+            <TextBlock Classes="body" Text="{Binding ActivityText}" TextWrapping="Wrap" />
+
+            <!-- Aufgaben -->
+            <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T AdminPage_Tasks.Text}" />
+            <TextBlock Classes="muted" Text="{l:T Linux_AppAdminNoTasks}" IsVisible="{Binding !HasTasks}" />
+            <ItemsControl ItemsSource="{Binding Tasks}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ApplicationTaskItemViewModel">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <CheckBox IsChecked="{Binding Done}" IsEnabled="{Binding CanEdit}" AutomationProperties.Name="{Binding Title}">
+                      <TextBlock Text="{Binding Title}" TextWrapping="Wrap" />
+                    </CheckBox>
+                    <Button Grid.Column="1" Classes="link pad" Command="{Binding DeleteCommand}" IsVisible="{Binding CanEdit}"
+                            Content="{l:T Backup_Delete.Content}" VerticalAlignment="Center" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding CanReview}" MaxWidth="460">
+              <TextBox x:Name="TaskBox" Text="{Binding NewTask}" MaxLength="191" PlaceholderText="{l:T AdminPage_NewTask.PlaceholderText}"
+                       AutomationProperties.Name="{l:T AdminPage_NewTask.PlaceholderText}" />
+              <Button Grid.Column="1" Classes="secondary" Margin="8,0,0,0" Command="{Binding AddTaskCommand}" Content="{l:T AdminPage_AddTask.Content, Upper=True}" />
+            </Grid>
+
+            <!-- Ablauf -->
+            <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T AdminPage_Timeline.Text}" />
+            <ItemsControl ItemsSource="{Binding Timeline}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ApplicationEntryViewModel">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <Panel Width="14" Height="14" Margin="0,3,10,0" VerticalAlignment="Top">
+                      <Ellipse Classes="dot" Width="8" Height="8" Fill="{DynamicResource RoGMutedBrush}" IsVisible="{Binding !Internal}" />
+                      <PathIcon Data="{StaticResource IconLock}" Width="14" Height="14" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Internal}"
+                                ToolTip.Tip="{l:T Linux_AppAdminInternal}" />
+                    </Panel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                      <TextBlock Classes="body" Text="{Binding Title}" TextWrapping="Wrap" />
+                      <TextBlock Classes="muted small" Text="{Binding When}" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Nachrichten und Notizen -->
+            <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T AdminPage_Messages.Text}" />
+            <TextBlock Classes="muted" Text="{l:T Linux_AppAdminNoMessages}" IsVisible="{Binding !HasMessages}" />
+            <ItemsControl ItemsSource="{Binding Messages}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ApplicationEntryViewModel">
+                  <Border Classes="card" Padding="14,10">
+                    <StackPanel Spacing="4">
+                      <WrapPanel Orientation="Horizontal" ItemSpacing="8">
+                        <TextBlock Classes="body strong" Text="{Binding Title}" />
+                        <TextBlock Classes="muted small" Text="{Binding When}" VerticalAlignment="Center" />
+                        <Border Classes="chip gold" IsVisible="{Binding Internal}">
+                          <TextBlock Text="{l:T Linux_AppAdminInternal, Upper=True}" />
+                        </Border>
+                      </WrapPanel>
+                      <SelectableTextBlock Classes="body" Text="{Binding Body}" TextWrapping="Wrap" IsVisible="{Binding HasBody}" />
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <StackPanel Spacing="8" IsVisible="{Binding CanReview}">
+              <TextBox Text="{Binding NewMessage}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" MaxLength="5000"
+                       PlaceholderText="{l:T AdminPage_NewMessage.PlaceholderText}" AutomationProperties.Name="{l:T AdminPage_NewMessage.PlaceholderText}" />
+              <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+                <CheckBox IsChecked="{Binding MessageInternal}" VerticalAlignment="Center">
+                  <TextBlock Text="{l:T AdminPage_Internal.Content}" TextWrapping="Wrap" />
+                </CheckBox>
+                <Button Classes="secondary" Command="{Binding SendMessageCommand}" Content="{l:T AccountPage_ApplicationSend.Content}" />
+              </WrapPanel>
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </Panel>
+    </c:ListDetailPanel>
+  </DockPanel>
+</UserControl>

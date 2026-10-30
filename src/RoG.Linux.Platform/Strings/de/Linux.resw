@@ -712,4 +712,67 @@
   <data name="Linux_AdminLogEmpty" xml:space="preserve">
     <value>Noch keine Moderationsaktionen.</value>
   </data>
+  <data name="Linux_AdminSearch" xml:space="preserve">
+    <value>Suchen</value>
+  </data>
+  <data name="Linux_MemberAdminEmpty" xml:space="preserve">
+    <value>Keine Konten gefunden.</value>
+  </data>
+  <data name="Linux_MemberAdminSelect" xml:space="preserve">
+    <value>Wähle links ein Konto, um Angaben und Rollen zu sehen.</value>
+  </data>
+  <data name="Linux_MemberAdminNoRoles" xml:space="preserve">
+    <value>Keine Rollen.</value>
+  </data>
+  <data name="Linux_MemberAdminRevokeTitle" xml:space="preserve">
+    <value>Rolle entziehen?</value>
+  </data>
+  <data name="Linux_MemberAdminRevokeText" xml:space="preserve">
+    <value>„{0}“ wird {1} entzogen.</value>
+  </data>
+  <data name="Linux_AppAdminEmpty" xml:space="preserve">
+    <value>Keine Bewerbungen in diesem Status.</value>
+  </data>
+  <data name="Linux_AppAdminSelect" xml:space="preserve">
+    <value>Wähle links eine Bewerbung, um alles für die Entscheidung zu sehen.</value>
+  </data>
+  <data name="Linux_AppAdminDays" xml:space="preserve">
+    <value>Tage</value>
+  </data>
+  <data name="Linux_AppAdminNoTasks" xml:space="preserve">
+    <value>Noch keine Aufgaben.</value>
+  </data>
+  <data name="Linux_AppAdminNoMessages" xml:space="preserve">
+    <value>Noch keine Nachrichten.</value>
+  </data>
+  <data name="Linux_AppAdminInternal" xml:space="preserve">
+    <value>Intern</value>
+  </data>
+  <data name="Linux_AppAdminDeleteTaskTitle" xml:space="preserve">
+    <value>Aufgabe löschen?</value>
+  </data>
+  <data name="Linux_AppAdminNoteSaved" xml:space="preserve">
+    <value>Notiz gespeichert.</value>
+  </data>
+  <data name="Linux_AppAdminMessageSent" xml:space="preserve">
+    <value>Nachricht gesendet.</value>
+  </data>
+  <data name="Linux_SquadAdminIsArchived" xml:space="preserve">
+    <value>Dieser Squad ist archiviert.</value>
+  </data>
+  <data name="Linux_SquadAdminIsActive" xml:space="preserve">
+    <value>Dieser Squad ist aktiv.</value>
+  </data>
+  <data name="Linux_SquadAdminLineupEmpty" xml:space="preserve">
+    <value>Noch niemand im Line-up.</value>
+  </data>
+  <data name="Linux_SquadAdminMemberRemoved" xml:space="preserve">
+    <value>{0} ist nicht mehr im Squad.</value>
+  </data>
+  <data name="Linux_AppAdminReferral" xml:space="preserve">
+    <value>Geworben von {0}</value>
+  </data>
+  <data name="Linux_AppAdminPickDecision" xml:space="preserve">
+    <value>Entscheidung wählen …</value>
+  </data>
 </root>

@@ -42,6 +42,8 @@
     <!-- Bausteine, die mehrere Seiten zeigen -->
     <DataTemplate DataType="vm:ServerItemViewModel"><views:ServerCard /></DataTemplate>
     <DataTemplate DataType="vm:ServerGameBansViewModel"><views:ServerGameBansView /></DataTemplate>
+    <DataTemplate DataType="vm:MembersAdminViewModel"><views:MembersAdminView /></DataTemplate>
+    <DataTemplate DataType="vm:ApplicationsAdminViewModel"><views:ApplicationsAdminView /></DataTemplate>
     <DataTemplate DataType="vm:InternalRowViewModel">
       <Button Classes="row tile" Padding="12,10" Command="{Binding OpenCommand}"
               AutomationProperties.Name="{Binding Title}">

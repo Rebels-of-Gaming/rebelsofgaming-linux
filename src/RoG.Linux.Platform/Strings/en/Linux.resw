@@ -712,4 +712,67 @@
   <data name="Linux_AdminLogEmpty" xml:space="preserve">
     <value>No moderation actions yet.</value>
   </data>
+  <data name="Linux_AdminSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Linux_MemberAdminEmpty" xml:space="preserve">
+    <value>No accounts found.</value>
+  </data>
+  <data name="Linux_MemberAdminSelect" xml:space="preserve">
+    <value>Pick an account on the left to see its details and roles.</value>
+  </data>
+  <data name="Linux_MemberAdminNoRoles" xml:space="preserve">
+    <value>No roles.</value>
+  </data>
+  <data name="Linux_MemberAdminRevokeTitle" xml:space="preserve">
+    <value>Revoke role?</value>
+  </data>
+  <data name="Linux_MemberAdminRevokeText" xml:space="preserve">
+    <value>“{0}” will be revoked from {1}.</value>
+  </data>
+  <data name="Linux_AppAdminEmpty" xml:space="preserve">
+    <value>No applications with this status.</value>
+  </data>
+  <data name="Linux_AppAdminSelect" xml:space="preserve">
+    <value>Pick an application on the left to see everything for the decision.</value>
+  </data>
+  <data name="Linux_AppAdminDays" xml:space="preserve">
+    <value>Days</value>
+  </data>
+  <data name="Linux_AppAdminNoTasks" xml:space="preserve">
+    <value>No tasks yet.</value>
+  </data>
+  <data name="Linux_AppAdminNoMessages" xml:space="preserve">
+    <value>No messages yet.</value>
+  </data>
+  <data name="Linux_AppAdminInternal" xml:space="preserve">
+    <value>Internal</value>
+  </data>
+  <data name="Linux_AppAdminDeleteTaskTitle" xml:space="preserve">
+    <value>Delete task?</value>
+  </data>
+  <data name="Linux_AppAdminNoteSaved" xml:space="preserve">
+    <value>Note saved.</value>
+  </data>
+  <data name="Linux_AppAdminMessageSent" xml:space="preserve">
+    <value>Message sent.</value>
+  </data>
+  <data name="Linux_SquadAdminIsArchived" xml:space="preserve">
+    <value>This squad is archived.</value>
+  </data>
+  <data name="Linux_SquadAdminIsActive" xml:space="preserve">
+    <value>This squad is active.</value>
+  </data>
+  <data name="Linux_SquadAdminLineupEmpty" xml:space="preserve">
+    <value>Nobody in the line-up yet.</value>
+  </data>
+  <data name="Linux_SquadAdminMemberRemoved" xml:space="preserve">
+    <value>{0} is no longer in the squad.</value>
+  </data>
+  <data name="Linux_AppAdminReferral" xml:space="preserve">
+    <value>Referred by {0}</value>
+  </data>
+  <data name="Linux_AppAdminPickDecision" xml:space="preserve">
+    <value>Choose a decision …</value>
+  </data>
 </root>

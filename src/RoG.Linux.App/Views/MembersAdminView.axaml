@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MembersAdminView"
+             x:DataType="vm:MembersAdminViewModel">
+  <!-- Verwaltung – Reiter „Mitglieder“ (wie MembersPanel der Windows-App): links Liste mit Status und Suche,
+       rechts das Konto mit Rollen; Rolle vergeben/entziehen nur mit Recht (Hierarchie prüft der Server). -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="16,8,16,0" IsVisible="{Binding ShowBars}">
+      <c:FeedbackBar DataContext="{Binding Feedback}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <c:ConfirmBar DataContext="{Binding Confirm}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <c:ListDetailPanel x:Name="Panel" ListWidth="340" IsDetailOpen="{Binding IsDetailOpen}">
+      <!-- Liste -->
+      <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="16,12,12,8">
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}"
+                      AutomationProperties.Name="{l:T AdminPage_StatusFilter.AutomationProperties.Name}" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="SearchBox" Text="{Binding Search}" PlaceholderText="{l:T AdminPage_MemberSearch.PlaceholderText}"
+                       AutomationProperties.Name="{l:T AdminPage_MemberSearch.PlaceholderText}" />
+              <Button Grid.Column="1" Classes="icon" Margin="6,0,0,0" Command="{Binding SearchNowCommand}"
+                      ToolTip.Tip="{l:T Linux_AdminSearch}" AutomationProperties.Name="{l:T Linux_AdminSearch}">
+                <PathIcon Data="{StaticResource IconSearch}" Width="18" Height="18" />
+              </Button>
+            </Grid>
+          </StackPanel>
+          <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="12,0,12,12" HorizontalAlignment="Stretch"
+                  IsVisible="{Binding HasMore}" IsEnabled="{Binding !IsLoadingMore}"
+                  Command="{Binding LoadMoreCommand}" Content="{l:T Common_LoadMore.Content}" />
+          <Panel>
+            <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                         EmptyText="{l:T Linux_MemberAdminEmpty}" RetryCommand="{Binding RefreshCommand}" />
+            <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                     IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AdminPage_TabMembers.Text}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:MemberAdminRowViewModel">
+                  <StackPanel Spacing="2" AutomationProperties.Name="{Binding Name}">
+                    <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Panel>
+        </DockPanel>
+      </Border>
+
+      <!-- Detail -->
+      <Panel>
+        <TextBlock Classes="muted" Text="{l:T Linux_MemberAdminSelect}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="Wrap" Margin="32" IsVisible="{Binding ShowSelectHint}" />
+        <c:StateView IsLoading="{Binding IsDetailLoading}" />
+        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding ShowDetail}">
+          <StackPanel Margin="24,16,24,32" Spacing="14" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+            <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding CloseDetailCommand}"
+                    IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+                <TextBlock Text="{l:T Common_Back}" />
+              </StackPanel>
+            </Button>
+            <SelectableTextBlock Classes="title" Text="{Binding Header}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="2" />
+            <SelectableTextBlock Classes="muted" Text="{Binding AccountText}" TextWrapping="Wrap" />
+            <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+              <Button Classes="secondary" Command="{Binding OpenProfileCommand}" Content="{l:T AccountPage_OpenProfile.Content}" />
+              <Button Classes="secondary" Command="{Binding ModerateMemberCommand}" IsVisible="{Binding CanModerate}"
+                      Content="{l:T AdminPage_Moderate.Content}" />
+            </WrapPanel>
+
+            <TextBlock Classes="section" Margin="0,8,0,0" Text="{l:T AdminPage_Roles.Text}" />
+            <TextBlock Classes="muted" Text="{l:T Linux_MemberAdminNoRoles}" IsVisible="{Binding !HasRoles}" />
+            <ItemsControl ItemsSource="{Binding Roles}" AutomationProperties.Name="{l:T AdminPage_Roles.Text}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:RoleAssignmentViewModel">
+                  <Border Classes="card" Padding="14,10" AutomationProperties.Name="{Binding Text}">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                      <PathIcon Data="{StaticResource IconShield}" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"
+                                Foreground="{DynamicResource RoGGoldBrush}" />
+                      <TextBlock Grid.Column="1" Classes="body" Text="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                      <Button Grid.Column="2" Classes="link pad" Margin="8,0,0,0" Command="{Binding RevokeCommand}" IsVisible="{Binding CanRevoke}"
+                              Content="{l:T AdminPage_RevokeRole.Content}" VerticalAlignment="Center" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Spacing="8" IsVisible="{Binding CanAssign}">
+              <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="8">
+                <StackPanel>
+                  <TextBlock Classes="label" Text="{l:T AdminPage_Role.Header}" />
+                  <ComboBox MinWidth="200" ItemsSource="{Binding RoleOptions}" SelectedItem="{Binding SelectedRole}"
+                            AutomationProperties.Name="{l:T AdminPage_Role.Header}" />
+                </StackPanel>
+                <StackPanel>
+                  <TextBlock Classes="label" Text="{l:T AdminPage_RoleScope.Header}" />
+                  <ComboBox MinWidth="180" ItemsSource="{Binding ScopeOptions}" SelectedItem="{Binding SelectedScope}"
+                            AutomationProperties.Name="{l:T AdminPage_RoleScope.Header}" />
+                </StackPanel>
+                <Button Classes="primary" VerticalAlignment="Bottom" Command="{Binding AssignCommand}" Content="{l:T AdminPage_AssignRole.Content}" />
+              </WrapPanel>
+              <TextBlock Classes="muted small" Text="{l:T SquadAdmin_RolesHint.Text}" TextWrapping="Wrap" />
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </Panel>
+    </c:ListDetailPanel>
+  </DockPanel>
+</UserControl>

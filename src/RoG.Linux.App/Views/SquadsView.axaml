@@ -92,8 +92,17 @@
                         HorizontalAlignment="Left" IsVisible="{Binding HasRecruiting}">
                   <TextBlock Text="{Binding RecruitingText}" />
                 </Border>
-                <Button x:Name="ApplyButton" Classes="primary" HorizontalAlignment="Left" Margin="0,6,0,0" Command="{Binding ApplyCommand}"
-                        IsVisible="{Binding CanApply}" Content="{l:T SquadsPage_Apply.Content}" />
+                <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8" Margin="0,6,0,0">
+                  <Button x:Name="ApplyButton" Classes="primary" Command="{Binding ApplyCommand}"
+                          IsVisible="{Binding CanApply}" Content="{l:T SquadsPage_Apply.Content}" />
+                  <Button x:Name="ManageButton" Classes="secondary" Command="{Binding ManageCommand}" IsVisible="{Binding CanManage}"
+                          AutomationProperties.Name="{l:T SquadsPage_Manage.Content}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <PathIcon Data="{StaticResource IconShield}" Width="16" Height="16" />
+                      <TextBlock Text="{l:T SquadsPage_Manage.Content}" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </Button>
+                </WrapPanel>
               </StackPanel>
               <Button Grid.Column="2" Classes="icon" VerticalAlignment="Top" Command="{Binding OpenInBrowserCommand}"
                       ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">

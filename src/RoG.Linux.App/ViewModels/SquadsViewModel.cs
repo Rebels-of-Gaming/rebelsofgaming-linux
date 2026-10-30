@@ -340,6 +340,42 @@ public sealed partial class SquadDetailViewModel(AppServices services, SquadServ
 
     protected override bool HasData => Name is not null;
 
+    /// <summary>Stand für die Verwaltung (Texte in der App-Sprache).</summary>
+    public SquadDetail? Current { get; private set; }
+
+    public SquadAdminRights AdminRights { get; private set; } = new(false, false, false);
+
+    /// <summary>„Verwalten“ zeigen: Rechte im Squad (<c>squads.manage</c>/<c>squad.members</c>) und Scope <c>squads:write</c>.</summary>
+    [ObservableProperty]
+    public partial bool CanManage { get; set; }
+
+    /// <summary>Verwaltungsfenster öffnen – die Ansicht zeigt es (ein Fenster je Squad).</summary>
+    public event EventHandler<SquadAdminViewModel>? ManageRequested;
+
+    [RelayCommand]
+    private void Manage()
+    {
+        if (Current is { } squad && CanManage)
+        {
+            var admin = new SquadAdminViewModel(Services, squad, AdminRights);
+            admin.Closed = changed =>
+            {
+                if (changed && _slug == squad.Summary.Slug)
+                {
+                    _ = ReloadAsync();
+                }
+            };
+            ManageRequested?.Invoke(this, admin);
+        }
+    }
+
+    /// <summary>Nach Änderungen im Verwaltungsfenster neu laden.</summary>
+    public Task ReloadAsync()
+    {
+        Name = null;
+        return LoadAsync();
+    }
+
     public Task ShowAsync(string slug)
     {
         if (slug == _slug && Name is not null)
@@ -354,6 +390,8 @@ public sealed partial class SquadDetailViewModel(AppServices services, SquadServ
         Logo = null;
         Application = null;
         CanApply = false;
+        CanManage = false;
+        Current = null;
         Tab = SquadTab.About;
         Feedback.Close();
         return LoadAsync();
@@ -405,6 +443,9 @@ public sealed partial class SquadDetailViewModel(AppServices services, SquadServ
 
         var s = detail.Summary;
         _id = s.Id;
+        Current = detail;
+        AdminRights = SquadAdminRights.For(Services.CurrentUser, s.Id);
+        CanManage = AdminRights.Any;
         Subtitle = string.Join(" · ", new[] { s.GameName, s.LeaderName is null ? null : Services.Format(StringKeys.SquadsLeader, s.LeaderName) }.Where(x => !string.IsNullOrEmpty(x)));
         RecruitingText = SquadsViewModel.RecruitingText(s.Recruiting, Services.Localizer);
         IsRecruitingOpen = s.Recruiting == Recruiting.Open;

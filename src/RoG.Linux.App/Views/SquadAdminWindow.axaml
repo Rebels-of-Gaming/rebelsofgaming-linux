@@ -1,0 +1,188 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RoG.Linux.App.ViewModels"
+        xmlns:sq="using:RoG.Core.Features.Squads"
+        xmlns:c="using:RoG.Linux.App.Controls"
+        xmlns:l="using:RoG.Linux.App.Localization"
+        x:Class="RoG.Linux.App.Views.SquadAdminWindow"
+        x:DataType="vm:SquadAdminViewModel"
+        Width="860" Height="680" MinWidth="360" MinHeight="420"
+        Background="{DynamicResource RoGBgBrush}"
+        Title="{Binding Title}">
+  <!-- Squad verwalten im eigenen Fenster (wie SquadAdminWindow der Windows-App): Profil, Line-up, Archiv; je Squad eins -->
+  <DockPanel>
+    <!-- Titel -->
+    <Border DockPanel.Dock="Top" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1"
+            Padding="16,8">
+      <Grid ColumnDefinitions="Auto,*">
+        <PathIcon Data="{StaticResource IconShield}" Width="16" Height="16" Foreground="{DynamicResource RoGMutedBrush}" Margin="0,0,10,0" />
+        <TextBlock Grid.Column="1" x:Name="TitleText" Classes="section" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+      </Grid>
+    </Border>
+
+    <!-- Reiter (nur, wenn mehr als einer erlaubt ist) -->
+    <Border DockPanel.Dock="Top" Margin="16,8,16,0" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" IsVisible="{Binding ShowTabs}">
+      <WrapPanel Orientation="Horizontal">
+        <ToggleButton Classes="segment" IsChecked="{Binding IsProfileTab}" IsVisible="{Binding CanEdit}" Content="{l:T SquadAdmin_TabProfile.Text, Upper=True}" />
+        <ToggleButton Classes="segment" IsChecked="{Binding IsMembersTab}" IsVisible="{Binding CanMembers}" Content="{l:T SquadAdmin_TabMembers.Text, Upper=True}" />
+        <ToggleButton Classes="segment" IsChecked="{Binding IsArchiveTab}" IsVisible="{Binding CanArchive}" Content="{l:T SquadAdmin_TabArchive.Text, Upper=True}" />
+      </WrapPanel>
+    </Border>
+
+    <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="16,8,16,0" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+      <c:FeedbackBar DataContext="{Binding Feedback}" />
+      <c:ConfirmBar DataContext="{Binding Confirm}" />
+    </StackPanel>
+
+    <Panel>
+      <!-- Profil -->
+      <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding IsProfileTab}">
+        <StackPanel Margin="16,8,16,24" Spacing="12" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+          <TextBlock Classes="muted small" Text="{l:T SquadAdmin_LanguageHint.Text}" TextWrapping="Wrap" />
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T SquadAdmin_Tagline.Header}" />
+            <TextBox Text="{Binding Tagline}" MaxLength="200" AutomationProperties.Name="{l:T SquadAdmin_Tagline.Header}" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T SquadAdmin_Description.Header}" />
+            <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="140" AutomationProperties.Name="{l:T SquadAdmin_Description.Header}" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T SquadAdmin_Training.Header}" />
+            <TextBox Text="{Binding TrainingTimes}" AcceptsReturn="True" TextWrapping="Wrap" AutomationProperties.Name="{l:T SquadAdmin_Training.Header}" />
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T SquadAdmin_Recruiting.Header}" />
+            <ComboBox MinWidth="240" ItemsSource="{Binding RecruitingOptions}" SelectedItem="{Binding SelectedRecruiting}"
+                      AutomationProperties.Name="{l:T SquadAdmin_Recruiting.Header}" />
+          </StackPanel>
+          <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="12">
+            <StackPanel>
+              <TextBlock Classes="label" Text="{l:T SquadAdmin_ClanTag.Header}" />
+              <TextBox Width="140" MaxLength="32" Text="{Binding ClanTag}" AutomationProperties.Name="{l:T SquadAdmin_ClanTag.Header}" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Classes="label" Text="{l:T SquadAdmin_ClanName.Header}" />
+              <TextBox Width="260" MaxLength="80" Text="{Binding ClanName}" AutomationProperties.Name="{l:T SquadAdmin_ClanName.Header}" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Classes="label" Text="{l:T SquadAdmin_ClanLevel.Header}" />
+              <NumericUpDown Width="150" Minimum="0" Maximum="9999" Increment="1" FormatString="0" Value="{Binding ClanLevel}"
+                             AutomationProperties.Name="{l:T SquadAdmin_ClanLevel.Header}" />
+            </StackPanel>
+          </WrapPanel>
+          <StackPanel>
+            <TextBlock Classes="label" Text="{l:T SquadAdmin_ClanRequirements.Header}" />
+            <TextBox Text="{Binding ClanRequirements}" AcceptsReturn="True" TextWrapping="Wrap" AutomationProperties.Name="{l:T SquadAdmin_ClanRequirements.Header}" />
+          </StackPanel>
+          <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding SaveProfileCommand}" Content="{l:T SquadAdmin_Save.Content}" />
+
+          <TextBlock Classes="section" Margin="0,16,0,0" Text="{l:T SquadAdmin_ImagesTitle.Text}" />
+          <TextBlock Classes="muted small" Text="{l:T SquadAdmin_ImagesHint.Text}" TextWrapping="Wrap" />
+          <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+            <Button Classes="secondary" Click="OnSetLogoClick" IsEnabled="{Binding !IsBusy}" Content="{l:T SquadAdmin_SetLogo.Content}" />
+            <Button Classes="link pad" VerticalAlignment="Center" Command="{Binding RemoveImageCommand}" CommandParameter="{x:Static sq:SquadImage.Logo}"
+                    Content="{l:T SquadAdmin_RemoveLogoButton.Content}" />
+          </WrapPanel>
+          <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+            <Button Classes="secondary" Click="OnSetHeaderClick" IsEnabled="{Binding !IsBusy}" Content="{l:T SquadAdmin_SetHeader.Content}" />
+            <Button Classes="link pad" VerticalAlignment="Center" Command="{Binding RemoveImageCommand}" CommandParameter="{x:Static sq:SquadImage.Header}"
+                    Content="{l:T SquadAdmin_RemoveHeaderButton.Content}" />
+          </WrapPanel>
+          <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" MaxWidth="320" HorizontalAlignment="Left" />
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Line-up -->
+      <DockPanel IsVisible="{Binding IsMembersTab}">
+        <StackPanel DockPanel.Dock="Top" Margin="16,8,16,8" Spacing="8" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left">
+          <TextBlock Classes="section" Text="{l:T SquadAdmin_AddTitle.Text}" />
+          <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="8">
+            <StackPanel Width="260">
+              <TextBlock Classes="label" Text="{l:T SquadAdmin_MemberSearch.Header}" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox x:Name="MemberBox" Text="{Binding MemberSearch}" PlaceholderText="{l:T SquadAdmin_MemberSearch.PlaceholderText}"
+                         AutomationProperties.Name="{l:T SquadAdmin_MemberSearch.Header}" />
+                <PathIcon Grid.Column="1" Data="{StaticResource IconCheck}" Width="16" Height="16" Margin="8,0,0,0"
+                          Foreground="{DynamicResource RoGGreenBrush}" IsVisible="{Binding HasNewMember}" />
+              </Grid>
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Classes="label" Text="{l:T SquadAdmin_Role.Header}" />
+              <ComboBox MinWidth="180" ItemsSource="{Binding Roles}" SelectedItem="{Binding NewMemberRole}"
+                        AutomationProperties.Name="{l:T SquadAdmin_Role.Header}" />
+            </StackPanel>
+            <CheckBox VerticalAlignment="Bottom" Margin="0,0,0,4" IsChecked="{Binding NewMemberSubstitute}" Content="{l:T SquadAdmin_Substitute.Content}" />
+            <Button Classes="primary" VerticalAlignment="Bottom" Command="{Binding AddMemberCommand}" Content="{l:T SquadAdmin_Add.Content}" />
+          </WrapPanel>
+          <!-- Vorschläge (ab 2 Zeichen) -->
+          <Border Classes="card" Padding="4" Width="260" HorizontalAlignment="Left" Margin="0,-4,0,0" IsVisible="{Binding HasSuggestions}">
+            <ItemsControl ItemsSource="{Binding Suggestions}" AutomationProperties.Name="{l:T SquadAdmin_MemberSearch.Header}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:SquadMemberSuggestionViewModel">
+                  <Button Classes="row" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Command="{Binding ChooseCommand}"
+                          AutomationProperties.Name="{Binding Name}">
+                    <StackPanel Spacing="1">
+                      <TextBlock Classes="body strong" Text="{Binding Name}" />
+                      <TextBlock Classes="muted small" Text="{Binding Meta}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+          <TextBlock Classes="muted small" Text="{l:T SquadAdmin_RolesHint.Text}" TextWrapping="Wrap" />
+        </StackPanel>
+        <Panel>
+          <c:StateView IsLoading="{Binding IsLoadingMembers}" IsEmpty="{Binding IsLineupEmpty}" EmptyText="{l:T Linux_SquadAdminLineupEmpty}" />
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <!-- Lesebreite: volle Breite bis 720 px, linksbündig -->
+            <Grid Margin="16,0,16,16">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*" MaxWidth="{StaticResource RoGReadingWidth}" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+            <ItemsControl ItemsSource="{Binding Lineup}"
+                          AutomationProperties.Name="{l:T SquadAdmin_TabMembers.Text}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:SquadAdminMemberViewModel">
+                  <Border Classes="card" Padding="14,10" AutomationProperties.Name="{Binding Name}">
+                    <StackPanel Spacing="8">
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="muted small" Text="{Binding Meta}" VerticalAlignment="Center" />
+                      </StackPanel>
+                      <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="8">
+                        <ComboBox MinWidth="180" ItemsSource="{Binding Roles}" SelectedItem="{Binding SelectedRole}" IsVisible="{Binding Editable}"
+                                  AutomationProperties.Name="{l:T SquadAdmin_MemberRole.AutomationProperties.Name}" />
+                        <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding Locked}" VerticalAlignment="Center">
+                          <PathIcon Data="{StaticResource IconLock}" Width="14" Height="14" Foreground="{DynamicResource RoGGoldBrush}" />
+                          <TextBlock Classes="body" Text="{Binding RoleText}" />
+                        </StackPanel>
+                        <CheckBox VerticalAlignment="Center" IsChecked="{Binding Substitute}" IsEnabled="{Binding Editable}" Content="{l:T SquadAdmin_Substitute.Content}" />
+                        <Button Classes.primary="{Binding IsDirty}" Classes.secondary="{Binding !IsDirty}" Command="{Binding SaveCommand}"
+                                IsVisible="{Binding Editable}" Content="{l:T SquadAdmin_SaveMember.Content, Upper=True}" />
+                        <Button Classes="secondary" Command="{Binding RemoveCommand}" IsVisible="{Binding Editable}" Content="{l:T SquadAdmin_RemoveMember.Content, Upper=True}" />
+                      </WrapPanel>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            </Grid>
+          </ScrollViewer>
+        </Panel>
+      </DockPanel>
+
+      <!-- Archiv -->
+      <StackPanel Margin="16,8,16,16" Spacing="12" MaxWidth="600" HorizontalAlignment="Left" IsVisible="{Binding IsArchiveTab}">
+        <TextBlock Classes="body strong" Text="{Binding ArchiveStateText}" />
+        <TextBlock Classes="body" Text="{l:T SquadAdmin_ArchiveHint.Text}" TextWrapping="Wrap" />
+        <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding ToggleArchiveCommand}" Content="{Binding ArchiveLabel}" />
+      </StackPanel>
+    </Panel>
+  </DockPanel>
+</Window>
