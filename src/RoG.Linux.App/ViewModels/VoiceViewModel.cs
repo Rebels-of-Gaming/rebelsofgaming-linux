@@ -72,6 +72,17 @@ public sealed partial class VoiceViewModel : LoadableViewModel
 
     protected override bool HasData => _ts is not null || _discordLoaded;
 
+    // Leerzustände hängen am Laden der Basisklasse
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.PropertyName == nameof(IsLoading))
+        {
+            OnPropertyChanged(nameof(ShowTeamSpeakEmpty));
+            OnPropertyChanged(nameof(ShowDiscordEmpty));
+        }
+    }
+
     protected override async Task LoadCoreAsync(CancellationToken cancellationToken)
     {
         var tsTask = _voice.GetTeamSpeakAsync(cancellationToken);

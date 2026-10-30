@@ -11,6 +11,9 @@ public sealed class FakeApi : HttpMessageHandler
 {
     public List<HttpRequestMessage> Requests { get; } = [];
 
+    /// <summary>Eigene Antworten je Pfad (z. B. leere Listen) – gehen den Standardantworten vor.</summary>
+    public Dictionary<string, string> Overrides { get; } = new(StringComparer.Ordinal);
+
     /// <summary>Alle Antworten als Fehler (Fehlerzustand testen).</summary>
     public HttpStatusCode? FailWith { get; set; }
 
@@ -23,7 +26,7 @@ public sealed class FakeApi : HttpMessageHandler
         }
 
         var path = request.RequestUri!.AbsolutePath.TrimEnd('/');
-        var body = (request.Method.Method, path) switch
+        var body = Overrides.TryGetValue(path, out var custom) ? custom : (request.Method.Method, path) switch
         {
             ("GET", "/v1/news") => FakeData.NewsList,
             ("GET", "/v1/news/scrim-serie-herbst-2026") => FakeData.NewsArticle,

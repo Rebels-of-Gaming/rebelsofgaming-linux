@@ -36,6 +36,8 @@ public class ServersTabsTests
         Assert.Null(rows[1].Detail); // Spitzname = RoG-Name
         Assert.True(rows[5].Indent.Left > rows[4].Indent.Left);
 
+        Assert.False(voice.ShowTeamSpeakEmpty);
+
         // Leere Kanäle zeigen
         voice.ShowEmptyChannels = true;
         Assert.Contains(voice.TeamSpeakRows, r => r.Text == "Clanwar");
@@ -94,7 +96,26 @@ public class ServersTabsTests
         await ViewModelTests.WaitUntil(() => !servers.Voice.IsLoading && servers.Voice.ShowContent);
         Assert.False(servers.Voice.IsTeamSpeakOnline);
         Assert.False(servers.Voice.CanConnect);
+        Assert.False(servers.Voice.ShowTeamSpeakEmpty); // kein TeamSpeak-Stand → kein „niemand da“
         Assert.Equal(t.Services.T("Voice_TsOffline"), servers.Voice.TeamSpeakStatus);
+        servers.Pause();
+    }
+
+    [AvaloniaFact]
+    public async Task Empty_teamspeak_shows_the_empty_state_until_empty_channels_are_shown()
+    {
+        using var t = await TestServices.CreateAsync(guest: true);
+        t.Api.Overrides["/v1/teamspeak/viewer"] = """
+            {"data":{"online":true,"server":{"name":"RoG","clients_online":0,"max_clients":32,"address":"ts.example.test"},"channels":[
+              {"id":1,"name":"Lobby","spacer":false,"default":true,"clients":[],"children":[]}]}}
+            """;
+        var servers = new ServersViewModel(t.Services, () => { });
+        servers.IsTeamSpeakTab = true;
+        await ViewModelTests.WaitUntil(() => servers.Voice.ShowContent);
+        Assert.True(servers.Voice.ShowTeamSpeakEmpty);
+        servers.Voice.ShowEmptyChannels = true;
+        Assert.False(servers.Voice.ShowTeamSpeakEmpty);
+        Assert.Equal("Lobby", Assert.Single(servers.Voice.TeamSpeakRows).Text);
         servers.Pause();
     }
 
