@@ -164,9 +164,8 @@ public class Stage3Tests
     [AvaloniaTheory]
     [InlineData("rog://admin", "https://admin.rebelsofgaming.com/")]
     [InlineData("rog://bans/01B1", "https://rebelsofgaming.com/de/bans/01B1")]
-    [InlineData("rog://leaderboards", "https://rebelsofgaming.com/de/minecraft/leaderboards")]
     [InlineData("rog://wiki/Minecraft/Befehle", "https://wiki.rebelsofgaming.com/Minecraft/Befehle")]
-    [InlineData("rog://open?url=https://rebelsofgaming.com/de/matches/01MA1", "https://rebelsofgaming.com/de/matches/01MA1")]
+    [InlineData("rog://open?url=https://rebelsofgaming.com/de/tools/zeitrechner", "https://rebelsofgaming.com/de/tools/zeitrechner")]
     public async Task Deep_links_without_a_native_page_open_the_exact_website_page(string link, string web)
     {
         using var t = await TestServices.CreateAsync(TestTokens.Wahke);

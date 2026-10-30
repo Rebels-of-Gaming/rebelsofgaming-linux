@@ -348,5 +348,16 @@
   </data>
   <data name="Error_rules_acceptance_required" xml:space="preserve">
     <value>Please accept the rules first (banner at the top or Info → Rules) – until then you can read but not post.</value>
+  <data name="Linux_MatchReport" xml:space="preserve">
+    <value>REPORT</value>
+  </data>
+  <data name="Linux_MatchSubstitute" xml:space="preserve">
+    <value>Substitute</value>
+  </data>
+  <data name="Linux_HallEmpty" xml:space="preserve">
+    <value>No Hall of Fame entries yet.</value>
+  </data>
+  <data name="Linux_StatsGuest" xml:space="preserve">
+    <value>Statistics are for members only. Sign in to see leaderboards and weekly awards.</value>
   </data>
 </root>

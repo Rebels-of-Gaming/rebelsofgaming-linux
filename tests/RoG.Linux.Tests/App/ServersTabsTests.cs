@@ -147,7 +147,7 @@ public class ServersTabsTests
         await join.DownloadPackCommand.ExecuteAsync(null);
         Assert.Equal("https://cdn.example.test/minecraft/pack-3f2a.zip", t.Browser.Opened[^1].ToString());
 
-        // Weltkarte und Bestenlisten: Website-Seite, solange die App sie nicht nativ hat
+        // Weltkarte: Website-Seite, solange die App sie nicht nativ hat (Bestenlisten: MatchesTests)
         var shell = new ShellViewModel(t.Services);
         await shell.InitializeAsync();
         join.OpenMapCommand.Execute(null);

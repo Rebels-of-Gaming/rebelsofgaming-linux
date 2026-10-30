@@ -39,7 +39,7 @@ public sealed partial class ShellViewModel : ObservableObject
             Item("Nav_Wiki", "Shell_NavWiki.Content", "IconWiki", string.Empty, false),
             Item("Nav_Tools", "Shell_NavTools.Content", "IconTools", "tools", false),
             Item("Nav_Members", "Shell_NavMembers.Content", "IconMembers", "members", true),
-            Item("Nav_Matches", "Shell_NavMatches.Content", "IconMatches", "matches", false),
+            Item("Nav_Matches", "Shell_NavMatches.Content", "IconMatches", "matches", true),
             Item("Nav_Media", "Shell_NavMedia.Content", "IconMedia", "gallery", true),
             Item("Nav_Uploads", "Shell_NavUploads.Content", "IconUploads", "uploads", true),
             Item("Nav_Info", "Shell_NavInfo.Content", "IconInfo", "about", true),
@@ -56,7 +56,7 @@ public sealed partial class ShellViewModel : ObservableObject
         HiddenItems =
         [
             Item("Nav_Votes", "VotesPage_Title.Text", "IconVote", "votes", true),
-            Item("Nav_Leaderboards", "LeaderboardsPage_Title.Text", "IconTrophy", "minecraft/leaderboards", false),
+            Item("Nav_Leaderboards", "LeaderboardsPage_Title.Text", "IconTrophy", "minecraft/leaderboards", true),
         ];
         Acceptance = new AcceptanceViewModel(services);
         _services.Unauthorized += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() => _ = OnUnauthorizedAsync());
@@ -330,7 +330,7 @@ public sealed partial class ShellViewModel : ObservableObject
             return false;
         }
 
-        // Bereiche ohne eigene Seite (Verwaltung, Bans, Bestenlisten, Karte) bzw. Einträge in Bereichen, die die
+        // Bereiche ohne eigene Seite (Verwaltung, Bans, Karte) bzw. Einträge in Bereichen, die die
         // App noch nicht nativ hat (Forum-Thema, Wiki-Seite …): genau diese Seite der Website öffnen
         var web = WebFallback(route);
         if (!s_sections.TryGetValue(route.Section, out var key))
@@ -419,11 +419,9 @@ public sealed partial class ShellViewModel : ObservableObject
         {
             AppSection.Admin => env.AdminBaseUrl ?? env.WebPage(lang, "admin"),
             AppSection.Bans => env.WebPage(lang, route.Key is { } b ? "bans/" + Escaped(b) : "bans"),
-            AppSection.Leaderboards => env.WebPage(lang, "minecraft/leaderboards"),
             AppSection.MinecraftMap => env.WebPage(lang, "minecraft/karte"),
             AppSection.Wiki when route.Key is { } w => new Uri(env.WikiBaseUrl, Escaped(w)),
             AppSection.Tools when route.Key is { } k => env.WebPage(lang, "tools/" + Escaped(k)),
-            AppSection.Matches when route.Key is { } m => env.WebPage(lang, "matches/" + Escaped(m)),
             _ => null,
         };
     }
@@ -447,6 +445,8 @@ public sealed partial class ShellViewModel : ObservableObject
         "Nav_Forum" => new ForumViewModel(_services),
         "Nav_Uploads" => new UploadsViewModel(_services, ShowLogin),
         "Nav_Media" => new MediaViewModel(_services),
+        "Nav_Matches" => new MatchesViewModel(_services, ShowLogin),
+        "Nav_Leaderboards" => new LeaderboardsViewModel(_services),
         "Nav_Account" => new AccountViewModel(_services, SignOutAsync, ShowLogin),
         _ => new PlaceholderViewModel(_services, item),
     };

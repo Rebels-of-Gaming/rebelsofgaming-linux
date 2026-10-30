@@ -1,0 +1,343 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.MatchesView"
+             x:DataType="vm:MatchesViewModel">
+  <!-- Matches wie MatchesPage der Windows-App: Reiter Matches (Liste-Detail) · Hall of Fame · Statistiken · Turniere -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="display" Text="{l:T MatchesPage_Title.Text}" />
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCurrentCommand}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+      <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1">
+        <WrapPanel Orientation="Horizontal">
+          <ToggleButton Classes="segment" IsChecked="{Binding IsMatchesTab}" Content="{l:T MatchesPage_TabMatches.Text, Upper=True}" />
+          <ToggleButton Classes="segment" IsChecked="{Binding IsHallTab}" Content="{l:T MatchesPage_TabHall.Text, Upper=True}" />
+          <ToggleButton Classes="segment" IsChecked="{Binding IsStatsTab}" Content="{l:T MatchesPage_TabStats.Text, Upper=True}" />
+          <ToggleButton Classes="segment" IsChecked="{Binding IsTournamentsTab}" Content="{l:T MatchesPage_TabTournaments.Text, Upper=True}" />
+        </WrapPanel>
+      </Border>
+    </StackPanel>
+
+    <Panel>
+      <!-- Matches -->
+      <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}" IsVisible="{Binding IsMatchesTab}">
+        <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
+          <DockPanel>
+            <Button DockPanel.Dock="Bottom" Classes="secondary" Margin="12,0,12,12" HorizontalAlignment="Stretch"
+                    IsVisible="{Binding HasMore}" IsEnabled="{Binding !IsLoadingMore}"
+                    Command="{Binding LoadMoreCommand}" Content="{l:T Common_LoadMore.Content}" />
+            <Panel>
+              <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                           EmptyText="{l:T MatchesPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+              <ListBox Classes="cards" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" SelectionMode="Single"
+                       IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T MatchesPage_Title.Text}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:MatchRowViewModel">
+                    <Grid ColumnDefinitions="4,*,Auto" AutomationProperties.Name="{Binding AutomationName}">
+                      <Border Width="4" CornerRadius="2" Background="{Binding ResultBrush}" />
+                      <StackPanel Grid.Column="1" Spacing="2" Margin="12,0" VerticalAlignment="Center">
+                        <TextBlock Classes="body strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="muted small" Text="{Binding Subtitle}" MaxLines="1" TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="2" VerticalAlignment="Center" FontFamily="{StaticResource RoGDisplayFont}" FontWeight="Bold"
+                                 FontSize="22" Foreground="{Binding ResultBrush}" Text="{Binding Score}" />
+                    </Grid>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Panel>
+          </DockPanel>
+        </Border>
+
+        <!-- Detail -->
+        <Panel>
+          <TextBlock Classes="muted" Text="{l:T MatchesPage_SelectHint.Text}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                     IsVisible="{Binding ShowSelectHint}" Margin="32" />
+          <c:StateView DataContext="{Binding Detail}" x:DataType="vm:MatchDetailViewModel"
+                       IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" RetryCommand="{Binding RefreshCommand}" />
+          <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Detail.ShowContent}">
+            <StackPanel DataContext="{Binding Detail}" x:DataType="vm:MatchDetailViewModel"
+                        MaxWidth="{StaticResource RoGReadingWidth}" Margin="32,24,32,40" HorizontalAlignment="Left" Spacing="16">
+              <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding $parent[UserControl].((vm:MatchesViewModel)DataContext).CloseDetailCommand}"
+                      IsVisible="{Binding #Panel.IsNarrow}" AutomationProperties.Name="{l:T Common_Back}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{StaticResource IconBack}" Width="16" Height="16" />
+                  <TextBlock Text="{l:T Common_Back}" />
+                </StackPanel>
+              </Button>
+              <c:FeedbackBar DataContext="{Binding Feedback}" />
+              <StackPanel Spacing="4">
+                <SelectableTextBlock Classes="title" Text="{Binding Title}" AutomationProperties.HeadingLevel="1" />
+                <TextBlock Classes="muted" Text="{Binding Subtitle}" />
+              </StackPanel>
+              <WrapPanel Orientation="Horizontal" AutomationProperties.Name="{Binding AutomationName}">
+                <TextBlock FontFamily="{StaticResource RoGDisplayFont}" FontWeight="Bold" FontSize="48" Margin="0,0,16,0"
+                           Foreground="{Binding ResultBrush}" Text="{Binding Score}" VerticalAlignment="Center" />
+                <TextBlock Classes="section" Foreground="{Binding ResultBrush}" Text="{Binding ResultText}" VerticalAlignment="Center" />
+              </WrapPanel>
+              <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding OpenInBrowserCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{StaticResource IconOpenExternal}" Width="16" Height="16" />
+                  <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
+                </StackPanel>
+              </Button>
+
+              <!-- Maps -->
+              <StackPanel Spacing="8" IsVisible="{Binding HasMaps}">
+                <TextBlock Classes="section" Text="{l:T MatchesPage_Maps.Text}" />
+                <Border Classes="card" Padding="16,8">
+                  <ItemsControl ItemsSource="{Binding Maps}" AutomationProperties.Name="{l:T MatchesPage_Maps.Text}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:MatchMapRow">
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                          <TextBlock Classes="body" Text="{Binding Map}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Grid.Column="1" Classes="body strong" Foreground="{Binding ResultBrush}" Text="{Binding Score}" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Border>
+              </StackPanel>
+
+              <!-- Line-up -->
+              <StackPanel Spacing="8" IsVisible="{Binding HasLineup}">
+                <TextBlock Classes="section" Text="{l:T MatchesPage_Lineup.Text}" />
+                <ItemsControl ItemsSource="{Binding Lineup}" AutomationProperties.Name="{l:T MatchesPage_Lineup.Text}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel ItemSpacing="8" LineSpacing="8" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:MatchPlayerRow">
+                      <Border Classes="chip" Padding="10,4">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                          <TextBlock Text="{Binding Name}" />
+                          <TextBlock Text="{Binding Detail}" IsVisible="{Binding HasDetail}" Foreground="{DynamicResource RoGMutedBrush}" FontWeight="Normal" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <!-- Links (Demo, VOD …) -->
+              <StackPanel Spacing="8" IsVisible="{Binding HasLinks}">
+                <TextBlock Classes="section" Text="{l:T SquadsPage_Links.Text}" />
+                <ItemsControl ItemsSource="{Binding Links}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel ItemSpacing="8" LineSpacing="6" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:LinkViewModel">
+                      <Button Classes="link pad" Command="{Binding OpenCommand}" ToolTip.Tip="{Binding Url}">
+                        <TextBlock Text="{Binding Label}" />
+                      </Button>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <!-- Bericht -->
+              <StackPanel Spacing="8" IsVisible="{Binding HasReport}">
+                <TextBlock Classes="section" Text="{l:T Linux_MatchReport}" />
+                <c:RichContentView Document="{Binding Report}" />
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </Panel>
+      </c:ListDetailPanel>
+
+      <!-- Hall of Fame -->
+      <Panel IsVisible="{Binding IsHallTab}">
+        <Panel DataContext="{Binding Hall}" x:DataType="vm:HallOfFameViewModel">
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T Linux_HallEmpty}" RetryCommand="{Binding RefreshCommand}" />
+          <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24,8,24,32" Spacing="20">
+              <StackPanel Spacing="12" IsVisible="{Binding HasTrophies}">
+                <TextBlock Classes="section" Text="{l:T MatchesPage_Trophies.Text}" />
+                <ItemsControl ItemsSource="{Binding Trophies}" AutomationProperties.Name="{l:T MatchesPage_Trophies.Text}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="260" Spacing="16" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:HallEntryViewModel">
+                      <Border Classes="card" AutomationProperties.Name="{Binding Title}">
+                        <StackPanel Spacing="6">
+                          <PathIcon Data="{StaticResource IconTrophy}" Width="24" Height="24" HorizontalAlignment="Left" Foreground="{Binding MedalBrush}" />
+                          <TextBlock Classes="body strong" Text="{Binding Title}" />
+                          <TextBlock Classes="muted" Text="{Binding Meta}" />
+                          <TextBlock Classes="body" Text="{Binding Description}" IsVisible="{Binding HasDescription}" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <StackPanel Spacing="12" IsVisible="{Binding HasMilestones}">
+                <TextBlock Classes="section" Text="{l:T MatchesPage_Milestones.Text}" />
+                <ItemsControl ItemsSource="{Binding Milestones}" AutomationProperties.Name="{l:T MatchesPage_Milestones.Text}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="260" Spacing="16" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:HallEntryViewModel">
+                      <Border Classes="card" AutomationProperties.Name="{Binding Title}">
+                        <StackPanel Spacing="6">
+                          <TextBlock Classes="body strong" Text="{Binding Title}" />
+                          <TextBlock Classes="muted" Text="{Binding Meta}" />
+                          <TextBlock Classes="body" Text="{Binding Description}" IsVisible="{Binding HasDescription}" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <StackPanel Spacing="12" IsVisible="{Binding HasHonorary}">
+                <TextBlock Classes="section" Text="{l:T MatchesPage_Honorary.Text}" />
+                <ItemsControl ItemsSource="{Binding Honorary}" AutomationProperties.Name="{l:T MatchesPage_Honorary.Text}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="300" Spacing="16" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:HonoraryViewModel">
+                      <Border Classes="card" AutomationProperties.Name="{Binding Name}">
+                        <Grid ColumnDefinitions="Auto,*">
+                          <c:AvatarView Size="56" Source="{Binding Avatar}" DisplayName="{Binding Name}" VerticalAlignment="Top" />
+                          <StackPanel Grid.Column="1" Spacing="4" Margin="12,0,0,0">
+                            <!-- ohne Text-Klasse: in Vorlagen gehen Klassen-Stile einer DynamicResource-Farbe vor -->
+                            <TextBlock FontFamily="{StaticResource RoGDisplayFont}" FontWeight="SemiBold" FontSize="20" LetterSpacing="1.1" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding Name}" TextWrapping="Wrap" />
+                            <TextBlock Classes="muted" Text="{Binding Period}" IsVisible="{Binding HasPeriod}" />
+                            <TextBlock Classes="body" Text="{Binding Tribute}" />
+                          </StackPanel>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </Panel>
+      </Panel>
+
+      <!-- Statistiken -->
+      <Panel IsVisible="{Binding IsStatsTab}">
+        <DockPanel DataContext="{Binding Stats}" x:DataType="vm:StatsViewModel">
+          <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="24,4,24,8" IsVisible="{Binding ShowFilters}">
+            <StackPanel Margin="0,0,12,8">
+              <TextBlock Classes="label" Text="{l:T Stats_Game.Header}" />
+              <ComboBox MinWidth="200" ItemsSource="{Binding Games}" SelectedItem="{Binding SelectedGame}"
+                        AutomationProperties.Name="{l:T Stats_Game.Header}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,12,8">
+              <TextBlock Classes="label" Text="{l:T Stats_Period.Header}" />
+              <ComboBox MinWidth="150" ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}"
+                        AutomationProperties.Name="{l:T Stats_Period.Header}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,12,8">
+              <TextBlock Classes="label" Text="{l:T Stats_Metric.Header}" />
+              <ComboBox MinWidth="150" ItemsSource="{Binding Metrics}" SelectedItem="{Binding SelectedMetric}"
+                        AutomationProperties.Name="{l:T Stats_Metric.Header}" />
+            </StackPanel>
+          </WrapPanel>
+          <Panel>
+            <StackPanel Spacing="16" Margin="24" IsVisible="{Binding NeedsLogin}" VerticalAlignment="Center" HorizontalAlignment="Center">
+              <PathIcon Data="{StaticResource IconChart}" Width="48" Height="48" Foreground="{DynamicResource RoGMutedBrush}" />
+              <TextBlock Classes="muted" Text="{l:T Linux_StatsGuest}" TextAlignment="Center" MaxWidth="420" />
+              <Button Classes="primary" HorizontalAlignment="Center" Command="{Binding SignInCommand}" Content="{l:T Linux_SignIn}" />
+            </StackPanel>
+            <Panel IsVisible="{Binding !NeedsLogin}">
+              <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                           EmptyText="{l:T Stats_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+            </Panel>
+            <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+              <StackPanel Margin="24,0,24,32" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" Spacing="16">
+                <TextBlock Classes="body strong" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding MyRankText}" IsVisible="{Binding HasMyRank}" />
+                <Border Classes="card" Padding="16,8">
+                  <ItemsControl ItemsSource="{Binding Rows}" AutomationProperties.Name="{l:T MatchesPage_TabStats.Text}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:StatsRowViewModel">
+                        <Border Background="{Binding RowBackground}" CornerRadius="{StaticResource RoGControlRadius}" Margin="-8,0" Padding="8,0">
+                        <Grid ColumnDefinitions="40,*,Auto" Margin="0,6" AutomationProperties.Name="{Binding AutomationName}">
+                          <TextBlock Classes="strong" FontSize="15" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding Rank}" VerticalAlignment="Center" />
+                          <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                            <TextBlock Classes="body strong" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Classes="muted small" Text="{Binding Details}" />
+                          </StackPanel>
+                          <TextBlock Grid.Column="2" Classes="body strong" VerticalAlignment="Center" Text="{Binding Value}" />
+                        </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Border>
+                <TextBlock Classes="section" Text="{Binding AwardsTitle}" IsVisible="{Binding HasAwards}" />
+                <ItemsControl ItemsSource="{Binding Awards}" IsVisible="{Binding HasAwards}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><c:AdaptiveGrid MinItemWidth="220" Spacing="12" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AwardRowViewModel">
+                      <Border Classes="card" Padding="14,10" AutomationProperties.Name="{Binding Label}">
+                        <Grid ColumnDefinitions="Auto,*">
+                          <PathIcon Data="{StaticResource IconStar}" Width="18" Height="18" Margin="0,2,10,0" VerticalAlignment="Top" Foreground="{DynamicResource RoGGoldBrush}" />
+                          <StackPanel Grid.Column="1" Spacing="2">
+                            <TextBlock Classes="strong" FontSize="15" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding Label}" TextWrapping="Wrap" />
+                            <TextBlock Classes="body" Text="{Binding Text}" />
+                          </StackPanel>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </ScrollViewer>
+          </Panel>
+        </DockPanel>
+      </Panel>
+
+      <!-- Turniere -->
+      <Panel IsVisible="{Binding IsTournamentsTab}">
+        <Panel DataContext="{Binding Tournaments}" x:DataType="vm:TournamentsViewModel">
+          <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                       EmptyText="{l:T Tournaments_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+          <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Items}" Margin="24,4,24,32" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left"
+                          AutomationProperties.Name="{l:T MatchesPage_TabTournaments.Text}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:TournamentRowViewModel">
+                  <Border Classes="card" Padding="16,12" AutomationProperties.Name="{Binding Title}">
+                    <Grid ColumnDefinitions="48,*,Auto">
+                      <TextBlock FontFamily="{StaticResource RoGDisplayFont}" FontWeight="SemiBold" FontSize="26" Foreground="{DynamicResource RoGGoldBrush}"
+                                 Text="{Binding Placement}" IsVisible="{Binding HasPlacement}" VerticalAlignment="Center" />
+                      <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                        <TextBlock Classes="body strong" Text="{Binding Title}" />
+                        <TextBlock Classes="muted small" Text="{Binding Meta}" />
+                      </StackPanel>
+                      <Button Grid.Column="2" Classes="icon" Margin="8,0,0,0" VerticalAlignment="Center" Command="{Binding OpenCommand}" IsVisible="{Binding HasUrl}"
+                              ToolTip.Tip="{l:T Common_OpenInBrowser.Content}" AutomationProperties.Name="{l:T Common_OpenInBrowser.Content}">
+                        <PathIcon Data="{StaticResource IconOpenExternal}" Width="18" Height="18" />
+                      </Button>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Panel>
+      </Panel>
+    </Panel>
+  </DockPanel>
+</UserControl>

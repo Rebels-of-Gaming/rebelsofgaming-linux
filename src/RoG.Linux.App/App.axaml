@@ -27,6 +27,8 @@
     <DataTemplate DataType="vm:UploadsViewModel"><views:UploadsView /></DataTemplate>
     <DataTemplate DataType="vm:MediaViewModel"><views:MediaView /></DataTemplate>
     <DataTemplate DataType="vm:VotesViewModel"><views:VotesView /></DataTemplate>
+    <DataTemplate DataType="vm:MatchesViewModel"><views:MatchesView /></DataTemplate>
+    <DataTemplate DataType="vm:LeaderboardsViewModel"><views:LeaderboardsView /></DataTemplate>
     <!-- Bausteine, die mehrere Seiten zeigen -->
     <DataTemplate DataType="vm:ServerItemViewModel"><views:ServerCard /></DataTemplate>
     <DataTemplate DataType="vm:InternalRowViewModel">

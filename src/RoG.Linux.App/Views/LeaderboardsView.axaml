@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.LeaderboardsView"
+             x:DataType="vm:LeaderboardsViewModel">
+  <!-- Minecraft-Bestenlisten wie LeaderboardsPage der Windows-App: nur Mitglieder mit freigegebenen Statistiken -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="24,24,24,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="display" Text="{l:T LeaderboardsPage_Title.Text}" />
+        <Button Grid.Column="1" Classes="icon" VerticalAlignment="Center" Command="{Binding RefreshCommand}"
+                ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="20" Height="20" />
+        </Button>
+      </Grid>
+      <TextBlock Classes="muted" Text="{l:T LeaderboardsPage_Intro.Text}" MaxWidth="{StaticResource RoGReadingWidth}" HorizontalAlignment="Left" />
+      <WrapPanel Orientation="Horizontal">
+        <StackPanel Margin="0,0,12,8">
+          <TextBlock Classes="label" Text="{l:T LeaderboardsPage_Board.Header}" />
+          <ComboBox Width="200" ItemsSource="{Binding BoardOptions}" SelectedItem="{Binding SelectedBoard}"
+                    AutomationProperties.Name="{l:T LeaderboardsPage_Board.Header}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,12,8">
+          <TextBlock Classes="label" Text="{l:T LeaderboardsPage_Period.Header}" />
+          <ComboBox Width="200" ItemsSource="{Binding PeriodOptions}" SelectedItem="{Binding SelectedPeriod}"
+                    AutomationProperties.Name="{l:T LeaderboardsPage_Period.Header}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,12,8" IsVisible="{Binding HasSorts}">
+          <TextBlock Classes="label" Text="{l:T LeaderboardsPage_Sort.Header}" />
+          <ComboBox Width="200" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}"
+                    AutomationProperties.Name="{l:T LeaderboardsPage_Sort.Header}" />
+        </StackPanel>
+        <StackPanel Margin="0,0,12,8" IsVisible="{Binding HasCourses}">
+          <TextBlock Classes="label" Text="{l:T LeaderboardsPage_Course.Header}" />
+          <ComboBox Width="200" ItemsSource="{Binding CourseOptions}" SelectedItem="{Binding SelectedCourse}"
+                    AutomationProperties.Name="{l:T LeaderboardsPage_Course.Header}" />
+        </StackPanel>
+      </WrapPanel>
+      <TextBlock Classes="muted small" Text="{Binding Hint}" IsVisible="{Binding HasHint}" />
+    </StackPanel>
+
+    <Panel>
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}"
+                   EmptyText="{l:T LeaderboardsPage_State.EmptyText}" RetryCommand="{Binding RefreshCommand}" />
+      <ScrollViewer IsVisible="{Binding ShowContent}" VerticalScrollBarVisibility="Auto">
+        <!-- Lesebreite: Spalte höchstens 720 px, links ausgerichtet, Zeilen füllen sie ganz aus -->
+        <Grid Margin="24,4,24,32">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="{StaticResource RoGReadingWidth}" /><ColumnDefinition Width="0*" /></Grid.ColumnDefinitions>
+        <ItemsControl ItemsSource="{Binding Items}"
+                      AutomationProperties.Name="{l:T LeaderboardsPage_List.AutomationProperties.Name}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="4" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:LeaderboardEntryViewModel">
+              <Button Classes="row" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Command="{Binding OpenCommand}"
+                      AutomationProperties.Name="{Binding AutomationName}">
+                <Grid ColumnDefinitions="48,Auto,*,Auto">
+                  <TextBlock Classes="body strong" Foreground="{Binding RankBrush}" Text="{Binding RankText}" VerticalAlignment="Center" />
+                  <c:AvatarView Grid.Column="1" Size="32" Source="{Binding Avatar}" DisplayName="{Binding Name}" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="2" Margin="12,0" VerticalAlignment="Center">
+                    <TextBlock Classes="body" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Classes="muted small" Text="{Binding Meta}" IsVisible="{Binding HasMeta}" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="3" Classes="body strong" Text="{Binding ValueText}" VerticalAlignment="Center" />
+                </Grid>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        </Grid>
+      </ScrollViewer>
+    </Panel>
+  </DockPanel>
+</UserControl>
