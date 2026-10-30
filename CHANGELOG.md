@@ -6,9 +6,27 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 1 – Konto + Start, Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
 
-### Hinzugefügt
+### Hinzugefügt (Stufe 2)
+
+- Squads: Liste mit Logo, Spiel, Clan-Tag und Rekrutierung (Chip), Umschalter „Spiele“ (Clan-Spiele mit Links); Squad-Seite mit Banner, Leitung, Reitern **Vorstellung** (Text, Trainingszeiten, Clan, Links mit Kopieren), **Line-up** (Avatare, Rollen in Rollenfarbe, Klick öffnet das Profil), **Server** (mit Verbinden) und **Intern** – nur für Member des Squads bzw. Verwalter: Squad-Gruppe, nächste Termine mit eigener Antwort, Squad-Forum, Downloads und Alben, Hinweis bei fehlenden Berechtigungen des Tokens
+- Mitglieder: Suche (verzögert, Strg+F), „Nur online“, Team-Ansicht, „Mehr laden“; Avatar mit **Status-Abzeichen** (grün online, blau Voice, rot auf RoG-Server, gold im Spiel, grau offline – jeweils auch als Form/Symbol, mit Tooltip und Screenreader-Text)
+- Profile: Banner, Avatar mit Status, Rang in Rangfarbe, Status + Aktivität, Motto, Über mich, Ort, „Dabei seit“, „Zuletzt gesehen“, Squads, Rebel-Coins, Abzeichen, Spiele-Accounts, „Im Browser öffnen“
+- Server: Karten mit Status (Punkt/Ring/Symbol + Text), Spieler und Auslastung, Map, Passwort-Schloss, Spielerliste; **Verbinden** startet Steam (`steam://`), ET: Legacy (`et://`) bzw. RtCW (`wolf://`) über `xdg-open` – ist kein Programm registriert (`xdg-mime`), wird die Adresse kopiert und erklärt, wie man sie im Spiel einträgt; Minecraft: Adresse kopieren mit Anleitung; „Adresse kopieren“; aktualisiert sich jede Minute
+- Kalender: Liste der nächsten 60 Tage nach Tag gruppiert, **Monatsansicht** (6 Wochen ab Montag, Punkte in Typfarbe, heute rot umrandet, „Heute“), Termin mit Zeit, Ort, Zahlen, eigener Antwort (nur anzeigen), Teilnehmern, Server mit Verbinden, Beschreibung, „Im Browser öffnen“, „In Kalender übernehmen“ (.ics)
+- Info: Regeln, Seiten und Rechtstexte nach Gruppen; Regeln mit §-Abschnitten, wichtige markiert, Hinweis „bitte bestätigen“ (vorerst auf der Website)
+- Suche (Strg+K, Lupe in Seitenleiste und Kopfleiste): Treffer nach Bereich, öffnen den Bereich in der App (Squads, Profile, News, Termine …) oder sonst den Browser
+- `rog://`-Links für Squads, Profile (`rog://u/…`), Termine, Server, Info, Unterhaltungen, Suche und `rog://open?url=…`
+- Startseite: Termine und Onboarding-Schritte öffnen jetzt die passenden Seiten der App statt der Website
+- Escape schließt das Detail auf allen Liste-Detail-Seiten; Farben aus der API (Ränge, Rollen, Abzeichen) bleiben im hellen Design lesbar
+- Tests: ViewModel-Tests für alle neuen Seiten, Deep Links und `xdg-mime`; Screenshots in 1280×800, 1440×900, schmal (480 px) und hell
+
+### Geändert (Stufe 2)
+
+- CI: `actions/checkout@v7` und `actions/setup-dotnet@v6` (Node 24)
+
+### Hinzugefügt (Stufe 1)
 
 - Startseite wie in der Windows-App: Begrüßung, Gast-Hinweis mit „Anmelden“, offene Abstimmungen, „Dein Start bei den Rebels“, Live-Ticker (`/v1/live`) als Kacheln, neueste News (öffnen den Artikel in der App) und nächste Termine
 - Einstellungen: Sprache (DE/EN/FR/System, wirkt nach Neustart), Design (RoG-Dunkel als Standard, „Wie das System“, Hell – sofort), Desktop-Benachrichtigungen mit Test-Knopf, „Über die App“ mit Version, Plattform-Version, Umgebung, Paket (Flatpak/direkt), Anzeige (Wayland/X11), Links, Copyright und Lizenzen

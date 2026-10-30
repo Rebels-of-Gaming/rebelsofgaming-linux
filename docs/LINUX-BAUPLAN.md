@@ -5,8 +5,8 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
-**Stufe 1 (Konto + Start, 30.10.2026) – erledigt**, davor Wechsel auf **Avalonia 12** (Owner-Entscheidung F3).
-Version 0.1.0, nicht veröffentlicht.
+**Stufe 2 (Community lesen, 30.10.2026) – erledigt.** Stufe 1 (Konto + Start) und der Wechsel auf **Avalonia 12**
+(Owner-Entscheidung F3) davor. Version 0.1.0, nicht veröffentlicht.
 
 | Bereich | Stand |
 |---|---|
@@ -25,8 +25,16 @@ Version 0.1.0, nicht veröffentlicht.
 | Token im Schlüsselbund (Secret Service), Rückfall „nur diese Sitzung“ | steht; Protokoll-Test gegen privaten D-Bus mit Test-Dienst (Anlegen, Ersetzen, Lesen, Entsperren per Prompt, Ablehnen, Löschen) |
 | Desktop-Benachrichtigungen (org.freedesktop.Notifications) | steht; Protokoll-Test + „Test-Benachrichtigung“ in den Einstellungen; Glocke/DMs ab Stufe 3 |
 | `xdg-open` (Browser, Spiele-Links), XDG-Ordner, Gerätename (PC/Steam Deck) | steht |
-| Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), F5, Escape (Menü, Detail); sichtbarer Fokusrahmen |
-| Tests | 84 xUnit-Tests inkl. 21 Headless-Screenshots (`artifacts/screenshots/`) und 7 D-Bus-Tests gegen einen privaten Bus |
+| **Squads** (Liste mit Logo + Rekrutierung, Umschalter Spiele; Squad-Seite mit Banner, Reitern Vorstellung/Line-up/Server und **Intern** nur für Member des Squads bzw. `squads.manage` mit Scope `squads:read`) | steht; gegen die Produktion geprüft (Gastmodus, ohne Intern) |
+| **Mitglieder + Profile** (Suche verzögert, „Nur online“, Team-Ansicht, Avatar mit Status-Abzeichen; Profil mit Banner, Rang in Rangfarbe, Status + Aktivität, Motto, Über mich, Ort/Dabei seit/zuletzt gesehen, Squads, Rebel-Coins, Abzeichen, Spiele-Accounts) | steht; gegen die Produktion geprüft |
+| **Status-Punkt** (`Controls/AvatarView`): grün online · blau Voice · rot RoG-Server · gold im Spiel · grau offline – zusätzlich Form (voller Punkt, Headset, Server, Controller, leerer Ring), Tooltip/Screenreader-Text | steht |
+| **Server** (Karten mit Status als Form + Text, Spieler/Slots, Map, Passwort-Schloss, Spielerliste, **Verbinden** über `xdg-open` mit Prüfung per `xdg-mime`, sonst Adresse kopieren + Hinweis; „Adresse kopieren“; still jede Minute neu, `ApplyStatus` für Echtzeit) | steht; gegen die Produktion geprüft |
+| **Kalender** (Liste 60 Tage nach Tag gruppiert, Monatsansicht 6×7 ab Montag mit Typfarben-Punkten, Tagesliste; Termin mit Zeit, Ort, Zahlen, eigener Antwort **nur anzeigen**, Teilnehmern, Server mit Verbinden, „In Kalender übernehmen“ = .ics) | steht |
+| **Info** (Regeln, Seiten, Rechtstexte gruppiert; Regeln mit §-Abschnitten, wichtige markiert; „bitte bestätigen“ → Website) | steht |
+| **Suche** (Strg+K, Lupe in Seitenleiste/Kopfleiste; Gruppen je Bereich; Treffer öffnen den Bereich in der App, sonst Browser) | steht |
+| Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
+| Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
+| Tests | 132 xUnit-Tests inkl. 38 Headless-Screenshots (`artifacts/screenshots/`) und 7 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -88,6 +96,9 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
 - **Wünsche an den Kern** (im Windows-Repo umsetzen, wenn es passt): Produktname im User-Agent aus `IApiContext`,
   Plattform als Parameter von `RegisterDeviceAsync`, `DeviceName.For(prefix, …)`. Dann entfallen 1–3. Neu (Stufe 1):
   Feld `Theme` in `AppSettings` (dann entfällt `linux.json`), `LanguageResolver`-Text „Systemsprache“ neutral.
+  Neu (Stufe 2): **`SquadInternalService`** für `GET /v1/squads/{squad}/intern` (Forum, Squad-Gruppe, Termine, Downloads,
+  Alben, `missing_scopes`) – liegt bis dahin in `src/RoG.Linux.App/Services/SquadInternalService.cs`; die Windows-App
+  zeigt „Intern“ noch nicht. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
 - **Kern anheben:** `git -C external/rog-windows fetch && git -C external/rog-windows checkout <commit>`, bauen,
   testen, Commit `chore: bump core to <hash>`.
 
@@ -103,8 +114,11 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    `rog://`-Weitergabe, Fensterzustand merken, schmale Ansicht (< 600 px: Kopfleiste + Menü-Überlagerung), kompakte
    Seitenleiste. *Offen aus der ursprünglichen Liste:* Toast-Baustein (kommt mit der ersten schreibenden Aktion,
    Stufe 4), Avatar + Status-Punkt (Stufe 2 mit Mitgliedern/Presence).
-2. **Community lesen** – Squads, Spiele, Mitglieder, Profile, Server mit „Verbinden“ (`steam://`, `et://` über
-   xdg-open, sonst Adresse kopieren), TeamSpeak/Discord-Voice, Matches/Hall of Fame, Kalender, Regeln, Seiten, Suche.
+2. **Community lesen** *(erledigt)* – Squads (inkl. Spiele und „Intern“), Mitglieder, Profile mit Status-Punkt,
+   Server mit „Verbinden“ (`steam://`, `et://`, `wolf://` über xdg-open, sonst Adresse kopieren), Kalender (Liste +
+   Monat, Zusagen nur anzeigen), Regeln/Seiten/Rechtstexte, globale Suche, Deep Links in alle diese Bereiche.
+   *Verschoben:* TeamSpeak-/Discord-Voice-Ansicht und Minecraft-Reiter der Server (Stufe 3, zusammen mit der Echtzeit
+   über `.live.updated`), Matches/Hall of Fame (Stufe 6 mit Stats), Zusagen/Regeln bestätigen (Stufe 4 bzw. 6).
 3. **Echtzeit + Desktop-Integration** – Reverb (Kern) im Betrieb, Glocke + Zähler, Desktop-Benachrichtigungen
    (Notification-Portal in Flatpak), Tray über StatusNotifierItem (KDE/GNOME-Erweiterung, optional), Autostart
    (Background-Portal), **Deep Links `rog://`** für alle Bereiche (Weitergabe per Single-Instance steht seit Stufe 1;
@@ -169,7 +183,7 @@ trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehob
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 1)
+## Datenschutz (Stand Stufe 2)
 
 - **Lokal:** `settings.json` (Sprache, Umgebung, Gastmodus, zuletzt geöffneter Bereich, Benachrichtigungen an/aus,
   Fenstergröße/-lage – keine personenbezogenen Daten) und `linux.json` (Design) unter
@@ -185,6 +199,13 @@ trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehob
   Übertragen werden nur `rog://`-Links zwischen zwei Prozessen desselben Benutzers.
 - **Neu in Stufe 1, keine Übermittlung an Dritte:** Startseite lädt `/v1/live`, `/v1/events`, `/v1/news` und
   (angemeldet) `/v1/votes`, `/v1/me/onboarding`; Einstellungen lesen die Plattform-Version (`GET /v1`).
+- **Neu in Stufe 2, keine Übermittlung an Dritte:** Squads, Mitglieder/Profile, Team, Spiele, Server, Termine
+  (+ Teilnehmer nur angemeldet), Regeln/Seiten/Rechtstexte und Suche kommen nur von der eigenen API (`/v1/squads…`,
+  `/v1/members…`, `/v1/team`, `/v1/games`, `/v1/servers`, `/v1/events…`, `/v1/rules…`, `/v1/pages`, `/v1/legal`,
+  `/v1/search`). Avatare, Banner und Logos nur von der Plattform bzw. ihrem CDN, nur im Speicher. Nichts davon wird
+  gespeichert. „Verbinden“ übergibt nur die Server-Adresse an das lokale Spiel/Steam (`xdg-open`) bzw. die
+  Zwischenablage; `xdg-mime` wird nur nach dem Schema gefragt. „In Kalender übernehmen“ öffnet die `.ics`-Adresse der
+  Plattform im Browser bzw. in der Kalender-App des Systems.
 - Website-seitig: keine Änderung nötig (`platform: linux` und Loopback-Login gibt es schon, Guide 35).
 
 ## Verzeichnisstruktur
@@ -231,8 +252,8 @@ docs/                       LINUX-BAUPLAN.md
   verwirft und der Kern nicht geändert wird (Wunsch an den Kern: Feld `Theme`).
 - **L14 – Seitenleiste kompakt (36 px je Eintrag)** statt 44 px, damit alle 15 + 3 Bereiche bei 1280×800 ohne
   Scrollen passen. Für Touch/Controller (Stufe 10) wird das mit dem Spielmodus noch einmal bewertet.
-- **L15 – Termine, Abstimmungen und Onboarding-Schritte** der Startseite öffnen vorerst die Website (Kalender und Votes
-  kommen nativ in Stufe 2 bzw. 6); News öffnen den Artikel in der App.
+- **L15 – Startseite:** Abstimmungen öffnen vorerst die Website (Votes nativ in Stufe 6); Termine, News und
+  Onboarding-Schritte (Regeln, Termine …) öffnen seit Stufe 2 die Seite in der App.
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
