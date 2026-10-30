@@ -5,6 +5,10 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
+**Stufe 9 (Verwaltung + Moderation, 30.10.2026) – erledigt** (Seite „Verwaltung“ mit allen Reitern der Windows-App:
+Übersicht, Mitglieder, Bewerbungen, Meldungen, Sperren, Einsprüche, Minecraft, Coins, Netzwerk, Mod-Log, Wortfilter,
+Galerie, Uploads, Website + Editor-Fenster; Squad-, News- und Match-Editor; „Melden“ an Inhalten; Minecraft-Weltkarte;
+Minecraft-Beitrittsdaten und Ressourcenpaket).
 **Stufe 8 (Wiki, 30.10.2026) – erledigt** (Bereiche, Seitenbaum, Seiten nativ, Inhaltsverzeichnis, Suche, Kategorien,
 Beobachten, Versionen mit Diff, Bearbeiten mit Vorschau und Konflikt-Auflösung, neue Seite, Bild einfügen, offline lesen).
 **Stufe 7 (Server-Steuerung, 30.10.2026) – erledigt** (Steuer-Fenster je Server mit Live-Konsole, Power, Ressourcen,
@@ -84,9 +88,13 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Wiki** (Bereich wählen, Seitenbaum, Suche, Kategorien; Seite nativ mit Inhaltsverzeichnis, Wiki-Links öffnen in der App; Beobachten; Versionen mit Diff, Wiederherstellen/Freigeben/Ablehnen mit Recht + Rückfrage; Bearbeiten mit Vorschau über die API, Konflikt mit Diff und „Ihre Fassung übernehmen“; neue Seite; Bild einfügen über das Portal; `rog://wiki/…` nativ) | steht; gegen die Produktion geprüft (Gast, Bereich ohne öffentliche Seiten → Leerzustand) |
 | **Wiki offline** (jede gelesene Seite verschlüsselt in `$XDG_DATA_HOME/rebelsofgaming/wiki-<umgebung>/`, „Bereich offline speichern“, Plakette „Offline verfügbar“; ohne Schlüsselbund nur online) | steht |
 | **Links in Inhalten** (News, Forum, Wiki …) öffnen Plattform-Seiten nativ, wenn es sie in der App gibt | steht |
+| **Verwaltung** (Eintrag in der Seitenleiste nur mit Verwaltungsrecht, dann 34 px je Eintrag; `rog://admin` nativ; Reiter je Recht + Scope wie Windows: Übersicht (Kennzahlen, Systemstatus, Audit-Log) · Mitglieder (Rollen vergeben/entziehen, „Mitglied moderieren“) · Bewerbungen (Votes, Antworten, Sperr-Check, Aufgaben, Entscheiden, Nachrichten) · Meldungen · Sperren · Einsprüche · Minecraft (Gruppen-Zuordnung) · Coins · Netzwerk (Pool, Deploy) · Mod-Log · Wortfilter · Galerie (Freigaben) · Uploads (Meldungen, Speicher) · Website (Bereiche im Editor-Fenster, Rest auf der Admin-Website)) | steht |
+| **Editoren** (eigene Fenster: Squad verwalten – Profil, Line-up, Archiv; News schreiben – Sprachen DE/EN/FR, Titelbild, Planen, Vorschau; Match eintragen – Maps, Line-up, Anhänge; Social-Media-Karte wie Windows) | steht |
+| **Melden** (Forum-Beitrag, Profil, Galerie-Bild, Wiki-Seite/-Version, Direktnachricht, News-Kommentar; Formular im Inhalt, Gründe des Kerns, nur mit Scope `reports:write`) | steht |
+| **Minecraft-Weltkarte** (`rog://map`, eigene Kachelkarte, Warps, Spawn, Live-Spieler alle 5 s wenn erlaubt; Verwaltung mit `minecraft.manage`) und im Server-Reiter Minecraft **Beitrittsdaten bearbeiten** + **Ressourcenpaket hochladen** | steht; Karte gegen die Produktion geprüft |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
-| Tests | 474 xUnit-Tests (Stufe 8); 457 xUnit-Tests (Stufe 7); 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
+| Tests | 609 xUnit-Tests (Stufe 9); 474 xUnit-Tests (Stufe 8); 457 xUnit-Tests (Stufe 7); 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
 | CI | `.github/workflows/ci.yml` auf `[self-hosted, Linux, rog]` – **grün** (Lauf 41032873055: 94/94 Tests, auch die D-Bus-Tests) |
 | Flatpak/AppStream | Entwürfe unter `packaging/` (Binärpaket-Manifest, nicht eingereicht), `packaging/scripts/make-tarball.sh` |
 
@@ -151,6 +159,9 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
   Neu (Stufe 2): **`SquadInternalService`** für `GET /v1/squads/{squad}/intern` (Forum, Squad-Gruppe, Termine, Downloads,
   Alben, `missing_scopes`) – liegt bis dahin in `src/RoG.Linux.App/Services/SquadInternalService.cs`; die Windows-App
   zeigt „Intern“ noch nicht. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
+  Neu (Stufe 9): `AdminAccess` und eine Moderations-Rechteprüfung in den Kern (Windows und Linux bauen sie nach),
+  `SquadMember` mit Rollen-ID, Markdown-Renderer für Vorschauen, echte Galerie-Freigabe-Warteschlange (W16),
+  Endpunkt oder Doku für Meldegründe.
   Neu (Stufe 8): `WikiOfflineStore.Prune(TimeSpan)` und Suche nach Bereich/Adresse (Deep Links ohne Netz entschlüsseln
   sonst alle Kopien).
   Neu (Stufe 7): öffentlicher Helfer für freie Dateinamen (`MediaService.FreePath`/`SafeFileName` sind `internal`),
@@ -213,7 +224,8 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
 8. **Wiki** *(erledigt)* – lesen, offline, bearbeiten (Vorschau, Konflikt), Versionen mit Diff, Kategorien, neue Seite,
    Bild einfügen. *Nicht enthalten:* Melden von Seiten/Versionen (Moderation, Stufe 9); Datei-, Hilfe- und
    Spezialseiten des Wikis öffnen im Browser.
-9. **Verwaltung + Moderation** – Bereiche aus der API wie in der Windows-App.
+9. **Verwaltung + Moderation** *(erledigt)* – alle Reiter der Windows-Verwaltungsseite, Editor-Fenster (Website-Bereiche,
+   Squad, News, Match), Melden an Inhalten, Minecraft-Weltkarte, Minecraft-Beitrittsdaten/Ressourcenpaket (aus Stufe 3).
 10. **Feinschliff, Steam Deck, Flathub** – siehe unten.
 
 Später, außerhalb der Stufen: **Clan-„Tools“** in einem eingebetteten, abgeschotteten WebKitGTK-Fenster (einzige
@@ -272,7 +284,15 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
 3. Runner-Pakete: `libfontconfig1` (+ eine Schrift, z. B. `fonts-dejavu-core`) für die Headless-Screenshots – der
    Workflow warnt, wenn sie fehlen.
 
-## Datenschutz (Stand Stufe 8)
+## Datenschutz (Stand Stufe 9)
+
+- **Neu in Stufe 9:** nur Aufrufe an die eigene API (Verwaltung: `admin/dashboard`, `system/status`, `audit-log`,
+  `moderation/*`, `admin/members` – E-Mail nur mit globalem Recht –, `roles`, Rollen vergeben/entziehen,
+  `applications…`, `squads/{s}` schreiben, `reports` (Melden), `game-ban-appeals*`, `minecraft/*` inkl. Karte und
+  Live-Positionen, `news` schreiben + Titelbild, `matches` schreiben + Anhänge, Galerie-Freigaben, `admin/uploads/*`,
+  `social/*`, Verwaltungsbereiche über `AdminResourceService`). Bilder (Titelbild, Logos) über den bestehenden
+  Upload-Weg. Kacheln/Köpfe der Minecraft-Karte nur von Adressen, die die API nennt, nur im Speicher; Live-Positionen
+  werden nicht gespeichert. **Keine neue lokale Speicherung.** Browser-Links nur auf die Admin-Domain der Plattform.
 
 - **Neu in Stufe 8:** Wiki-Aufrufe nur an die eigene API (Bereiche, Baum, Seiten, Suche, Kategorien, Versionen,
   Vorschau `/wiki/render`, Speichern, neue Seite, Beobachten, Datei registrieren; Bilder über den bestehenden
@@ -496,6 +516,15 @@ docs/                       LINUX-BAUPLAN.md
   weil die Kopien Mitglieder- und interne Bereiche enthalten können.
 - **L51 – Wiki-Versionen:** Wiederherstellen, Freigeben und Ablehnen fragen unter Linux nach (Windows nicht);
   Konflikt-Diff steht über dem Editor.
+- **L52 – Verwaltung:** Reiter-Regeln wie Windows zentral in `AdminAccess`; wer Rechte, aber keine passenden Scopes
+  hat, sieht den Eintrag und „keine Rechte“ (wie Windows). Ein Mod-Log (Reiter „Log“), das Audit-Log steckt in der
+  Übersicht. Netzwerk = Minecraft-Netzwerk. Rückfragen bei Rolle entziehen und Aufgabe löschen (Windows ohne);
+  Hierarchie-Ablehnungen zeigen den Grund des Servers. Squad-Line-up ordnet Rollen wie Windows über die Bezeichnung zu.
+- **L53 – News-Vorschau** im Editor ist eine lokale Näherung (Einbettungen als Link, Hinweis in der Vorschau);
+  maßgeblich ist die Website. Match-Editor höchstens ein Fenster je Match.
+- **L54 – Melden** nur mit Scope `reports:write` (Guide 28; Windows prüft das nicht); Gründe aus dem Kern
+  (`ModerationService.ReportReasons`, entspricht dem `reason`-Enum der API – die API hat keinen Endpunkt dafür).
+- **L55 – Rebel-Coins-Zeichen ⛃** wird überall durch „Coins“ ersetzt (fehlt in üblichen Linux-Schriften).
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 

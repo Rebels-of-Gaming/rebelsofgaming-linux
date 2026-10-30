@@ -6,7 +6,14 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+Stufe 9 – Verwaltung + Moderation, Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+
+### Hinzugefügt (Stufe 9)
+
+- **Verwaltung** (mit Rechten): Übersicht mit Systemstatus und Audit-Log, Mitglieder und Rollen, Bewerbungen entscheiden, Meldungen, Sperren, Einsprüche, Wortfilter, Mod-Log, Minecraft-Gruppen, Rebel-Coins, Minecraft-Netzwerk, Galerie-Freigaben, Upload-Meldungen und Website-Bereiche im Editor
+- **Editoren** in eigenen Fenstern: Squad verwalten, News schreiben (mit Titelbild, Planen und Vorschau), Matches eintragen
+- **Melden** an Forenbeiträgen, Profilen, Galerie-Bildern, Wiki-Seiten, Direktnachrichten und News-Kommentaren
+- **Minecraft-Weltkarte** mit Warps und Live-Spielern; Beitrittsdaten und Ressourcenpaket im Minecraft-Reiter bearbeiten (mit Recht)
 
 ### Hinzugefügt (Stufe 8)
 
