@@ -150,8 +150,9 @@ Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
 Windows-Repo), .NET über `actions/setup-dotnet` ins Benutzerverzeichnis.
 
 **Stand 30.10.2026:** Secret `ROG_WINDOWS_DEPLOY_KEY` und Runner-Freigabe stehen – CI läuft grün (Build + 94 Tests in
-rund 7 Minuten inkl. Wartezeit). Hinweise im Lauf: `libfontconfig1` fehlt auf dem Runner (Screenshots rendern
-trotzdem), `actions/checkout@v4`/`setup-dotnet@v4` laufen auf Node 20 (veraltet) → bei Gelegenheit auf v5 anheben.
+rund 7 Minuten inkl. Wartezeit). Hinweis im Lauf: `libfontconfig1` fehlt auf dem Runner (Screenshots rendern
+trotzdem, der Workflow warnt nur – Owner-Aufgabe). Actions auf Node 24 angehoben: `actions/checkout@v7`,
+`actions/setup-dotnet@v6` (Runner 2.338 unterstützt Node 24).
 
 **Einrichtung (zum Nachlesen):**
 
