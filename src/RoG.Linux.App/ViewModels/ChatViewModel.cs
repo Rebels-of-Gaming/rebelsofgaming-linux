@@ -30,6 +30,7 @@ public sealed partial class ChatViewModel : LoadableViewModel, IDisposable
         _messages = new MessageService(services.Api.Client);
         ConversationId = conversationId;
         Title = title;
+        Report = new ReportFormViewModel(services);
     }
 
     public string ConversationId { get; }
@@ -39,6 +40,11 @@ public sealed partial class ChatViewModel : LoadableViewModel, IDisposable
     public ObservableCollection<ChatMessageViewModel> Messages { get; } = [];
 
     public FeedbackViewModel Feedback { get; } = new();
+
+    /// <summary>Nachricht melden – Formular über der Eingabe.</summary>
+    public ReportFormViewModel Report { get; }
+
+    internal bool CanReport => ReportFormViewModel.IsAllowed(Services);
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SendCommand))]
@@ -272,6 +278,13 @@ public sealed partial class ChatMessageViewModel
     public string ReplyPreview => $"↩ {Author}: {Body}";
 
     public bool CanReply => !IsDeleted;
+
+    /// <summary>„Melden“ wie Windows: fremde, nicht gelöschte Nachricht (Scope <c>reports:write</c>).</summary>
+    public bool CanReport => IsOther && !IsDeleted && _owner.CanReport;
+
+    [RelayCommand]
+    private void Report() =>
+        _owner.Report.Open("message", Message.Id, $"{_services.T(StringKeys.ModTypeMessage)} · {Author}");
 
     [RelayCommand]
     private void Reply() => _owner.Quote(this);

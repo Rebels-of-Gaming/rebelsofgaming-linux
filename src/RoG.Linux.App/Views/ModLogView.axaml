@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ModLogView"
+             x:DataType="vm:ModLogViewModel">
+  <!-- Verwaltung → Mod-Log (wie LogPanel der Windows-App): Zeit · wer · Aktion · wen -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="16,8,16,24" HorizontalAlignment="Left" Spacing="12">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="section" Text="{l:T AdminPage_TabLog.Text, Upper=True}" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+        </Button>
+      </Grid>
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}" MinHeight="200"
+                   EmptyText="{l:T Linux_ModLogEmpty}" RetryCommand="{Binding RefreshCommand}" />
+      <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AdminPage_LogList.AutomationProperties.Name}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,0,1" Padding="0,6">
+              <SelectableTextBlock Classes="body" Text="{Binding}" TextWrapping="Wrap" />
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding LoadMoreCommand}" IsVisible="{Binding HasMore}"
+              Content="{l:T Common_LoadMore.Content}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

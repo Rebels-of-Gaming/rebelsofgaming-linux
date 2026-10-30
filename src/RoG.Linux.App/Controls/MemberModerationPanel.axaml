@@ -1,0 +1,103 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Controls.MemberModerationPanel"
+             x:DataType="vm:MemberModerationViewModel"
+             IsVisible="{Binding IsOpen}">
+  <!-- Mitglied moderieren (wie MemberModerationDialog der Windows-App) als Bereich im Reiter; Escape schließt -->
+  <Border Classes="card" BorderBrush="{DynamicResource RoGGoldBrush}" MaxWidth="720" HorizontalAlignment="Left">
+    <StackPanel Spacing="12">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="section" Text="{Binding Name}" TextWrapping="Wrap" />
+          <TextBlock Classes="body" Foreground="{DynamicResource RoGGoldBrush}" Text="{Binding PointsText}" IsVisible="{Binding ShowContent}" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="icon" Width="32" Height="32" Padding="8" VerticalAlignment="Top"
+                Command="{Binding CancelCommand}" ToolTip.Tip="{l:T Linux_Close}" AutomationProperties.Name="{l:T Linux_Close}">
+          <PathIcon Data="{StaticResource IconClose}" Width="14" Height="14" />
+        </Button>
+      </Grid>
+      <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
+
+      <StackPanel Spacing="12" IsVisible="{Binding ShowContent}">
+        <!-- Verwarnungen -->
+        <StackPanel Spacing="6">
+          <TextBlock Classes="kicker" Text="{l:T Mod_Warnings, Upper=True}" />
+          <TextBlock Classes="muted small" Text="—" IsVisible="{Binding HasNoWarnings}" />
+          <ItemsControl ItemsSource="{Binding Warnings}" AutomationProperties.Name="{l:T Mod_Warnings}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ModRecordViewModel">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                  <TextBlock Classes="body" Text="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="link pad" Margin="12,0,0,0" Command="{Binding ActCommand}" IsVisible="{Binding CanAct}" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ActionLabel}" />
+                  </Button>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- Sperren -->
+        <StackPanel Spacing="6">
+          <TextBlock Classes="kicker" Text="{l:T Mod_Bans, Upper=True}" />
+          <TextBlock Classes="muted small" Text="—" IsVisible="{Binding HasNoBans}" />
+          <ItemsControl ItemsSource="{Binding Bans}" AutomationProperties.Name="{l:T Mod_Bans}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ModRecordViewModel">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                  <TextBlock Classes="body" Text="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="link pad" Margin="12,0,0,0" Command="{Binding ActCommand}" IsVisible="{Binding CanAct}" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ActionLabel}" />
+                  </Button>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- Neue Maßnahme -->
+        <StackPanel Spacing="8" IsVisible="{Binding CanAct}">
+          <TextBlock Classes="kicker" Text="{l:T Mod_NewAction, Upper=True}" />
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T Mod_Reason}" TextWrapping="Wrap" />
+            <TextBox x:Name="ReasonBox" MinHeight="60" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="500" Text="{Binding Reason}"
+                     AutomationProperties.Name="{l:T Mod_Reason}" />
+          </StackPanel>
+          <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+            <StackPanel Spacing="4" IsVisible="{Binding CanWarn}">
+              <TextBlock Classes="label" Text="{l:T Mod_Points}" />
+              <NumericUpDown Width="140" Minimum="0" Maximum="100" Increment="1" FormatString="0" Value="{Binding Points}"
+                             AutomationProperties.Name="{l:T Mod_Points}" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="{l:T Mod_Days}" TextWrapping="Wrap" MaxWidth="260" />
+              <NumericUpDown Width="160" Minimum="0" Maximum="3650" Increment="1" FormatString="0" Value="{Binding Days}"
+                             AutomationProperties.Name="{l:T Mod_Days}" />
+            </StackPanel>
+          </WrapPanel>
+          <StackPanel Spacing="8" IsVisible="{Binding CanBan}">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="{l:T Mod_ScopeHeader}" />
+              <ComboBox MinWidth="260" ItemsSource="{Binding ScopeOptions}" SelectedItem="{Binding SelectedScope}"
+                        AutomationProperties.Name="{l:T Mod_ScopeHeader}" />
+            </StackPanel>
+            <CheckBox IsChecked="{Binding IsPublic}"><TextBlock Text="{l:T Mod_Public}" TextWrapping="Wrap" /></CheckBox>
+          </StackPanel>
+        </StackPanel>
+      </StackPanel>
+
+      <Border Classes="hint error" IsVisible="{Binding HasError}">
+        <SelectableTextBlock Classes="body" Text="{Binding Error}" TextWrapping="Wrap" />
+      </Border>
+      <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+        <Button Classes="primary" Command="{Binding WarnCommand}" IsVisible="{Binding CanWarn}" IsEnabled="{Binding ShowContent}"
+                Content="{l:T Mod_Warn, Upper=True}" />
+        <Button Classes="primary" Command="{Binding BanCommand}" IsVisible="{Binding CanBan}" IsEnabled="{Binding ShowContent}"
+                Content="{l:T Mod_Ban, Upper=True}" />
+        <Button Classes="secondary" Command="{Binding CancelCommand}" Content="{l:T Common_Cancel}" />
+      </WrapPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

@@ -25,6 +25,7 @@ public sealed partial class MediaViewModel : LoadableViewModel, IDetailPage
     {
         _media = new MediaService(services.Api.Client, services.StorageHttp);
         Downloads = new DownloadsViewModel(services, _media);
+        Report = new ReportFormViewModel(services);
     }
 
     public ObservableCollection<AlbumItemViewModel> Albums { get; } = [];
@@ -97,6 +98,23 @@ public sealed partial class MediaViewModel : LoadableViewModel, IDetailPage
     public string AlbumTitle => Album?.Title ?? string.Empty;
 
     public bool IsViewerOpen => Viewed is not null;
+
+    partial void OnViewedChanged(GalleryItemViewModel? value) => Report.Close();
+
+    /// <summary>„Melden“ in der Großansicht wie Windows (angemeldet, Scope <c>reports:write</c>).</summary>
+    public bool CanReport => ReportFormViewModel.IsAllowed(Services);
+
+    /// <summary>Galeriebild melden – Formular in der Großansicht.</summary>
+    public ReportFormViewModel Report { get; }
+
+    [RelayCommand]
+    private void ReportViewed()
+    {
+        if (Viewed is { } item)
+        {
+            Report.Open("gallery_item", item.Id, string.Join(" · ", new[] { Services.T(StringKeys.ModTypeGalleryItem), item.Author }.Where(s => !string.IsNullOrEmpty(s))));
+        }
+    }
 
     bool IDetailPage.IsDetailOpen => IsViewerOpen || Album is not null;
 
@@ -292,6 +310,11 @@ public sealed partial class MediaViewModel : LoadableViewModel, IDetailPage
     /// <summary>Escape: Großansicht, dann Album schließen.</summary>
     public void CloseDetail()
     {
+        if (Report.Close())
+        {
+            return; // Escape schließt zuerst „Melden“
+        }
+
         if (Viewed is not null)
         {
             Viewed = null;
@@ -344,6 +367,10 @@ public sealed partial class GalleryItemViewModel : ObservableObject
         AutomationName = string.Join(", ", new[] { item.Caption ?? item.Author ?? item.Id, item.IsVideo ? services.T("Linux_Video") : null }.Where(s => s is not null));
         _ = LoadThumbAsync();
     }
+
+    public string Id => _item.Id;
+
+    public string? Author => _item.Author;
 
     public string Caption => _item.Caption ?? string.Empty;
 

@@ -159,7 +159,10 @@
                 <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
               </StackPanel>
             </Button>
+            <Button Classes="secondary" Margin="0,0,12,8" Command="{Binding ReportProfileCommand}" IsVisible="{Binding CanReport}"
+                    Content="{l:T Common_Report.Content, Upper=True}" />
           </WrapPanel>
+          <c:ReportForm DataContext="{Binding Report}" />
           <c:FeedbackBar DataContext="{Binding FriendFeedback}" />
         </StackPanel>
       </ScrollViewer>

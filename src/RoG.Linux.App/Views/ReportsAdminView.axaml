@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ReportsAdminView"
+             x:DataType="vm:ReportsAdminViewModel">
+  <!-- Verwaltung → Meldungen (wie ReportsPanel der Windows-App); Kinderschutz rot gekennzeichnet und oben -->
+  <UserControl.Styles>
+    <Style Selector="Border.card.childsafety">
+      <Setter Property="BorderBrush" Value="{DynamicResource RoGRedBrush}" />
+      <Setter Property="BorderThickness" Value="3,1,1,1" />
+    </Style>
+  </UserControl.Styles>
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="16,8,16,24" HorizontalAlignment="Left" Spacing="12">
+      <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+        <ComboBox MinWidth="150" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}"
+                  AutomationProperties.Name="{l:T AdminPage_StatusFilter.AutomationProperties.Name}" />
+        <ComboBox MinWidth="200" ItemsSource="{Binding ReasonOptions}" SelectedItem="{Binding SelectedReason}"
+                  AutomationProperties.Name="{l:T AdminPage_ReasonFilter.AutomationProperties.Name}" />
+        <ComboBox MinWidth="180" ItemsSource="{Binding SourceOptions}" SelectedItem="{Binding SelectedSource}"
+                  AutomationProperties.Name="{l:T AdminPage_SourceFilter.AutomationProperties.Name}" />
+        <Button Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+        </Button>
+      </WrapPanel>
+
+      <c:MemberModerationPanel DataContext="{Binding Member}" />
+
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}" MinHeight="200"
+                   EmptyText="{l:T Linux_ModReportsEmpty}" RetryCommand="{Binding RefreshCommand}" />
+      <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AdminPage_TabReports.Text}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><StackPanel Spacing="12" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:ReportItemViewModel">
+            <Border Classes="card" Classes.childsafety="{Binding IsChildSafety}" AutomationProperties.Name="{Binding Title}">
+              <StackPanel Spacing="6">
+                <Border Classes="chip red" HorizontalAlignment="Left" IsVisible="{Binding IsChildSafety}">
+                  <TextBlock Text="{l:T AdminPage_ChildSafetyBadge.Text}" />
+                </Border>
+                <TextBlock Classes="body strong" Text="{Binding Title}" TextWrapping="Wrap" />
+                <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                <StackPanel Spacing="2" IsVisible="{Binding IsGame}">
+                  <SelectableTextBlock Classes="body" FontSize="13" Text="{Binding GameText}" TextWrapping="Wrap" />
+                  <TextBlock Classes="body" FontSize="13" Foreground="{DynamicResource RoGGoldBrush}" Text="{l:T AdminPage_GameReportHint.Text}" TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Padding="10" Background="{DynamicResource RoGBg3Brush}" CornerRadius="{StaticResource RoGControlRadius}" IsVisible="{Binding HasExcerpt}">
+                  <SelectableTextBlock Classes="body" Text="{Binding Excerpt}" TextWrapping="Wrap" />
+                </Border>
+                <SelectableTextBlock Classes="body" FontStyle="Italic" Text="{Binding Comment}" TextWrapping="Wrap" IsVisible="{Binding HasComment}" />
+                <Button Classes="link" HorizontalAlignment="Left" Command="{Binding OpenContentCommand}" IsVisible="{Binding HasUrl}">
+                  <TextBlock Text="{l:T AdminPage_OpenReported.Content}" />
+                </Button>
+                <StackPanel Spacing="8" IsVisible="{Binding IsOpen}">
+                  <TextBox Text="{Binding Resolution}" MaxLength="500" PlaceholderText="{l:T AdminPage_Resolution.PlaceholderText}"
+                           AutomationProperties.Name="{l:T AdminPage_Resolution.PlaceholderText}" />
+                  <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+                    <Button Classes="primary" Command="{Binding ResolveCommand}" Content="{l:T AdminPage_Resolve.Content}" />
+                    <Button Classes="secondary" Command="{Binding DismissCommand}" Content="{l:T AdminPage_Dismiss.Content}" />
+                    <Button Classes="secondary" Command="{Binding ModerateCommand}" IsVisible="{Binding CanModerateTarget}" Content="{l:T AdminPage_Moderate.Content}" />
+                  </WrapPanel>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding LoadMoreCommand}" IsVisible="{Binding HasMore}"
+              Content="{l:T Common_LoadMore.Content}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

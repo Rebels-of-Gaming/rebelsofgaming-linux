@@ -42,6 +42,7 @@ public sealed partial class WikiViewModel : LoadableViewModel, IDetailPage, IRou
     public WikiViewModel(AppServices services, Action requestSignIn)
         : base(services)
     {
+        Report = new ReportFormViewModel(services);
         _requestSignIn = requestSignIn;
         _wiki = new WikiService(services.Api.Client, services.Api.Http, services.Environment.WikiBaseUrl);
         _uploads = new UploadService(services.Api.Client, services.StorageHttp);
@@ -129,8 +130,32 @@ public sealed partial class WikiViewModel : LoadableViewModel, IDetailPage, IRou
     // ── Seite ────────────────────────────────────────────────────────────────
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasPage), nameof(IsDetailOpen), nameof(ShowSelectHint), nameof(ShowPage), nameof(Title))]
+    [NotifyPropertyChangedFor(nameof(HasPage), nameof(IsDetailOpen), nameof(ShowSelectHint), nameof(ShowPage), nameof(Title), nameof(CanReportPage))]
     public partial WikiArticle? Article { get; set; }
+
+    partial void OnArticleChanged(WikiArticle? value) => Report.Close();
+
+    /// <summary>Seite melden wie Windows: angemeldet, Scope <c>reports:write</c>, nicht die eigene zuletzt geänderte Fassung.</summary>
+    public bool CanReportPage => Article is { } page && !page.IsLastEditedBy(MyId) && ReportFormViewModel.IsAllowed(Services);
+
+    internal bool CanReportRevisions => ReportFormViewModel.IsAllowed(Services);
+
+    internal string? MyId => Services.CurrentUser?.Id;
+
+    /// <summary>„Melden“ für Seite (angezeigte Sprachfassung) und einzelne Versionen – Formular unter den Aktionen.</summary>
+    public ReportFormViewModel Report { get; }
+
+    [RelayCommand]
+    private void ReportPage()
+    {
+        if (Article is { } page)
+        {
+            Report.Open("wiki_page", page.Id, $"{Services.T(StringKeys.ModTypewikipage)} · {page.Title}", page.Locale);
+        }
+    }
+
+    internal void ReportRevision(WikiRevisionItemViewModel revision) =>
+        Report.Open("wiki_revision", revision.Id, $"{Services.T(StringKeys.ModTypewikirevision)} · {revision.Text}");
 
     public bool HasPage => Article is not null;
 
@@ -1043,6 +1068,11 @@ public sealed partial class WikiViewModel : LoadableViewModel, IDetailPage, IRou
     [RelayCommand]
     public void CloseDetail()
     {
+        if (Report.Close())
+        {
+            return; // Escape schließt zuerst „Melden“
+        }
+
         if (Confirm.IsOpen)
         {
             Confirm.Cancel();
@@ -1151,6 +1181,12 @@ public sealed partial class WikiRevisionItemViewModel(WikiRevision revision, Wik
     public bool CanRestore => owner.CanEdit && revision.Status == "approved";
 
     public bool CanDecide => owner.CanApprove && revision.Status == "pending";
+
+    /// <summary>Version melden wie Windows (nicht die eigene).</summary>
+    public bool CanReport { get; } = owner.CanReportRevisions && !revision.IsBy(owner.MyId);
+
+    [RelayCommand]
+    private void Report() => owner.ReportRevision(this);
 
     [RelayCommand]
     private Task CompareAsync() => owner.CompareAsync(this);

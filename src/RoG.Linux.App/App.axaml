@@ -44,6 +44,11 @@
     <DataTemplate DataType="vm:ServerGameBansViewModel"><views:ServerGameBansView /></DataTemplate>
     <DataTemplate DataType="vm:MembersAdminViewModel"><views:MembersAdminView /></DataTemplate>
     <DataTemplate DataType="vm:ApplicationsAdminViewModel"><views:ApplicationsAdminView /></DataTemplate>
+    <DataTemplate DataType="vm:ReportsAdminViewModel"><views:ReportsAdminView /></DataTemplate>
+    <DataTemplate DataType="vm:ModBansAdminViewModel"><views:ModBansAdminView /></DataTemplate>
+    <DataTemplate DataType="vm:BanAppealsViewModel"><views:BanAppealsView /></DataTemplate>
+    <DataTemplate DataType="vm:WordFilterViewModel"><views:WordFilterView /></DataTemplate>
+    <DataTemplate DataType="vm:ModLogViewModel"><views:ModLogView /></DataTemplate>
     <DataTemplate DataType="vm:InternalRowViewModel">
       <Button Classes="row tile" Padding="12,10" Command="{Binding OpenCommand}"
               AutomationProperties.Name="{Binding Title}">

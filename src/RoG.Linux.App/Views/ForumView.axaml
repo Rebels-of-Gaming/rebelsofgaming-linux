@@ -193,6 +193,10 @@
           </StackPanel>
         </Border>
         <Border DockPanel.Dock="Bottom" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,1,0,0"
+                Padding="16,10" IsVisible="{Binding Report.IsOpen}">
+          <c:ReportForm DataContext="{Binding Report}" />
+        </Border>
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,1,0,0"
                 Padding="20,12" IsVisible="{Binding ShowReadOnlyHint}">
           <TextBlock Classes="muted small" Text="{l:T Linux_ForumReadOnly}" />
         </Border>
@@ -281,6 +285,10 @@
                             <Button Classes="icon" Width="32" Height="32" Padding="7" Command="{Binding QuoteCommand}" IsVisible="{Binding CanQuote}"
                                     ToolTip.Tip="{l:T ForumPage_Quote.Content}" AutomationProperties.Name="{l:T ForumPage_Quote.Content}">
                               <PathIcon Data="{StaticResource IconQuote}" Width="16" Height="16" />
+                            </Button>
+                            <Button Classes="link pad" VerticalAlignment="Center" Command="{Binding ReportCommand}" IsVisible="{Binding CanReport}"
+                                    AutomationProperties.Name="{l:T Common_ReportLink.Content}">
+                              <TextBlock Text="{l:T Common_ReportLink.Content}" />
                             </Button>
                           </StackPanel>
                         </Grid>

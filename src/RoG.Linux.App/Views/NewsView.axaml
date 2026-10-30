@@ -91,6 +91,7 @@
           <!-- Kommentare (lesen) -->
           <StackPanel Spacing="12" IsVisible="{Binding Detail.HasComments}" Margin="0,16,0,0">
             <TextBlock Classes="section" Text="{Binding Detail.CommentsHeader}" />
+            <c:ReportForm DataContext="{Binding Detail.Report}" />
             <ItemsControl ItemsSource="{Binding Detail.Comments}">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
@@ -99,10 +100,12 @@
                 <DataTemplate x:DataType="vm:NewsCommentViewModel">
                   <Border Classes="card" Padding="16,12">
                     <StackPanel Spacing="4">
-                      <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Classes="body strong" Text="{Binding Author}" />
-                        <TextBlock Classes="muted" Text="{Binding Time}" />
-                      </StackPanel>
+                      <Grid ColumnDefinitions="Auto,*,Auto">
+                        <TextBlock Classes="body strong" Text="{Binding Author}" Margin="0,0,8,0" />
+                        <TextBlock Grid.Column="1" Classes="muted" Text="{Binding Time}" />
+                        <Button Grid.Column="2" Classes="link" Command="{Binding ReportCommand}" IsVisible="{Binding CanReport}"
+                                Content="{l:T Common_ReportLink.Content}" />
+                      </Grid>
                       <SelectableTextBlock Classes="body" Text="{Binding Body}" />
                     </StackPanel>
                   </Border>

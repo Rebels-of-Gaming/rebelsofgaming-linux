@@ -11,6 +11,7 @@
     <Border DockPanel.Dock="Bottom" Background="{DynamicResource RoGBg2Brush}" BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,1,0,0"
             Padding="16,10">
       <StackPanel Spacing="8">
+        <c:ReportForm DataContext="{Binding Report}" />
         <c:FeedbackBar DataContext="{Binding Feedback}" />
         <Border IsVisible="{Binding HasQuote}" BorderBrush="{DynamicResource RoGActionRedBrush}" BorderThickness="3,0,0,0" Padding="10,4"
                 Background="{DynamicResource RoGBg3Brush}" CornerRadius="4">
@@ -58,6 +59,7 @@
                     <ContextMenu>
                       <MenuItem Header="{l:T ChatView_Reply.Text}" Command="{Binding ReplyCommand}" IsEnabled="{Binding CanReply}" />
                       <MenuItem Header="{l:T ChatView_CopyText.Text}" Command="{Binding CopyCommand}" IsEnabled="{Binding !IsDeleted}" />
+                      <MenuItem Header="{l:T ChatView_Report.Text}" Command="{Binding ReportCommand}" IsVisible="{Binding CanReport}" />
                     </ContextMenu>
                   </Border.ContextMenu>
                   <StackPanel Spacing="4">

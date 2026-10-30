@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Controls.ReportForm"
+             x:DataType="vm:ReportFormViewModel"
+             IsVisible="{Binding IsOpen}">
+  <!-- „Inhalt melden“ im Inhalt (statt ContentDialog wie Windows): Grund, Kommentar, Senden; danach Dank. Escape schließt. -->
+  <Border x:Name="Card" Classes="hint" Background="{DynamicResource RoGBg3Brush}" BorderBrush="{DynamicResource RoGRedBrush}"
+          BorderThickness="3,1,1,1" MaxWidth="560" HorizontalAlignment="Left">
+    <StackPanel Spacing="10">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="body strong" Text="{l:T Report_Title}" />
+          <TextBlock Classes="muted small" Text="{Binding Subject}" IsVisible="{Binding HasSubject}" TextWrapping="Wrap" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="icon" Width="32" Height="32" Padding="8" VerticalAlignment="Top" Margin="8,-4,-6,0"
+                Command="{Binding CancelCommand}" ToolTip.Tip="{l:T Linux_Close}" AutomationProperties.Name="{l:T Linux_Close}">
+          <PathIcon Data="{StaticResource IconClose}" Width="14" Height="14" />
+        </Button>
+      </Grid>
+
+      <!-- Formular -->
+      <StackPanel Spacing="10" IsVisible="{Binding ShowForm}">
+        <TextBlock Classes="muted small" Text="{l:T Report_Hint}" TextWrapping="Wrap" />
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T Report_ReasonHeader}" />
+          <ComboBox x:Name="ReasonBox" HorizontalAlignment="Stretch" ItemsSource="{Binding Reasons}" SelectedItem="{Binding SelectedReason}"
+                    PlaceholderText="{l:T Report_ReasonHeader}" AutomationProperties.Name="{l:T Report_ReasonHeader}" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T Report_Comment}" />
+          <TextBox MinHeight="56" MaxHeight="140" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="{x:Static vm:ReportFormViewModel.MaxComment}"
+                   Text="{Binding Comment}" AutomationProperties.Name="{l:T Report_Comment}" />
+        </StackPanel>
+        <Border Classes="hint error" IsVisible="{Binding HasError}">
+          <SelectableTextBlock Classes="body" Text="{Binding Error}" TextWrapping="Wrap" />
+        </Border>
+        <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+          <Button Classes="primary" Command="{Binding SendCommand}" Content="{l:T Report_Send, Upper=True}" />
+          <Button Classes="secondary" Command="{Binding CancelCommand}" Content="{l:T Common_Cancel}" />
+          <ProgressBar IsIndeterminate="True" Width="80" VerticalAlignment="Center" IsVisible="{Binding IsSending}" />
+        </WrapPanel>
+      </StackPanel>
+
+      <!-- Dank -->
+      <StackPanel Spacing="10" IsVisible="{Binding IsSent}">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <PathIcon Data="{StaticResource IconCheckCircle}" Width="18" Height="18" Foreground="{DynamicResource RoGGreenBrush}" VerticalAlignment="Top" Margin="0,2,0,0" />
+          <TextBlock x:Name="ThanksText" Classes="body" Text="{l:T Report_Thanks}" TextWrapping="Wrap" />
+        </StackPanel>
+        <Button x:Name="DoneButton" Classes="secondary" HorizontalAlignment="Left" Command="{Binding CancelCommand}" Content="{l:T Linux_Close}" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

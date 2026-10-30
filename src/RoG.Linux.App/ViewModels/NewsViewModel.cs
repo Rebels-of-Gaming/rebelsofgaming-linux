@@ -110,6 +110,11 @@ public sealed partial class NewsViewModel : LoadableViewModel, IDetailPage, IRou
     [RelayCommand]
     public void CloseDetail()
     {
+        if (Detail.Report.Close())
+        {
+            return; // Escape schließt zuerst „Melden“
+        }
+
         Selected = null;
         IsLinkedDetailOpen = false;
     }
@@ -220,10 +225,14 @@ public sealed partial class NewsDetailViewModel(AppServices services, NewsServic
 
     public bool HasComments => Comments.Count > 0;
 
+    /// <summary>Kommentar melden – Formular über den Kommentaren.</summary>
+    public ReportFormViewModel Report { get; } = new(services);
+
     protected override bool HasData => _article is not null;
 
     public async Task ShowAsync(string slug)
     {
+        Report.Close();
         Slug = slug;
         _article = null;
         Cover = null;
@@ -259,7 +268,7 @@ public sealed partial class NewsDetailViewModel(AppServices services, NewsServic
             {
                 foreach (var c in await news.GetCommentsAsync(slug, cancellationToken: cancellationToken))
                 {
-                    Comments.Add(new NewsCommentViewModel(c, Services));
+                    Comments.Add(new NewsCommentViewModel(c, Services, Report));
                 }
             }
             catch (RoG.Core.Api.ApiProblemException)
@@ -291,8 +300,14 @@ public sealed partial class NewsDetailViewModel(AppServices services, NewsServic
     }
 }
 
-public sealed class NewsCommentViewModel(NewsComment comment, AppServices services)
+/// <param name="report">Formular für „Melden“ (wie Windows bei sichtbaren Kommentaren, Scope <c>reports:write</c>); <c>null</c> = ohne.</param>
+public sealed partial class NewsCommentViewModel(NewsComment comment, AppServices services, ReportFormViewModel? report = null)
 {
+    public bool CanReport { get; } = report is not null && !(comment.AuthorBlocked && comment.Body is null) && ReportFormViewModel.IsAllowed(services);
+
+    [RelayCommand]
+    private void Report() => report?.Open("news_comment", comment.Id, $"{services.T(StringKeys.ModTypeNewsComment)} · {comment.AuthorName}");
+
     public string Author { get; } = comment.AuthorName;
 
     public string Time { get; } = comment.CreatedAt?.ToLocalTime().ToString("g", services.Culture) ?? string.Empty;

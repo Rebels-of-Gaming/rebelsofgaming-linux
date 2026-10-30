@@ -775,4 +775,13 @@
   <data name="Linux_AppAdminPickDecision" xml:space="preserve">
     <value>Entscheidung wählen …</value>
   </data>
+  <data name="Linux_ModReportsEmpty" xml:space="preserve">
+    <value>Keine Meldungen mit diesem Filter.</value>
+  </data>
+  <data name="Linux_ModWordsEmpty" xml:space="preserve">
+    <value>Noch keine Wortfilter.</value>
+  </data>
+  <data name="Linux_ModLogEmpty" xml:space="preserve">
+    <value>Noch keine Einträge im Mod-Log.</value>
+  </data>
 </root>

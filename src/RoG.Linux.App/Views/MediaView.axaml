@@ -157,9 +157,11 @@
 
     <!-- Großansicht -->
     <Grid IsVisible="{Binding IsViewerOpen}" Background="#F2101216" RowDefinitions="Auto,*,Auto" x:Name="Viewer" Focusable="True">
-      <Grid ColumnDefinitions="*,Auto" Margin="16,12">
+      <Grid ColumnDefinitions="*,Auto,Auto" Margin="16,12">
         <TextBlock Classes="body" Foreground="#FFF1EFEA" Text="{Binding Viewed.Caption}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-        <Button Grid.Column="1" Classes="icon" Command="{Binding CloseViewerCommand}" Foreground="#FFF1EFEA"
+        <Button Grid.Column="1" Classes="secondary" Margin="12,0,8,0" Command="{Binding ReportViewedCommand}" IsVisible="{Binding CanReport}"
+                Content="{l:T MediaPage_Report.Content}" AutomationProperties.Name="{l:T Common_Report.Content}" />
+        <Button Grid.Column="2" Classes="icon" Command="{Binding CloseViewerCommand}" Foreground="#FFF1EFEA"
                 ToolTip.Tip="{l:T MediaPage_CloseViewer.AutomationProperties.Name}" AutomationProperties.Name="{l:T MediaPage_CloseViewer.AutomationProperties.Name}">
           <PathIcon Data="{StaticResource IconClose}" Width="18" Height="18" />
         </Button>
@@ -175,6 +177,7 @@
           <PathIcon Data="{StaticResource IconChevronRight}" Width="24" Height="24" />
         </Button>
       </Grid>
+      <c:ReportForm Grid.Row="1" DataContext="{Binding Report}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="16,0,16,8" />
       <TextBlock Grid.Row="2" Classes="muted small" Margin="16,8,16,16" Text="{Binding Viewed.Meta}" Foreground="#FFA8ACB6" />
     </Grid>
   </Panel>

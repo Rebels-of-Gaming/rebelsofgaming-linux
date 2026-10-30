@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.ModBansAdminView"
+             x:DataType="vm:ModBansAdminViewModel">
+  <!-- Verwaltung → Sperren (wie BansPanel der Windows-App): aktive Sperren, aufheben, Mitglied öffnen -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="16,8,16,24" HorizontalAlignment="Left" Spacing="12">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="section" Text="{l:T AdminPage_TabBans.Text, Upper=True}" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+        </Button>
+      </Grid>
+
+      <c:MemberModerationPanel DataContext="{Binding Member}" />
+
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}" MinHeight="200"
+                   EmptyText="{l:T Ban_Empty.Text}" RetryCommand="{Binding RefreshCommand}" />
+      <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AdminPage_TabBans.Text}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:ModBanItemViewModel">
+            <Border Classes="card" Padding="14,10" AutomationProperties.Name="{Binding Title}">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2" VerticalAlignment="Center">
+                  <Button Classes="link" HorizontalAlignment="Left" Command="{Binding OpenCommand}" IsVisible="{Binding CanOpen}">
+                    <TextBlock Classes="strong" Text="{Binding Title}" TextWrapping="Wrap" />
+                  </Button>
+                  <TextBlock Classes="body strong" Text="{Binding Title}" TextWrapping="Wrap" IsVisible="{Binding !CanOpen}" />
+                  <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="secondary" Margin="12,0,0,0" VerticalAlignment="Center" Command="{Binding LiftCommand}"
+                        IsVisible="{Binding CanLift}" Content="{l:T Ban_Lift.Content}" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

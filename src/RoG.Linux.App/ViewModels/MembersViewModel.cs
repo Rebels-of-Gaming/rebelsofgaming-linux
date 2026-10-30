@@ -143,6 +143,11 @@ public sealed partial class MembersViewModel : LoadableViewModel, IDetailPage, I
     [RelayCommand]
     public void CloseDetail()
     {
+        if (Detail.Report.Close())
+        {
+            return; // Escape schließt zuerst „Melden“
+        }
+
         Selected = null;
         DetailForced = false;
     }
@@ -335,6 +340,7 @@ public sealed partial class MemberDetailViewModel(AppServices services, MemberSe
         }
 
         _slug = slug;
+        Report.Close();
         Name = null;
         Banner = null;
         Avatar = null;
@@ -360,6 +366,7 @@ public sealed partial class MemberDetailViewModel(AppServices services, MemberSe
         var me = Services.CurrentUser?.Id ?? (await Services.Tokens.GetAsync(cancellationToken))?.UserId;
         CanMessage = me is not null && me != s.Id;
         CanBefriend = CanMessage && Services.CurrentUser?.HasScope(FriendsService.WriteScope) == true;
+        CanReport = CanMessage && ReportFormViewModel.IsAllowed(Services);
         FriendFeedback.Close();
         Rank = s.RankLabel?.ToUpper(Services.Culture);
         RankBrush = UiResources.FromHex(s.RankColor, "RoGGoldBrush");
@@ -435,6 +442,22 @@ public sealed partial class MemberDetailViewModel(AppServices services, MemberSe
     /// <summary>Freundschaftsanfrage senden (fremdes Profil, Scope <c>friends:write</c>; Grenzen/Sperren prüft der Server).</summary>
     [ObservableProperty]
     public partial bool CanBefriend { get; set; }
+
+    /// <summary>„Melden“ wie Windows bei fremden Profilen (Scope <c>reports:write</c>).</summary>
+    [ObservableProperty]
+    public partial bool CanReport { get; set; }
+
+    /// <summary>Profil melden – Formular unter den Aktionen.</summary>
+    public ReportFormViewModel Report { get; } = new(services);
+
+    [RelayCommand]
+    private void ReportProfile()
+    {
+        if (_id is { } id)
+        {
+            Report.Open("profile", id, $"{Services.T(StringKeys.ModTypeProfile)} · {Name}");
+        }
+    }
 
     /// <summary>Rückmeldung zu „Als Freund hinzufügen“.</summary>
     public FeedbackViewModel FriendFeedback { get; } = new();

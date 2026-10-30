@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.BanAppealsView"
+             x:DataType="vm:BanAppealsViewModel">
+  <!-- Verwaltung → Einsprüche gegen Gameserver-Bans (wie AppealsPanel der Windows-App) -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="16,8,16,24" HorizontalAlignment="Left" Spacing="12">
+      <!-- Forum-Bereich und Mindest-Plugin-Versionen (gamebans.manage) -->
+      <Border Classes="card" IsVisible="{Binding HasSettings}">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="section" Text="{l:T BanAppeals_BoardTitle.Text}" />
+          <TextBlock Classes="muted" Text="{Binding BoardText}" TextWrapping="Wrap" />
+          <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="label" Text="{l:T BanAppeals_Board.Header}" />
+              <ComboBox MinWidth="240" ItemsSource="{Binding BoardOptions}" SelectedItem="{Binding SelectedBoard}"
+                        AutomationProperties.Name="{l:T BanAppeals_Board.Header}" />
+            </StackPanel>
+            <Button Classes="primary" VerticalAlignment="Bottom" Command="{Binding SaveBoardCommand}" Content="{l:T BanAppeals_SaveBoard.Content, Upper=True}" />
+            <Button Classes="secondary" VerticalAlignment="Bottom" Command="{Binding CreateBoardCommand}">
+              <TextBlock Text="{l:T BanAppeals_CreateBoard.Content}" TextWrapping="Wrap" />
+            </Button>
+          </WrapPanel>
+          <TextBlock Classes="body strong" Margin="0,8,0,0" Text="{l:T BanAppeals_PluginVersionsTitle.Text}" />
+          <TextBlock Classes="muted small" Text="{Binding PluginVersionsInfo}" TextWrapping="Wrap" />
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T BanAppeals_PluginVersions.Header}" TextWrapping="Wrap" />
+            <TextBox MinHeight="80" AcceptsReturn="True" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding PluginVersions}"
+                     AutomationProperties.Name="{l:T BanAppeals_PluginVersions.Header}" />
+          </StackPanel>
+          <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding SavePluginVersionsCommand}" Content="{l:T BanAppeals_SavePluginVersions.Content}" />
+        </StackPanel>
+      </Border>
+
+      <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+        <ComboBox MinWidth="200" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}"
+                  AutomationProperties.Name="{l:T BanAppeals_StatusFilter.AutomationProperties.Name}" />
+        <Button Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:T BanAppeals_Reload.Content}" AutomationProperties.Name="{l:T BanAppeals_Reload.Content}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+        </Button>
+      </WrapPanel>
+
+      <!-- Entscheidung im Inhalt -->
+      <Border x:Name="DecisionPanel" Classes="hint info" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding Decision.IsOpen}">
+        <StackPanel DataContext="{Binding Decision}" x:DataType="vm:AppealDecisionViewModel" Spacing="10">
+          <TextBlock Classes="body strong" Text="{Binding Title}" TextWrapping="Wrap" />
+          <TextBlock Classes="body" Text="{Binding Text}" TextWrapping="Wrap" />
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{l:T BanAppeals_Note}" />
+            <TextBox x:Name="NoteBox" MinHeight="80" AcceptsReturn="True" TextWrapping="Wrap" MaxLength="{x:Static vm:AppealDecisionViewModel.MaxNote}"
+                     Text="{Binding Note}" AutomationProperties.Name="{l:T BanAppeals_Note}" />
+          </StackPanel>
+          <CheckBox IsChecked="{Binding Reappeal}" IsVisible="{Binding IsReject}">
+            <TextBlock Text="{l:T BanAppeals_Reappeal}" TextWrapping="Wrap" />
+          </CheckBox>
+          <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8">
+            <Button Classes="primary" Command="{Binding AcceptCommand}" Content="{l:T Common_Confirm}" />
+            <Button Classes="secondary" Command="{Binding CancelCommand}" Content="{l:T Common_Cancel}" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}" MinHeight="200"
+                   EmptyText="{l:T BanAppeals_Empty.Text}" RetryCommand="{Binding RefreshCommand}" />
+      <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AdminPage_TabAppeals.Text}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:BanAppealItemViewModel">
+            <Border Classes="card" Padding="14,12" AutomationProperties.Name="{Binding AutomationName}">
+              <StackPanel Spacing="4">
+                <WrapPanel Orientation="Horizontal" ItemSpacing="8">
+                  <Ellipse Width="10" Height="10" Fill="{Binding StatusBrush}" VerticalAlignment="Center" />
+                  <TextBlock Classes="body strong" Text="{Binding Title}" TextWrapping="Wrap" />
+                  <TextBlock Classes="muted" Text="{Binding StatusText}" VerticalAlignment="Center" />
+                </WrapPanel>
+                <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                <SelectableTextBlock Classes="body" FontSize="13" Text="{Binding Note}" TextWrapping="Wrap" IsVisible="{Binding HasNote}" />
+                <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8" Margin="0,4,0,0">
+                  <Button Classes="primary" Command="{Binding AcceptCommand}" IsVisible="{Binding CanDecide}" Content="{l:T BanAppeals_Accept.Content, Upper=True}" />
+                  <Button Classes="secondary" Command="{Binding RejectCommand}" IsVisible="{Binding CanDecide}" Content="{l:T BanAppeals_Reject.Content}" />
+                  <Button Classes="link pad" VerticalAlignment="Center" Command="{Binding OpenThreadCommand}" IsVisible="{Binding HasThread}">
+                    <TextBlock Text="{l:T BanAppeals_OpenThread.Content}" />
+                  </Button>
+                  <Button Classes="link pad" VerticalAlignment="Center" Command="{Binding OpenBanCommand}" IsVisible="{Binding HasBan}">
+                    <TextBlock Text="{l:T BanAppeals_OpenBan.Content}" />
+                  </Button>
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Button Classes="secondary" HorizontalAlignment="Left" Command="{Binding LoadMoreCommand}" IsVisible="{Binding HasMore}"
+              Content="{l:T Common_LoadMore.Content}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

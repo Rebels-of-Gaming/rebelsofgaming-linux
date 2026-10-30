@@ -229,9 +229,12 @@
                 <TextBlock Text="{l:T Common_OpenInBrowser.Content}" />
               </StackPanel>
             </Button>
+            <Button Classes="secondary" Margin="0,0,8,8" Command="{Binding ReportPageCommand}" IsVisible="{Binding CanReportPage}" IsEnabled="{Binding !IsOfflineCopy}"
+                    Content="{l:T WikiPage_Report.Content}" />
           </WrapPanel>
           <c:FeedbackBar DataContext="{Binding Feedback}" />
           <c:ConfirmBar DataContext="{Binding Confirm}" />
+          <c:ReportForm DataContext="{Binding Report}" />
 
           <!-- Bearbeitungskonflikt -->
           <Border Classes="hint error" Background="{DynamicResource RoGBg3Brush}" IsVisible="{Binding HasConflict}">
@@ -348,7 +351,8 @@
                         <Button Classes="link" Margin="0,0,16,0" Command="{Binding CompareCommand}" Content="{l:T WikiPage_Compare.Content}" />
                         <Button Classes="link" Margin="0,0,16,0" Command="{Binding RestoreCommand}" IsVisible="{Binding CanRestore}" Content="{l:T Config_Rollback.Content}" />
                         <Button Classes="link" Margin="0,0,16,0" Command="{Binding ApproveCommand}" IsVisible="{Binding CanDecide}" Content="{l:T Approval_ApproveLink.Content}" />
-                        <Button Classes="link" Command="{Binding RejectCommand}" IsVisible="{Binding CanDecide}" Content="{l:T Approval_RejectLink.Content}" />
+                        <Button Classes="link" Margin="0,0,16,0" Command="{Binding RejectCommand}" IsVisible="{Binding CanDecide}" Content="{l:T Approval_RejectLink.Content}" />
+                        <Button Classes="link" Command="{Binding ReportCommand}" IsVisible="{Binding CanReport}" Content="{l:T Common_ReportLink.Content}" />
                       </WrapPanel>
                     </StackPanel>
                   </DataTemplate>

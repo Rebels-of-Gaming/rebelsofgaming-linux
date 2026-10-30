@@ -291,6 +291,11 @@ public sealed partial class ForumViewModel : LoadableViewModel, IDetailPage, IRo
     [RelayCommand]
     public void CloseDetail()
     {
+        if (Thread.Report.Close())
+        {
+            return; // Escape schließt zuerst „Melden“
+        }
+
         SelectedThread = null;
         ThreadForced = false;
         IsComposing = false;
@@ -371,6 +376,9 @@ public sealed partial class ThreadViewModel(AppServices services, ForumService f
 
     public FeedbackViewModel Feedback { get; } = new();
 
+    /// <summary>„Melden“ eines Beitrags – Formular über der Antwort.</summary>
+    public ReportFormViewModel Report { get; } = new(services);
+
     public string? ThreadId => _threadId;
 
     [ObservableProperty]
@@ -432,6 +440,7 @@ public sealed partial class ThreadViewModel(AppServices services, ForumService f
         _watch?.Dispose();
         _watch = null;
         _threadId = threadId;
+        Report.Close();
         Title = null;
         Posts.Clear();
         PollOptions.Clear();
@@ -696,6 +705,8 @@ public sealed partial class PostViewModel : ObservableObject
         _owner = owner;
         Content = post.Content;
         CanInteract = signedIn && !post.Pending && !post.Hidden;
+        CanReport = CanInteract && ReportFormViewModel.IsAllowed(services);
+        _reportSubject = $"{services.T(StringKeys.ModTypeForumPost)} · {post.AuthorName}";
         Author = post.AuthorBlocked ? services.T(StringKeys.ForumBlockedAuthor) : post.AuthorName;
         Meta = string.Join(" · ", new[]
         {
@@ -730,6 +741,11 @@ public sealed partial class PostViewModel : ObservableObject
 
     public bool CanInteract { get; }
 
+    /// <summary>„Melden“ wie Windows bei allen sichtbaren Beiträgen (eigene lehnt der Server ab), Scope <c>reports:write</c>.</summary>
+    public bool CanReport { get; }
+
+    private readonly string _reportSubject;
+
     public bool CanQuote => CanInteract && !IsCollapsed;
 
     public bool CanReact => CanInteract && ReactionChoices.Count > 0;
@@ -748,6 +764,9 @@ public sealed partial class PostViewModel : ObservableObject
 
     [RelayCommand]
     private void Quote() => _owner.QuotePost(this);
+
+    [RelayCommand]
+    private void Report() => _owner.Report.Open("forum_post", Id, _reportSubject);
 
     [RelayCommand]
     private async Task RevealAsync()

@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RoG.Linux.App.ViewModels"
+             xmlns:c="using:RoG.Linux.App.Controls"
+             xmlns:l="using:RoG.Linux.App.Localization"
+             x:Class="RoG.Linux.App.Views.WordFilterView"
+             x:DataType="vm:WordFilterViewModel">
+  <!-- Verwaltung → Wortfilter (wie WordsPanel der Windows-App): neues Muster, Liste mit Löschen -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="{StaticResource RoGReadingWidth}" Margin="16,8,16,24" HorizontalAlignment="Left" Spacing="12">
+      <WrapPanel Orientation="Horizontal" ItemSpacing="8" LineSpacing="8">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T AdminPage_WordPattern.Header}" />
+          <TextBox Width="220" MaxLength="190" Text="{Binding NewPattern}" FontFamily="{StaticResource RoGMonoFont}"
+                   AutomationProperties.Name="{l:T AdminPage_WordPattern.Header}">
+            <TextBox.KeyBindings>
+              <KeyBinding Gesture="Enter" Command="{Binding AddCommand}" />
+            </TextBox.KeyBindings>
+          </TextBox>
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Classes="label" Text="{l:T AdminPage_WordAction.Header}" />
+          <ComboBox MinWidth="170" ItemsSource="{Binding Actions}" SelectedItem="{Binding NewAction}"
+                    AutomationProperties.Name="{l:T AdminPage_WordAction.Header}" />
+        </StackPanel>
+        <StackPanel Spacing="4" IsVisible="{Binding IsReplace}">
+          <TextBlock Classes="label" Text="{l:T AdminPage_WordReplacement.Header}" />
+          <TextBox Width="180" MaxLength="190" Text="{Binding NewReplacement}" AutomationProperties.Name="{l:T AdminPage_WordReplacement.Header}" />
+        </StackPanel>
+        <Button Classes="primary" VerticalAlignment="Bottom" Command="{Binding AddCommand}" Content="{l:T AdminPage_WordAdd.Content}" />
+        <Button Classes="icon" VerticalAlignment="Bottom" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:T Linux_Refresh}" AutomationProperties.Name="{l:T Linux_Refresh}">
+          <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
+        </Button>
+      </WrapPanel>
+
+      <c:StateView IsLoading="{Binding IsLoading}" ErrorMessage="{Binding ErrorMessage}" IsEmpty="{Binding IsEmpty}" MinHeight="200"
+                   EmptyText="{l:T Linux_ModWordsEmpty}" RetryCommand="{Binding RefreshCommand}" />
+      <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding ShowContent}" AutomationProperties.Name="{l:T AdminPage_TabWords.Text}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:WordItemViewModel">
+            <Border Classes="card" Padding="14,8" AutomationProperties.Name="{Binding Pattern}">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2" VerticalAlignment="Center">
+                  <SelectableTextBlock Classes="body" FontFamily="{StaticResource RoGMonoFont}" Text="{Binding Pattern}" TextWrapping="Wrap" />
+                  <TextBlock Classes="muted small" Text="{Binding Meta}" TextWrapping="Wrap" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="secondary" Margin="12,0,0,0" VerticalAlignment="Center" Command="{Binding DeleteCommand}"
+                        Content="{l:T Backup_Delete.Content}" AutomationProperties.Name="{Binding DeleteName}" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
