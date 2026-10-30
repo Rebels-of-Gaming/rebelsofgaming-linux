@@ -5,10 +5,13 @@
              x:Class="RoG.Linux.App.App"
              Name="Rebels of Gaming"
              RequestedThemeVariant="Dark">
+  <!-- Standard RoG-Dunkel; „Hell“/„Wie das System“ setzt ThemeService beim Start bzw. aus den Einstellungen -->
 
   <!-- Seite je ViewModel (kein Reflection-ViewLocator: trim-/AOT-freundlich) -->
   <Application.DataTemplates>
     <DataTemplate DataType="vm:LoginViewModel"><views:LoginView /></DataTemplate>
+    <DataTemplate DataType="vm:HomeViewModel"><views:HomeView /></DataTemplate>
+    <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
     <DataTemplate DataType="vm:NewsViewModel"><views:NewsView /></DataTemplate>
     <DataTemplate DataType="vm:MessagesViewModel"><views:MessagesView /></DataTemplate>
     <DataTemplate DataType="vm:AccountViewModel"><views:AccountView /></DataTemplate>
@@ -24,7 +27,7 @@
   </Application.Resources>
 
   <Application.Styles>
-    <!-- Fluent im Dunkel-Design, Akzent = RoG-Rot, Flächen = bg/bg2/bg3 -->
+    <!-- Fluent im RoG-Ton (dunkel Standard, hell optional), Akzent = RoG-Rot, Flächen = bg/bg2/bg3 -->
     <FluentTheme>
       <FluentTheme.Palettes>
         <ColorPaletteResources x:Key="Dark"
@@ -50,6 +53,29 @@
                                ListLow="#2D3240"
                                ListMedium="#3A4050"
                                ErrorText="#F04A60" />
+        <ColorPaletteResources x:Key="Light"
+                               Accent="#C42840"
+                               RegionColor="#F3F1EC"
+                               AltHigh="#FFFFFF"
+                               AltLow="#FFFFFF"
+                               AltMedium="#FFFFFF"
+                               AltMediumHigh="#FFFFFF"
+                               AltMediumLow="#FFFFFF"
+                               BaseHigh="#1C1F26"
+                               BaseMediumHigh="#2D3240"
+                               BaseMedium="#5A5F6B"
+                               BaseMediumLow="#8A8F9A"
+                               BaseLow="#D2CEC5"
+                               ChromeAltLow="#1C1F26"
+                               ChromeHigh="#D2CEC5"
+                               ChromeMedium="#E8E5DE"
+                               ChromeMediumLow="#F3F1EC"
+                               ChromeLow="#FFFFFF"
+                               ChromeGray="#5A5F6B"
+                               ChromeWhite="#FFFFFF"
+                               ListLow="#E8E5DE"
+                               ListMedium="#D2CEC5"
+                               ErrorText="#A51E34" />
       </FluentTheme.Palettes>
     </FluentTheme>
     <StyleInclude Source="avares://rebelsofgaming/Themes/RoGTheme.axaml" />

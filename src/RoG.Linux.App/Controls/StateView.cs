@@ -34,7 +34,9 @@ public sealed class StateView : UserControl
     public StateView()
     {
         _loading = new StackPanel { Spacing = 12, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Width = 220 };
-        _loading.Children.Add(new ProgressBar { IsIndeterminate = true, Foreground = Brush("RoGRedBrush") });
+        var progress = new ProgressBar { IsIndeterminate = true };
+        progress.Bind(ProgressBar.ForegroundProperty, progress.GetResourceObservable("RoGRedBrush"));
+        _loading.Children.Add(progress);
         _loading.Children.Add(new TextBlock { Text = Loc.Get("Common_Loading"), Classes = { "muted" }, HorizontalAlignment = HorizontalAlignment.Center });
         AutomationProperties.SetName(_loading, Loc.Get("Common_Loading"));
 
@@ -115,7 +117,4 @@ public sealed class StateView : UserControl
         _emptyText.Text = string.IsNullOrEmpty(EmptyText) ? Loc.Get("Common_Empty") : EmptyText;
         IsVisible = _loading.IsVisible || _error.IsVisible || _empty.IsVisible;
     }
-
-    private static IBrush? Brush(string key) =>
-        Application.Current?.TryGetResource(key, null, out var value) == true ? value as IBrush : null;
 }

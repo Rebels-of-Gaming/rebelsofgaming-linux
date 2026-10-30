@@ -24,6 +24,8 @@ public sealed class RichContentView : UserControl
     {
         Content = _root;
         Focusable = false;
+        // Farben kommen beim Aufbau aus dem aktiven Design → bei Designwechsel neu aufbauen
+        ActualThemeVariantChanged += (_, _) => Render();
     }
 
     /// <summary>Öffnet Links (vom Fenster gesetzt: xdg-open); ohne Wert sind Links nur Text.</summary>
@@ -374,5 +376,5 @@ public sealed class RichContentView : UserControl
     }
 
     private static T Res<T>(string key) =>
-        Application.Current?.TryGetResource(key, null, out var value) == true && value is T typed ? typed : default!;
+        Application.Current is { } app && app.TryGetResource(key, app.ActualThemeVariant, out var value) && value is T typed ? typed : default!;
 }

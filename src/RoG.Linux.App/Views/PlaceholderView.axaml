@@ -8,7 +8,7 @@
   <Grid RowDefinitions="Auto,*" Margin="{StaticResource RoGPagePadding}">
     <TextBlock Classes="display" Text="{Binding Title}" />
     <StackPanel Grid.Row="1" Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="440">
-      <PathIcon Data="{Binding Icon}" Width="56" Height="56" Foreground="{StaticResource RoGLineBrush}" HorizontalAlignment="Center" />
+      <PathIcon Data="{Binding Icon}" Width="56" Height="56" Foreground="{DynamicResource RoGLineBrush}" HorizontalAlignment="Center" />
       <TextBlock Classes="body" Text="{Binding Text}" TextAlignment="Center" />
       <TextBlock Classes="muted" Text="{Binding WebHint}" TextAlignment="Center" />
       <Button Classes="secondary" HorizontalAlignment="Center" Command="{Binding OpenInBrowserCommand}">

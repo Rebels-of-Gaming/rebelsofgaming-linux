@@ -8,7 +8,7 @@
 
   <c:ListDetailPanel x:Name="Panel" IsDetailOpen="{Binding IsDetailOpen}">
     <!-- Liste -->
-    <Border BorderBrush="{StaticResource RoGLineBrush}" BorderThickness="0,0,1,0">
+    <Border BorderBrush="{DynamicResource RoGLineBrush}" BorderThickness="0,0,1,0">
     <DockPanel>
       <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="24,24,16,12">
         <TextBlock Classes="display" Text="{l:T NewsPage_Title.Text}" />
@@ -28,7 +28,7 @@
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="vm:NewsItemViewModel">
               <Grid ColumnDefinitions="96,*" AutomationProperties.Name="{Binding Title}">
-                <Border Width="96" Height="64" VerticalAlignment="Top" Background="{StaticResource RoGBg3Brush}"
+                <Border Width="96" Height="64" VerticalAlignment="Top" Background="{DynamicResource RoGBg3Brush}"
                         CornerRadius="{StaticResource RoGControlRadius}" ClipToBounds="True">
                   <Panel>
                     <!-- ohne Titelbild: RoG-Abzeichen statt leerer Fläche -->
@@ -39,7 +39,7 @@
                 </Border>
                 <StackPanel Grid.Column="1" Spacing="3" Margin="12,0,0,0">
                   <StackPanel Orientation="Horizontal" Spacing="6">
-                    <PathIcon Data="{StaticResource IconPin}" Width="12" Height="12" Foreground="{StaticResource RoGGoldBrush}" IsVisible="{Binding Pinned}" />
+                    <PathIcon Data="{StaticResource IconPin}" Width="12" Height="12" Foreground="{DynamicResource RoGGoldBrush}" IsVisible="{Binding Pinned}" />
                     <TextBlock Classes="kicker" Text="{Binding Category}" IsVisible="{Binding HasCategory}" />
                   </StackPanel>
                   <TextBlock Classes="body strong" Text="{Binding Title}" MaxLines="2" TextTrimming="CharacterEllipsis" />
