@@ -357,11 +357,16 @@ public sealed class AppServices : IDisposable
     public async Task UpdateSettingsAsync(Func<AppSettings, AppSettings> change)
     {
         ArgumentNullException.ThrowIfNull(change);
-        await _settingsGate.WaitAsync();
+
+        // ConfigureAwait(false): Schließen des Fensters wartet synchron (UpdateSettingsNow) – läuft dabei noch ein vom
+        // UI-Thread gestartetes Speichern, darf es nicht auf den blockierten UI-Thread zurückwollen (Verklemmung).
+        await _settingsGate.WaitAsync().ConfigureAwait(false);
         try
         {
-            Settings = change(Settings);
-            await SettingsStore.SaveAsync(Settings);
+            var settings = Settings = change(Settings);
+
+            // auf dem Thread-Pool: der Speicher des Kerns wartet intern ohne ConfigureAwait(false)
+            await Task.Run(() => SettingsStore.SaveAsync(settings)).ConfigureAwait(false);
         }
         finally
         {
@@ -379,18 +384,27 @@ public sealed class AppServices : IDisposable
     public async Task UpdateLinuxSettingsAsync(Func<LinuxSettings, LinuxSettings> change)
     {
         ArgumentNullException.ThrowIfNull(change);
-        await _settingsGate.WaitAsync();
+        var onUiThread = Avalonia.Threading.Dispatcher.UIThread.CheckAccess();
+        await _settingsGate.WaitAsync().ConfigureAwait(false); // siehe UpdateSettingsAsync
         try
         {
-            LinuxSettings = change(LinuxSettings);
-            await _linuxStore.SaveAsync(LinuxSettings);
+            var settings = LinuxSettings = change(LinuxSettings);
+            await Task.Run(() => _linuxStore.SaveAsync(settings)).ConfigureAwait(false);
         }
         finally
         {
             _settingsGate.Release();
         }
 
-        LinuxSettingsChanged?.Invoke(this, EventArgs.Empty);
+        // Design wechseln u. ä. gehört auf den UI-Thread
+        if (onUiThread && !Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+        {
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => LinuxSettingsChanged?.Invoke(this, EventArgs.Empty));
+        }
+        else
+        {
+            LinuxSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     /// <summary>Texte für die Seite, die der Browser nach dem Login-Rücksprung zeigt.</summary>
