@@ -143,7 +143,7 @@ Fehlen die S3-Secrets, überspringt die Pipeline Schritt 5 mit Hinweis und legt 
    Rebels-of-Gaming/rebelsofgaming-linux`). Ein Probelauf (`workflow_dispatch`) prüft den Zugang dann lesend.
    cdn.rogclan.de muss `apps/linux/` wie die übrigen Dateien aus `rog-public` ausliefern.
 2. **Signierschlüssel** – erledigt (31.10.2026): Secret `ROG_FLATPAK_GPG_PRIVATE_KEY`, Variable
-   `ROG_FLATPAK_GPG_KEY_ID` = `34F611FC7126A42F19D263719D3BE41F6AAB9998` (RSA 4096, nur Signieren, ohne Ablauf,
+   `ROG_FLATPAK_GPG_KEY_ID` = `027092E94A7C7F091DAE3E5C285E5FD5A7C11AEC` (RSA 4096, nur Signieren, ohne Ablauf,
    „Rebels of Gaming Flatpak Repository &lt;info@wahke.lu&gt;“). Der private Schlüssel existiert **nur** als GitHub-Secret
    (lokal sicher gelöscht, keine Sicherung). Geht er verloren: neuen Schlüssel erzeugen, `rebelsofgaming.gpg`/`.asc` und
    `GPGKey=` ersetzen; bestehende Installationen müssen dann einmal die neue `.flatpakrepo`/`.flatpakref` öffnen bzw.
