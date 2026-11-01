@@ -1,16 +1,24 @@
 # Changelog – Rebels of Gaming für Linux
 
 Versionen nach [SemVer](https://semver.org/lang/de/), Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
-Jedes veröffentlichte Paket (Flathub, später ggf. Steam) bekommt einen Git-Tag `vX.Y.Z`. Änderungen bis zur nächsten
+Jedes veröffentlichte Paket (eigenes Flatpak-Repo, `.deb`, später ggf. Steam) bekommt einen Git-Tag `vX.Y.Z`. Änderungen bis zur nächsten
 Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
 Stufe 10 – Feinschliff und Steam Deck, Stufe 9 – Verwaltung + Moderation, Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
 
+### Verteilung (F15)
+
+- **Eigenes Flatpak-Repo** `https://cdn.rogclan.de/apps/linux/flatpak/` statt Flathub: Installation mit einem Klick über `com.rebelsofgaming.RebelsOfGaming.flatpakref` (GNOME Software, KDE Discover, Steam Deck), automatische Updates, GPG-signiert, x86_64 und aarch64
+- Flatpak wird **aus dem Quelltext** gebaut (freedesktop 26.08 + .NET-10-Erweiterung, NuGet ohne Netz aus `nuget-sources.json`)
+- **`.deb`** für Debian, Ubuntu, Mint und Pop!_OS (amd64, arm64): Programm unter `/opt/rebelsofgaming`, Befehl `rebelsofgaming`, Starter mit `rog://`-Links, Handbuchseite
+- Release-Pipeline: bei Tag auf `main` Bau, Tests, Installationsproben (`.deb` und Flatpak aus dem signierten Repo), Flatpak-Bundles zur Offline-Installation, Upload nach cdn.rogclan.de (übersprungen ohne S3-Zugang) und GitHub-Release; Probelauf per Hand
+- CI prüft die Paket-Dateien: NuGet-Quellen, Schlüssel in `.flatpakref`/`.flatpakrepo`, Desktop-Datei, AppStream, shellcheck, Handbuchseite, `.deb` mit lintian
+
 ### Lizenz
 
-- GPL-3.0-or-later (`LICENSE`); Name „Rebels of Gaming“, Logo und Grafiken sind ausgenommen (`TRADEMARKS.md`). Die AppStream-Metadaten nennen die Lizenz für Flathub
+- GPL-3.0-or-later (`LICENSE`); Name „Rebels of Gaming“, Logo und Grafiken sind ausgenommen (`TRADEMARKS.md`). Die AppStream-Metadaten nennen die Lizenz
 
 ### Hinzugefügt (Stufe 10)
 
@@ -18,7 +26,7 @@ Stufe 10 – Feinschliff und Steam Deck, Stufe 9 – Verwaltung + Moderation, St
 - **Spielmodus** auf dem Steam Deck: Vollbild, größere Knöpfe und Schrift, Hinweis auf die Bildschirmtastatur
 - **Barrierefreiheit**: besser lesbare rote Schrift (Kontrast AA), deutlich sichtbarer Fokusrahmen, Escape schließt jedes Fenster, „Bewegung reduzieren“ des Desktops wird beachtet
 - **Schneller Start** (rund 0,8 s bis zum Fenster)
-- Paket: AppStream-Beschreibung DE/EN/FR, Starter mit Schnellzugriffen, Flatpak-Manifest für Flathub vorbereitet (nicht eingereicht)
+- Paket: AppStream-Beschreibung DE/EN/FR, Starter mit Schnellzugriffen
 
 ### Hinzugefügt (Stufe 9)
 

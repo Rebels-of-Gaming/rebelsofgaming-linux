@@ -5,10 +5,16 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
+**Verteilung (31.10.2026, F15) – im Repo erledigt:** eigenes GPG-signiertes Flatpak-Repo
+`https://cdn.rogclan.de/apps/linux/flatpak/` (Bau aus dem Quelltext ohne Netz, x86_64 + aarch64 nativ auf GitHub-Runnern,
+Ein-Klick-`.flatpakref`, Offline-Bundles `.flatpak`), `.deb` (amd64/arm64) und Tarballs; Release-Pipeline `release.yml` (Tag `v*` auf `main`,
+Probelauf per `workflow_dispatch`), lokal geprüft (Flatpak aus signiertem Repo installiert und gestartet, `.deb` auf
+Debian 12/13, Ubuntu 22.04/24.04; erneut 01.11.2026: lintian 2.117/2.122 ohne Befund, Start unter Xvfb). **Offen nur für den Owner:** S3-Zugang `ROG_PUBLIC_APPS_KEY_ID`/`_SECRET`, dann
+Release (main + Tag). Anleitung `packaging/README.md`.
 **Stufe 10 (Feinschliff, Steam Deck, Flathub-Vorbereitung, 30.10.2026) – im Repo erledigt** (Controller über SDL,
 Spielmodus, Barrierefreiheits- und Kontrastprüfungen als Tests, „Bewegung reduzieren“ vom Desktop, Start in ~0,8 s mit
-ReadyToRun, AppStream/Desktop/Manifest Flathub-fertig und geprüft, lokaler Flatpak-Probebau, Release-Workflow-Entwurf).
-**Offen nur für den Owner:** Lizenz, Uploads/Secrets, Einreichung, Tests auf echter Hardware (siehe „Offene Fragen“).
+ReadyToRun, AppStream/Desktop/Manifest geprüft, lokaler Flatpak-Probebau, Release-Workflow).
+**Offen nur für den Owner:** Uploads/Secrets, Tests auf echter Hardware (siehe „Offene Fragen“).
 **Stufe 9 (Verwaltung + Moderation, 30.10.2026) – erledigt** (Seite „Verwaltung“ mit allen Reitern der Windows-App:
 Übersicht, Mitglieder, Bewerbungen, Meldungen, Sperren, Einsprüche, Minecraft, Coins, Netzwerk, Mod-Log, Wortfilter,
 Galerie, Uploads, Website + Editor-Fenster; Squad-, News- und Match-Editor; „Melden“ an Inhalten; Minecraft-Weltkarte;
@@ -100,7 +106,8 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 | **Spielmodus** (Gamescope bzw. `--gamemode`/`ROG_GAMEMODE=1`: Vollbild ohne Dekoration, Ziele ≥ 44 px, Schrift ≥ 14 px über Theme-Klasse `Window.gamemode`, einmaliger Hinweis auf Steam+X) | steht |
 | **Barrierefreiheit** (Tests: Namen an Symbol-Knöpfen/Listen/Feldern, keine festen Farben in Views, Tab-Durchgang mit sichtbarem Fokusrahmen per Pixelprüfung, Escape in allen Fenstern; Kontrast WCAG AA beider Paletten, eigenes Text-Rot `RoGRedTextBrush`; „Bewegung reduzieren“ aus dem Settings-Portal: freedesktop/GNOME/KDE) | steht |
 | **Leistung** (Start bis Fenster ~0,83 s statt ~1,48 s mit ReadyToRun; Fenster wartet nicht mehr auf den Tray; `ROG_STARTUP_TRACE=1`) | steht; Paket 62,7 MB (vorher 49,2 MB) |
-| **Flathub-Vorbereitung** (AppStream EN/DE/FR mit OARS, Branding, Screenshots-Platzhaltern, Releases; `.desktop` mit Übersetzungen + Schnellzugriffen; Manifest freedesktop 26.08 mit begründeten Rechten; `appstreamcli validate --pedantic`, `desktop-file-validate`, `flatpak-builder-lint` geprüft; lokaler Probebau startet; `release.yml` nur bei Tag `v*` auf `main`, Upload/PR auskommentiert; Anleitung `packaging/README.md`) | steht; nichts veröffentlicht |
+| **Eigenes Flatpak-Repo + .deb** (F15: Manifest aus dem Quelltext mit `nuget-sources.json`, signiertes OSTree-Repo, `.flatpakref`/`.flatpakrepo` mit eingebettetem Schlüssel, `.deb` mit lintian-Overrides, `release.yml` mit Upload nach `rog-public/apps/linux/`, `check-packaging.py` in der CI) | steht; nichts veröffentlicht (S3-Zugang fehlt) |
+| **Flathub-Vorbereitung** (überholt durch F15; AppStream EN/DE/FR mit OARS, Branding, Screenshots-Platzhaltern, Releases; `.desktop` mit Übersetzungen + Schnellzugriffen; Manifest freedesktop 26.08 mit begründeten Rechten; `appstreamcli validate --pedantic`, `desktop-file-validate`, `flatpak-builder-lint` geprüft; lokaler Probebau startet; `release.yml` nur bei Tag `v*` auf `main`, Upload/PR auskommentiert; Anleitung `packaging/README.md`) | steht; nichts veröffentlicht |
 | Deep Links Stufe 2 | `rog://squads/…`, `rog://u/…`, `rog://events/…`, `rog://servers/…`, `rog://info/…`, `rog://messages/…`, `rog://search?q=…`, `rog://open?url=…` öffnen den Eintrag |
 | Tastatur + Fokus | Tab/Pfeile, Strg+1…9, Strg+, (Einstellungen), Strg+K (Suche), Strg+F (Mitgliedersuche), F5, Escape (Menü, Detail jeder Liste-Detail-Seite); sichtbarer Fokusrahmen |
 | Tests | 685 xUnit-Tests (Stufe 10, auch unter `LANG=C` grün); 609 xUnit-Tests (Stufe 9); 474 xUnit-Tests (Stufe 8); 457 xUnit-Tests (Stufe 7); 339 xUnit-Tests (Stufe 6, inkl. Screenshots von Votes, Bewerbung, Bestätigen, Matches, Stats, Bestenlisten, Freunden, Karte, Konto, Benachrichtigungen); 237 xUnit-Tests inkl. 63 Headless-Screenshots (Stufe 5); 218 xUnit-Tests inkl. 52 Headless-Screenshots (Stufe 4); 196 xUnit-Tests inkl. 47 Headless-Screenshots und 16 D-Bus-Tests (Schlüsselbund, Benachrichtigungen + Portal, Single-Instance, Tray, Background-Portal); bis Stufe 2: 170 xUnit-Tests inkl. 41 Headless-Screenshots (`artifacts/screenshots/`) und 8 D-Bus-Tests gegen einen privaten Bus; X11-Lauf unter Xvfb gegen die Produktion (Gastmodus) mit Bildschirmfotos (`artifacts/screenshots/x11-production/`) |
@@ -109,7 +116,17 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
 
 ## Owner-Entscheidungen (30.10.2026)
 
-- **F1 – Flathub mit Binärpaketen, Quelltext bleibt privat.** Die CI baut je Architektur ein self-contained Paket
+- **F15 – Eigenes Flatpak-Repo statt Flathub (Owner 31.10.2026).** Flathub nimmt keine KI-erstellten Manifeste oder
+  PRs an – deshalb kein Flathub. Stattdessen: (1) eigenes Flatpak-Repo, statisch unter
+  `https://cdn.rogclan.de/apps/linux/flatpak/` (Bucket `rog-public`, Präfix `apps/linux/`), Installation per
+  `.flatpakref` mit einem Klick (GNOME Software, KDE Discover, Steam Deck), `RuntimeRepo` = Flathub für
+  freedesktop 26.08 + dotnet10, Updates über das Repo; gebaut **aus dem Quelltext** (`nuget-sources.json`), x86_64 und
+  aarch64 (nativer `ubuntu-24.04-arm`-Runner). (2) Eigener GPG-Schlüssel nur für dieses Repo
+  (`481C989928561CE7111E317DF101268B68FADA38`, privat nur als GitHub-Secret `ROG_FLATPAK_GPG_PRIVATE_KEY`, öffentlich
+  `packaging/flatpak/rebelsofgaming.gpg`). (3) `.deb` für Debian/Ubuntu/Mint/Pop!_OS unter `/opt/rebelsofgaming/`.
+  (4) Release bei Tag `v*` auf `main`, Upload nach S3 nur mit den Secrets `ROG_PUBLIC_APPS_KEY_ID`/`_SECRET`, sonst
+  übersprungen. F1 und F11 sind damit erledigt. Details: `packaging/README.md`.
+- ~~F1~~ *(überholt durch F10 und F15)* **– Flathub mit Binärpaketen, Quelltext bleibt privat.** Die CI baut je Architektur ein self-contained Paket
   (`packaging/scripts/make-tarball.sh` → `rebelsofgaming-<version>-linux-<x86_64|aarch64>.tar.gz` mit
   `rebelsofgaming/` und `share/`) und legt es **öffentlich** unter `https://cdn.rogclan.de/apps/linux/<version>/` ab
   (Bucket `rog-public` der Website, ausgeliefert über cdn.rogclan.de). Das Flathub-Manifest bindet die Pakete als
@@ -235,9 +252,9 @@ getestet, committet – weiter erst nach Wahkes „weiter“.
    Spezialseiten des Wikis öffnen im Browser.
 9. **Verwaltung + Moderation** *(erledigt)* – alle Reiter der Windows-Verwaltungsseite, Editor-Fenster (Website-Bereiche,
    Squad, News, Match), Melden an Inhalten, Minecraft-Weltkarte, Minecraft-Beitrittsdaten/Ressourcenpaket (aus Stufe 3).
-10. **Feinschliff, Steam Deck, Flathub** *(im Repo erledigt)* – Controller, Spielmodus, Barrierefreiheit, Kontrast,
-    Bewegung, Startzeit, Paket- und Store-Metadaten, Release-Workflow-Entwurf. *Wartet auf den Owner:* Lizenz,
-    Upload-Zugang, Domain-Verifikation, Einreichung, Hardware-Tests (Steam Deck, Wayland, Controller).
+10. **Feinschliff, Steam Deck, Verteilung** *(im Repo erledigt)* – Controller, Spielmodus, Barrierefreiheit, Kontrast,
+    Bewegung, Startzeit, Paket- und Store-Metadaten; eigenes Flatpak-Repo + `.deb` + Release-Pipeline (F15).
+    *Wartet auf den Owner:* S3-Zugang, Release, Hardware-Tests (Steam Deck, Wayland, Controller).
 
 Später, außerhalb der Stufen: **Clan-„Tools“** in einem eingebetteten, abgeschotteten WebKitGTK-Fenster (einzige
 Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
@@ -251,7 +268,7 @@ Web-Ansicht der App, nur für die Tools-Seiten der Plattform).
 - Spielmodus (Gamescope): Vollbild-Start, keine Fensterdekoration nötig; Erkennung über `SteamDeck=1`/`gamescope`
 - Erkennung Steam Deck schon im Spike (`LinuxDeviceName.IsSteamDeck`) – für Gerätenamen genutzt
 
-### Stufe 10 – Flathub
+### Stufe 10 – Flathub (überholt durch F15: eigenes Repo, Bau aus dem Quelltext mit `nuget-sources.json`)
 
 - App-ID **`com.rebelsofgaming.RebelsOfGaming`** (Owner-Entscheidung F2). Flathub verlangt den Nachweis, dass die
   Domain uns gehört (`https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt`).
@@ -304,9 +321,11 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
 
 - **Neu in Stufe 10:** keine neuen API-Aufrufe. Lokal neu in `linux.json`: „Controller an/aus“. Controller-Eingaben
   werden nur verarbeitet, solange das Fenster den Fokus hat, nie gespeichert. „Bewegung reduzieren“ wird vom lokalen
-  Settings-Portal gelesen. Zeitmessung nur mit `ROG_STARTUP_TRACE=1` auf stderr. **Vertrieb über Flathub** (später):
-  Flathub spiegelt Screenshots und Metadaten auf eigene Server; die Datenschutzerklärung der Website sollte einen
-  Abschnitt zu Flathub als Vertriebsweg bekommen (Owner/Website).
+  Settings-Portal gelesen. Zeitmessung nur mit `ROG_STARTUP_TRACE=1` auf stderr. **Vertrieb (F15):** App, Updates,
+  Screenshots und Symbol kommen von cdn.rogclan.de (eigener Server, keine Protokollierung durch die App); die
+  freedesktop-Laufzeit und die .NET-Erweiterung lädt Flatpak bei der Installation von **Flathub** (`RuntimeRepo`) – das
+  ist eine Übermittlung an Dritte (IP-Adresse an Flathub/dessen CDN) und gehört in die Datenschutzerklärung der Website
+  (Abschnitt Linux-App). Das `.deb` lädt nichts nach. Die App selbst bleibt unverändert (keine neuen Aufrufe).
 
 - **Neu in Stufe 9:** nur Aufrufe an die eigene API (Verwaltung: `admin/dashboard`, `system/status`, `audit-log`,
   `moderation/*`, `admin/members` – E-Mail nur mit globalem Recht –, `roles`, Rollen vergeben/entziehen,
@@ -568,8 +587,8 @@ docs/                       LINUX-BAUPLAN.md
 ## Offene Fragen (an Wahke)
 
 - **Nur vom Owner zu erledigen/testen (blockiert nichts):** F5 Wayland-Test + Tray unter GNOME/KDE · `libfontconfig1`
-  und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · Einreichung
-  bei Flathub (nur auf Auftrag).
+  und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · S3-Zugang für
+  `rog-public/apps/linux/` als Secrets, danach Release (F15).
 
 - **F14 – Tools – entschieden (Owner 30.10.2026: „entscheide du“):** vorerst im System-Browser öffnen (wie heute), keine
   GNOME-Runtime/WebKitGTK. Neu bewerten, wenn einzelne Tools nachweislich in der App gebraucht werden.
@@ -578,7 +597,8 @@ docs/                       LINUX-BAUPLAN.md
   Folgen: Flathub baut nach der Veröffentlichung aus dem Quelltext (F1 nur bis dahin), F11 entfällt dann; vorher muss
   `RoG.Core` im Windows-Repo öffentlich und GPL-verträglich lizenziert werden und die Historie beider Repos auf
   Geheimnisse geprüft sein (Aufgabe vor dem Umschalten, nicht im Linux-Repo).
-- **F11 – Upload-Zugang – entfällt** mit der Veröffentlichung des Quelltexts (F10: Flathub baut aus dem Quelltext); nur
+- **F11 – Upload-Zugang – wieder nötig (F15):** Secrets `ROG_PUBLIC_APPS_KEY_ID`/`ROG_PUBLIC_APPS_SECRET` für
+  `rog-public/apps/linux/` (Anleitung SeaweedFS in `packaging/README.md`). Früherer Stand: **entfällt** mit der Veröffentlichung des Quelltexts (F10: Flathub baut aus dem Quelltext); nur
   falls vorher eine Binär-Version raus soll, Secrets `ROG_PUBLIC_APPS_KEY_ID`/`ROG_PUBLIC_APPS_SECRET` kurz davor anlegen.
 - **F12 – Rotton für Schrift – entschieden (30.10.2026):** #FF6A7D für rote Schrift im Dunkel-Design bleibt (AA-Kontrast),
   Markenrot #E0324A für Flächen und Kanten.
