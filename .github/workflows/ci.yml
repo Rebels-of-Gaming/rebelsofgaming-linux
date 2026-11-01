@@ -34,3 +34,53 @@ jobs:
 
       - run: dotnet build RoG.Linux.sln -c Release
       - run: dotnet test RoG.Linux.sln -c Release --no-build --blame-hang-timeout 5m --blame-hang-dump-type none
+
+  packaging:
+    name: Paket-Dateien + .deb
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Werkzeuge
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq desktop-file-utils appstream lintian
+
+      - name: NuGet-Quellen, Schlüssel und Repo-Dateien
+        run: python3 -I packaging/scripts/check-packaging.py
+
+      - name: Shell-Skripte (shellcheck)
+        run: |
+          if command -v shellcheck >/dev/null; then
+            shellcheck packaging/scripts/*.sh packaging/flatpak/rebelsofgaming.sh
+          else
+            echo "::warning::shellcheck nicht installiert – übersprungen"
+          fi
+
+      - name: Handbuchseite
+        run: |
+          out="$(LC_ALL=C.UTF-8 MANROFFSEQ='' MANWIDTH=80 man --warnings -E UTF-8 -l -Tutf8 -Z packaging/linux/rebelsofgaming.1 2>&1 >/dev/null)"
+          [ -z "$out" ] || { echo "$out"; exit 1; }
+
+      - name: Desktop-Datei und AppStream
+        run: |
+          desktop-file-validate packaging/linux/com.rebelsofgaming.RebelsOfGaming.desktop
+          # Ohne Netz (Screenshots liegen erst nach dem ersten Release auf cdn.rogclan.de)
+          appstreamcli validate --no-net --explain packaging/linux/com.rebelsofgaming.RebelsOfGaming.metainfo.xml
+
+      - name: Tarball + .deb (x86_64)
+        run: |
+          packaging/scripts/make-tarball.sh x86_64
+          packaging/scripts/make-deb.sh x86_64
+          lintian --tag-display-limit 0 --fail-on error,warning artifacts/dist/rebelsofgaming_*_amd64.deb
