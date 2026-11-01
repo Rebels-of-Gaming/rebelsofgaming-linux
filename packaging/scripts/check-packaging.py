@@ -52,7 +52,7 @@ for project, props in projects.items():
                           "packaging/scripts/update-nuget-sources.sh ausführen")
 for prefix in ("microsoft.netcore.app.runtime.linux-x64.", "microsoft.netcore.app.runtime.linux-arm64.",
                "microsoft.netcore.app.crossgen2.linux-x64.", "microsoft.netcore.app.crossgen2.linux-arm64.",
-               "microsoft.netcore.app.host.linux-arm64."):
+               "microsoft.netcore.app.host.linux-x64.", "microsoft.netcore.app.host.linux-arm64."):
     if not any(name.startswith(prefix) for name in available):
         errors.append(f"nuget-sources.json: {prefix}* fehlt")
 for s in sources:

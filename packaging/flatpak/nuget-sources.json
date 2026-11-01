@@ -190,6 +190,13 @@
     },
     {
         "type": "file",
+        "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.host.linux-x64/10.0.12/microsoft.netcore.app.host.linux-x64.10.0.12.nupkg",
+        "sha512": "b688f494f44dee80c97b4d8ec93603064456ea6516467f0b79441603ba394639dbb7eede25407c0139702ae6d5a83627b8e23202440ca03c260c2de0741d7266",
+        "dest": "nuget-sources",
+        "dest-filename": "microsoft.netcore.app.host.linux-x64.10.0.12.nupkg"
+    },
+    {
+        "type": "file",
         "url": "https://api.nuget.org/v3-flatcontainer/microsoft.netcore.app.runtime.linux-arm64/10.0.12/microsoft.netcore.app.runtime.linux-arm64.10.0.12.nupkg",
         "sha512": "c22ee365f184553b9a8e20f9471fd12f9b064467079f977a514ea8fc7e8885ec431e556968f1ade51e8989c21c10489eb4a01811ab6e30ccec4a7148dba0c86e",
         "dest": "nuget-sources",

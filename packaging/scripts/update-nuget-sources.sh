@@ -8,8 +8,9 @@
 # Wie flatpak-dotnet-generator (flatpak-builder-tools, MIT) und im selben Format: Restore IM Flatpak-SDK
 # (org.freedesktop.Sdk//26.08 + org.freedesktop.Sdk.Extension.dotnet10), damit Laufzeit-, AppHost- und
 # Crossgen2-Pakete genau zur .NET-Version der Erweiterung passen – nicht zur lokal installierten. Zusätzlich zum
-# Generator: Crossgen2 für BEIDE Host-Architekturen (ReadyToRun auf dem aarch64-Runner braucht
-# Microsoft.NETCore.App.Crossgen2.linux-arm64, das ein Restore auf x86_64 nie lädt).
+# Generator: Crossgen2 und AppHost für BEIDE Host-Architekturen (ReadyToRun auf dem aarch64-Runner braucht
+# Microsoft.NETCore.App.Crossgen2.linux-arm64, und wegen RuntimeIdentifiers=linux-x64;linux-arm64 will der Restore
+# dort Microsoft.NETCore.App.Host.linux-x64 – beides lädt ein Restore auf x86_64 nie, das SDK bringt den eigenen mit).
 # Der Restore läuft auf einer Kopie der versionierten Dateien – bin/obj im Arbeitsverzeichnis bleiben unberührt.
 # Braucht: flatpak, Netz, die beiden SDK-Refs (flatpak install flathub org.freedesktop.Sdk//26.08
 # org.freedesktop.Sdk.Extension.dotnet10//26.08).
@@ -46,13 +47,15 @@ for rid in linux-x64 linux-arm64; do
     --packages "$work/packages"
 done
 
-# Crossgen2 je Host-Architektur (siehe oben)
+# Crossgen2 und AppHost je Host-Architektur (siehe oben)
 cat > "$work/extra/extra.csproj" <<EOF
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
   <ItemGroup>
     <PackageDownload Include="Microsoft.NETCore.App.Crossgen2.linux-x64" Version="[$runtime_version]" />
     <PackageDownload Include="Microsoft.NETCore.App.Crossgen2.linux-arm64" Version="[$runtime_version]" />
+    <PackageDownload Include="Microsoft.NETCore.App.Host.linux-x64" Version="[$runtime_version]" />
+    <PackageDownload Include="Microsoft.NETCore.App.Host.linux-arm64" Version="[$runtime_version]" />
   </ItemGroup>
 </Project>
 EOF
