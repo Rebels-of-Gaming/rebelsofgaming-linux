@@ -1,0 +1,55 @@
+.TH REBELSOFGAMING 1 "2026-10-31" "Rebels of Gaming" "User Commands"
+.SH NAME
+rebelsofgaming \- native app of the Rebels of Gaming clan platform
+.SH SYNOPSIS
+.B rebelsofgaming
+[\fIOPTION\fR]... [\fIrog://LINK\fR]
+.SH DESCRIPTION
+.B rebelsofgaming
+is the native Linux client of the Rebels of Gaming clan platform: news, forum, wiki, direct messages,
+squads, members, calendar, matches, game servers, gallery, downloads, uploads and \- with the right
+permissions \- server control, moderation and administration.
+.PP
+Sign-in happens in the system browser. The device token is stored in the Secret Service keyring
+(GNOME Keyring, KWallet, KeePassXC); without a keyring it is kept in memory only.
+.PP
+If the app is already running, a second start hands its arguments (for example a
+.B rog://
+link) to the running instance and exits.
+.SH OPTIONS
+.TP
+.B \-\-x11
+Use X11 (or XWayland) even in a Wayland session.
+.TP
+.B \-\-wayland
+Use native Wayland.
+.TP
+.B \-\-gamemode
+Start in game mode (full screen, larger controls), as in Steam Deck gaming mode.
+.TP
+.BI \-\-environment= NAME
+Select the platform environment
+.RB ( production ,
+.BR staging ,
+.BR local );
+for development only.
+.SH ENVIRONMENT
+.TP
+.B ROG_DISPLAY
+.B x11
+or
+.BR wayland ,
+same as the options above.
+.TP
+.B ROG_GAMEMODE
+.B 1
+starts in game mode.
+.SH FILES
+.TP
+.I $XDG_CONFIG_HOME/rebelsofgaming/
+Settings (settings.json, linux.json).
+.TP
+.I $XDG_DATA_HOME/rebelsofgaming/
+Encrypted offline copies of wiki pages.
+.SH SEE ALSO
+https://rebelsofgaming.com/ \- https://github.com/Rebels-of-Gaming/rebelsofgaming-linux

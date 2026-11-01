@@ -1,0 +1,13 @@
+# Intentional deviations of the vendor .deb (packaging/scripts/make-deb.sh, reasons in packaging/README.md).
+# This is not a Debian archive package but the vendor package: a self-contained .NET app under /opt.
+
+# Owner decision: the app lives in /opt/rebelsofgaming (own .NET runtime, no clashes with system packages)
+rebelsofgaming: dir-or-file-in-opt [opt/rebelsofgaming/*]
+# SkiaSharp (NuGet) links FreeType, libjpeg and libpng statically, .NET ships its own zlib-ng
+rebelsofgaming: embedded-library freetype [opt/rebelsofgaming/libSkiaSharp.so]
+rebelsofgaming: embedded-library libjpeg [opt/rebelsofgaming/libSkiaSharp.so]
+rebelsofgaming: embedded-library libpng [opt/rebelsofgaming/libSkiaSharp.so]
+rebelsofgaming: embedded-library zlib [opt/rebelsofgaming/libSystem.IO.Compression.Native.so]
+# Prebuilt native libraries from NuGet are shipped unchanged (as in the Flatpak: strip: false)
+rebelsofgaming: unstripped-binary-or-object [opt/rebelsofgaming/libHarfBuzzSharp.so]
+rebelsofgaming: unstripped-binary-or-object [opt/rebelsofgaming/libSkiaSharp.so]

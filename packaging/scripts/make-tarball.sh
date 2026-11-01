@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Baut das Binärpaket für Flathub (Owner-Entscheidung F1, 30.10.2026): self-contained Publish + Desktop-Dateien als
+# Baut das Binärpaket (Tarball, Grundlage des .deb – make-deb.sh): self-contained Publish + Desktop-Dateien als
 #   artifacts/dist/rebelsofgaming-<version>-linux-<arch>.tar.gz  (+ .sha256)
-# Layout im Archiv: rebelsofgaming-<version>-linux-<arch>/{rebelsofgaming,share}/ – flatpak-builder streift den
-# obersten Ordner ab, das Manifest kopiert dist/rebelsofgaming nach /app/lib und dist/share nach /app/share.
-# Die Release-Pipeline (.github/workflows/release.yml) baut beide Architekturen, erzeugt mit release-manifest.sh das
-# Manifest mit URL + sha256 und lädt später (nach Owner-Freigabe) nach https://cdn.rogclan.de/apps/linux/<version>/
-# (Bucket rog-public) hoch. Der Upload ist bewusst NICHT Teil dieses Skripts.
+# Layout im Archiv: rebelsofgaming-<version>-linux-<arch>/{rebelsofgaming,share}/ – Programm und Desktop-Dateien
+# (das Flatpak baut dagegen aus dem Quelltext, packaging/flatpak/). Die Release-Pipeline
+# (.github/workflows/release.yml) baut beide Architekturen und lädt sie nach https://cdn.rogclan.de/apps/linux/<version>/
+# (Bucket rog-public) hoch. Der Upload ist NICHT Teil dieses Skripts.
 #
 #   packaging/scripts/make-tarball.sh [x86_64|aarch64]
 set -euo pipefail
@@ -30,9 +29,10 @@ mkdir -p "$work"
 # Laufzeit ist größer als der Gewinn an Paketgröße. ROG_READY_TO_RUN=false baut ohne Vorkompilierung.
 ready_to_run="${ROG_READY_TO_RUN:-true}"
 dotnet publish "$root/src/RoG.Linux.App/RoG.Linux.App.csproj" -c Release -r "$rid" --self-contained true \
-  -p:PublishTrimmed=false -p:PublishReadyToRun="$ready_to_run" -p:DebugType=none -o "$work/rebelsofgaming"
+  -p:PublishTrimmed=false -p:PublishReadyToRun="$ready_to_run" -p:DebugType=none \
+  -p:PublishDocumentationFiles=false -o "$work/rebelsofgaming"
 
-# Layout wie unter /app im Flatpak (das Manifest kopiert es nur noch)
+# Layout wie unter /app im Flatpak
 install -Dm644 "$root/packaging/linux/$app_id.desktop" "$work/share/applications/$app_id.desktop"
 install -Dm644 "$root/packaging/linux/$app_id.metainfo.xml" "$work/share/metainfo/$app_id.metainfo.xml"
 install -Dm644 "$root/external/rog-windows/src/RoG.App/Assets/rog-badge-512.png" "$work/share/icons/hicolor/512x512/apps/$app_id.png"

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  AppStream-Metadaten für Flathub, GNOME Software und KDE Discover (Stufe 10). NICHT eingereicht.
-  App-ID endgültig (Owner-Entscheidung F2). Lizenz GPL-3.0-or-later (Owner 30.10.2026, F10); der Quelltext wird
-  öffentlich – bis dahin bekommt Flathub Binärpakete (F1), danach baut Flathub aus dem Quelltext.
+  AppStream-Metadaten für GNOME Software, KDE Discover und Steam Deck Discover (Stufe 10, F15).
+  Verteilung über das EIGENE Flatpak-Repo https://cdn.rogclan.de/apps/linux/flatpak/ und das .deb – nicht Flathub
+  (Owner-Entscheidung F15, 31.10.2026). App-ID endgültig (F2), Lizenz GPL-3.0-or-later (F10).
 
-  Vor einer Einreichung (Checkliste: packaging/README.md):
-   - Screenshots unter https://cdn.rogclan.de/apps/linux/screenshots/ hochladen (Dateien: packaging/screenshots/)
-   - Release-Eintrag: Version, Datum und type="stable" zum Tag vX.Y.Z setzen (neuester Eintrag zuerst)
-  Prüfen: „appstreamcli validate“ (pedantisch) und „flatpak-builder-lint appstream“ – Befehle in packaging/README.md
+  Zu jedem Release (Checkliste: packaging/README.md):
+   - Release-Eintrag oben: Version = Tag, Datum = Tag-Datum, type="stable" (die Release-Pipeline prüft das)
+   - Screenshots lädt die Release-Pipeline nach https://cdn.rogclan.de/apps/linux/screenshots/ (packaging/screenshots/)
+  Prüfen: „appstreamcli validate“ (pedantisch) – Befehle in packaging/README.md
 -->
 <component type="desktop-application">
   <id>com.rebelsofgaming.RebelsOfGaming</id>
@@ -78,6 +78,7 @@
   <url type="homepage">https://rebelsofgaming.com/</url>
   <url type="help">https://wiki.rebelsofgaming.com/</url>
   <url type="bugtracker">https://rebelsofgaming.com/de/forum</url>
+  <url type="vcs-browser">https://github.com/Rebels-of-Gaming/rebelsofgaming-linux</url>
 
   <!-- RoG-Rot (hell) und RoG-Dunkel (dunkel) aus dem Design der Plattform -->
   <branding>
@@ -103,7 +104,7 @@
     <control>pointing</control>
     <control>keyboard</control>
     <control>touch</control>
-    <!-- Controller (SDL) kommt mit dem Steam-Deck-Teil von Stufe 10 – vor der Einreichung prüfen, sonst Zeile entfernen -->
+    <!-- Controller über SDL (Stufe 10): Steuerkreuz, A/B, Schultertasten -->
     <control>gamepad</control>
   </supports>
   <!-- Kleinstes Fenster 360 logische Pixel (MainWindow MinWidth); ab 600 px Seitenleiste mit Symbolen -->
@@ -145,8 +146,8 @@
 
   <!--
     Englisch als Standard, Deutsch als Sprachvariante. 1280×800 (16:10) aus den Headless-Tests
-    (StoreScreenshotTests); Dateien unter packaging/screenshots/. Die URLs sind PLATZHALTER nach dem Muster aus F1 –
-    noch nicht hochgeladen. Flathub spiegelt die Bilder beim Bau auf eigene Server.
+    (StoreScreenshotTests); Dateien unter packaging/screenshots/, hochgeladen von der Release-Pipeline. Die
+    Software-Center laden sie von cdn.rogclan.de (eigener Server, keine Dritten).
   -->
   <screenshots>
     <screenshot type="default">
@@ -186,16 +187,14 @@
     </screenshot>
   </screenshots>
 
-  <!--
-    0.1.0 ist NICHT veröffentlicht: type="development" (Software-Center zeigen es nicht als stabile Version).
-    Zur ersten Veröffentlichung einen Eintrag mit der Tag-Version, dem Tag-Datum und type="stable" OBEN einfügen.
-  -->
+  <!-- Neuester Eintrag zuerst; Version/Datum = Tag (Release-Pipeline prüft version + type="stable") -->
   <releases>
-    <release version="0.1.0" date="2026-10-30" type="development">
+    <release version="0.1.0" date="2026-10-31" type="stable">
+      <url type="details">https://github.com/Rebels-of-Gaming/rebelsofgaming-linux/releases/tag/v0.1.0</url>
       <description>
-        <p>Preview with the full range of the clan platform:</p>
-        <p xml:lang="de">Vorschau mit dem vollen Umfang der Clan-Plattform:</p>
-        <p xml:lang="fr">Aperçu avec toutes les fonctions de la plateforme du clan :</p>
+        <p>First public version, with the full range of the clan platform:</p>
+        <p xml:lang="de">Erste öffentliche Version mit dem vollen Umfang der Clan-Plattform:</p>
+        <p xml:lang="fr">Première version publique, avec toutes les fonctions de la plateforme du clan :</p>
         <ul>
           <li>News, forum, wiki with offline reading, direct messages in real time</li>
           <li xml:lang="de">News, Forum, Wiki mit Offline-Lesen, Direktnachrichten in Echtzeit</li>
