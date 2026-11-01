@@ -122,7 +122,7 @@ Schließen in den Infobereich, Autostart, Portale in Flatpak). **Stufe 2 (Commun
   `.flatpakref` mit einem Klick (GNOME Software, KDE Discover, Steam Deck), `RuntimeRepo` = Flathub für
   freedesktop 26.08 + dotnet10, Updates über das Repo; gebaut **aus dem Quelltext** (`nuget-sources.json`), x86_64 und
   aarch64 (nativer `ubuntu-24.04-arm`-Runner). (2) Eigener GPG-Schlüssel nur für dieses Repo
-  (`481C989928561CE7111E317DF101268B68FADA38`, privat nur als GitHub-Secret `ROG_FLATPAK_GPG_PRIVATE_KEY`, öffentlich
+  (`34F611FC7126A42F19D263719D3BE41F6AAB9998`, privat nur als GitHub-Secret `ROG_FLATPAK_GPG_PRIVATE_KEY`, öffentlich
   `packaging/flatpak/rebelsofgaming.gpg`). (3) `.deb` für Debian/Ubuntu/Mint/Pop!_OS unter `/opt/rebelsofgaming/`.
   (4) Release bei Tag `v*` auf `main`, Upload nach S3 nur mit den Secrets `ROG_PUBLIC_APPS_KEY_ID`/`_SECRET`, sonst
   übersprungen. F1 und F11 sind damit erledigt. Details: `packaging/README.md`.
