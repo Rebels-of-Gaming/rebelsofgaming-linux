@@ -233,7 +233,10 @@ jobs:
             echo "available=false" >> "$GITHUB_OUTPUT"
           else
             aws configure set default.s3.addressing_style path
-            aws --endpoint-url "$S3_ENDPOINT" s3 ls "$S3_BASE/" > /dev/null
+            # s3api statt „s3 ls“: „s3 ls“ endet bei leerem Präfix (erster Upload) mit Code 1
+            path="${S3_BASE#s3://}"
+            aws --endpoint-url "$S3_ENDPOINT" s3api list-objects-v2 --bucket "${path%%/*}" --prefix "${path#*/}/" \
+              --max-keys 1 > /dev/null
             echo "S3-Zugang ok (lesend geprüft)"
             echo "available=true" >> "$GITHUB_OUTPUT"
           fi
