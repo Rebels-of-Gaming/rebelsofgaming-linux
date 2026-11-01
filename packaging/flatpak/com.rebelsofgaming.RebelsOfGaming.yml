@@ -1,21 +1,22 @@
-# ENTWURF – Flatpak-Manifest der Linux-App. Nicht bei Flathub eingereicht (nur auf Auftrag des Owners).
+# Flatpak-Manifest der Linux-App für das EIGENE Flatpak-Repository (Owner-Entscheidung F15, 31.10.2026):
+#   https://cdn.rogclan.de/apps/linux/flatpak/  (Bucket rog-public, Präfix apps/linux/flatpak/, GPG-signiert)
+# Nicht für Flathub – Flathub nimmt keine KI-erstellten Manifeste/PRs an (F15 in docs/LINUX-BAUPLAN.md).
 #
-# Owner-Entscheidungen (30.10.2026, docs/LINUX-BAUPLAN.md):
-#  - F1: Der Quelltext bleibt privat. Flathub baut aus fertigen Binärpaketen, die die Release-Pipeline öffentlich unter
-#        https://cdn.rogclan.de/apps/linux/<version>/ (Bucket rog-public der Website) ablegt; hier nur URL + sha256.
-#        Paket bauen: packaging/scripts/make-tarball.sh <x86_64|aarch64> (self-contained .NET, kein SDK im Flatpak).
-#        Entwurf der Pipeline: .github/workflows/release.yml (Upload und Flathub-PR noch deaktiviert).
+# Gebaut wird aus dem Quelltext (GPL-3.0-or-later, F10) ohne Netz: alle NuGet-Pakete stehen in nuget-sources.json
+# (Format von flatpak-dotnet-generator; neu erzeugen mit packaging/scripts/update-nuget-sources.sh nach jeder
+# Paketänderung – die CI prüft, dass alle Paketversionen enthalten sind).
 #  - F2: App-ID com.rebelsofgaming.RebelsOfGaming (endgültig) – gleich in .desktop, AppStream, Symbol, D-Bus-Namen
 #        (Single-Instance), Schlüsselbund-Attribut, WM-Klasse (X11) und xdg_toplevel-App-ID (Wayland).
 #  - F3: Avalonia 12 mit nativem Wayland → wayland + fallback-x11 statt erzwungenem X11.
 #
-# Prüfen und lokal bauen: packaging/README.md (flatpak-builder-lint, packaging/scripts/flatpak-local.sh).
-# Vor einer Einreichung: echte Prüfsummen (Release-Pipeline), Screenshots unter cdn.rogclan.de, Lizenz (Owner),
-# Domain-Nachweis https://rebelsofgaming.com/.well-known/org.flathub.VerifiedApps.txt.
+# Lokal bauen und testen: packaging/scripts/flatpak-build.sh (Anleitung packaging/README.md).
+# Release: .github/workflows/release.yml (x86_64 und aarch64 nativ auf GitHub-Runnern, Branch „stable“).
 id: com.rebelsofgaming.RebelsOfGaming
 runtime: org.freedesktop.Platform
 runtime-version: '26.08'
 sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.dotnet10
 command: rebelsofgaming
 
 finish-args:
@@ -30,11 +31,11 @@ finish-args:
   # GPU-Beschleunigung (EGL/OpenGL über Skia); ohne Recht zeichnet die App deutlich langsamer in Software
   - --device=dri
   # Controller (Steam Deck, Gamepads) über SDL: /dev/input (evdev; Hot-Plug per inotify, udev gibt es in der Sandbox
-  # nicht). Bewusst nicht --device=all: das gäbe Zugriff auf alle Geräte (Kamera, USB …) und zeigt auf Flathub
-  # „potenziell unsicher“. Folge: SDL-HIDAPI über /dev/hidraw* fällt weg (Sonderfunktionen einzelner Controller wie
-  # Gyro/Touchpad); Tasten und Sticks gehen über evdev. Im Spielmodus des Steam Deck liefert Steam Input ohnehin einen
-  # virtuellen Controller unter /dev/input. Braucht Flatpak ≥ 1.15.6 – ältere Versionen ignorieren das Recht, dann
-  # bleibt die App ohne Controller bedienbar. SDL selbst bringt die Runtime mit (freedesktop 25.08/26.08: SDL3 + sdl2-compat).
+  # nicht). Bewusst nicht --device=all: das gäbe Zugriff auf alle Geräte (Kamera, USB …). Folge: SDL-HIDAPI über
+  # /dev/hidraw* fällt weg (Sonderfunktionen einzelner Controller wie Gyro/Touchpad); Tasten und Sticks gehen über
+  # evdev. Im Spielmodus des Steam Deck liefert Steam Input ohnehin einen virtuellen Controller unter /dev/input.
+  # Braucht Flatpak ≥ 1.15.6 – ältere Versionen ignorieren das Recht, dann bleibt die App ohne Controller bedienbar.
+  # SDL selbst bringt die Runtime mit (freedesktop 26.08: SDL3 + sdl2-compat).
   - --device=input
   # Geräte-Token und Offline-Schlüssel im Schlüsselbund (Secret Service, org.freedesktop.secrets). Das Secret-Portal
   # liefert nur einen Schlüssel je App, keine benannten Einträge je Umgebung – deshalb (noch) direkt.
@@ -54,33 +55,51 @@ finish-args:
   #    Dateiauswahl (FileChooser), Bildschirmfoto hochladen (Screenshot), Farbschema „Wie das System“ (Settings),
   #    Links, rog:// an Spiele und den Browser (OpenURI)
 
+build-options:
+  append-path: /usr/lib/sdk/dotnet10/bin
+  append-ld-library-path: /usr/lib/sdk/dotnet10/lib
+  env:
+    DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+    DOTNET_NOLOGO: 'true'
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 'true'
+    DOTNET_GENERATE_ASPNET_CERTIFICATE: 'false'
+
 modules:
   - name: rebelsofgaming
     buildsystem: simple
-    # Fertige Binärdateien (.NET-Laufzeit, SkiaSharp, HarfBuzz): nicht strippen und keine Debug-Erweiterung abspalten –
-    # die Pakete sind bereits ohne Symbole gebaut (DebugType=none), und Strippen fremder .so bringt nur Risiko
     build-options:
+      # Self-contained .NET (Laufzeit, SkiaSharp, HarfBuzz aus NuGet): ohne Symbole gebaut (DebugType=none); fremde
+      # .so nicht strippen und keine Debug-Erweiterung abspalten
       no-debuginfo: true
       strip: false
+      arch:
+        x86_64:
+          env:
+            ROG_RID: linux-x64
+        aarch64:
+          env:
+            ROG_RID: linux-arm64
     sources:
-      # Self-contained Publish + share/ (Desktop-Datei, AppStream, Symbol, Lizenzen) je Architektur, gebaut mit
-      # packaging/scripts/make-tarball.sh. Das Archiv enthält einen Ordner rebelsofgaming-<version>-linux-<arch>/,
-      # den flatpak-builder beim Entpacken abstreift (strip-components 1) → dist/rebelsofgaming/, dist/share/.
-      - type: archive
-        only-arches: [x86_64]
-        url: https://cdn.rogclan.de/apps/linux/0.1.0/rebelsofgaming-0.1.0-linux-x86_64.tar.gz
-        # PLATZHALTER – setzt die Release-Pipeline (Datei *.tar.gz.sha256)
-        sha256: '0000000000000000000000000000000000000000000000000000000000000000'
-        dest: dist
-      - type: archive
-        only-arches: [aarch64]
-        url: https://cdn.rogclan.de/apps/linux/0.1.0/rebelsofgaming-0.1.0-linux-aarch64.tar.gz
-        # PLATZHALTER – setzt die Release-Pipeline (Datei *.tar.gz.sha256)
-        sha256: '0000000000000000000000000000000000000000000000000000000000000000'
-        dest: dist
+      # Der Quelltext dieses Repos samt Submodul external/rog-windows (Kern). In der CI ist das der saubere Checkout,
+      # lokal ein Abzug der versionierten Dateien (packaging/scripts/flatpak-build.sh) – nie bin/, obj/, artifacts/.
+      - type: dir
+        path: ../..
+        skip:
+          - artifacts
+          - .flatpak-builder
+      # Alle NuGet-Pakete (linux-x64 + linux-arm64, inkl. Laufzeit-, AppHost- und Crossgen2-Paketen) für den
+      # Restore ohne Netz
+      - nuget-sources.json
     build-commands:
-      - mkdir -p /app/lib /app/bin
-      - cp -a dist/rebelsofgaming /app/lib/rebelsofgaming
-      - printf '#!/bin/sh\nexec /app/lib/rebelsofgaming/rebelsofgaming "$@"\n' > /app/bin/rebelsofgaming
-      - chmod 755 /app/bin/rebelsofgaming
-      - cp -a dist/share/. /app/share/
+      # ReadyToRun wie Tarball/.deb (schneller Start, Stufe 10), kein Trimming (Reflexion in Kern/Avalonia, L60)
+      - >-
+        dotnet publish src/RoG.Linux.App/RoG.Linux.App.csproj -c Release -r "$ROG_RID" --self-contained true
+        --source "$PWD/nuget-sources" -p:PublishTrimmed=false -p:PublishReadyToRun=true -p:DebugType=none
+        -p:PublishDocumentationFiles=false -o /app/lib/rebelsofgaming
+      - install -Dm755 packaging/flatpak/rebelsofgaming.sh /app/bin/rebelsofgaming
+      - install -Dm644 packaging/linux/com.rebelsofgaming.RebelsOfGaming.desktop -t /app/share/applications
+      - install -Dm644 packaging/linux/com.rebelsofgaming.RebelsOfGaming.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 external/rog-windows/src/RoG.App/Assets/rog-badge-512.png /app/share/icons/hicolor/512x512/apps/com.rebelsofgaming.RebelsOfGaming.png
+      - install -Dm644 LICENSE -t /app/share/licenses/com.rebelsofgaming.RebelsOfGaming
+      - install -Dm644 TRADEMARKS.md -t /app/share/licenses/com.rebelsofgaming.RebelsOfGaming
+      - install -Dm644 external/rog-windows/src/RoG.App/Fonts/OFL.txt /app/share/licenses/com.rebelsofgaming.RebelsOfGaming/OFL-BarlowCondensed.txt
