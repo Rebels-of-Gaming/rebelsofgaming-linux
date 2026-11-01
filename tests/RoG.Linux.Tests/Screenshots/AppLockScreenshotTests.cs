@@ -132,7 +132,7 @@ public class AppLockScreenshotTests
             var folder = Path.Combine(RoG.Linux.Tests.Platform.LocalizationTests.RepoRoot(), "artifacts", "screenshots");
             Directory.CreateDirectory(folder);
             Avalonia.Headless.AvaloniaHeadlessPlatform.ForceRenderTimerTick();
-            var frame = Avalonia.Headless.HeadlessWindowExtensions.CaptureRenderedFrame(window);
+            using var frame = Avalonia.Headless.HeadlessWindowExtensions.CaptureRenderedFrame(window);
             Assert.NotNull(frame);
             frame.Save(Path.Combine(folder, name + ".png"), new Avalonia.Media.Imaging.PngBitmapEncoderOptions());
             foreach (var viewer in window.GetVisualDescendants().OfType<Avalonia.Controls.ScrollViewer>())

@@ -507,6 +507,27 @@ public class ScreenshotTests
         await Settle(300);
     }
 
+    /// <summary>
+    /// Avalonia.Skia <c>WriteableBitmapImpl.Save</c> macht mit <c>SKImage.FromPixels</c> nur einen Schnappschuss ohne Kopie
+    /// und hält die Bitmap während des PNG-Kodierens nicht am Leben. Ist <c>frame</c> danach nicht mehr benutzt, darf der GC
+    /// sie (Release-JIT) mitten im nativen <c>sk_pngencoder_encode</c> finalisieren – der Pixelspeicher wird freigegeben und
+    /// der Testprozess stirbt mit SIGSEGV (Exit 139, sporadisch in CI). Deshalb jedes erfasste Bild mit <c>using</c>.
+    /// </summary>
+    [Fact]
+    public void Captured_frames_stay_alive_while_saving()
+    {
+        const string capture = nameof(HeadlessWindowExtensions.CaptureRenderedFrame) + "(";
+        var tests = Path.Combine(LocalizationTests.RepoRoot(), "tests", "RoG.Linux.Tests");
+        var offenders = Directory.EnumerateFiles(tests, "*.cs", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .SelectMany(f => File.ReadLines(f).Select((line, i) => (File: Path.GetFileName(f), Line: i + 1, Text: line.Trim())))
+            .Where(l => l.Text.Contains(capture, StringComparison.Ordinal) && l.Text.Contains('=', StringComparison.Ordinal)
+                && !l.Text.StartsWith("using var ", StringComparison.Ordinal))
+            .Select(l => $"{l.File}:{l.Line}")
+            .ToList();
+        Assert.Empty(offenders);
+    }
+
     internal static async Task Shoot(string name, int width, int height, TestServices t, Func<ShellViewModel, Task> arrange, Action<Avalonia.Controls.Window>? check = null)
     {
         using (t)
@@ -522,7 +543,8 @@ public class ScreenshotTests
 
             Directory.CreateDirectory(s_folder);
             AvaloniaHeadlessPlatform.ForceRenderTimerTick();
-            var frame = window.CaptureRenderedFrame();
+            // „using“ ist Pflicht (siehe Captured_frames_stay_alive_while_saving): Save kodiert ohne Kopie aus dem Pixelspeicher
+            using var frame = window.CaptureRenderedFrame();
             Assert.NotNull(frame);
             Assert.Equal(width, frame.PixelSize.Width);
             frame.Save(Path.Combine(s_folder, name + ".png"), new Avalonia.Media.Imaging.PngBitmapEncoderOptions());

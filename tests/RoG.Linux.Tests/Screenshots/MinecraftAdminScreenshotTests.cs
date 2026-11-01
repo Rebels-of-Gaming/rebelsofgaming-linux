@@ -89,7 +89,7 @@ public class MinecraftAdminScreenshotTests
     {
         Directory.CreateDirectory(s_folder);
         AvaloniaHeadlessPlatform.ForceRenderTimerTick();
-        var frame = window.CaptureRenderedFrame();
+        using var frame = window.CaptureRenderedFrame();
         Assert.NotNull(frame);
         Assert.Equal(width, frame.PixelSize.Width);
         frame.Save(Path.Combine(s_folder, name + ".png"), new Avalonia.Media.Imaging.PngBitmapEncoderOptions());
