@@ -153,8 +153,11 @@ jobs:
 
       - name: flatpak-builder installieren
         run: |
+          # Ubuntu 24.04 hat flatpak 1.14 – --device=input (Controller) kennt erst 1.15.6 → aktuelles flatpak aus dem PPA
+          sudo add-apt-repository -y ppa:flatpak/stable
           sudo apt-get update -qq
           sudo apt-get install -y -qq flatpak flatpak-builder
+          flatpak --version
           # Ubuntu 24.04 sperrt unprivilegierte User-Namespaces per AppArmor – bubblewrap braucht sie
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
           flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -211,8 +214,11 @@ jobs:
 
       - name: Werkzeuge
         run: |
+          # Ubuntu 24.04 hat flatpak 1.14 – --device=input (Controller) kennt erst 1.15.6 → aktuelles flatpak aus dem PPA
+          sudo add-apt-repository -y ppa:flatpak/stable
           sudo apt-get update -qq
           sudo apt-get install -y -qq flatpak ostree xvfb xauth dbus
+          flatpak --version
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
           # Laufzeit für die Installationsprobe (RuntimeRepo der .flatpakref)
           flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
