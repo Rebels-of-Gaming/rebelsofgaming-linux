@@ -1,18 +1,19 @@
-# ENTWURF – Release-Pipeline der Linux-App (Owner-Entscheidung F1, docs/LINUX-BAUPLAN.md).
+# Release-Pipeline der Linux-App (Owner-Entscheidung F15, 31.10.2026: eigenes Flatpak-Repo + .deb statt Flathub).
 #
-# Läuft NUR bei einem Tag vX.Y.Z, der auf main liegt – nie bei Pushes auf develop oder main und nicht bei PRs.
-# Heute: prüfen, bauen (x86_64 + aarch64 per Cross-Publish), testen, Tarballs + SHA-256 + fertiges Flathub-Manifest
-# als Workflow-Artefakte. Upload nach rog-public und der PR ins Flathub-Repo sind auskommentiert.
-#
-# TODO (Owner-Freigabe nötig, siehe packaging/README.md „Release-Pipeline freischalten“):
-#  1. Zugang für den Bucket rog-public (nur Schreiben unter apps/linux/) als Secrets anlegen
-#  2. Flathub-Repo der App (nach Annahme der Einreichung) + Token mit Schreibrecht nur darauf als Secret
-#  3. Danach die Schritte „Upload“ und „Flathub-PR“ einkommentieren
+# Auslöser:
+#  - Tag vX.Y.Z auf einem Commit in main → bauen, testen, Flatpak-Repo signieren, nach rog-public hochladen
+#    (https://cdn.rogclan.de/apps/linux/), GitHub-Release mit .deb, Tarballs, Flatpak-Bundles und .flatpakref.
+#  - workflow_dispatch → Probelauf: alles bauen und prüfen (inkl. Installation aus dem signierten Repo), aber NIE
+#    hochladen und kein Release; ein vorhandener S3-Zugang wird nur lesend geprüft.
+# Fehlen die S3-Secrets ROG_PUBLIC_APPS_KEY_ID/ROG_PUBLIC_APPS_SECRET, werden die Upload-Schritte mit Hinweis
+# übersprungen (Artefakte entstehen trotzdem; das GitHub-Release wird dann nur als Entwurf angelegt).
+# Ablauf und Owner-Schritte: packaging/README.md
 name: Release
 
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -24,22 +25,23 @@ concurrency:
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: '1'
   DOTNET_NOLOGO: '1'
+  APP_ID: com.rebelsofgaming.RebelsOfGaming
 
 jobs:
   check:
-    name: Tag prüfen
-    if: github.ref_type == 'tag'
+    name: Version prüfen
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       version: ${{ steps.version.outputs.version }}
+      publish: ${{ steps.version.outputs.publish }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          submodules: true
 
       - name: Tag liegt auf main
+        if: github.ref_type == 'tag'
         run: |
           git fetch --no-tags origin main
           if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
@@ -50,37 +52,43 @@ jobs:
       - name: Version = Tag = AppStream
         id: version
         run: |
-          tag="${GITHUB_REF_NAME#v}"
           props="$(sed -n 's:.*<RoGLinuxVersion>\(.*\)</RoGLinuxVersion>.*:\1:p' Directory.Build.props)"
-          if [ "$tag" != "$props" ]; then
-            echo "::error::Tag v$tag passt nicht zu RoGLinuxVersion $props (Directory.Build.props)"
-            exit 1
+          metainfo="packaging/linux/$APP_ID.metainfo.xml"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            tag="${GITHUB_REF_NAME#v}"
+            if [ "$tag" != "$props" ]; then
+              echo "::error::Tag v$tag passt nicht zu RoGLinuxVersion $props (Directory.Build.props)"
+              exit 1
+            fi
+            if ! grep -Eq "<release version=\"$tag\"[^>]*type=\"stable\"" "$metainfo"; then
+              echo "::error::$metainfo braucht einen Eintrag <release version=\"$tag\" date=\"…\" type=\"stable\">"
+              exit 1
+            fi
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Probelauf (workflow_dispatch) – es wird nichts hochgeladen und kein Release angelegt"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
           fi
-          metainfo=packaging/linux/com.rebelsofgaming.RebelsOfGaming.metainfo.xml
-          if ! grep -Eq "<release version=\"$tag\"[^>]*type=\"stable\"" "$metainfo"; then
-            echo "::error::$metainfo braucht einen Eintrag <release version=\"$tag\" date=\"…\" type=\"stable\">"
-            exit 1
-          fi
-          echo "version=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$props" >> "$GITHUB_OUTPUT"
 
-  build:
-    name: Paket ${{ matrix.arch }}
+  packages:
+    name: Tarball + .deb ${{ matrix.arch }}
     needs: check
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     strategy:
       fail-fast: true
       matrix:
-        # aarch64 wird auf dem x86_64-Runner per Cross-Publish (linux-arm64) gebaut – .NET braucht dafür keinen
-        # arm64-Rechner; Tests laufen nur für x86_64
+        # aarch64 per Cross-Publish (linux-arm64) auf dem x86_64-Runner – .NET braucht dafür keinen arm64-Rechner;
+        # Tests und Installationsprobe nur für x86_64
         arch: [x86_64, aarch64]
     env:
+      VERSION: ${{ needs.check.outputs.version }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: true
-
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -92,25 +100,98 @@ jobs:
           dotnet build RoG.Linux.sln -c Release
           dotnet test RoG.Linux.sln -c Release --no-build --blame-hang-timeout 5m --blame-hang-dump-type none
 
-      - name: Paket bauen
+      - name: Tarball
         run: packaging/scripts/make-tarball.sh "${{ matrix.arch }}"
+
+      - name: .deb
+        run: packaging/scripts/make-deb.sh "${{ matrix.arch }}"
+
+      - name: .deb prüfen (lintian, Installation, Start unter Xvfb)
+        if: matrix.arch == 'x86_64'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lintian xvfb xauth dbus
+          deb="artifacts/dist/rebelsofgaming_${VERSION}_amd64.deb"
+          lintian --tag-display-limit 0 --fail-on error,warning "$deb"
+          sudo apt-get install -y --no-install-recommends "./$deb"
+          set +e
+          dbus-run-session -- xvfb-run -a timeout 20 rebelsofgaming --x11
+          code=$?
+          set -e
+          # 124 = lief bis zum Timeout (Fenster offen) – alles andere ist ein Absturz beim Start
+          [ "$code" = 124 ] || { echo "::error::Start aus dem .deb fehlgeschlagen (Exit $code)"; exit 1; }
+          sudo apt-get remove -y rebelsofgaming
 
       - uses: actions/upload-artifact@v4
         with:
-          name: rebelsofgaming-${{ needs.check.outputs.version }}-linux-${{ matrix.arch }}
+          name: packages-${{ matrix.arch }}
           path: |
-            artifacts/dist/rebelsofgaming-${{ needs.check.outputs.version }}-linux-${{ matrix.arch }}.tar.gz
-            artifacts/dist/rebelsofgaming-${{ needs.check.outputs.version }}-linux-${{ matrix.arch }}.tar.gz.sha256
+            artifacts/dist/*.tar.gz
+            artifacts/dist/*.deb
+            artifacts/dist/*.sha256
           if-no-files-found: error
           retention-days: 90
 
+  flatpak:
+    name: Flatpak ${{ matrix.arch }}
+    needs: check
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          # Nativer arm64-Runner (für öffentliche Repos kostenlos) – kein qemu
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: flatpak-builder installieren
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak flatpak-builder
+          # Ubuntu 24.04 sperrt unprivilegierte User-Namespaces per AppArmor – bubblewrap braucht sie
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Flatpak bauen (aus dem Quelltext, ohne Netz)
+        env:
+          ROG_FLATPAK_DEPS_FROM: flathub
+        run: packaging/scripts/flatpak-build.sh "${{ matrix.arch }}" "$PWD/artifacts/flatpak/repo-${{ matrix.arch }}"
+
+      - name: Repo packen
+        run: tar -C artifacts/flatpak -cf "flatpak-repo-${{ matrix.arch }}.tar" "repo-${{ matrix.arch }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-repo-${{ matrix.arch }}
+          path: flatpak-repo-${{ matrix.arch }}.tar
+          if-no-files-found: error
+          retention-days: 14
+
   publish:
-    name: Manifest (+ Upload/Flathub, deaktiviert)
-    needs: [check, build]
+    name: Repo signieren, prüfen, hochladen
+    needs: [check, packages, flatpak]
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 45
+    permissions:
+      contents: write
     env:
       VERSION: ${{ needs.check.outputs.version }}
+      PUBLISH: ${{ needs.check.outputs.publish }}
+      GPG_KEY_ID: ${{ vars.ROG_FLATPAK_GPG_KEY_ID }}
+      S3_ENDPOINT: https://s3.wahke.lu
+      S3_BASE: s3://rog-public/apps/linux
+      CDN_BASE: https://cdn.rogclan.de/apps/linux
+      AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: 'true'
     steps:
       - uses: actions/checkout@v7
         with:
@@ -118,55 +199,229 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: rebelsofgaming-${{ needs.check.outputs.version }}-linux-*
+          pattern: packages-*
           path: artifacts/dist
           merge-multiple: true
 
-      - name: Prüfsummen kontrollieren
-        working-directory: artifacts/dist
-        run: sha256sum -c ./*.sha256
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: flatpak-repo-*
+          path: artifacts/flatpak
+          merge-multiple: true
 
-      - name: Flathub-Manifest mit URLs und Prüfsummen
-        run: packaging/scripts/release-manifest.sh "$VERSION" artifacts/dist artifacts/release/com.rebelsofgaming.RebelsOfGaming.yml
+      - name: Werkzeuge
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak ostree xvfb xauth dbus
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          # Laufzeit für die Installationsprobe (RuntimeRepo der .flatpakref)
+          flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          for t in artifacts/flatpak/flatpak-repo-*.tar; do tar -C artifacts/flatpak -xf "$t"; done
+          (cd artifacts/dist && sha256sum -c ./*.sha256)
+
+      - name: S3-Zugang vorhanden?
+        id: s3
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "::notice title=Upload übersprungen::Secrets ROG_PUBLIC_APPS_KEY_ID/ROG_PUBLIC_APPS_SECRET fehlen – nichts wird nach rog-public hochgeladen (Owner-Schritte: packaging/README.md)"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            aws configure set default.s3.addressing_style path
+            aws --endpoint-url "$S3_ENDPOINT" s3 ls "$S3_BASE/" > /dev/null
+            echo "S3-Zugang ok (lesend geprüft)"
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Signierschlüssel laden
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.ROG_FLATPAK_GPG_PRIVATE_KEY }}
+        run: |
+          GNUPGHOME="$(mktemp -d "$RUNNER_TEMP/gnupg.XXXXXX")"
+          chmod 700 "$GNUPGHOME"
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          if [ -n "$GPG_PRIVATE_KEY" ] && [ -n "$GPG_KEY_ID" ]; then
+            printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --homedir "$GNUPGHOME" --batch --quiet --import
+            # Der geladene Schlüssel muss zum öffentlichen Schlüssel im Repo passen (dem die Nutzer vertrauen)
+            want="$(gpg --homedir "$GNUPGHOME" --with-colons --fingerprint "$GPG_KEY_ID" | awk -F: '/^fpr/{print $10; exit}')"
+            have="$(gpg --homedir "$GNUPGHOME" --with-colons --import-options show-only --import packaging/flatpak/rebelsofgaming.gpg | awk -F: '/^fpr/{print $10; exit}')"
+            if [ -z "$want" ] || [ "$want" != "$have" ]; then
+              echo "::error::Signierschlüssel passt nicht zu packaging/flatpak/rebelsofgaming.gpg"; exit 1
+            fi
+          elif [ "$PUBLISH" = true ]; then
+            echo "::error::Secret ROG_FLATPAK_GPG_PRIVATE_KEY bzw. Variable ROG_FLATPAK_GPG_KEY_ID fehlt – ohne Signatur kein Release"
+            exit 1
+          else
+            echo "::warning::Kein Signierschlüssel – Probelauf mit Wegwerf-Schlüssel"
+            gpg --homedir "$GNUPGHOME" --batch --passphrase '' --quick-gen-key "RoG CI dry run" rsa3072 sign 1d
+            gpg --homedir "$GNUPGHOME" --export > "$RUNNER_TEMP/dry-run.gpg"
+            echo "GPG_KEY_ID=$(gpg --homedir "$GNUPGHOME" --with-colons --list-keys | awk -F: '/^fpr/{print $10; exit}')" >> "$GITHUB_ENV"
+            echo "DRY_RUN_KEY=$RUNNER_TEMP/dry-run.gpg" >> "$GITHUB_ENV"
+          fi
+
+      - name: Bestehendes Repo aus rog-public laden
+        if: steps.s3.outputs.available == 'true' && env.PUBLISH == 'true'
+        run: |
+          # Neue Commits hängen am Vorgänger → Clients laden nur Deltas
+          mkdir -p artifacts/flatpak/repo
+          aws --endpoint-url "$S3_ENDPOINT" s3 sync "$S3_BASE/flatpak/" artifacts/flatpak/repo/ --only-show-errors
+          [ -f artifacts/flatpak/repo/config ] || echo "::notice::Noch kein Repo in rog-public – wird neu angelegt"
+
+      - name: Repo zusammenführen und signieren
+        run: |
+          ROG_FLATPAK_PUBLIC_KEY="${DRY_RUN_KEY:-$PWD/packaging/flatpak/rebelsofgaming.gpg}" \
+            packaging/scripts/flatpak-repo.sh artifacts/flatpak/repo "$GPG_KEY_ID" \
+            artifacts/flatpak/repo-x86_64 artifacts/flatpak/repo-aarch64
+
+      - name: Flatpak-Bundles (Offline-Installation, Updates danach über das Repo)
+        run: |
+          key_file="${DRY_RUN_KEY:-packaging/flatpak/rebelsofgaming.gpg}"
+          for a in x86_64 aarch64; do
+            bundle="artifacts/dist/rebelsofgaming-$VERSION-$a.flatpak"
+            flatpak build-bundle --arch="$a" --gpg-keys="$key_file" \
+              --repo-url="$CDN_BASE/flatpak/" --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
+              artifacts/flatpak/repo "$bundle" "$APP_ID" stable
+            (cd artifacts/dist && sha256sum "$(basename "$bundle")" > "$(basename "$bundle").sha256")
+          done
+          ls -l artifacts/dist/*.flatpak
+
+      - name: Aus dem signierten Repo installieren und starten (x86_64)
+        run: |
+          key_file="${DRY_RUN_KEY:-packaging/flatpak/rebelsofgaming.gpg}"
+          sed -e "s#^Url=.*#Url=file://$PWD/artifacts/flatpak/repo#" \
+              -e "s#^GPGKey=.*#GPGKey=$(base64 -w0 "$key_file")#" \
+              "packaging/flatpak/$APP_ID.flatpakref" > "$RUNNER_TEMP/test.flatpakref"
+          flatpak --user install -y --noninteractive "$RUNNER_TEMP/test.flatpakref"
+          flatpak --user info "$APP_ID"
+          flatpak --user remote-ls --all rebelsofgaming
+          set +e
+          dbus-run-session -- xvfb-run -a timeout 30 flatpak run --user "$APP_ID" --x11
+          code=$?
+          set -e
+          [ "$code" = 124 ] || { echo "::error::Start des Flatpaks fehlgeschlagen (Exit $code)"; exit 1; }
+
+      - name: Einstiegsdateien und Übersicht
+        run: |
+          mkdir -p artifacts/release
+          cp "packaging/flatpak/$APP_ID.flatpakref" packaging/flatpak/rebelsofgaming.flatpakrepo \
+             packaging/flatpak/rebelsofgaming.gpg artifacts/release/
+          python3 -I - <<'PY'
+          import json, os, pathlib
+          v = os.environ["VERSION"]; cdn = os.environ["CDN_BASE"]; dist = pathlib.Path("artifacts/dist")
+          files = {}
+          for f in sorted(dist.glob("*.deb")) + sorted(dist.glob("*.tar.gz")) + sorted(dist.glob("*.flatpak")):
+              files[f.name] = {"url": f"{cdn}/{v}/{f.name}",
+                               "sha256": (dist / f"{f.name}.sha256").read_text().split()[0],
+                               "size": f.stat().st_size}
+          data = {"version": v, "flatpakref": f"{cdn}/{os.environ['APP_ID']}.flatpakref",
+                  "flatpakrepo": f"{cdn}/rebelsofgaming.flatpakrepo", "files": files}
+          pathlib.Path("artifacts/release/latest.json").write_text(json.dumps(data, indent=2) + "\n")
+          PY
+          cat artifacts/release/latest.json
 
       - uses: actions/upload-artifact@v4
         with:
-          name: flathub-manifest-${{ needs.check.outputs.version }}
-          path: artifacts/release/com.rebelsofgaming.RebelsOfGaming.yml
+          name: release-${{ needs.check.outputs.version }}
+          path: |
+            artifacts/dist/*.tar.gz
+            artifacts/dist/*.deb
+            artifacts/dist/*.flatpak
+            artifacts/dist/*.sha256
+            artifacts/release/*
           if-no-files-found: error
           retention-days: 90
 
-      # TODO (Owner-Freigabe: Secrets + Bucket-Rechte) – Upload nach rog-public, ausgeliefert über cdn.rogclan.de.
-      # Bestehende Dateien werden nie überschrieben (Flathub-Builds müssen reproduzierbar bleiben).
-      # - name: Upload nach rog-public (apps/linux/<version>/)
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
-      #     AWS_DEFAULT_REGION: us-east-1
-      #     S3_ENDPOINT: https://s3.wahke.lu
-      #   run: |
-      #     prefix="s3://rog-public/apps/linux/$VERSION/"
-      #     if aws --endpoint-url "$S3_ENDPOINT" s3 ls "$prefix" | grep -q .; then
-      #       echo "::error::$prefix existiert schon – Version erhöhen statt überschreiben"; exit 1
-      #     fi
-      #     for f in artifacts/dist/*.tar.gz artifacts/dist/*.tar.gz.sha256; do
-      #       aws --endpoint-url "$S3_ENDPOINT" s3 cp "$f" "$prefix" --acl public-read
-      #     done
-      #     for f in artifacts/dist/*.tar.gz; do
-      #       url="https://cdn.rogclan.de/apps/linux/$VERSION/$(basename "$f")"
-      #       test "$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)" = "$(cut -d' ' -f1 "$f.sha256")"
-      #     done
+      - name: Upload nach rog-public (apps/linux/)
+        if: steps.s3.outputs.available == 'true' && env.PUBLISH == 'true'
+        run: |
+          s3() { aws --endpoint-url "$S3_ENDPOINT" s3 "$@" --only-show-errors; }
+          immutable="public, max-age=31536000, immutable"
+          short="public, max-age=60"
+          bin=application/octet-stream
 
-      # TODO (Owner-Freigabe: Flathub-Repo der App + Token nur dafür) – PR mit neuem Manifest. Flathub baut den PR
-      # zur Probe; Zusammenführen bleibt Handarbeit des Owners.
-      # - name: PR ins Flathub-Repo
-      #   env:
-      #     GH_TOKEN: ${{ secrets.FLATHUB_APP_REPO_TOKEN }}
-      #   run: |
-      #     git clone "https://x-access-token:${GH_TOKEN}@github.com/flathub/com.rebelsofgaming.RebelsOfGaming.git" flathub
-      #     cd flathub
-      #     git switch -c "release-$VERSION"
-      #     cp ../artifacts/release/com.rebelsofgaming.RebelsOfGaming.yml .
-      #     git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -am "Update to $VERSION"
-      #     git push origin "release-$VERSION"
-      #     gh pr create --title "Update to $VERSION" --body "Release $VERSION der Linux-App" --head "release-$VERSION"
+          # 1. Versionierte Pakete – nie überschreiben
+          if aws --endpoint-url "$S3_ENDPOINT" s3 ls "$S3_BASE/$VERSION/" | grep -q .; then
+            echo "::error::$S3_BASE/$VERSION/ existiert schon – Version erhöhen statt überschreiben"; exit 1
+          fi
+          for f in artifacts/dist/*.deb; do
+            s3 cp "$f" "$S3_BASE/$VERSION/" --content-type application/vnd.debian.binary-package --cache-control "$immutable"
+          done
+          for f in artifacts/dist/*.tar.gz; do
+            s3 cp "$f" "$S3_BASE/$VERSION/" --content-type application/gzip --cache-control "$immutable"
+          done
+          for f in artifacts/dist/*.flatpak; do
+            s3 cp "$f" "$S3_BASE/$VERSION/" --content-type application/vnd.flatpak --cache-control "$immutable"
+          done
+          for f in artifacts/dist/*.sha256; do
+            s3 cp "$f" "$S3_BASE/$VERSION/" --content-type "text/plain; charset=utf-8" --cache-control "$immutable"
+          done
+
+          # 2. Flatpak-Repo: erst Inhalte (unveränderlich, nach Prüfsumme benannt), zuletzt Refs und Summary –
+          #    Clients sehen nie eine Summary, deren Objekte noch fehlen. tmp/, state/, .lock bleiben lokal.
+          repo=artifacts/flatpak/repo
+          s3 sync "$repo/objects" "$S3_BASE/flatpak/objects" --size-only --content-type "$bin" --cache-control "$immutable"
+          if [ -d "$repo/deltas" ]; then
+            s3 sync "$repo/deltas" "$S3_BASE/flatpak/deltas" --size-only --content-type "$bin" --cache-control "$immutable"
+          fi
+          for d in delta-indexes summaries refs; do
+            if [ -d "$repo/$d" ]; then
+              s3 sync "$repo/$d" "$S3_BASE/flatpak/$d" --delete --exact-timestamps --content-type "$bin" --cache-control "$short"
+            fi
+          done
+          for f in config summary.idx summary.idx.sig summary summary.sig; do
+            if [ -f "$repo/$f" ]; then
+              s3 cp "$repo/$f" "$S3_BASE/flatpak/$f" --content-type "$bin" --cache-control "$short"
+            fi
+          done
+          # Vom Prune entfernte Objekte/Deltas erst jetzt löschen
+          s3 sync "$repo/objects" "$S3_BASE/flatpak/objects" --size-only --delete --content-type "$bin" --cache-control "$immutable"
+          if [ -d "$repo/deltas" ]; then
+            s3 sync "$repo/deltas" "$S3_BASE/flatpak/deltas" --size-only --delete --content-type "$bin" --cache-control "$immutable"
+          fi
+
+          # 3. Einstiegsdateien, Übersicht, feste Namen der neuesten Pakete, Symbol und Screenshots
+          s3 cp "artifacts/release/$APP_ID.flatpakref" "$S3_BASE/" --content-type application/vnd.flatpak.ref --cache-control "$short"
+          s3 cp artifacts/release/rebelsofgaming.flatpakrepo "$S3_BASE/" --content-type application/vnd.flatpak.repo --cache-control "$short"
+          s3 cp artifacts/release/rebelsofgaming.gpg "$S3_BASE/" --content-type application/pgp-keys --cache-control "$short"
+          s3 cp artifacts/release/latest.json "$S3_BASE/" --content-type "application/json; charset=utf-8" --cache-control "$short"
+          for a in amd64 arm64; do
+            s3 cp "artifacts/dist/rebelsofgaming_${VERSION}_$a.deb" "$S3_BASE/rebelsofgaming_$a.deb" \
+              --content-type application/vnd.debian.binary-package --cache-control "$short"
+          done
+          s3 cp external/rog-windows/src/RoG.App/Assets/rog-badge-512.png "$S3_BASE/icon-512.png" --content-type image/png --cache-control "public, max-age=86400"
+          s3 sync packaging/screenshots "$S3_BASE/screenshots" --content-type image/png --cache-control "public, max-age=86400"
+
+      - name: Über cdn.rogclan.de prüfen
+        if: steps.s3.outputs.available == 'true' && env.PUBLISH == 'true'
+        run: |
+          for f in artifacts/dist/*.deb; do
+            url="$CDN_BASE/$VERSION/$(basename "$f")"
+            test "$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)" = "$(cut -d' ' -f1 "$f.sha256")" \
+              || { echo "::error::Prüfsumme über $url stimmt nicht"; exit 1; }
+          done
+          flatpak --user remote-add --if-not-exists --from rog-cdn "$CDN_BASE/rebelsofgaming.flatpakrepo"
+          flatpak --user remote-ls rog-cdn --columns=application,version,arch
+
+      - name: GitHub-Release
+        if: env.PUBLISH == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPLOADED: ${{ steps.s3.outputs.available }}
+        run: |
+          draft=()
+          [ "$UPLOADED" = true ] || draft=(--draft)
+          notes="$RUNNER_TEMP/notes.md"
+          {
+            echo "Rebels of Gaming für Linux $VERSION"
+            echo
+            echo "- **Flatpak (empfohlen, auch Steam Deck):** [$APP_ID.flatpakref]($CDN_BASE/$APP_ID.flatpakref) öffnen oder"
+            echo "  \`flatpak install --user --from $CDN_BASE/$APP_ID.flatpakref\` – Updates kommen automatisch über das Repo."
+            echo "- **Flatpak offline:** \`rebelsofgaming-${VERSION}-<x86_64|aarch64>.flatpak\` (Updates danach über das Repo)"
+            echo "- **Debian/Ubuntu/Mint/Pop!_OS:** \`sudo apt install ./rebelsofgaming_${VERSION}_amd64.deb\` (arm64 ebenfalls angehängt)"
+            echo "- Repo-Schlüssel (GPG): \`$GPG_KEY_ID\`"
+            echo
+            echo "Änderungen: [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/CHANGELOG.md)"
+          } > "$notes"
+          gh release create "$GITHUB_REF_NAME" "${draft[@]}" --verify-tag --title "v$VERSION" --notes-file "$notes" \
+            artifacts/dist/*.deb artifacts/dist/*.tar.gz artifacts/dist/*.flatpak artifacts/dist/*.sha256 \
+            "artifacts/release/$APP_ID.flatpakref" artifacts/release/rebelsofgaming.flatpakrepo
+          [ "$UPLOADED" = true ] || echo "::notice::Release als Entwurf angelegt – Pakete liegen noch nicht auf cdn.rogclan.de"
