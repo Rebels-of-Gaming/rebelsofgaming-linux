@@ -331,7 +331,8 @@ public class AppLockTests
         settings.Enabled = false;
         await ViewModelTests.WaitUntil(() => !t.Services.Settings.AppLock);
         await ViewModelTests.WaitUntil(() => t.Secrets.Items.Count == 1); // nur noch der Token
-        Assert.Equal(t.Services.T("Linux_AppLockDisabled"), settings.Feedback.Message);
+        // Die Rückmeldung kommt erst in der Fortsetzung nach DisableAsync (UI-Thread) – unter Last später als das Löschen
+        await ViewModelTests.WaitUntil(() => settings.Feedback.Message == t.Services.T("Linux_AppLockDisabled"));
     }
 
     [AvaloniaFact]
