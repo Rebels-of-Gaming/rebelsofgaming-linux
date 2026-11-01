@@ -6,7 +6,9 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
-Stufe 10 – Feinschliff und Steam Deck, Stufe 9 – Verwaltung + Moderation, Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0, nicht veröffentlicht).
+## [0.1.0] – 2026-11-01
+
+Erste öffentliche Version. Stufe 10 – Feinschliff und Steam Deck, Stufe 9 – Verwaltung + Moderation, Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0).
 
 ### Verteilung (F15)
 

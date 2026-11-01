@@ -118,7 +118,7 @@ Fehlen die S3-Secrets, überspringt die Pipeline Schritt 5 mit Hinweis und legt 
 
 - [ ] `RoGLinuxVersion` in `Directory.Build.props` erhöht
 - [ ] AppStream: neuer `<release version="X.Y.Z" date="<Tag-Datum>" type="stable">` **oben** (für 0.1.0 vorbereitet,
-      Datum 2026-10-31 – am Release-Tag anpassen)
+      zuletzt 0.1.0 am 2026-11-01)
 - [ ] `CHANGELOG.md`: Abschnitt `[X.Y.Z] – Datum` statt `[Unveröffentlicht]`
 - [ ] Pakete geändert? → `packaging/scripts/update-nuget-sources.sh` (CI prüft es)
 - [ ] Probelauf `workflow_dispatch` auf `develop` grün, dann Fast-Forward `main` + Tag (Owner)

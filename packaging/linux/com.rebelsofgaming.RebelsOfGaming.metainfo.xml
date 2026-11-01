@@ -189,7 +189,7 @@
 
   <!-- Neuester Eintrag zuerst; Version/Datum = Tag (Release-Pipeline prüft version + type="stable") -->
   <releases>
-    <release version="0.1.0" date="2026-10-31" type="stable">
+    <release version="0.1.0" date="2026-11-01" type="stable">
       <url type="details">https://github.com/Rebels-of-Gaming/rebelsofgaming-linux/releases/tag/v0.1.0</url>
       <description>
         <p>First public version, with the full range of the clan platform:</p>
