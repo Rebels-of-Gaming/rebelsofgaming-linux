@@ -46,7 +46,7 @@ rebelsofgaming-<version>-linux-x86_64/rebelsofgaming/rebelsofgaming
 
 Versionierte Dateien mit SHA-256: `https://cdn.rogclan.de/apps/linux/<version>/` und am
 [GitHub-Release](https://github.com/Rebels-of-Gaming/rebelsofgaming-linux/releases). Repo-Schlüssel:
-`481C 9899 2856 1CE7 111E 317D F101 268B 68FA DA38` (`packaging/flatpak/rebelsofgaming.asc`). Details und
+`0270 92E9 4A7C 7F09 1DAE 3E5C 285E 5FD5 A7C1 1AEC` (`packaging/flatpak/rebelsofgaming.asc`). Details und
 Bau-Anleitung: [`packaging/README.md`](packaging/README.md).
 
 ## Aufbau
