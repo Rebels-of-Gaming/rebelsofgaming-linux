@@ -39,6 +39,9 @@ public sealed record AppServicesOptions
     /// <summary>HTTP-Handler für Bilder vom CDN der Plattform.</summary>
     public HttpMessageHandler? ImageHandler { get; init; }
 
+    /// <summary>Hosts, von denen Bilder geladen werden (Standard: Plattform; Tests: zusätzlich <c>*.example.test</c>).</summary>
+    public RoG.Core.Content.ContentPolicy? ImagePolicy { get; init; }
+
     public IBrowserLauncher? Browser { get; init; }
 
     public IDesktopNotifier? Notifier { get; init; }
@@ -293,6 +296,14 @@ public sealed class AppServices : IDisposable
 
     public string Format(string key, params object?[] args) => string.Format(Culture, Localizer.GetString(key), args);
 
+    /// <summary>
+    /// Flatpak: Secret-Portal (ein Geheimnis je App, Einträge verschlüsselt im Datenordner – keine Freigabe des ganzen
+    /// Schlüsselbunds, Audit M1). .deb/Tarball: Secret Service direkt (ein Eintrag je Umgebung im Schlüsselbund).
+    /// </summary>
+    internal static ISecretBackend CreateSecretBackend(LinuxPaths paths) => paths.IsFlatpak
+        ? new PortalSecretBackend(new SecretPortal(), Path.Combine(paths.DataDirectory, "secrets"))
+        : new SecretServiceBackend();
+
     public static async Task<AppServices> CreateAsync(AppServicesOptions? options = null)
     {
         options ??= new AppServicesOptions();
@@ -302,8 +313,8 @@ public sealed class AppServices : IDisposable
         var settings = await settingsStore.LoadAsync();
 
         var language = options.Language ?? LanguageResolver.Resolve(settings.Language, CultureInfo.CurrentUICulture);
-        var environment = RoGEnvironment.Get(options.Environment ?? LaunchOptions.Current.Environment ?? settings.Environment);
-        var secrets = options.Secrets ?? (options.Tokens is null ? new SecretServiceBackend() : null);
+        var environment = RoGEnvironment.Get(options.Environment ?? LaunchOptions.Current.Environment ?? LaunchOptions.FilterEnvironment(settings.Environment));
+        var secrets = options.Secrets ?? (options.Tokens is null ? CreateSecretBackend(paths) : null);
         var tokens = options.Tokens ?? new FallbackTokenStore(new SecretServiceTokenStore(secrets!, environment.Name));
         var apiContext = new ApiContext(language, AppVersion);
 
@@ -338,7 +349,7 @@ public sealed class AppServices : IDisposable
         // RoGHttpHandler setzt „RoG-Windows“ nur, wenn noch kein User-Agent da ist – HttpClient überträgt diesen vorher
         api.Http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(AppIdentity.UserAgentProduct, AppVersion));
 
-        var images = new ImageLoader(options.ImageHandler);
+        var images = new ImageLoader(options.ImageHandler, options.ImagePolicy);
         var xdg = new XdgLauncher();
         var launcher = options.Launcher ?? xdg;
         var connector = new RoG.Core.Features.Servers.ServerConnector(launcher, options.Clipboard ?? new AvaloniaClipboard());

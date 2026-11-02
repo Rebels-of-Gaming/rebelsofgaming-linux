@@ -33,13 +33,34 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
 
     public static LaunchOptions Current { get; set; } = new(null, null);
 
+    /// <summary>Name der Entwicklungsumgebung (<c>http://*.rog.test</c>, ohne TLS).</summary>
+    public const string LocalEnvironment = "local";
+
+    /// <summary>
+    /// Darf die Umgebung <c>local</c> gewählt werden? Nur in Debug-Builds: In einem veröffentlichten Paket könnte sonst
+    /// ein untergeschobenes <c>ROG_ENVIRONMENT=local</c> (bzw. eine geänderte <c>settings.json</c>) Anmeldung und
+    /// Token unverschlüsselt über http an einen beliebigen <c>*.rog.test</c>-Host im lokalen Netz schicken.
+    /// </summary>
+#if DEBUG
+    public static bool AllowLocalEnvironment => true;
+#else
+    public static bool AllowLocalEnvironment => false;
+#endif
+
+    /// <summary>Bekannte Umgebung, <c>local</c> nur mit <paramref name="allowLocal"/>; sonst <c>null</c> (= Standard).</summary>
+    public static string? FilterEnvironment(string? name, bool? allowLocal = null) =>
+        name is not null && RoGEnvironment.All.ContainsKey(name) && (name != LocalEnvironment || (allowLocal ?? AllowLocalEnvironment))
+            ? name
+            : null;
+
     /// <summary>
     /// <c>--environment=staging</c> bzw. Umgebungsvariable <c>ROG_ENVIRONMENT</c> gehen den Einstellungen vor; unbekannte
-    /// Namen werden ignoriert. Domains stehen nur in <c>environments.json</c> des Kerns.
+    /// Namen werden ignoriert, <c>local</c> nur in Debug-Builds (<see cref="AllowLocalEnvironment"/>). Domains stehen nur
+    /// in <c>environments.json</c> des Kerns.
     /// Fenstersystem: <c>--x11</c>/<c>--wayland</c> bzw. <c>ROG_DISPLAY=x11|wayland</c>, sonst automatisch
     /// (<see cref="DetectBackend"/>).
     /// </summary>
-    public static LaunchOptions Parse(IReadOnlyList<string> args, Func<string, string?> env)
+    public static LaunchOptions Parse(IReadOnlyList<string> args, Func<string, string?> env, bool? allowLocal = null)
     {
         ArgumentNullException.ThrowIfNull(args);
         ArgumentNullException.ThrowIfNull(env);
@@ -83,7 +104,7 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
             "wayland" => DisplayBackend.Wayland,
             _ => DetectBackend(env),
         };
-        return new LaunchOptions(environment is not null && RoGEnvironment.All.ContainsKey(environment) ? environment : null, link, backend.Value)
+        return new LaunchOptions(FilterEnvironment(environment, allowLocal), link, backend.Value)
         {
             Background = background,
             GameMode = gameMode || DetectGameMode(env),

@@ -71,6 +71,23 @@ public class PlatformServiceTests
         Assert.Equal("rog://news/abc", options.DeepLink?.ToString());
 
         Assert.Null(LaunchOptions.Parse(["--environment=evil"], _ => null).Environment);
-        Assert.Equal("local", LaunchOptions.Parse([], n => n == "ROG_ENVIRONMENT" ? "local" : null).Environment);
+        Assert.Equal("local", LaunchOptions.Parse([], n => n == "ROG_ENVIRONMENT" ? "local" : null, allowLocal: true).Environment);
+    }
+
+    [Fact]
+    public void Local_environment_is_refused_in_release_builds()
+    {
+        // Release: weder Argument noch Umgebungsvariable noch settings.json können auf http://*.rog.test umschalten
+        Assert.Null(LaunchOptions.Parse(["--environment=local"], _ => null, allowLocal: false).Environment);
+        Assert.Null(LaunchOptions.Parse([], n => n == "ROG_ENVIRONMENT" ? "local" : null, allowLocal: false).Environment);
+        Assert.Null(LaunchOptions.FilterEnvironment("local", allowLocal: false));
+        Assert.Equal("staging", LaunchOptions.FilterEnvironment("staging", allowLocal: false));
+        Assert.Equal("local", LaunchOptions.FilterEnvironment("local", allowLocal: true));
+#if DEBUG
+        Assert.True(LaunchOptions.AllowLocalEnvironment);
+#else
+        Assert.False(LaunchOptions.AllowLocalEnvironment);
+        Assert.Null(LaunchOptions.Parse(["--environment=local"], _ => null).Environment);
+#endif
     }
 }
