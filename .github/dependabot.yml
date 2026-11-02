@@ -1,0 +1,27 @@
+# Updates für gepinnte Actions (Commit-SHA + Versionskommentar) und NuGet-Pakete (Directory.Packages.props).
+# NuGet-Updates brauchen danach packaging/scripts/update-nuget-sources.sh (Flatpak baut ohne Netz) – die CI prüft das.
+# Das Submodul external/rog-windows wird bewusst nicht automatisch angehoben (CLAUDE.md: „chore: bump core“ per Hand).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci
+
+  - package-ecosystem: nuget
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      avalonia:
+        patterns: ['Avalonia*']
+    commit-message:
+      prefix: build

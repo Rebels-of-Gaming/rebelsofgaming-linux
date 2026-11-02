@@ -4,7 +4,10 @@
 #  - Tag vX.Y.Z auf einem Commit in main → bauen, testen, Flatpak-Repo signieren, nach rog-public hochladen
 #    (https://cdn.rogclan.de/apps/linux/), GitHub-Release mit .deb, Tarballs, Flatpak-Bundles und .flatpakref.
 #  - workflow_dispatch → Probelauf: alles bauen und prüfen (inkl. Installation aus dem signierten Repo), aber NIE
-#    hochladen und kein Release; ein vorhandener S3-Zugang wird nur lesend geprüft.
+#    hochladen und kein Release; signiert wird mit einem Wegwerf-Schlüssel, Secrets werden nie geladen.
+# Härtung (Audit M2): Actions per Commit-SHA gepinnt (Dependabot hebt sie an), Rechte je Job minimal, Secrets nur in
+# den Schritten, die sie brauchen; GPG-Schlüssel nur im Signier-Job (ohne PPA-Pakete), S3 nur in den Upload-Schritten;
+# Signieren und Hochladen bei Tags in der Umgebung „release“ (nur Tags v*, Freigabe durch den Owner).
 # Fehlen die S3-Secrets ROG_PUBLIC_APPS_KEY_ID/ROG_PUBLIC_APPS_SECRET, werden die Upload-Schritte mit Hinweis
 # übersprungen (Artefakte entstehen trotzdem; das GitHub-Release wird dann nur als Entwurf angelegt).
 # Ablauf und Owner-Schritte: packaging/README.md
@@ -36,8 +39,9 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       publish: ${{ steps.version.outputs.publish }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Tag liegt auf main
@@ -85,12 +89,13 @@ jobs:
     env:
       VERSION: ${{ needs.check.outputs.version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
           submodules: true
 
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
 
@@ -122,7 +127,7 @@ jobs:
           [ "$code" = 124 ] || { echo "::error::Start aus dem .deb fehlgeschlagen (Exit $code)"; exit 1; }
           sudo apt-get remove -y rebelsofgaming
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: packages-${{ matrix.arch }}
           path: |
@@ -147,8 +152,9 @@ jobs:
           - arch: aarch64
             runner: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: flatpak-builder installieren
@@ -170,20 +176,25 @@ jobs:
       - name: Repo packen
         run: tar -C artifacts/flatpak -cf "flatpak-repo-${{ matrix.arch }}.tar" "repo-${{ matrix.arch }}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: flatpak-repo-${{ matrix.arch }}
           path: flatpak-repo-${{ matrix.arch }}.tar
           if-no-files-found: error
           retention-days: 14
 
-  publish:
-    name: Repo signieren, prüfen, hochladen
+  # Signieren: einziger Job mit dem GPG-Schlüssel. Nur Werkzeuge aus dem Ubuntu-Archiv (kein PPA – fremde Pakete
+  # laufen nie neben dem privaten Schlüssel). Signieren braucht kein flatpak ≥ 1.15.6, nur build-commit-from/
+  # build-update-repo/build-bundle. Release (Tag): Umgebung „release“ (nur Tags v*, Freigabe durch den Owner);
+  # Probelauf: Wegwerf-Schlüssel, keine Secrets.
+  sign:
+    name: Repo signieren
     needs: [check, packages, flatpak]
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 30
+    environment: ${{ needs.check.outputs.publish == 'true' && 'release' || '' }}
     permissions:
-      contents: write
+      contents: read
     env:
       VERSION: ${{ needs.check.outputs.version }}
       PUBLISH: ${{ needs.check.outputs.publish }}
@@ -191,120 +202,152 @@ jobs:
       S3_ENDPOINT: https://s3.wahke.lu
       S3_BASE: s3://rog-public/apps/linux
       CDN_BASE: https://cdn.rogclan.de/apps/linux
-      AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
       AWS_DEFAULT_REGION: us-east-1
       AWS_EC2_METADATA_DISABLED: 'true'
-      # Ohne diese beiden lädt die AWS-CLI (≥ 2.23) „aws-chunked“ hoch; SeaweedFS speichert das als
-      # Content-Encoding und das CDN liefert es aus – Browser und flatpak lehnen die Dateien dann ab
       AWS_REQUEST_CHECKSUM_CALCULATION: when_required
       AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          submodules: true
+          persist-credentials: false
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: flatpak-repo-*
+          path: artifacts/flatpak
+          merge-multiple: true
+
+      - name: Werkzeuge (Ubuntu-Archiv)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak ostree
+          flatpak --version
+          for t in artifacts/flatpak/flatpak-repo-*.tar; do tar -C artifacts/flatpak -xf "$t"; done
+
+      - name: Bestehendes Repo aus rog-public laden
+        if: env.PUBLISH == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
+        run: |
+          # Neue Commits hängen am Vorgänger → Clients laden nur Deltas
+          mkdir -p artifacts/flatpak/repo
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "::notice::Kein S3-Zugang – Repo wird neu angelegt (Upload später übersprungen)"; exit 0
+          fi
+          aws configure set default.s3.addressing_style path
+          aws --endpoint-url "$S3_ENDPOINT" s3 sync "$S3_BASE/flatpak/" artifacts/flatpak/repo/ --only-show-errors
+          [ -f artifacts/flatpak/repo/config ] || echo "::notice::Noch kein Repo in rog-public – wird neu angelegt"
+
+      - name: Schlüssel laden, Repo zusammenführen und signieren
+        env:
+          GPG_PRIVATE_KEY: ${{ needs.check.outputs.publish == 'true' && secrets.ROG_FLATPAK_GPG_PRIVATE_KEY || '' }}
+        run: |
+          # Der private Schlüssel lebt nur in diesem Schritt (eigenes GNUPGHOME, danach gelöscht)
+          GNUPGHOME="$(mktemp -d "$RUNNER_TEMP/gnupg.XXXXXX")"
+          export GNUPGHOME
+          chmod 700 "$GNUPGHOME"
+          trap 'gpgconf --kill all >/dev/null 2>&1 || true; rm -rf "$GNUPGHOME"' EXIT
+          mkdir -p artifacts/keys
+          if [ "$PUBLISH" = true ]; then
+            if [ -z "$GPG_PRIVATE_KEY" ] || [ -z "$GPG_KEY_ID" ]; then
+              echo "::error::Secret ROG_FLATPAK_GPG_PRIVATE_KEY bzw. Variable ROG_FLATPAK_GPG_KEY_ID fehlt – ohne Signatur kein Release"
+              exit 1
+            fi
+            printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --batch --quiet --import
+            unset GPG_PRIVATE_KEY
+            # Der geladene Schlüssel muss zum öffentlichen Schlüssel im Repo passen (dem die Nutzer vertrauen)
+            want="$(gpg --with-colons --fingerprint "$GPG_KEY_ID" | awk -F: '/^fpr/{print $10; exit}')"
+            have="$(gpg --with-colons --import-options show-only --import packaging/flatpak/rebelsofgaming.gpg | awk -F: '/^fpr/{print $10; exit}')"
+            if [ -z "$want" ] || [ "$want" != "$have" ]; then
+              echo "::error::Signierschlüssel passt nicht zu packaging/flatpak/rebelsofgaming.gpg"; exit 1
+            fi
+            cp packaging/flatpak/rebelsofgaming.gpg artifacts/keys/repo.gpg
+          else
+            echo "::notice::Probelauf – Wegwerf-Schlüssel, keine Secrets"
+            gpg --batch --passphrase '' --quick-gen-key "RoG CI dry run" rsa3072 sign 1d
+            gpg --export > artifacts/keys/repo.gpg
+            GPG_KEY_ID="$(gpg --with-colons --list-keys | awk -F: '/^fpr/{print $10; exit}')"
+          fi
+          echo "$GPG_KEY_ID" > artifacts/keys/key-id
+          ROG_FLATPAK_PUBLIC_KEY="$PWD/artifacts/keys/repo.gpg" \
+            packaging/scripts/flatpak-repo.sh artifacts/flatpak/repo "$GPG_KEY_ID" \
+            artifacts/flatpak/repo-x86_64 artifacts/flatpak/repo-aarch64
+
+      - name: Flatpak-Bundles (Offline-Installation, Updates danach über das Repo)
+        run: |
+          mkdir -p artifacts/bundles
+          for a in x86_64 aarch64; do
+            bundle="artifacts/bundles/rebelsofgaming-$VERSION-$a.flatpak"
+            flatpak build-bundle --arch="$a" --gpg-keys=artifacts/keys/repo.gpg \
+              --repo-url="$CDN_BASE/flatpak/" --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
+              artifacts/flatpak/repo "$bundle" "$APP_ID" stable
+            (cd artifacts/bundles && sha256sum "$(basename "$bundle")" > "$(basename "$bundle").sha256")
+          done
+          ls -l artifacts/bundles
+          tar -C artifacts -cf signed-repo.tar flatpak/repo bundles keys
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: signed-repo
+          path: signed-repo.tar
+          if-no-files-found: error
+          retention-days: 14
+
+  # Installationsprobe aus dem signierten Repo: braucht flatpak ≥ 1.15.6 (--device=input) aus dem PPA – deshalb in
+  # einem eigenen Job ohne jedes Secret.
+  verify:
+    name: Aus dem signierten Repo installieren
+    needs: [check, packages, sign]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      CDN_BASE: https://cdn.rogclan.de/apps/linux
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: packages-*
           path: artifacts/dist
           merge-multiple: true
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          pattern: flatpak-repo-*
-          path: artifacts/flatpak
-          merge-multiple: true
+          name: signed-repo
+          path: artifacts
 
       - name: Werkzeuge
         run: |
           # Ubuntu 24.04 hat flatpak 1.14 – --device=input (Controller) kennt erst 1.15.6 → aktuelles flatpak aus dem PPA
           sudo add-apt-repository -y ppa:flatpak/stable
           sudo apt-get update -qq
-          sudo apt-get install -y -qq flatpak ostree xvfb xauth dbus
+          sudo apt-get install -y -qq flatpak xvfb xauth dbus
           flatpak --version
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
           # Laufzeit für die Installationsprobe (RuntimeRepo der .flatpakref)
           flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          for t in artifacts/flatpak/flatpak-repo-*.tar; do tar -C artifacts/flatpak -xf "$t"; done
+          tar -C artifacts -xf artifacts/signed-repo.tar
+          mv artifacts/bundles/* artifacts/dist/
           (cd artifacts/dist && sha256sum -c ./*.sha256)
-
-      - name: S3-Zugang vorhanden?
-        id: s3
-        run: |
-          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
-            echo "::notice title=Upload übersprungen::Secrets ROG_PUBLIC_APPS_KEY_ID/ROG_PUBLIC_APPS_SECRET fehlen – nichts wird nach rog-public hochgeladen (Owner-Schritte: packaging/README.md)"
-            echo "available=false" >> "$GITHUB_OUTPUT"
-          else
-            aws configure set default.s3.addressing_style path
-            # s3api statt „s3 ls“: „s3 ls“ endet bei leerem Präfix (erster Upload) mit Code 1
-            path="${S3_BASE#s3://}"
-            aws --endpoint-url "$S3_ENDPOINT" s3api list-objects-v2 --bucket "${path%%/*}" --prefix "${path#*/}/" \
-              --max-keys 1 > /dev/null
-            echo "S3-Zugang ok (lesend geprüft)"
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Signierschlüssel laden
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.ROG_FLATPAK_GPG_PRIVATE_KEY }}
-        run: |
-          GNUPGHOME="$(mktemp -d "$RUNNER_TEMP/gnupg.XXXXXX")"
-          chmod 700 "$GNUPGHOME"
-          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
-          if [ -n "$GPG_PRIVATE_KEY" ] && [ -n "$GPG_KEY_ID" ]; then
-            printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --homedir "$GNUPGHOME" --batch --quiet --import
-            # Der geladene Schlüssel muss zum öffentlichen Schlüssel im Repo passen (dem die Nutzer vertrauen)
-            want="$(gpg --homedir "$GNUPGHOME" --with-colons --fingerprint "$GPG_KEY_ID" | awk -F: '/^fpr/{print $10; exit}')"
-            have="$(gpg --homedir "$GNUPGHOME" --with-colons --import-options show-only --import packaging/flatpak/rebelsofgaming.gpg | awk -F: '/^fpr/{print $10; exit}')"
-            if [ -z "$want" ] || [ "$want" != "$have" ]; then
-              echo "::error::Signierschlüssel passt nicht zu packaging/flatpak/rebelsofgaming.gpg"; exit 1
-            fi
-          elif [ "$PUBLISH" = true ]; then
-            echo "::error::Secret ROG_FLATPAK_GPG_PRIVATE_KEY bzw. Variable ROG_FLATPAK_GPG_KEY_ID fehlt – ohne Signatur kein Release"
-            exit 1
-          else
-            echo "::warning::Kein Signierschlüssel – Probelauf mit Wegwerf-Schlüssel"
-            gpg --homedir "$GNUPGHOME" --batch --passphrase '' --quick-gen-key "RoG CI dry run" rsa3072 sign 1d
-            gpg --homedir "$GNUPGHOME" --export > "$RUNNER_TEMP/dry-run.gpg"
-            echo "GPG_KEY_ID=$(gpg --homedir "$GNUPGHOME" --with-colons --list-keys | awk -F: '/^fpr/{print $10; exit}')" >> "$GITHUB_ENV"
-            echo "DRY_RUN_KEY=$RUNNER_TEMP/dry-run.gpg" >> "$GITHUB_ENV"
-          fi
-
-      - name: Bestehendes Repo aus rog-public laden
-        if: steps.s3.outputs.available == 'true' && env.PUBLISH == 'true'
-        run: |
-          # Neue Commits hängen am Vorgänger → Clients laden nur Deltas
-          mkdir -p artifacts/flatpak/repo
-          aws --endpoint-url "$S3_ENDPOINT" s3 sync "$S3_BASE/flatpak/" artifacts/flatpak/repo/ --only-show-errors
-          [ -f artifacts/flatpak/repo/config ] || echo "::notice::Noch kein Repo in rog-public – wird neu angelegt"
-
-      - name: Repo zusammenführen und signieren
-        run: |
-          ROG_FLATPAK_PUBLIC_KEY="${DRY_RUN_KEY:-$PWD/packaging/flatpak/rebelsofgaming.gpg}" \
-            packaging/scripts/flatpak-repo.sh artifacts/flatpak/repo "$GPG_KEY_ID" \
-            artifacts/flatpak/repo-x86_64 artifacts/flatpak/repo-aarch64
-
-      - name: Flatpak-Bundles (Offline-Installation, Updates danach über das Repo)
-        run: |
-          key_file="${DRY_RUN_KEY:-packaging/flatpak/rebelsofgaming.gpg}"
-          for a in x86_64 aarch64; do
-            bundle="artifacts/dist/rebelsofgaming-$VERSION-$a.flatpak"
-            flatpak build-bundle --arch="$a" --gpg-keys="$key_file" \
-              --repo-url="$CDN_BASE/flatpak/" --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
-              artifacts/flatpak/repo "$bundle" "$APP_ID" stable
-            (cd artifacts/dist && sha256sum "$(basename "$bundle")" > "$(basename "$bundle").sha256")
-          done
-          ls -l artifacts/dist/*.flatpak
 
       - name: Aus dem signierten Repo installieren und starten (x86_64)
         run: |
-          key_file="${DRY_RUN_KEY:-packaging/flatpak/rebelsofgaming.gpg}"
           sed -e "s#^Url=.*#Url=file://$PWD/artifacts/flatpak/repo#" \
-              -e "s#^GPGKey=.*#GPGKey=$(base64 -w0 "$key_file")#" \
+              -e "s#^GPGKey=.*#GPGKey=$(base64 -w0 artifacts/keys/repo.gpg)#" \
               "packaging/flatpak/$APP_ID.flatpakref" > "$RUNNER_TEMP/test.flatpakref"
           flatpak --user install -y --noninteractive "$RUNNER_TEMP/test.flatpakref"
           flatpak --user info "$APP_ID"
+          flatpak --user info --show-permissions "$APP_ID" | tee "$RUNNER_TEMP/permissions.txt"
+          # Audit M1: kein Zugriff auf den ganzen Schlüsselbund
+          if grep -q 'org.freedesktop.secrets' "$RUNNER_TEMP/permissions.txt"; then
+            echo "::error::Flatpak darf org.freedesktop.secrets nicht direkt ansprechen (Secret-Portal nutzen)"; exit 1
+          fi
           flatpak --user remote-ls --all rebelsofgaming
           set +e
           dbus-run-session -- xvfb-run -a timeout 30 flatpak run --user "$APP_ID" --x11
@@ -331,7 +374,7 @@ jobs:
           PY
           cat artifacts/release/latest.json
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release-${{ needs.check.outputs.version }}
           path: |
@@ -343,9 +386,77 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      - name: Upload nach rog-public (apps/linux/)
-        if: steps.s3.outputs.available == 'true' && env.PUBLISH == 'true'
+  # Hochladen + GitHub-Release: nur bei Tag, Umgebung „release“. Keine Paketquellen von Dritten, nur die AWS-CLI des
+  # Runners; S3-Zugang nur in den Upload-Schritten.
+  publish:
+    name: Hochladen und Release
+    needs: [check, sign, verify]
+    if: needs.check.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: release
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      S3_ENDPOINT: https://s3.wahke.lu
+      S3_BASE: s3://rog-public/apps/linux
+      CDN_BASE: https://cdn.rogclan.de/apps/linux
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: 'true'
+      # Ohne diese beiden lädt die AWS-CLI (≥ 2.23) „aws-chunked“ hoch; SeaweedFS speichert das als
+      # Content-Encoding und das CDN liefert es aus – Browser und flatpak lehnen die Dateien dann ab
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: signed-repo
+          path: artifacts
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release-${{ needs.check.outputs.version }}
+          path: artifacts
+
+      - name: Dateien prüfen
         run: |
+          tar -C artifacts -xf artifacts/signed-repo.tar flatpak/repo keys
+          (cd artifacts/dist && sha256sum -c ./*.sha256)
+          echo "GPG_KEY_ID=$(cat artifacts/keys/key-id)" >> "$GITHUB_ENV"
+          ls -l artifacts/dist artifacts/release
+
+      - name: S3-Zugang vorhanden?
+        id: s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "::notice title=Upload übersprungen::Secrets ROG_PUBLIC_APPS_KEY_ID/ROG_PUBLIC_APPS_SECRET fehlen – nichts wird nach rog-public hochgeladen (Owner-Schritte: packaging/README.md)"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            aws configure set default.s3.addressing_style path
+            # s3api statt „s3 ls“: „s3 ls“ endet bei leerem Präfix (erster Upload) mit Code 1
+            path="${S3_BASE#s3://}"
+            aws --endpoint-url "$S3_ENDPOINT" s3api list-objects-v2 --bucket "${path%%/*}" --prefix "${path#*/}/" \
+              --max-keys 1 > /dev/null
+            echo "S3-Zugang ok (lesend geprüft)"
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload nach rog-public (apps/linux/)
+        if: steps.s3.outputs.available == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
+        run: |
+          aws configure set default.s3.addressing_style path
           s3() { aws --endpoint-url "$S3_ENDPOINT" s3 "$@" --only-show-errors; }
           immutable="public, max-age=31536000, immutable"
           short="public, max-age=60"
@@ -404,7 +515,7 @@ jobs:
           s3 sync packaging/screenshots "$S3_BASE/screenshots" --content-type image/png --cache-control "public, max-age=86400"
 
       - name: Über cdn.rogclan.de prüfen
-        if: steps.s3.outputs.available == 'true' && env.PUBLISH == 'true'
+        if: steps.s3.outputs.available == 'true'
         run: |
           for f in "$APP_ID.flatpakref" rebelsofgaming.flatpakrepo latest.json flatpak/summary; do
             if curl -fsSI "$CDN_BASE/$f" | grep -qi '^content-encoding: *aws-chunked'; then
@@ -416,11 +527,14 @@ jobs:
             test "$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)" = "$(cut -d' ' -f1 "$f.sha256")" \
               || { echo "::error::Prüfsumme über $url stimmt nicht"; exit 1; }
           done
-          flatpak --user remote-add --if-not-exists --from rog-cdn "$CDN_BASE/rebelsofgaming.flatpakrepo"
-          flatpak --user remote-ls rog-cdn --columns=application,version,arch
+          # Repo über das CDN lesen (ostree des Ubuntu-Archivs reicht dafür – kein PPA in diesem Job)
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ostree
+          ostree init --mode=archive-z2 --repo="$RUNNER_TEMP/cdn-check"
+          ostree --repo="$RUNNER_TEMP/cdn-check" remote add --gpg-import=artifacts/release/rebelsofgaming.gpg rog-cdn "$CDN_BASE/flatpak/"
+          ostree --repo="$RUNNER_TEMP/cdn-check" remote refs rog-cdn
 
       - name: GitHub-Release
-        if: env.PUBLISH == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           UPLOADED: ${{ steps.s3.outputs.available }}
@@ -440,6 +554,7 @@ jobs:
             echo "Änderungen: [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/CHANGELOG.md)"
           } > "$notes"
           gh release create "$GITHUB_REF_NAME" "${draft[@]}" --verify-tag --title "v$VERSION" --notes-file "$notes" \
+            --repo "$GITHUB_REPOSITORY" \
             artifacts/dist/*.deb artifacts/dist/*.tar.gz artifacts/dist/*.flatpak artifacts/dist/*.sha256 \
             "artifacts/release/$APP_ID.flatpakref" artifacts/release/rebelsofgaming.flatpakrepo
           [ "$UPLOADED" = true ] || echo "::notice::Release als Entwurf angelegt – Pakete liegen noch nicht auf cdn.rogclan.de"

@@ -100,19 +100,26 @@ Run workflow) ist ein **Probelauf**: alles wird gebaut und geprüft, aber nichts
    Recommends und Start unter Xvfb.
 3. **Flatpak** je Architektur **nativ** (`ubuntu-24.04` bzw. `ubuntu-24.04-arm`, für öffentliche Repos kostenlos):
    `flatpak-builder` aus dem Quelltext, NuGet ohne Netz aus `nuget-sources.json`, Repo als Artefakt.
-4. **Veröffentlichen:** privaten Signierschlüssel aus dem Secret laden (muss zu `rebelsofgaming.gpg` passen), mit
-   S3-Zugang das bestehende Repo aus `rog-public` laden (neue Commits hängen am Vorgänger → Deltas), beide Architekturen
-   übernehmen und signieren (`flatpak-repo.sh`: `build-commit-from --gpg-sign`, `build-update-repo
-   --generate-static-deltas --gpg-sign`), **aus dem signierten Repo über eine `.flatpakref` installieren und starten**
-   (prüft Signatur und Schlüssel Ende-zu-Ende), je Architektur ein **Flatpak-Bundle** (`flatpak build-bundle` mit
-   Schlüssel, `--repo-url` auf das eigene Repo und Flathub als Laufzeit-Repo – Offline-Installation, Updates danach
-   über das Repo), `latest.json` erzeugen, alles als Artefakt (90 Tage).
-5. **Upload** nach `rog-public/apps/linux/` (siehe oben), danach Prüfsummen über cdn.rogclan.de und
-   `flatpak remote-ls` gegen das echte Repo.
-6. **GitHub-Release** mit `.deb` (amd64/arm64), Tarballs, Flatpak-Bundles (`.flatpak`, x86_64/aarch64), `.sha256`,
+4. **Signieren** (Job `sign`, bei Tags in der Umgebung `release`): nur Werkzeuge aus dem Ubuntu-Archiv (kein PPA neben
+   dem privaten Schlüssel). Mit S3-Zugang (nur in diesem Schritt) das bestehende Repo aus `rog-public` laden (neue
+   Commits hängen am Vorgänger → Deltas); der private Signierschlüssel lebt **nur im Signier-Schritt** (eigenes
+   `GNUPGHOME`, danach gelöscht) und muss zu `rebelsofgaming.gpg` passen; beide Architekturen übernehmen und signieren
+   (`flatpak-repo.sh`: `build-commit-from --gpg-sign`, `build-update-repo --generate-static-deltas --gpg-sign`), je
+   Architektur ein **Flatpak-Bundle** (`flatpak build-bundle` mit Schlüssel, `--repo-url` auf das eigene Repo und
+   Flathub als Laufzeit-Repo). Probelauf: Wegwerf-Schlüssel, **keine Secrets**.
+5. **Installationsprobe** (Job `verify`, ohne Secrets, flatpak ≥ 1.15.6 aus dem PPA): **aus dem signierten Repo über
+   eine `.flatpakref` installieren und starten** (prüft Signatur und Schlüssel Ende-zu-Ende), prüfen, dass das Flatpak
+   `org.freedesktop.secrets` nicht direkt ansprechen darf, `latest.json` erzeugen, alles als Artefakt (90 Tage).
+6. **Upload** (Job `publish`, nur bei Tags, Umgebung `release`, S3-Zugang nur in den Upload-Schritten) nach
+   `rog-public/apps/linux/` (siehe oben), danach Prüfsummen über cdn.rogclan.de und die Refs des echten Repos.
+7. **GitHub-Release** mit `.deb` (amd64/arm64), Tarballs, Flatpak-Bundles (`.flatpak`, x86_64/aarch64), `.sha256`,
    `.flatpakref`, `.flatpakrepo`.
 
-Fehlen die S3-Secrets, überspringt die Pipeline Schritt 5 mit Hinweis und legt das GitHub-Release nur als **Entwurf** an.
+Härtung (Audit M2): alle Actions per Commit-SHA gepinnt (Versionskommentar, Dependabot hebt sie wöchentlich an),
+oberste Rechte `contents: read`, `contents: write` nur im Job `publish`, `persist-credentials: false` beim Checkout.
+Tags `v*` sind per Ruleset geschützt (anlegen, ändern, löschen nur Admins).
+
+Fehlen die S3-Secrets, überspringt die Pipeline Schritt 6 mit Hinweis und legt das GitHub-Release nur als **Entwurf** an.
 
 ### Checkliste vor einem Tag
 
@@ -140,7 +147,7 @@ Fehlen die S3-Secrets, überspringt die Pipeline Schritt 5 mit Hinweis und legt 
    `… s3://rog-public/test.txt` (muss `AccessDenied` liefern).
    Danach im Repo unter *Settings → Secrets and variables → Actions* die Secrets **`ROG_PUBLIC_APPS_KEY_ID`** (Access
    Key) und **`ROG_PUBLIC_APPS_SECRET`** (Secret Key) setzen (`gh secret set ROG_PUBLIC_APPS_KEY_ID -R
-   Rebels-of-Gaming/rebelsofgaming-linux`). Ein Probelauf (`workflow_dispatch`) prüft den Zugang dann lesend.
+   Rebels-of-Gaming/rebelsofgaming-linux`). Der Zugang wird erst beim Release benutzt (Probeläufe laden keine Secrets).
    cdn.rogclan.de muss `apps/linux/` wie die übrigen Dateien aus `rog-public` ausliefern.
 2. **Signierschlüssel** – erledigt (31.10.2026): Secret `ROG_FLATPAK_GPG_PRIVATE_KEY`, Variable
    `ROG_FLATPAK_GPG_KEY_ID` = `027092E94A7C7F091DAE3E5C285E5FD5A7C11AEC` (RSA 4096, nur Signieren, ohne Ablauf,
@@ -148,7 +155,13 @@ Fehlen die S3-Secrets, überspringt die Pipeline Schritt 5 mit Hinweis und legt 
    (lokal sicher gelöscht, keine Sicherung). Geht er verloren: neuen Schlüssel erzeugen, `rebelsofgaming.gpg`/`.asc` und
    `GPGKey=` ersetzen; bestehende Installationen müssen dann einmal die neue `.flatpakrepo`/`.flatpakref` öffnen bzw.
    `flatpak remote-modify --gpg-import=rebelsofgaming.gpg rebelsofgaming` ausführen.
-3. Website: Installationsseite mit `.flatpakref`-Link und `.deb` (Daten aus `latest.json`), Linux-Feld im Store-Block,
+3. **Umgebung `release`** (angelegt 02.11.2026): nur Tags `v*`, Freigabe durch `wahke`. Jeder Release wartet zweimal auf
+   „Review deployments → Approve“ (Job `sign` und Job `publish`). Empfohlen: die drei Secrets
+   (`ROG_FLATPAK_GPG_PRIVATE_KEY`, `ROG_PUBLIC_APPS_KEY_ID`, `ROG_PUBLIC_APPS_SECRET`) unter *Settings → Environments →
+   release* als **Umgebungs-Secrets** neu eintragen und danach die Repo-Secrets löschen – dann kommt kein anderer
+   Workflow/Branch mehr an sie heran (Werte lassen sich nicht auslesen, deshalb nur durch den Owner).
+4. **Ruleset „Release tags v*“** (angelegt 02.11.2026): Tags `v*` anlegen/ändern/löschen nur Admins.
+5. Website: Installationsseite mit `.flatpakref`-Link und `.deb` (Daten aus `latest.json`), Linux-Feld im Store-Block,
    Datenschutzerklärung (Downloads/Updates von cdn.rogclan.de, Laufzeit von Flathub).
 
 ## Lokal bauen und prüfen
@@ -231,10 +244,24 @@ OFL) liegt im Flatpak unter `/app/share/licenses/com.rebelsofgaming.RebelsOfGami
 
 ## Rechte im Flatpak (Kurzfassung)
 
-Netz · Wayland + X11-Rückfall · IPC (nur X11) · DRI · `/dev/input` (Controller) · `org.freedesktop.secrets`
-(Schlüsselbund) · `org.kde.StatusNotifierWatcher` (Tray) · System-Bus `net.reactivated.Fprint` (Fingerabdruck) ·
-`xdg-download`. Ohne Recht über Portale: Benachrichtigungen, Autostart, Dateiauswahl, Bildschirmfoto, Farbschema,
-Links. Begründung je Zeile im Manifest.
+Netz · Wayland + X11-Rückfall · IPC (nur X11) · DRI · `/dev/input` (Controller) · `org.kde.StatusNotifierWatcher`
+(Tray) · System-Bus `net.reactivated.Fprint` (Fingerabdruck) · `xdg-download`. Ohne Recht über Portale:
+Schlüsselbund (Secret-Portal), Benachrichtigungen, Autostart, Dateiauswahl, Bildschirmfoto, Farbschema, Links.
+Begründung je Zeile im Manifest; `check-packaging.py` lehnt `org.freedesktop.secrets`, `--device=all`, Home-/Host-
+Dateisystem und ganze Busse ab.
+
+**Schlüsselbund (ab 0.1.1):** Das Flatpak spricht **nicht** mehr direkt mit `org.freedesktop.secrets` (das gäbe Lese-
+zugriff auf alle Passwörter des Benutzers), sondern holt über das **Secret-Portal** ein Geheimnis nur für diese App.
+Daraus leitet es per HKDF-SHA256 je Eintrag einen Schlüssel ab (Geräte-Token je Umgebung, Cache-Schlüssel, PIN der
+App-Sperre) und legt die Einträge AES-256-GCM-verschlüsselt unter `~/.var/app/com.rebelsofgaming.RebelsOfGaming/data/
+rebelsofgaming/secrets/` ab (0600, Dateiname = HMAC). Braucht xdg-desktop-portal ≥ 1.5 mit Secret-Backend (GNOME
+Keyring; unter KDE/Steam Deck je nach KWallet-Version – vom Owner zu prüfen); ohne bleibt die Anmeldung nur bis zum Beenden (Hinweis in der App). `.deb` und Tarball nutzen
+weiter den Secret Service direkt. Folge beim Update von 0.1.0: einmal neu anmelden, PIN der App-Sperre neu setzen.
+
+**Grenze von `--device=input`:** Das Recht gibt die ganze `/dev/input`-Hierarchie frei – also auch Tastatur und Maus
+als evdev-Geräte. Die App liest nur Gamepads über SDL, könnte technisch aber alle Eingabegeräte lesen (unter X11 kann
+das ohnehin jede App). Eine feinere Freigabe nur für Controller gibt es in Flatpak nicht; wer das nicht möchte:
+`flatpak override --user --nodevice=input com.rebelsofgaming.RebelsOfGaming` (dann ohne Controller).
 
 ## Screenshots erneuern
 
