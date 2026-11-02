@@ -80,6 +80,21 @@ for name, section in (("com.rebelsofgaming.RebelsOfGaming.flatpakref", "Flatpak 
         if entry.get("RuntimeRepo") != "https://dl.flathub.org/repo/flathub.flatpakrepo":
             errors.append(f"{name}: RuntimeRepo muss Flathub sein (Laufzeit + .NET-Erweiterung)")
 
+# 3. Sandbox-Rechte im Manifest (Audit M1): kein direkter Zugriff auf den Schlüsselbund, keine Vollzugriffe
+manifest = (FLATPAK / "com.rebelsofgaming.RebelsOfGaming.yml").read_text(encoding="utf-8")
+finish_args = [line.strip()[2:].strip() for line in manifest.splitlines() if line.strip().startswith("- --")]
+forbidden = {
+    "--talk-name=org.freedesktop.secrets": "Schlüsselbund nur über das Secret-Portal",
+    "--device=all": "nur --device=dri und --device=input",
+    "--filesystem=home": "nur xdg-download",
+    "--filesystem=host": "nur xdg-download",
+    "--socket=session-bus": "nur einzelne --talk-name",
+    "--socket=system-bus": "nur einzelne --system-talk-name",
+}
+for arg in finish_args:
+    if arg in forbidden:
+        errors.append(f"Flatpak-Manifest: {arg} nicht erlaubt ({forbidden[arg]})")
+
 if errors:
     print("\n".join(f"::error::{e}" for e in errors))
     sys.exit(1)

@@ -37,9 +37,6 @@ finish-args:
   # Braucht Flatpak ≥ 1.15.6 – ältere Versionen ignorieren das Recht, dann bleibt die App ohne Controller bedienbar.
   # SDL selbst bringt die Runtime mit (freedesktop 26.08: SDL3 + sdl2-compat).
   - --device=input
-  # Geräte-Token und Offline-Schlüssel im Schlüsselbund (Secret Service, org.freedesktop.secrets). Das Secret-Portal
-  # liefert nur einen Schlüssel je App, keine benannten Einträge je Umgebung – deshalb (noch) direkt.
-  - --talk-name=org.freedesktop.secrets
   # Tray-Symbol (StatusNotifierItem): Anmeldung beim Watcher des Panels mit dem eindeutigen Busnamen – kein eigener
   # Name nötig. Ohne Panel (GNOME ohne AppIndicator-Erweiterung) beendet das Schließen des Fensters die App.
   - --talk-name=org.kde.StatusNotifierWatcher
@@ -51,6 +48,10 @@ finish-args:
   - --filesystem=xdg-download
   # Ohne weiteres Recht:
   #  - Single-Instance: die App besitzt ihre App-ID als D-Bus-Namen (Flatpak erlaubt den eigenen Namen immer)
+  #  - Schlüsselbund über das Secret-Portal (ab 0.1.1, Audit M1): ein Geheimnis je App, daraus per HKDF je Eintrag
+  #    (Geräte-Token je Umgebung, Cache-Schlüssel, PIN der App-Sperre) ein Schlüssel; die Einträge liegen AES-GCM-
+  #    verschlüsselt im Datenordner der App. Bewusst KEIN --talk-name=org.freedesktop.secrets (das gäbe Zugriff auf
+  #    alle Passwörter des Benutzers). Die CI prüft das.
   #  - Portale: Benachrichtigungen (Notification), Autostart beim Anmelden (Background, fragt einmal nach),
   #    Dateiauswahl (FileChooser), Bildschirmfoto hochladen (Screenshot), Farbschema „Wie das System“ (Settings),
   #    Links, rog:// an Spiele und den Browser (OpenURI)

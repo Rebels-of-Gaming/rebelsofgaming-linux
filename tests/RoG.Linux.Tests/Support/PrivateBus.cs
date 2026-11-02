@@ -425,6 +425,14 @@ public sealed class FakeDesktopPortal : IPathMethodHandler
 
     public List<bool> ScreenshotRequests { get; } = [];
 
+    /// <summary>Geheimnis der App für das Secret-Portal (wie gnome-keyring: 64 zufällige Byte je App-ID).</summary>
+    public byte[] AppSecret { get; set; } = System.Security.Cryptography.RandomNumberGenerator.GetBytes(64);
+
+    /// <summary>Antwortcode für RetrieveSecret: 0 = ok, 1 = abgelehnt, 2 = Fehler.</summary>
+    public uint SecretResponse { get; set; }
+
+    public int SecretRequests { get; private set; }
+
     public string Path => "/org/freedesktop/portal/desktop";
 
     public bool HandlesChildPaths => false;
@@ -492,6 +500,40 @@ public sealed class FakeDesktopPortal : IPathMethodHandler
                 finally
                 {
                     writer.Dispose();
+                }
+
+                break;
+            }
+
+            case ("org.freedesktop.portal.Secret", "RetrieveSecret"):
+            {
+                SecretRequests++;
+                using (var fd = reader.ReadHandle<Microsoft.Win32.SafeHandles.SafeFileHandle>())
+                {
+                    var options = reader.ReadDictionaryOfStringToVariantValue();
+                    var token = options["handle_token"].GetString();
+                    var sender = request.SenderAsString!.TrimStart(':').Replace('.', '_');
+                    var handle = $"/org/freedesktop/portal/desktop/request/{sender}/{token}";
+                    if (SecretResponse == 0 && fd is not null)
+                    {
+                        using var stream = new FileStream(fd, FileAccess.Write);
+                        stream.Write(AppSecret);
+                    }
+
+                    Replies.Send(context, "o", (ref MessageWriter w) => w.WriteObjectPath(handle));
+                    var writer = context.Connection.GetMessageWriter();
+                    try
+                    {
+                        writer.WriteSignalHeader(null, handle, "org.freedesktop.portal.Request", "Response", "ua{sv}");
+                        writer.WriteUInt32(SecretResponse);
+                        var dict = writer.WriteDictionaryStart();
+                        writer.WriteDictionaryEnd(dict);
+                        context.Connection.TrySendMessage(writer.CreateMessage());
+                    }
+                    finally
+                    {
+                        writer.Dispose();
+                    }
                 }
 
                 break;
