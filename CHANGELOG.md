@@ -6,6 +6,25 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
+### Sicherheit
+
+- **Flatpak ohne Zugriff auf den ganzen Schlüsselbund** (Audit M1): Die App fragt nicht mehr direkt beim Secret Service
+  (`org.freedesktop.secrets`) an – damit hätte sie alle Passwörter des Benutzers lesen können –, sondern holt über das
+  **Secret-Portal** ein Geheimnis nur für sich. Daraus leitet sie per HKDF je Eintrag (Anmeldung je Umgebung,
+  Cache-Schlüssel, PIN der App-Sperre) einen eigenen Schlüssel ab; die Einträge liegen AES-256-GCM-verschlüsselt im
+  Datenordner der App. `.deb` und Tarball nutzen weiter den Schlüsselbund direkt.
+  **Einmalig nach dem Update (nur Flatpak):** neu anmelden und – falls genutzt – die PIN der App-Sperre neu setzen.
+  Die alten Einträge kann die Sandbox nicht mehr lesen; sie lassen sich in „Passwörter und Schlüssel“ (Seahorse) bzw.
+  KWalletManager unter „Rebels of Gaming“ löschen. (Bewusst ohne Übergangsversion: 0.1.0 erschien erst am 01.11.2026.)
+- **Bilder** werden höchstens 15 MB groß gelesen – auch wenn der Server keine oder eine falsche Größe nennt (Audit N7) –
+  und nur noch von Servern der Plattform geladen, auch nach Weiterleitungen (fremde Bilder liefert die Website über
+  ihren Bild-Cache aus)
+- Die Entwicklungsumgebung `local` (`--environment=local`, `ROG_ENVIRONMENT=local`, `settings.json`) ist in
+  veröffentlichten Paketen gesperrt – Anmeldung und Token könnten sonst unverschlüsselt über http gehen
+- Release-Pipeline gehärtet (Audit M2): Actions per Commit gepinnt (Dependabot), minimale Rechte je Job, Signier-
+  schlüssel nur im Signier-Schritt ohne Fremdpakete, S3-Zugang nur beim Hochladen, Probeläufe ganz ohne Secrets,
+  Signieren und Hochladen in der geschützten Umgebung `release` mit Freigabe, Release-Tags per Ruleset geschützt
+
 ## [0.1.0] – 2026-11-01
 
 Erste öffentliche Version. Stufe 10 – Feinschliff und Steam Deck, Stufe 9 – Verwaltung + Moderation, Stufe 8 – Wiki, Stufe 7 – Server-Steuerung, Stufe 6 – Clan-Prozesse, Stufe 5 – Medien, Stufe 4 – Kommunikation, Stufe 3 – Echtzeit + Desktop-Integration, Stufe 2 – Community lesen; davor Stufe 1 – Konto + Start und Wechsel auf Avalonia 12 (Version 0.1.0).

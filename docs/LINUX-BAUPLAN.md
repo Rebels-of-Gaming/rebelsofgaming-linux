@@ -396,7 +396,9 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
 - **Lokal:** `settings.json` (Sprache, Umgebung, Gastmodus, zuletzt geöffneter Bereich, Benachrichtigungen an/aus,
   Fenstergröße/-lage – keine personenbezogenen Daten) und `linux.json` (Design) unter
   `$XDG_CONFIG_HOME/rebelsofgaming/` (Flatpak: `~/.var/app/com.rebelsofgaming.RebelsOfGaming/config/…`); Geräte-Token im Schlüsselbund des Systems (Attribute: App-ID, Art,
-  Umgebung; Bezeichnung „Rebels of Gaming (&lt;Anzeigename&gt;)“). Ohne Schlüsselbund nur im Speicher.
+  Umgebung; Bezeichnung „Rebels of Gaming (&lt;Anzeigename&gt;)“); im Flatpak seit L62 stattdessen verschlüsselt im
+  Datenordner (`…/data/rebelsofgaming/secrets/`, Schlüssel aus dem Secret-Portal; Abmelden löscht den Eintrag,
+  Deinstallation mit `--delete-data` alles). Ohne Schlüsselbund nur im Speicher.
   Bilder nur im Speicher, Antworten seit Stufe 4 verschlüsselt auf der Platte (siehe unten). Abmelden widerruft den Token (`POST /v1/auth/logout`) und löscht ihn lokal.
 - **Übermittlung:** nur an die eigenen Server (API, CDN der Plattform). Gerätemeldung `POST /v1/devices` mit
   `platform: linux` und App-Version (nur mit Scope `devices:manage`), Gerätename beim Login (enthält den
@@ -581,6 +583,22 @@ docs/                       LINUX-BAUPLAN.md
 - **L61 – AppStream:** Englisch als Standard mit DE/FR; Screenshots EN Standard + DE; OARS ehrlich streng (Chat
   moderiert, Profil/Ort/verknüpfte Konten für Mitglieder sichtbar); Release 0.1.0 als `development`; Runtime 26.08;
   kein öffentlicher Bugtracker eingetragen.
+- **L62 – Schlüsselbund in Flatpak über das Secret-Portal (Audit M1, 02.11.2026):** `--talk-name=org.freedesktop.secrets`
+  entfernt. `PortalSecretBackend` (implementiert `ISecretBackend`, Token-/PIN-/Cache-Logik unverändert) holt einmal je
+  Lauf das App-Geheimnis (`org.freedesktop.portal.Secret.RetrieveSecret`, Pipe), leitet per HKDF-SHA256 (Salz
+  `RoG-Linux/secret-portal/v1`, Info = Zweck + kanonische Attribute) je Eintrag einen Schlüssel ab und speichert im
+  `RGC1`-Format (`KeyringPayloadProtector`) unter `$XDG_DATA_HOME/rebelsofgaming/secrets/<HMAC>.secret` (0600).
+  Falsches Geheimnis/manipuliert = „nicht vorhanden“; kein Portal = Rückfall „nur diese Sitzung“ wie bisher. Außerhalb
+  von Flatpak weiter `SecretServiceBackend`. **Keine Migration** (Owner-Vorgabe): 0.1.0 war einen Tag alt – Flatpak-
+  Nutzer melden sich einmal neu an und setzen die PIN neu (CHANGELOG). `check-packaging.py` und die Release-Probe
+  lehnen den Talk-Name ab. Offen: Secret-Portal-Backend unter KDE/Steam Deck (KWallet) vom Owner zu prüfen.
+- **L63 – Bilder nur von Plattform-Hosts (02.11.2026):** `ImageLoader` prüft jede Adresse und jede Weiterleitung gegen
+  `ContentPolicy.Platform` des Kerns (https; http nur `*.test`) und liest höchstens 15 MB, auch ohne Content-Length
+  (Audit N7). Fremde Bilder in Inhalten schreibt die API bereits auf den signierten Bild-Cache der Website um
+  (`/media/external?u=…&signature=…`, relativ → Website-Host; Twitch-/Steam-Bilder absolut) – eine Proxy-URL kann die
+  App selbst nicht bilden (Signatur nur serverseitig); was trotzdem fremd ist, zeigt der Inhalts-Parser als Link.
+- **L64 – Umgebung `local` nur in Debug-Builds (02.11.2026):** `LaunchOptions.FilterEnvironment` verwirft `local` aus
+  Argument, `ROG_ENVIRONMENT` und `settings.json`, wenn nicht `DEBUG` (Token/Login sonst per http an `*.rog.test`).
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
