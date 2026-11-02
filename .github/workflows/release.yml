@@ -195,6 +195,10 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
       AWS_DEFAULT_REGION: us-east-1
       AWS_EC2_METADATA_DISABLED: 'true'
+      # Ohne diese beiden lädt die AWS-CLI (≥ 2.23) „aws-chunked“ hoch; SeaweedFS speichert das als
+      # Content-Encoding und das CDN liefert es aus – Browser und flatpak lehnen die Dateien dann ab
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
     steps:
       - uses: actions/checkout@v7
         with:
@@ -402,6 +406,11 @@ jobs:
       - name: Über cdn.rogclan.de prüfen
         if: steps.s3.outputs.available == 'true' && env.PUBLISH == 'true'
         run: |
+          for f in "$APP_ID.flatpakref" rebelsofgaming.flatpakrepo latest.json flatpak/summary; do
+            if curl -fsSI "$CDN_BASE/$f" | grep -qi '^content-encoding: *aws-chunked'; then
+              echo "::error::$CDN_BASE/$f wird mit Content-Encoding aws-chunked ausgeliefert"; exit 1
+            fi
+          done
           for f in artifacts/dist/*.deb; do
             url="$CDN_BASE/$VERSION/$(basename "$f")"
             test "$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)" = "$(cut -d' ' -f1 "$f.sha256")" \

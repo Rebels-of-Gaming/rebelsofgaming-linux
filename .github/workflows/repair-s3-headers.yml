@@ -1,0 +1,58 @@
+# Einmalige Reparatur: entfernt „Content-Encoding: aws-chunked“ von allem unter rog-public/apps/linux/
+# (Folge der AWS-CLI-Prüfsummen beim Release v0.1.0). Kopiert jedes betroffene Objekt auf sich selbst und behält
+# Content-Type und Cache-Control. Lädt nichts Neues hoch und löscht nichts.
+name: S3-Header reparieren
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      S3_ENDPOINT: https://s3.wahke.lu
+      BUCKET: rog-public
+      PREFIX: apps/linux/
+      CDN_BASE: https://cdn.rogclan.de/apps/linux
+      AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: 'true'
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+    steps:
+      - name: Header reparieren
+        run: |
+          aws configure set default.s3.addressing_style path
+          api() { aws --endpoint-url "$S3_ENDPOINT" s3api "$@"; }
+          fixed=0; total=0
+          while read -r key; do
+            [ -n "$key" ] || continue
+            total=$((total + 1))
+            head="$(api head-object --bucket "$BUCKET" --key "$key")"
+            enc="$(jq -r '.ContentEncoding // ""' <<<"$head")"
+            [ "$enc" = aws-chunked ] || continue
+            type="$(jq -r '.ContentType // "application/octet-stream"' <<<"$head")"
+            cache="$(jq -r '.CacheControl // "public, max-age=60"' <<<"$head")"
+            api copy-object --bucket "$BUCKET" --key "$key" --copy-source "$BUCKET/$key" \
+              --metadata-directive REPLACE --content-type "$type" --cache-control "$cache" > /dev/null
+            fixed=$((fixed + 1))
+          done < <(api list-objects-v2 --bucket "$BUCKET" --prefix "$PREFIX" --query 'Contents[].Key' --output text | tr '\t' '\n' | grep -v '^None$')
+          echo "Objekte: $total, repariert: $fixed"
+
+      - name: Über cdn.rogclan.de prüfen
+        run: |
+          for f in com.rebelsofgaming.RebelsOfGaming.flatpakref rebelsofgaming.flatpakrepo latest.json flatpak/summary flatpak/config; do
+            h="$(curl -fsSI "$CDN_BASE/$f")"
+            if grep -qi '^content-encoding: *aws-chunked' <<<"$h"; then
+              echo "::error::$CDN_BASE/$f noch mit aws-chunked (CDN-Cache?)"; exit 1
+            fi
+            echo "ok $f"
+          done
+          sudo apt-get -qq install -y flatpak > /dev/null
+          flatpak --user remote-add --if-not-exists --from rog-cdn "$CDN_BASE/rebelsofgaming.flatpakrepo"
+          flatpak --user remote-ls rog-cdn --columns=application,version,arch
