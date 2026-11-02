@@ -197,7 +197,7 @@ public class MinecraftAdminScreenshotTests
     {
         Assert.True(shell.OpenDeepLink(new Uri("rog://map?server=freebuild-1&x=40&z=40")));
         var map = Assert.IsType<MinecraftMapViewModel>(shell.CurrentPage);
-        map.Tiles = new MapTileCache(new ImageLoader(new FakeMinecraftTiles()), MinecraftMapViewModel.TileCacheCapacity);
+        map.Tiles = new MapTileCache(new ImageLoader(new FakeMinecraftTiles(), TestServices.TestImagePolicy), MinecraftMapViewModel.TileCacheCapacity);
         await WaitUntil(() => map.ShowContent && map.Players.Count > 0);
         await ScreenshotTests.Settle(900);
         if (admin)
@@ -241,7 +241,7 @@ public class MinecraftAdminScreenshotTests
         {
             shell.NavigateTo("Nav_MinecraftMap");
             var map = Assert.IsType<MinecraftMapViewModel>(shell.CurrentPage);
-            map.Tiles = new MapTileCache(new ImageLoader(new FakeMinecraftTiles()), MinecraftMapViewModel.TileCacheCapacity);
+            map.Tiles = new MapTileCache(new ImageLoader(new FakeMinecraftTiles(), TestServices.TestImagePolicy), MinecraftMapViewModel.TileCacheCapacity);
             await WaitUntil(() => map.ShowContent);
             await ScreenshotTests.Settle(900);
         });

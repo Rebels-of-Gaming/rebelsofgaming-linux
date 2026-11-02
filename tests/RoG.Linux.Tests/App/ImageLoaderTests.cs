@@ -1,5 +1,4 @@
 using System.Net;
-using RoG.Core.Content;
 using RoG.Linux.App.Services;
 
 namespace RoG.Linux.Tests.App;
@@ -80,7 +79,7 @@ public class ImageLoaderTests
     [Fact]
     public void Custom_policy_is_respected()
     {
-        using var loader = new ImageLoader(new Handler(_ => new HttpResponseMessage(HttpStatusCode.NotFound)), new ContentPolicy(["example.test"]));
+        using var loader = new ImageLoader(new Handler(_ => new HttpResponseMessage(HttpStatusCode.NotFound)), u => u.Host.EndsWith(".example.test", StringComparison.Ordinal));
         Assert.True(loader.IsAllowed(new Uri("https://cdn.example.test/a.png")));
         Assert.False(loader.IsAllowed(new Uri("https://cdn.rogclan.de/a.png")));
     }

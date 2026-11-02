@@ -173,18 +173,25 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
 - **Mitbenutzt aus dem Submodul:** Übersetzungen (`src/RoG.App/Strings/*/Resources.resw`, eingebettet und von
   `ReswLocalizer` gelesen), Barlow Condensed + OFL, RoG-Abzeichen.
 - **Kein Blocker, aber Windows-Annahmen im Kern** (im Linux-Repo umgangen, nichts im Windows-Repo geändert):
-  1. `RoGHttpHandler` setzt den User-Agent `RoG-Windows/…`, wenn keiner da ist → die Linux-App setzt
-     `RoG-Linux/<Version>` als Standard-Kopf des `HttpClient` (geht vor, Test prüft das).
-  2. `AccountService.RegisterDeviceAsync` meldet fest `platform: windows` → `LinuxDeviceRegistration` mit `linux`.
-  3. `DeviceName` kennt nur `ForWindows` → `LinuxDeviceName` („Linux-App – PC/Steam Deck von …“).
+  1. ~~User-Agent fest `RoG-Windows`~~ **erledigt (Kern 4c8c9e1):** `ApiContext.Platform = linux` → `RoG-Linux/<Version>`,
+     Reverb `client=rog-linux` (`ReverbClient(platform:)`).
+  2. ~~`RegisterDeviceAsync` fest `windows`~~ **erledigt:** `LinuxDeviceRegistration` ruft
+     `RegisterDeviceAsync(version, ManageDevicesPlatform.Linux)`.
+  3. ~~nur `DeviceName.ForWindows`~~ **erledigt:** `LinuxDeviceName` nutzt `DeviceName.For("Linux-App", …, "PC"/"Steam Deck")`.
   4. `PersistentEtagCache`/`Outbox`/Wiki-Offline erwarten einen `IPayloadProtector` (Windows: DPAPI) → unter Linux
      vorerst nur Speicher-Cache; Plattencache folgt mit eigenem Schlüssel aus dem Schlüsselbund (Stufe 4).
-- **Wünsche an den Kern** (im Windows-Repo umsetzen, wenn es passt): Produktname im User-Agent aus `IApiContext`,
-  Plattform als Parameter von `RegisterDeviceAsync`, `DeviceName.For(prefix, …)`. Dann entfallen 1–3. Neu (Stufe 1):
+- **Wünsche an den Kern** (im Windows-Repo umsetzen, wenn es passt): ~~Produktname im User-Agent aus `IApiContext`,
+  Plattform als Parameter von `RegisterDeviceAsync`, `DeviceName.For(prefix, …)`~~ **erledigt mit Kern 4c8c9e1
+  (02.11.2026)**, ebenso ~~`SquadInternalService`~~ (eigene Kopie entfernt), ~~`client=rog-<plattform>`~~ und
+  `VoiceService.SpacerTitle` (eigene Kopie entfernt). Aus dem Sicherheits-Audit kommen mit: Token nur an den API-Host
+  (`RoGHttpHandler.ApiBaseUrl`), Echtzeit nur mit TLS und eigenem Auth-Host (`RealtimeConfig`), Login wartet bei
+  falschem `state` weiter (`LoopbackCallbackListener`), `RoGEnvironment.Resolve(name, allowLocal)` (Linux: `local` nur
+  in Debug, L64), Bilder nur von `RoGEnvironment.MediaDomains`/`IsOwnMedia` (`environments.json` → `media`, L63),
+  Links nur `ApiValues.IsBrowsable` (`XdgLauncher`). `MarkOfTheWeb` ist unter Linux wirkungslos (nur Windows);
+  `TokenResource`/`AccountFileName` braucht Linux nicht (Schlüsselbund-Attribute je Umgebung). Neu (Stufe 1):
   Feld `Theme` in `AppSettings` (dann entfällt `linux.json`), `LanguageResolver`-Text „Systemsprache“ neutral.
   Neu (Stufe 2): **`SquadInternalService`** für `GET /v1/squads/{squad}/intern` (Forum, Squad-Gruppe, Termine, Downloads,
-  Alben, `missing_scopes`) – liegt bis dahin in `src/RoG.Linux.App/Services/SquadInternalService.cs`; die Windows-App
-  zeigt „Intern“ noch nicht. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
+  Alben, `missing_scopes`) – **erledigt**, jetzt `RoG.Core.Features.Squads.SquadInternalService`. `IClipboardService.SetText` asynchron (Wayland/X11-Zwischenablage ist asynchron).
   Neu (Stufe 9): `AdminAccess` und eine Moderations-Rechteprüfung in den Kern (Windows und Linux bauen sie nach),
   `SquadMember` mit Rollen-ID, Markdown-Renderer für Vorschauen, echte Galerie-Freigabe-Warteschlange (W16),
   Endpunkt oder Doku für Meldegründe.
@@ -593,7 +600,7 @@ docs/                       LINUX-BAUPLAN.md
   Nutzer melden sich einmal neu an und setzen die PIN neu (CHANGELOG). `check-packaging.py` und die Release-Probe
   lehnen den Talk-Name ab. Offen: Secret-Portal-Backend unter KDE/Steam Deck (KWallet) vom Owner zu prüfen.
 - **L63 – Bilder nur von Plattform-Hosts (02.11.2026):** `ImageLoader` prüft jede Adresse und jede Weiterleitung gegen
-  `ContentPolicy.Platform` des Kerns (https; http nur `*.test`) und liest höchstens 15 MB, auch ohne Content-Length
+  `RoGEnvironment.IsOwnMedia` der aktiven Umgebung (Kern, `media` in `environments.json`; https, http nur lokal) und liest höchstens 15 MB, auch ohne Content-Length
   (Audit N7). Fremde Bilder in Inhalten schreibt die API bereits auf den signierten Bild-Cache der Website um
   (`/media/external?u=…&signature=…`, relativ → Website-Host; Twitch-/Steam-Bilder absolut) – eine Proxy-URL kann die
   App selbst nicht bilden (Signatur nur serverseitig); was trotzdem fremd ist, zeigt der Inhalts-Parser als Link.

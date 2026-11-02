@@ -170,7 +170,7 @@ public sealed partial class VoiceViewModel : LoadableViewModel
         if (channel.Spacer)
         {
             // Trenner: Überschrift ohne Einrückung, Unterkanäle eine Ebene tiefer (wie im TeamSpeak-Client)
-            if (SpacerTitle(channel.Name) is { } title)
+            if (RoG.Core.Features.Voice.VoiceService.SpacerTitle(channel.Name) is { } title)
             {
                 rows.Add(VoiceRow.Section(title, depth));
             }
@@ -188,22 +188,6 @@ public sealed partial class VoiceViewModel : LoadableViewModel
         {
             Add(rows, child, channel.Spacer ? depth : depth + 1);
         }
-    }
-
-    /// <summary>
-    /// Überschrift eines Trenners: TeamSpeak-Präfix <c>[cspacer]</c>/<c>[*spacer0]</c> weg; reine Linien („---“, „___“)
-    /// ergeben keine Überschrift.
-    /// </summary>
-    internal static string? SpacerTitle(string name)
-    {
-        var text = name.Trim();
-        if (text.StartsWith('[') && text.IndexOf(']', StringComparison.Ordinal) is var end and > 0
-            && text[..end].Contains("spacer", StringComparison.OrdinalIgnoreCase))
-        {
-            text = text[(end + 1)..].Trim();
-        }
-
-        return text.Trim('-', '_', '=', '.', '*', '~', ' ').Length > 0 ? text : null;
     }
 
     private static void Replace(ObservableCollection<VoiceRow> target, List<VoiceRow> rows)

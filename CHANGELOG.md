@@ -24,6 +24,14 @@ Version sammelt `## [Unveröffentlicht]`.
 - Release-Pipeline gehärtet (Audit M2): Actions per Commit gepinnt (Dependabot), minimale Rechte je Job, Signier-
   schlüssel nur im Signier-Schritt ohne Fremdpakete, S3-Zugang nur beim Hochladen, Probeläufe ganz ohne Secrets,
   Signieren und Hochladen in der geschützten Umgebung `release` mit Freigabe, Release-Tags per Ruleset geschützt
+- Mit dem neuen Kern (Windows-App, Sicherheits-Audit): Anmelde-Token geht nur an den API-Server, Echtzeit nur
+  verschlüsselt (wss) und mit Autorisierung beim eigenen Server, der Browser-Login wartet bei gefälschtem Rücksprung
+  weiter, Links öffnen nur `http`/`https`/`mailto`, Bilder nur von den Medien-Domains der Plattform
+
+### Geändert
+
+- Kern angehoben (Website-Stand v0.55): die App meldet sich überall als `RoG-Linux` (API und Echtzeit), Gerätemeldung,
+  Gerätename, „Intern“ der Squads und TeamSpeak-Trenner kommen jetzt aus dem gemeinsamen Kern
 
 ## [0.1.0] – 2026-11-01
 

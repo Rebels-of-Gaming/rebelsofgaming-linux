@@ -583,7 +583,7 @@ public class MinecraftAdminTests
         using var t = await SignedInAsync();
         var main = RoG.Linux.App.App.CreateMainWindow(t.Services); // Übersetzungen/Theme
         var tilesHandler = new FakeMinecraftTiles();
-        var map = new MinecraftMapViewModel(t.Services) { Tiles = new MapTileCache(new ImageLoader(tilesHandler), MinecraftMapViewModel.TileCacheCapacity) };
+        var map = new MinecraftMapViewModel(t.Services) { Tiles = new MapTileCache(new ImageLoader(tilesHandler, TestServices.TestImagePolicy), MinecraftMapViewModel.TileCacheCapacity) };
         var view = new RoG.Linux.App.Views.MinecraftMapView { DataContext = map };
         var window = new Avalonia.Controls.Window { Width = 1280, Height = 800, Content = view };
         window.Show();

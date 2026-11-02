@@ -20,7 +20,7 @@ public sealed class XdgLauncher(IProcessLauncher? processes = null) : IBrowserLa
     public Task<bool> OpenAsync(Uri uri, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(uri);
-        return uri.IsAbsoluteUri && s_webSchemes.Contains(uri.Scheme) ? RunAsync(uri, cancellationToken) : Task.FromResult(false);
+        return RoG.Core.Api.ApiValues.IsBrowsable(uri) ? RunAsync(uri, cancellationToken) : Task.FromResult(false);
     }
 
     /// <summary>

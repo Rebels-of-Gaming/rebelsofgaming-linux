@@ -50,7 +50,7 @@ public sealed partial class RealtimeService : ObservableObject, IAsyncDisposable
         var origin = services.Environment.WebBaseUrl.GetLeftPart(UriPartial.Authority);
         _hub = hub ?? new RealtimeHub(
             ct => RealtimeConfig.FetchAsync(services.Api.Http, ct),
-            config => new ReverbClient(config, new HttpChannelAuthorizer(services.Api.Http, config.AuthEndpoint), () => new ClientWebSocketConnection(userAgent, origin), AppServices.AppVersion));
+            config => new ReverbClient(config, new HttpChannelAuthorizer(services.Api.Http, config.AuthEndpoint), () => new ClientWebSocketConnection(userAgent, origin), AppServices.AppVersion, platform: ClientPlatform.Linux));
 
         _hub.NotificationReceived += (_, n) => OnUi(() => OnNotification(n));
         _hub.UnreadChanged += (_, n) => OnUi(() => UnreadNotifications = n);

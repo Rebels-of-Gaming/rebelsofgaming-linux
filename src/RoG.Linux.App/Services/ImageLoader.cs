@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Net;
 using Avalonia.Media.Imaging;
-using RoG.Core.Content;
 
 namespace RoG.Linux.App.Services;
 
@@ -9,8 +8,8 @@ namespace RoG.Linux.App.Services;
 /// Lädt Bilder (Titelbilder, Avatare) von den Servern/dem CDN der Plattform und dekodiert sie auf die angezeigte Breite.
 /// Fehler ergeben <c>null</c> (Platzhalter statt kaputter Seite). Cache nur im Speicher, je Adresse + Breite.
 /// <para>
-/// Datenschutz: nur Hosts der Plattform (<see cref="ContentPolicy.Platform"/>: Website, API, CDN; https, http nur
-/// lokal <c>*.test</c>) – auch nach Weiterleitungen. Fremde Bilder liefert die API bereits über den Bild-Cache der
+/// Datenschutz: nur Medien-Domains der Plattform (<c>RoGEnvironment.IsOwnMedia</c> des Kerns: Website, CDN; https,
+/// http nur in der lokalen Umgebung) – auch nach Weiterleitungen. Fremde Bilder liefert die API bereits über den Bild-Cache der
 /// Website aus (<c>/media/external?u=…</c>, signiert); was trotzdem fremd ist, lädt die App nicht.
 /// Sicherheit: höchstens <see cref="MaxBytes"/> – auch ohne bzw. mit falscher <c>Content-Length</c> (Audit N7).
 /// </para>
@@ -23,17 +22,18 @@ public sealed class ImageLoader : IDisposable
     private const int MaxRedirects = 3;
 
     private readonly HttpClient _http;
-    private readonly ContentPolicy _policy;
+    private readonly Func<Uri, bool> _isOwnMedia;
     private readonly ConcurrentDictionary<(Uri, int), Task<Bitmap?>> _cache = new();
 
-    public ImageLoader(HttpMessageHandler? handler = null, ContentPolicy? policy = null)
+    public ImageLoader(HttpMessageHandler? handler = null, Func<Uri, bool>? isOwnMedia = null)
     {
         // Weiterleitungen selbst folgen, damit jedes Ziel gegen die Host-Liste geprüft wird
         _http = handler is null
             ? new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false, AutomaticDecompression = DecompressionMethods.None })
             : new HttpClient(handler, disposeHandler: false);
         _http.Timeout = TimeSpan.FromSeconds(20);
-        _policy = policy ?? ContentPolicy.Platform;
+        // Ohne Vorgabe (nur Tests/Werkzeuge): Medien-Domains irgendeiner Umgebung; die App übergibt die der aktiven
+        _isOwnMedia = isOwnMedia ?? (uri => RoG.Core.Config.RoGEnvironment.All.Values.Any(e => e.IsOwnMedia(uri)));
     }
 
     public Task<Bitmap?> LoadAsync(Uri? uri, int decodeWidth)
@@ -54,7 +54,7 @@ public sealed class ImageLoader : IDisposable
 
     /// <summary>Absolute http(s)-Adresse auf einem Host der Plattform?</summary>
     public bool IsAllowed(Uri? uri) =>
-        uri is { IsAbsoluteUri: true } && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp) && _policy.IsTrustedImage(uri);
+        uri is { IsAbsoluteUri: true } && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp) && _isOwnMedia(uri);
 
     /// <summary>Antwort lesen, aber nie mehr als <paramref name="maxBytes"/>; <c>null</c> = zu groß.</summary>
     internal static async Task<byte[]?> ReadCappedAsync(HttpContent content, int maxBytes, CancellationToken cancellationToken = default)

@@ -7,9 +7,10 @@ namespace RoG.Linux.Tests.Support;
 /// <summary>App-Verdrahtung mit Fakes: Einstellungen im Temp-Ordner, Schlüsselbund im Speicher, Fake-API und -Bilder.</summary>
 public sealed class TestServices : IDisposable
 {
-    /// <summary>Bild-Hosts in Tests: Plattform plus die Beispiel-Domains der Fake-Daten.</summary>
-    public static RoG.Core.Content.ContentPolicy TestImagePolicy { get; } =
-        new([.. RoG.Core.Content.ContentPolicy.Platform.TrustedImageHosts, "example.test", "example.org", "example.com"]);
+    /// <summary>Bild-Hosts in Tests: Medien-Domains der Plattform plus die Beispiel-Domains der Fake-Daten.</summary>
+    public static Func<Uri, bool> TestImagePolicy { get; } = uri =>
+        RoG.Core.Config.RoGEnvironment.All.Values.Any(e => e.IsOwnMedia(uri))
+        || (uri.Scheme == Uri.UriSchemeHttps && (uri.Host.EndsWith(".example.test", StringComparison.Ordinal) || uri.Host is "example.test" or "example.org" or "example.com"));
 
     private TestServices(AppServices services, FakeApi api, FakeSecretBackend secrets, RecordingBrowser browser, string folder, FakeClipboard clipboard, FakeLauncher launcher)
     {

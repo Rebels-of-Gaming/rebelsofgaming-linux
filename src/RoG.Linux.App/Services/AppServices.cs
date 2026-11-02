@@ -39,8 +39,8 @@ public sealed record AppServicesOptions
     /// <summary>HTTP-Handler für Bilder vom CDN der Plattform.</summary>
     public HttpMessageHandler? ImageHandler { get; init; }
 
-    /// <summary>Hosts, von denen Bilder geladen werden (Standard: Plattform; Tests: zusätzlich <c>*.example.test</c>).</summary>
-    public RoG.Core.Content.ContentPolicy? ImagePolicy { get; init; }
+    /// <summary>Darf ein Bild direkt geladen werden? Standard: <c>RoGEnvironment.IsOwnMedia</c>; Tests: zusätzlich <c>*.example.test</c>.</summary>
+    public Func<Uri, bool>? ImagePolicy { get; init; }
 
     public IBrowserLauncher? Browser { get; init; }
 
@@ -313,10 +313,13 @@ public sealed class AppServices : IDisposable
         var settings = await settingsStore.LoadAsync();
 
         var language = options.Language ?? LanguageResolver.Resolve(settings.Language, CultureInfo.CurrentUICulture);
-        var environment = RoGEnvironment.Get(options.Environment ?? LaunchOptions.Current.Environment ?? LaunchOptions.FilterEnvironment(settings.Environment));
+        // „local“ (http) nur in Debug-Builds – aus Argument/ROG_ENVIRONMENT filtert LaunchOptions, aus settings.json der Kern
+        var environment = options.Environment is { } forced
+            ? RoGEnvironment.Get(forced)
+            : RoGEnvironment.Resolve(LaunchOptions.Current.Environment ?? settings.Environment, LaunchOptions.AllowLocalEnvironment);
         var secrets = options.Secrets ?? (options.Tokens is null ? CreateSecretBackend(paths) : null);
         var tokens = options.Tokens ?? new FallbackTokenStore(new SecretServiceTokenStore(secrets!, environment.Name));
-        var apiContext = new ApiContext(language, AppVersion);
+        var apiContext = new ApiContext(language, AppVersion) { Platform = ClientPlatform.Linux };
 
         // Antwort-Cache und Warteschlange verschlüsselt auf der Platte (AES-GCM, Schlüssel im Schlüsselbund – statt DPAPI
         // wie unter Windows). Ohne Schlüsselbund bleibt alles im Speicher (Annahme L6/L30).
@@ -346,10 +349,9 @@ public sealed class AppServices : IDisposable
             PruneOld(wikiFolder, CacheRetention);
         }
 
-        // RoGHttpHandler setzt „RoG-Windows“ nur, wenn noch kein User-Agent da ist – HttpClient überträgt diesen vorher
-        api.Http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(AppIdentity.UserAgentProduct, AppVersion));
-
-        var images = new ImageLoader(options.ImageHandler, options.ImagePolicy);
+        // User-Agent „RoG-Linux/<Version>“ setzt der Kern über ApiContext.Platform; Bilder nur von den Medien-Domains
+        // der Umgebung (environments.json → media)
+        var images = new ImageLoader(options.ImageHandler, options.ImagePolicy ?? environment.IsOwnMedia);
         var xdg = new XdgLauncher();
         var launcher = options.Launcher ?? xdg;
         var connector = new RoG.Core.Features.Servers.ServerConnector(launcher, options.Clipboard ?? new AvaloniaClipboard());

@@ -3,26 +3,15 @@ using RoG.Core.Auth;
 namespace RoG.Linux.Platform;
 
 /// <summary>
-/// Gerätename für den App-Login (<c>device_name</c>, max. 80 Zeichen) – Gegenstück zu <c>DeviceName.ForWindows</c>
-/// im geteilten Kern. Steam Deck bekommt einen eigenen Namen, damit man es unter Konto → Apps &amp; Geräte erkennt.
+/// Gerätename für den App-Login (<c>device_name</c>, max. 80 Zeichen) – Präfix und Steam-Deck-Erkennung; die
+/// Bildung des Namens macht der Kern. Steam Deck bekommt einen eigenen Namen, damit man es unter Konto → Apps &amp; Geräte erkennt.
 /// </summary>
 public static class LinuxDeviceName
 {
     public const string Prefix = "Linux-App";
 
-    /// <summary>„Linux-App – PC von &lt;Name&gt;“ bzw. „Linux-App – Steam Deck von &lt;Name&gt;“, ohne Namen nur „Linux-App“.</summary>
-    public static string For(string? owner, bool steamDeck = false)
-    {
-        var clean = new string((owner ?? string.Empty).Where(c => !char.IsControl(c)).ToArray()).Trim();
-        if (clean.Length == 0)
-        {
-            return Prefix;
-        }
-
-        var device = steamDeck ? "Steam Deck" : "PC";
-        var name = $"{Prefix} – {device} von {clean}";
-        return name.Length <= DeviceName.MaxLength ? name : name[..DeviceName.MaxLength].TrimEnd();
-    }
+    /// <summary>„Linux-App – PC von &lt;Name&gt;“ bzw. „Linux-App – Steam Deck von &lt;Name&gt;“, ohne Namen nur „Linux-App“ (Kern: <see cref="DeviceName.For"/>).</summary>
+    public static string For(string? owner, bool steamDeck = false) => DeviceName.For(Prefix, owner, steamDeck ? "Steam Deck" : "PC");
 
     /// <summary>
     /// Steam Deck erkennen: SteamOS setzt <c>SteamDeck=1</c> im Spielmodus, sonst steht die Board-Kennung (Jupiter/Galileo)
