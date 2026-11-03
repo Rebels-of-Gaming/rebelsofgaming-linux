@@ -644,6 +644,16 @@ docs/                       LINUX-BAUPLAN.md
 - **M7 – Stufe-1-Lücken auf macOS:** Klick auf Mitteilung springt nicht zum Ziel (kein Delegate), kein Autostart
   (`SMAppService`), kein Touch ID (App-Sperre nur PIN), kein Bildschirmfoto-Knopf, keine Controller (SDL fehlt).
   Schließen blendet das Fenster aus (App bleibt im Dock, Klick aufs Dock-Symbol holt es zurück, ⌘Q beendet).
+- **M9 – Start in der Sandbox ungeklärt (03.11.2026, wichtigstes Risiko):** Ohne Sandbox startet die App auf dem
+  macOS-15-Runner (Fenster, Shell, `rog-smoke-test: ok`). Ad-hoc signiert **mit** Sandbox bricht sie in
+  `[NSApplication sharedApplication]` (Avalonia-Init) ab: `HIServices _RegisterApplication` → `abort`, weil launchd die
+  Suche nach `com.apple.coreservices.launchservicesd` für den Prozess sperrt („Sandbox restriction“). Gegenprobe: eine
+  Swift-App mit denselben Rechten – auch als Programm **im selben Bundle** – startet sandboxed fehlerfrei; Bundle,
+  Info.plist und Signatur sind also nicht die Ursache, sondern etwas im .NET-Prozess vor der AppKit-Initialisierung
+  (`DOTNET_EnableDiagnostics=0` und `DisableSetProcessName` ändern nichts; apphost ist mit `minos 12.0` gebaut).
+  Der Workflow meldet das als Warnung mit Absturzbericht. **Vor dem ersten Einreichen klären:** mit echtem
+  Store-Profil (TestFlight) auf einem Mac prüfen; falls gleich: Avalonia/.NET-Issue suchen bzw. eigenen nativen
+  Starter (auch für Universal, M4) bauen, der AppKit vor der Laufzeit initialisiert.
 - **M8 – Build-Nummer** (`CFBundleVersion`) = Laufnummer des Workflows `macos.yml`; Version = `RoGLinuxVersion`
   (eine Version für Linux und macOS).
 

@@ -166,6 +166,11 @@ und `disable-library-validation` braucht .NET 10 nicht – alle Bibliotheken tra
 
 ## Offen / später
 
+- **Wichtig – Start in der Sandbox (Bauplan M9):** Auf den GitHub-Runnern startet die App ohne Sandbox einwandfrei,
+  ad-hoc signiert **in** der Sandbox bricht AppKit beim Start ab (LaunchServices gesperrt). Eine Swift-Testapp mit
+  denselben Rechten im selben Bundle läuft. Ob das mit echtem Store-Profil auf einem Mac auch passiert, zeigt erst der
+  erste TestFlight-Build – **vor dem Einreichen zur Prüfung testen.**
+
 - **Universal (Intel + Apple-Chip):** .NET-Rahmenbibliotheken sind je Architektur vorkompiliert – ein einfaches
   `lipo` reicht nicht. Plan: kleiner nativer Starter (universal) unter `Contents/MacOS`, der je Architektur die passende
   .NET-Laufzeit lädt. Der Workflow baut x64 schon mit und startet es unter Rosetta (Rauchtest).
