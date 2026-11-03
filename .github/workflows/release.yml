@@ -199,13 +199,7 @@ jobs:
       VERSION: ${{ needs.check.outputs.version }}
       PUBLISH: ${{ needs.check.outputs.publish }}
       GPG_KEY_ID: ${{ vars.ROG_FLATPAK_GPG_KEY_ID }}
-      S3_ENDPOINT: https://s3.wahke.lu
-      S3_BASE: s3://rog-public/apps/linux
       CDN_BASE: https://cdn.rogclan.de/apps/linux
-      AWS_DEFAULT_REGION: us-east-1
-      AWS_EC2_METADATA_DISABLED: 'true'
-      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
-      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -224,20 +218,21 @@ jobs:
           flatpak --version
           for t in artifacts/flatpak/flatpak-repo-*.tar; do tar -C artifacts/flatpak -xf "$t"; done
 
-      - name: Bestehendes Repo aus rog-public laden
-        if: env.PUBLISH == 'true'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.ROG_PUBLIC_APPS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.ROG_PUBLIC_APPS_SECRET }}
+      - name: Bestehendes Repo über das CDN laden
         run: |
-          # Neue Commits hängen am Vorgänger → Clients laden nur Deltas
-          mkdir -p artifacts/flatpak/repo
-          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
-            echo "::notice::Kein S3-Zugang – Repo wird neu angelegt (Upload später übersprungen)"; exit 0
+          # Neue Commits hängen am Vorgänger → Clients laden nur Deltas. Gelesen wird über das öffentliche CDN
+          # (ostree-Mirror, ohne Zugangsdaten) statt per S3-GetObject – so braucht dieser Job keine S3-Schlüssel, und
+          # der Probelauf prüft den Schritt mit. Tiefe = Prune-Tiefe des Repos, damit der Upload (sync --delete)
+          # keine noch referenzierten Objekte entfernt.
+          repo=artifacts/flatpak/repo
+          if ! curl -fsS -o /dev/null "$CDN_BASE/flatpak/config"; then
+            echo "::notice::Noch kein Repo auf $CDN_BASE/flatpak – wird neu angelegt"; exit 0
           fi
-          aws configure set default.s3.addressing_style path
-          aws --endpoint-url "$S3_ENDPOINT" s3 sync "$S3_BASE/flatpak/" artifacts/flatpak/repo/ --only-show-errors
-          [ -f artifacts/flatpak/repo/config ] || echo "::notice::Noch kein Repo in rog-public – wird neu angelegt"
+          ostree init --mode=archive-z2 --repo="$repo"
+          ostree remote add --repo="$repo" --no-gpg-verify cdn "$CDN_BASE/flatpak"
+          ostree pull --repo="$repo" --mirror --depth="${ROG_FLATPAK_PRUNE_DEPTH:-3}" cdn
+          ostree remote delete --repo="$repo" cdn
+          ostree refs --repo="$repo"
 
       - name: Schlüssel laden, Repo zusammenführen und signieren
         env:
