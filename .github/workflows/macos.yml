@@ -92,6 +92,24 @@ jobs:
               "artifacts/macos/rebelsofgaming-macos-$arch-unsigned.zip"
           done
 
+      - name: DIAGNOSE Sandbox-Referenz (minimale Cocoa-App)
+        continue-on-error: true
+        run: |
+          d="$RUNNER_TEMP/ref/Ref.app/Contents"
+          mkdir -p "$d/MacOS"
+          cat > "$RUNNER_TEMP/ref/main.swift" <<'SWIFT'
+          import AppKit
+          let app = NSApplication.shared
+          print("ref-ok")
+          FileManager.default.createFile(atPath: NSTemporaryDirectory() + "ref-ok.txt", contents: Data("ok".utf8))
+          SWIFT
+          swiftc -O -o "$d/MacOS/Ref" "$RUNNER_TEMP/ref/main.swift"
+          /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.example.rogref" -c "Add :CFBundleExecutable string Ref" -c "Add :CFBundlePackageType string APPL" "$d/Info.plist"
+          codesign --force --options runtime --entitlements packaging/macos/RebelsOfGaming.dev.entitlements --sign - "$RUNNER_TEMP/ref/Ref.app"
+          open -W -n "$RUNNER_TEMP/ref/Ref.app" || true
+          ls "$HOME/Library/Containers/com.example.rogref/Data/tmp/" 2>&1 || true
+          ls "$HOME/Library/Logs/DiagnosticReports/" | grep -i ref || echo "kein Absturzbericht der Referenz-App"
+
       - name: Ad-hoc signieren und starten (Sandbox, Rauchtest)
         run: |
           crash_reports() {
