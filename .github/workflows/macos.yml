@@ -101,7 +101,9 @@ jobs:
                   echo "== $report"
                   grep -E '"(asi|termination|exception|ktriageinfo|crashed)"|"symbol"|abort|Assertion' "$report" | head -n 60
                 done
-            log show --last 3m --style compact --predicate 'process == "rebelsofgaming" OR (sender == "Sandbox" AND eventMessage CONTAINS "rebelsofgaming")' 2>/dev/null | tail -n 60 || true
+            log show --last 3m --style compact --predicate 'process == "rebelsofgaming" OR eventMessage CONTAINS[c] "rebelsofgaming"' 2>/dev/null \
+              | grep -v -E 'ContextStoreAgent|siriknowledged|nehelper|TransactionLog|AMFI|amfid' | tail -n 80 || true
+            find "$HOME/Library/Containers/com.rebelsofgaming.app/Data" -maxdepth 4 \( -path '*/Library/*' -o -path '*/tmp*' \) 2>/dev/null | head -n 40 || true
           }
           smoke() {
             local arch="$1" prefix="$2" mode="$3" app="artifacts/macos/smoke-$1-$3/Rebels of Gaming.app"
@@ -115,7 +117,7 @@ jobs:
               # Sandbox-Apps müssen über LaunchServices starten (wie per Doppelklick) – direkt aus der Shell bricht
               # AppKit beim Anmelden bei launchservicesd ab
               : > "$log"
-              open -W -n --stdout "$PWD/$log" --stderr "$PWD/$log" "$app" --args --smoke-test &
+              open -W -n --env ROG_STARTUP_TRACE=1 --stdout "$PWD/$log" --stderr "$PWD/$log" "$app" --args --smoke-test &
             else
               $prefix "$app/Contents/MacOS/rebelsofgaming" --smoke-test >"$log" 2>&1 &
             fi
