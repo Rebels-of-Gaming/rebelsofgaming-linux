@@ -96,10 +96,23 @@ jobs:
         run: |
           crash_reports() {
             # Absturzberichte von macOS (Sandbox-Verletzung, Abbruch) zur Diagnose ausgeben
+            sleep 8
             find "$HOME/Library/Logs/DiagnosticReports" -name 'rebelsofgaming*' -newer "$GITHUB_WORKSPACE/global.json" 2>/dev/null \
               | while read -r report; do
                   echo "== $report"
-                  grep -E '"(asi|termination|exception|ktriageinfo|crashed)"|"symbol"|abort|Assertion' "$report" | head -n 60
+                  python3 -I -c '
+          import json, sys
+          text = open(sys.argv[1]).read()
+          body = json.loads(text[text.index("\n") + 1:])
+          for key in ("exception", "termination", "asi", "lastExceptionBacktrace"):
+              if key in body: print(key, json.dumps(body[key])[:1500])
+          images = body.get("usedImages", [])
+          for thread in body.get("threads", []):
+              if thread.get("triggered"):
+                  for f in thread.get("frames", [])[:40]:
+                      name = images[f["imageIndex"]].get("name", "?") if f.get("imageIndex", -1) < len(images) else "?"
+                      print("  ", name, f.get("symbol", hex(f.get("imageOffset", 0))))
+          ' "$report" || head -c 3000 "$report"
                 done
             log show --last 3m --style compact --predicate 'process == "rebelsofgaming" OR eventMessage CONTAINS[c] "rebelsofgaming"' 2>/dev/null \
               | grep -v -E 'ContextStoreAgent|siriknowledged|nehelper|TransactionLog|AMFI|amfid' | tail -n 80 || true
