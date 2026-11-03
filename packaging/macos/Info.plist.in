@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Info.plist der macOS-App (Mac App Store). Platzhalter füllt packaging/macos/make-app.sh:
+  @VERSION@ = RoGLinuxVersion (Directory.Build.props), @BUILD@ = fortlaufende Build-Nummer (GitHub run_number),
+  @MIN_MACOS@ = kleinste macOS-Version (.NET 10: macOS 14 Sonoma).
+  Bundle-ID = die der iOS-App (Universal Purchase unter demselben App-Store-Connect-Eintrag).
+-->
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>de</string>
+  <key>CFBundleLocalizations</key>
+  <array>
+    <string>de</string>
+    <string>en</string>
+    <string>fr</string>
+  </array>
+  <key>CFBundleDisplayName</key>
+  <string>Rebels of Gaming</string>
+  <key>CFBundleName</key>
+  <string>Rebels of Gaming</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.rebelsofgaming.app</string>
+  <key>CFBundleExecutable</key>
+  <string>rebelsofgaming</string>
+  <key>CFBundleIconFile</key>
+  <string>AppIcon</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleShortVersionString</key>
+  <string>@VERSION@</string>
+  <key>CFBundleVersion</key>
+  <string>@BUILD@</string>
+  <key>CFBundleSupportedPlatforms</key>
+  <array>
+    <string>MacOSX</string>
+  </array>
+  <key>LSMinimumSystemVersion</key>
+  <string>@MIN_MACOS@</string>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.social-networking</string>
+  <key>NSHumanReadableCopyright</key>
+  <string>© 2020–2026 Rebels of Gaming · Copyright by wahke (https://wahke.lu)</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
+  <key>NSSupportsAutomaticGraphicsSwitching</key>
+  <true/>
+  <!-- Nur HTTPS/WSS zu den eigenen Domains, keine eigene Verschlüsselung über die des Systems hinaus -->
+  <key>ITSAppUsesNonExemptEncryption</key>
+  <false/>
+  <!-- rog://-Links (Benachrichtigungen, Website „In der App öffnen“) – wie die iOS-App -->
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>com.rebelsofgaming.app</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>rog</string>
+      </array>
+    </dict>
+  </array>
+</dict>
+</plist>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Rechte der Mac-App-Store-Version (App Sandbox ist Pflicht). Nur, was die App braucht:
+  - network.client: API, Reverb (WSS), Bilder vom CDN
+  - network.server: Login-Rücksprung auf http://127.0.0.1:<Port>/callback (PKCE + Loopback, RFC 8252) – nur lokal
+  - files.user-selected.read-write: Bild/Datei für Uploads wählen, Speichern unter …
+  - files.downloads.read-write: Downloads landen in ~/Downloads („Im Finder zeigen“)
+  - cs.allow-jit: .NET (CoreCLR) übersetzt Code zur Laufzeit (MAP_JIT); ohne das startet die App mit Hardened Runtime nicht
+  - application-identifier/team-identifier/keychain-access-groups: Schlüsselbund-Einträge (Token, PIN) nur für diese App;
+    müssen zum Mac-App-Store-Provisioning-Profil passen (Team K4KM7V6YK5)
+-->
+<plist version="1.0">
+<dict>
+  <key>com.apple.security.app-sandbox</key>
+  <true/>
+  <key>com.apple.security.network.client</key>
+  <true/>
+  <key>com.apple.security.network.server</key>
+  <true/>
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+  <key>com.apple.security.files.downloads.read-write</key>
+  <true/>
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <key>com.apple.application-identifier</key>
+  <string>K4KM7V6YK5.com.rebelsofgaming.app</string>
+  <key>com.apple.developer.team-identifier</key>
+  <string>K4KM7V6YK5</string>
+  <key>keychain-access-groups</key>
+  <array>
+    <string>K4KM7V6YK5.com.rebelsofgaming.app</string>
+  </array>
+</dict>
+</plist>
