@@ -457,9 +457,14 @@ jobs:
           short="public, max-age=60"
           bin=application/octet-stream
 
-          # 1. Versionierte Pakete – nie überschreiben
+          # 1. Versionierte Pakete – nie überschreiben. Ausnahme: ein abgebrochener Upload derselben Version, die noch nie
+          #    veröffentlicht wurde (latest.json auf dem CDN nennt eine andere Version) – dann wird sie neu hochgeladen.
           if aws --endpoint-url "$S3_ENDPOINT" s3 ls "$S3_BASE/$VERSION/" | grep -q .; then
-            echo "::error::$S3_BASE/$VERSION/ existiert schon – Version erhöhen statt überschreiben"; exit 1
+            published="$(curl -fsS "$CDN_BASE/latest.json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("version",""))' || true)"
+            if [ "$published" = "$VERSION" ]; then
+              echo "::error::$S3_BASE/$VERSION/ ist schon veröffentlicht – Version erhöhen statt überschreiben"; exit 1
+            fi
+            echo "::warning::$S3_BASE/$VERSION/ stammt von einem abgebrochenen Upload (veröffentlicht: ${published:-keine}) – wird überschrieben"
           fi
           for f in artifacts/dist/*.deb; do
             s3 cp "$f" "$S3_BASE/$VERSION/" --content-type application/vnd.debian.binary-package --cache-control "$immutable"
@@ -481,7 +486,12 @@ jobs:
           if [ -d "$repo/deltas" ]; then
             s3 sync "$repo/deltas" "$S3_BASE/flatpak/deltas" --size-only --content-type "$bin" --cache-control "$immutable"
           fi
-          for d in delta-indexes summaries refs; do
+          # delta-indexes/ und deltas/ tragen Base64-Namen mit „+“ – SeaweedFS lehnt DeleteObject für solche Schlüssel mit
+          # SignatureDoesNotMatch ab. Dort nur hochladen, nie löschen (veraltete Indizes/Deltas stören Clients nicht).
+          if [ -d "$repo/delta-indexes" ]; then
+            s3 sync "$repo/delta-indexes" "$S3_BASE/flatpak/delta-indexes" --exact-timestamps --content-type "$bin" --cache-control "$short"
+          fi
+          for d in summaries refs; do
             if [ -d "$repo/$d" ]; then
               s3 sync "$repo/$d" "$S3_BASE/flatpak/$d" --delete --exact-timestamps --content-type "$bin" --cache-control "$short"
             fi
@@ -493,9 +503,6 @@ jobs:
           done
           # Vom Prune entfernte Objekte/Deltas erst jetzt löschen
           s3 sync "$repo/objects" "$S3_BASE/flatpak/objects" --size-only --delete --content-type "$bin" --cache-control "$immutable"
-          if [ -d "$repo/deltas" ]; then
-            s3 sync "$repo/deltas" "$S3_BASE/flatpak/deltas" --size-only --delete --content-type "$bin" --cache-control "$immutable"
-          fi
 
           # 3. Einstiegsdateien, Übersicht, feste Namen der neuesten Pakete, Symbol und Screenshots
           s3 cp "artifacts/release/$APP_ID.flatpakref" "$S3_BASE/" --content-type application/vnd.flatpak.ref --cache-control "$short"
