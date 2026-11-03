@@ -30,12 +30,21 @@ case "$mode" in
   *) echo "Modus unbekannt: $mode" >&2; exit 2 ;;
 esac
 
-# Von innen nach außen: erst jede native Bibliothek, dann das Programm (mit Rechten), zuletzt das Bundle
+# Von innen nach außen: erst jede Datei neben dem Programm, dann das Programm (mit Rechten), zuletzt das Bundle.
+# .NET legt Assemblys (.dll, .json) neben das Programm in Contents/MacOS – codesign verlangt dort für jede Datei eine
+# eigene Signatur (bei Nicht-Mach-O in erweiterten Attributen), sonst „code object is not signed at all“ (Vorgehen wie
+# in der Avalonia-Doku zum Mac App Store).
 while IFS= read -r -d '' file; do
-  if [ "$file" != "$exe" ] && file -b "$file" | grep -q 'Mach-O'; then
+  if [ "$file" != "$exe" ]; then
     codesign --force --options runtime --sign "$identity" "$file"
   fi
-done < <(find "$app/Contents" -type f -print0)
+done < <(find "$app/Contents/MacOS" -type f -print0)
+# native Bibliotheken außerhalb von Contents/MacOS (derzeit keine)
+while IFS= read -r -d '' file; do
+  if file -b "$file" | grep -q 'Mach-O'; then
+    codesign --force --options runtime --sign "$identity" "$file"
+  fi
+done < <(find "$app/Contents" -path "$app/Contents/MacOS" -prune -o -type f -print0)
 codesign --force --options runtime --entitlements "$entitlements" --sign "$identity" "$exe"
 codesign --force --options runtime --entitlements "$entitlements" --sign "$identity" "$app"
 codesign --verify --deep --strict --verbose=2 "$app"
