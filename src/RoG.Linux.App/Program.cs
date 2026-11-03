@@ -41,6 +41,10 @@ internal static class Program
             // App-ID als WM-Klasse (X11) bzw. xdg_toplevel-App-ID (Wayland): Symbol und .desktop-Zuordnung im Dock
             .With(new X11PlatformOptions { WmClass = Platform.AppIdentity.AppId })
             .With(new WaylandPlatformOptions { AppId = Platform.AppIdentity.AppId })
+            // macOS: Avalonia setzt den Prozessnamen sonst über eine private LaunchServices-Schnittstelle – in der
+            // App Sandbox (Mac App Store) ist launchservicesd gesperrt und die App bricht beim Start ab. Den Namen in
+            // Menüleiste und Dock liefert ohnehin das Bundle (CFBundleName).
+            .With(new MacOSPlatformOptions { DisableSetProcessName = true })
             .LogToTrace();
         return backend == DisplayBackend.Wayland ? builder.UseWaylandWithFallback() : builder;
     }
