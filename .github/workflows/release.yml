@@ -222,8 +222,7 @@ jobs:
         run: |
           # Neue Commits hängen am Vorgänger → Clients laden nur Deltas. Gelesen wird über das öffentliche CDN
           # (ostree-Mirror, ohne Zugangsdaten) statt per S3-GetObject – so braucht dieser Job keine S3-Schlüssel, und
-          # der Probelauf prüft den Schritt mit. Tiefe = Prune-Tiefe des Repos, damit der Upload (sync --delete)
-          # keine noch referenzierten Objekte entfernt.
+          # der Probelauf prüft den Schritt mit. Tiefe = Prune-Tiefe des Repos.
           repo=artifacts/flatpak/repo
           if ! curl -fsS -o /dev/null "$CDN_BASE/flatpak/config"; then
             echo "::notice::Noch kein Repo auf $CDN_BASE/flatpak – wird neu angelegt"; exit 0
@@ -486,14 +485,15 @@ jobs:
           if [ -d "$repo/deltas" ]; then
             s3 sync "$repo/deltas" "$S3_BASE/flatpak/deltas" --size-only --content-type "$bin" --cache-control "$immutable"
           fi
-          # delta-indexes/ und deltas/ tragen Base64-Namen mit „+“ – SeaweedFS lehnt DeleteObject für solche Schlüssel mit
-          # SignatureDoesNotMatch ab. Dort nur hochladen, nie löschen (veraltete Indizes/Deltas stören Clients nicht).
+          # Nur hochladen, nie löschen: SeaweedFS lehnt DeleteObject (wie GetObject) von der AWS-CLI mit
+          # SignatureDoesNotMatch ab. Veraltete Objekte, Deltas, Indizes und Summaries stören Clients nicht – maßgeblich
+          # sind refs/ und summary, die zuletzt geschrieben werden. Aufräumen bei Bedarf von Hand (packaging/README.md).
           if [ -d "$repo/delta-indexes" ]; then
             s3 sync "$repo/delta-indexes" "$S3_BASE/flatpak/delta-indexes" --exact-timestamps --content-type "$bin" --cache-control "$short"
           fi
           for d in summaries refs; do
             if [ -d "$repo/$d" ]; then
-              s3 sync "$repo/$d" "$S3_BASE/flatpak/$d" --delete --exact-timestamps --content-type "$bin" --cache-control "$short"
+              s3 sync "$repo/$d" "$S3_BASE/flatpak/$d" --exact-timestamps --content-type "$bin" --cache-control "$short"
             fi
           done
           for f in config summary.idx summary.idx.sig summary summary.sig; do
@@ -501,8 +501,6 @@ jobs:
               s3 cp "$repo/$f" "$S3_BASE/flatpak/$f" --content-type "$bin" --cache-control "$short"
             fi
           done
-          # Vom Prune entfernte Objekte/Deltas erst jetzt löschen
-          s3 sync "$repo/objects" "$S3_BASE/flatpak/objects" --size-only --delete --content-type "$bin" --cache-control "$immutable"
 
           # 3. Einstiegsdateien, Übersicht, feste Namen der neuesten Pakete, Symbol und Screenshots
           s3 cp "artifacts/release/$APP_ID.flatpakref" "$S3_BASE/" --content-type application/vnd.flatpak.ref --cache-control "$short"
