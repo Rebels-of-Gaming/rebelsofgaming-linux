@@ -47,7 +47,7 @@ public sealed partial class LoginViewModel(AppServices services) : ObservableObj
             var http = services.Api.Http;
             var flow = new AppLoginFlow(services.Environment, http, services.Browser, services.Tokens);
             var scopes = await AppScopes.ResolveAsync(http, cts.Token);
-            var deviceName = LinuxDeviceName.For(Environment.UserName, LinuxDeviceName.IsSteamDeck());
+            var deviceName = HostPlatform.DeviceName(Environment.UserName);
             await flow.LoginAsync(scopes, deviceName, services.LoopbackTexts(), cancellationToken: cts.Token);
             await services.UpdateSettingsAsync(s => s with { GuestMode = false });
             OnPropertyChanged(nameof(ShowKeyringWarning));

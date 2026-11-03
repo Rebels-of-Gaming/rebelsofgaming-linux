@@ -895,4 +895,13 @@
   <data name="Linux_KeyboardHintClose" xml:space="preserve">
     <value>Hinweis schließen</value>
   </data>
+  <data name="Linux_MacMenuAbout" xml:space="preserve">
+    <value>Über Rebels of Gaming</value>
+  </data>
+  <data name="Linux_MacMenuSettings" xml:space="preserve">
+    <value>Einstellungen …</value>
+  </data>
+  <data name="Linux_PackageMac" xml:space="preserve">
+    <value>macOS-App (Mac App Store)</value>
+  </data>
 </root>

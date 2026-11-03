@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    macOS-Verdrahtung ohne Oberfläche (Mac App Store): Token und PIN im Schlüsselbund (Security.framework),
+    Mitteilungen (UserNotifications), Links und Finder über NSWorkspace, Ordner im Sandbox-Container.
+    Nur P/Invoke auf Systembibliotheken – keine zusätzlichen NuGet-Pakete (Flatpak-Quellen bleiben unverändert).
+    Die Schnittstellen (ISecretBackend, IDesktopNotifier …) kommen aus RoG.Linux.Platform; alles hier wird nur unter
+    macOS aufgerufen (OperatingSystem.IsMacOS()), baut und testet aber auf jedem System.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>RoG.Mac.Platform</RootNamespace>
+    <AssemblyName>RoG.Mac.Platform</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../RoG.Linux.Platform/RoG.Linux.Platform.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RoG.Mac.Tests" />
+  </ItemGroup>
+
+</Project>

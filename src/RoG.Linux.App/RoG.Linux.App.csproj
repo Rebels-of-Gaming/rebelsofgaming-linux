@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../RoG.Linux.Platform/RoG.Linux.Platform.csproj" />
+    <ProjectReference Include="../RoG.Mac.Platform/RoG.Mac.Platform.csproj" />
   </ItemGroup>
 
   <ItemGroup>

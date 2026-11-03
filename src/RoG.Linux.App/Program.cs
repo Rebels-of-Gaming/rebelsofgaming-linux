@@ -15,6 +15,12 @@ internal static class Program
     {
         Services.StartupTrace.Mark("main");
         LaunchOptions.Current = LaunchOptions.Parse(args, Environment.GetEnvironmentVariable);
+        if (OperatingSystem.IsMacOS())
+        {
+            // macOS: LaunchServices hält die App ohnehin einmalig; rog://-Links kommen als Apple Event (App.MacOS.cs)
+            return BuildAvaloniaApp(DisplayBackend.X11).StartWithClassicDesktopLifetime(args);
+        }
+
         using var instance = Platform.Desktop.SingleInstance.Acquire(args);
         if (!instance.IsPrimary)
         {

@@ -12,6 +12,9 @@ using RoG.Linux.Platform;
 using RoG.Linux.Platform.Desktop;
 using RoG.Linux.Platform.Localization;
 using RoG.Linux.Platform.Secrets;
+using RoG.Mac.Platform;
+using RoG.Mac.Platform.Desktop;
+using RoG.Mac.Platform.Secrets;
 
 namespace RoG.Linux.App.Services;
 
@@ -138,7 +141,7 @@ public sealed class AppServices : IDisposable
         Images = images;
         ServerConnector = serverConnector;
         Account = new AccountService(api.Client, tokens);
-        Devices = new LinuxDeviceRegistration(api.Client, tokens);
+        Devices = new LinuxDeviceRegistration(api.Client, tokens, HostPlatform.DevicePlatform);
         api.Handler.Unauthorized += (_, _) => Unauthorized?.Invoke(this, EventArgs.Empty);
         Realtime = new RealtimeService(this);
         OutboxRunner = new OutboxRunner(this);
@@ -308,7 +311,11 @@ public sealed class AppServices : IDisposable
     {
         options ??= new AppServicesOptions();
         var paths = new LinuxPaths();
-        var settingsDirectory = options.SettingsDirectory ?? paths.ConfigDirectory;
+
+        // macOS (Mac App Store): Ordner im Sandbox-Container, Schlüsselbund, NSWorkspace, UserNotifications
+        var mac = HostPlatform.IsMac ? new MacPaths() : null;
+        var settingsDirectory = options.SettingsDirectory ?? mac?.ConfigDirectory ?? paths.ConfigDirectory;
+        var dataDirectory = options.DataDirectory ?? mac?.DataDirectory ?? paths.DataDirectory;
         var settingsStore = new JsonFileSettingsStore(Path.Combine(settingsDirectory, "settings.json"));
         var settings = await settingsStore.LoadAsync();
 
@@ -317,16 +324,16 @@ public sealed class AppServices : IDisposable
         var environment = options.Environment is { } forced
             ? RoGEnvironment.Get(forced)
             : RoGEnvironment.Resolve(LaunchOptions.Current.Environment ?? settings.Environment, LaunchOptions.AllowLocalEnvironment);
-        var secrets = options.Secrets ?? (options.Tokens is null ? CreateSecretBackend(paths) : null);
+        var secrets = options.Secrets ?? (options.Tokens is null ? (mac is null ? CreateSecretBackend(paths) : new KeychainSecretBackend()) : null);
         var tokens = options.Tokens ?? new FallbackTokenStore(new SecretServiceTokenStore(secrets!, environment.Name));
-        var apiContext = new ApiContext(language, AppVersion) { Platform = ClientPlatform.Linux };
+        var apiContext = new ApiContext(language, AppVersion) { Platform = HostPlatform.Client };
 
         // Antwort-Cache und Warteschlange verschlüsselt auf der Platte (AES-GCM, Schlüssel im Schlüsselbund – statt DPAPI
         // wie unter Windows). Ohne Schlüsselbund bleibt alles im Speicher (Annahme L6/L30).
         var protector = options.MemoryOnly
             ? null
             : options.Protector ?? (secrets is null ? null : await KeyringPayloadProtector.TryCreateAsync(secrets, environment.Name));
-        var cacheDirectory = Path.Combine(options.CacheDirectory ?? paths.CacheDirectory, "http", environment.Name);
+        var cacheDirectory = Path.Combine(options.CacheDirectory ?? mac?.CacheDirectory ?? paths.CacheDirectory, "http", environment.Name);
         IEtagCache cache = new InMemoryEtagCache();
         if (protector is not null)
         {
@@ -337,13 +344,20 @@ public sealed class AppServices : IDisposable
         }
 
         var api = new RoGApi(environment, tokens, apiContext, cache, options.ApiHandler);
+        if (mac is not null)
+        {
+            // Der Kern bildet „RoG-Macos“ aus der Plattform – „RoG-macOS“ setzen wir selbst (Wunsch an den Kern K-Mac1);
+            // ein gesetzter User-Agent hat Vorrang vor dem des Kerns
+            api.Http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(MacIdentity.UserAgentProduct, AppVersion));
+        }
+
         var persistentCache = protector is not null;
         var outbox = new RoG.Core.Offline.Outbox(
             api.Http,
-            protector is null ? null : Path.Combine(options.DataDirectory ?? paths.DataDirectory, $"outbox-{environment.Name}.dat"),
+            protector is null ? null : Path.Combine(dataDirectory, $"outbox-{environment.Name}.dat"),
             protector ?? (RoG.Core.Security.IPayloadProtector)RoG.Core.Security.NoPayloadProtection.Instance);
         await outbox.LoadAsync();
-        var wikiFolder = Path.Combine(options.DataDirectory ?? paths.DataDirectory, $"wiki-{environment.Name}");
+        var wikiFolder = Path.Combine(dataDirectory, $"wiki-{environment.Name}");
         if (protector is not null)
         {
             PruneOld(wikiFolder, CacheRetention);
@@ -352,8 +366,9 @@ public sealed class AppServices : IDisposable
         // User-Agent „RoG-Linux/<Version>“ setzt der Kern über ApiContext.Platform; Bilder nur von den Medien-Domains
         // der Umgebung (environments.json → media)
         var images = new ImageLoader(options.ImageHandler, options.ImagePolicy ?? environment.IsOwnMedia);
+        var workspace = mac is null ? null : new MacWorkspace();
         var xdg = new XdgLauncher();
-        var launcher = options.Launcher ?? xdg;
+        var launcher = options.Launcher ?? (RoG.Core.Features.Servers.IExternalLauncher?)workspace ?? xdg;
         var connector = new RoG.Core.Features.Servers.ServerConnector(launcher, options.Clipboard ?? new AvaloniaClipboard());
         var services = new AppServices(
             settingsStore,
@@ -364,19 +379,19 @@ public sealed class AppServices : IDisposable
             tokens,
             api,
             new ReswLocalizer(language),
-            options.Browser ?? xdg,
-            options.Notifier ?? (paths.IsFlatpak ? new PortalNotifier() : new FreedesktopNotifier()),
+            options.Browser ?? (IBrowserLauncher?)workspace ?? xdg,
+            options.Notifier ?? (mac is not null ? new MacNotifier() : paths.IsFlatpak ? new PortalNotifier() : new FreedesktopNotifier()),
             images,
             outbox,
-            options.Autostart ?? (paths.IsFlatpak
+            options.Autostart ?? (mac is not null ? new MacAutostart() : paths.IsFlatpak
                 ? new PortalAutostart()
                 : new XdgAutostart(paths.ConfigHome, AutostartExecutable())),
             launcher,
             connector)
         {
-            FileManager = options.FileManager ?? new FreedesktopFileManager(),
-            Screenshots = options.Screenshots ?? new ScreenshotPortal(),
-            DownloadDirectory = options.DownloadDirectory ?? paths.DownloadDirectory,
+            FileManager = options.FileManager ?? (IFileManager?)workspace ?? new FreedesktopFileManager(),
+            Screenshots = options.Screenshots ?? (mac is not null ? new MacScreenshots() : new ScreenshotPortal()),
+            DownloadDirectory = options.DownloadDirectory ?? mac?.DownloadDirectory ?? paths.DownloadDirectory,
             PersistentCache = persistentCache,
             Gamepad = new RoG.Linux.Platform.Input.GamepadService(options.GamepadBackend),
             GameMode = options.GameMode ?? LaunchOptions.Current.GameMode,
@@ -388,7 +403,7 @@ public sealed class AppServices : IDisposable
         services.AppLock = new AppLockService(
             services,
             secrets,
-            options.Fingerprint ?? new RoG.Linux.Platform.Security.FprintdVerifier(),
+            options.Fingerprint ?? (mac is not null ? new MacFingerprint() : new RoG.Linux.Platform.Security.FprintdVerifier()),
             options.Clock ?? (static () => DateTimeOffset.UtcNow),
             options.PinIterations ?? RoG.Linux.Platform.Security.PinHash.DefaultIterations);
         services.Gamepad.Enabled = services.LinuxSettings.Controller;

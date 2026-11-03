@@ -65,7 +65,7 @@ public sealed partial class ServerConsoleViewModel : ObservableObject, IAsyncDis
         _feedback = feedback;
         _confirm = confirm;
         _control = new ServerControlService(services.Api.Client);
-        var userAgent = $"{AppIdentity.UserAgentProduct}/{AppServices.AppVersion}";
+        var userAgent = HostPlatform.UserAgent;
         // Wings prüft den Origin gegen allowed_origins – die API nennt ihn im Ticket (Admin-Domain), keine feste Domain
         _sockets = sockets ?? (origin => new ClientWebSocketConnection(userAgent, origin));
         Lines.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasNoLines));

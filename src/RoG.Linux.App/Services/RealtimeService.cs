@@ -44,13 +44,13 @@ public sealed partial class RealtimeService : ObservableObject, IAsyncDisposable
         _services = services;
         _notifications = new NotificationService(services.Api.Client);
         _messages = new MessageService(services.Api.Client);
-        var userAgent = $"{AppIdentity.UserAgentProduct}/{AppServices.AppVersion}";
+        var userAgent = HostPlatform.UserAgent;
         // Reverb der Produktion lehnt Verbindungen ohne erlaubten Origin ab (pusher:error 4009 „Origin not allowed“) –
         // die App meldet sich deshalb mit der Website ihrer Umgebung als Origin (aus environments.json, keine feste Domain)
         var origin = services.Environment.WebBaseUrl.GetLeftPart(UriPartial.Authority);
         _hub = hub ?? new RealtimeHub(
             ct => RealtimeConfig.FetchAsync(services.Api.Http, ct),
-            config => new ReverbClient(config, new HttpChannelAuthorizer(services.Api.Http, config.AuthEndpoint), () => new ClientWebSocketConnection(userAgent, origin), AppServices.AppVersion, platform: ClientPlatform.Linux));
+            config => new ReverbClient(config, new HttpChannelAuthorizer(services.Api.Http, config.AuthEndpoint), () => new ClientWebSocketConnection(userAgent, origin), AppServices.AppVersion, platform: HostPlatform.Client));
 
         _hub.NotificationReceived += (_, n) => OnUi(() => OnNotification(n));
         _hub.UnreadChanged += (_, n) => OnUi(() => UnreadNotifications = n);

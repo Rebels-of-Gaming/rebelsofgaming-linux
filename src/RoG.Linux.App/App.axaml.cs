@@ -32,6 +32,7 @@ public sealed partial class App : Application
         }
 
         StartupTrace.Mark("framework");
+        var macLinks = HostPlatform.IsMac ? MacActivation.Attach(this) : null;
         var services = await AppServices.CreateAsync();
 
         // Zahlen/Datum im Kern (z. B. „1,2 GB“) folgen der App-Sprache, nicht der Locale des Systems (wie Windows)
@@ -53,6 +54,11 @@ public sealed partial class App : Application
 
         services.Gamepad.Start(); // Controller (SDL); ohne SDL endet der Thread sofort
         desktop.Exit += (_, _) => services.Dispose();
+        if (HostPlatform.IsMac)
+        {
+            await StartMacAsync(desktop, services, window, macLinks);
+            return;
+        }
 
         // Tray (StatusNotifierItem): nur wenn ein Panel es zeigt, geht „Schließen“ in den Infobereich
         var tray = new TrayService(services);
@@ -129,26 +135,16 @@ public sealed partial class App : Application
 
             BringToFront(window);
         };
-        // Desktop-Benachrichtigungen nur, wenn das Fenster nicht im Vordergrund ist; Klick → Fenster nach vorn + Ziel
-        services.Realtime.IsAppFocused = () => window.IsActive;
-        services.Realtime.ActivationRequested += (_, target) =>
-        {
-            BringToFront(window);
-            switch (target)
-            {
-                case RoG.Core.Navigation.AppRoute route when shell.Navigate(route):
-                    break;
-                case Uri url:
-                    _ = services.Browser.OpenAsync(url);
-                    break;
-            }
-        };
+
+        AttachRealtimeActivation(services, window, shell);
         await shell.InitializeAsync();
         StartupTrace.Mark("shell-initialized");
         if (LaunchOptions.Current.DeepLink is { } link)
         {
             shell.OpenDeepLink(link);
         }
+
+        SmokeTest(desktop);
 
         // Zweiter Start: Fenster nach vorn holen, Link öffnen (kommt auf einem Hintergrund-Thread)
         if (Instance is { } instance)
@@ -162,6 +158,24 @@ public sealed partial class App : Application
                 }
             });
         }
+    }
+
+    /// <summary>Desktop-Benachrichtigungen nur, wenn das Fenster nicht im Vordergrund ist; Klick → Fenster nach vorn + Ziel.</summary>
+    private static void AttachRealtimeActivation(AppServices services, MainWindow window, ShellViewModel shell)
+    {
+        services.Realtime.IsAppFocused = () => window.IsActive;
+        services.Realtime.ActivationRequested += (_, target) =>
+        {
+            BringToFront(window);
+            switch (target)
+            {
+                case RoG.Core.Navigation.AppRoute route when shell.Navigate(route):
+                    break;
+                case Uri url:
+                    _ = services.Browser.OpenAsync(url);
+                    break;
+            }
+        };
     }
 
     private static async Task<bool> WaitForTrayAsync(TrayService tray, TimeSpan timeout)

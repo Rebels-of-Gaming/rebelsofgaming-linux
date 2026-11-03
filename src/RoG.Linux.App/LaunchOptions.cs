@@ -31,6 +31,14 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
     /// </summary>
     public bool GameMode { get; init; }
 
+    /// <summary>
+    /// Rauchtest (CI, v. a. macOS): normal starten, nach dem Laden der Shell <c>rog-smoke-test: ok</c> ausgeben und nach
+    /// zwei Sekunden beenden.
+    /// </summary>
+    public const string SmokeTestArgument = "--smoke-test";
+
+    public bool SmokeTest { get; init; }
+
     public static LaunchOptions Current { get; set; } = new(null, null);
 
     /// <summary>Name der Entwicklungsumgebung (<c>http://*.rog.test</c>, ohne TLS).</summary>
@@ -69,6 +77,7 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
         DisplayBackend? backend = null;
         var background = false;
         var gameMode = false;
+        var smokeTest = false;
         foreach (var arg in args)
         {
             if (arg.StartsWith("--environment=", StringComparison.Ordinal))
@@ -91,6 +100,10 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
             {
                 gameMode = true;
             }
+            else if (arg == SmokeTestArgument)
+            {
+                smokeTest = true;
+            }
             else if (TryParseDeepLink(arg, out var uri))
             {
                 link = uri;
@@ -108,6 +121,7 @@ public sealed record LaunchOptions(string? Environment, Uri? DeepLink, DisplayBa
         {
             Background = background,
             GameMode = gameMode || DetectGameMode(env),
+            SmokeTest = smokeTest,
         };
     }
 

@@ -66,7 +66,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         AppVersionText = services.Format(StringKeys.SettingsAppVersion, AppServices.AppVersion);
         PlatformText = services.Format(StringKeys.SettingsPlatformVersion, "…");
         EnvironmentText = services.Format("Linux_Environment", services.Environment.Name);
-        PackageText = services.T(services.IsFlatpak ? "Linux_PackageFlatpak" : "Linux_PackageNative")
+        PackageText = services.T(HostPlatform.IsMac ? "Linux_PackageMac" : services.IsFlatpak ? "Linux_PackageFlatpak" : "Linux_PackageNative")
             + (LinuxDeviceName.IsSteamDeck() ? " · " + services.T("Linux_SteamDeck") : string.Empty);
         DisplayText = services.Format("Linux_DisplayBackend", WindowPlacementService.ActualBackend);
         CopyrightText = services.Format(StringKeys.SettingsPageClanCopyright, ClanFounded, DateTime.Now.Year);
