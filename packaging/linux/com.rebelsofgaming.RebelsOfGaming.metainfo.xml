@@ -189,6 +189,25 @@
 
   <!-- Neuester Eintrag zuerst; Version/Datum = Tag (Release-Pipeline prüft version + type="stable") -->
   <releases>
+    <release version="0.2.0" date="2026-11-03" type="stable">
+      <url type="details">https://github.com/Rebels-of-Gaming/rebelsofgaming-linux/releases/tag/v0.2.0</url>
+      <description>
+        <p>Security update and shared core with the Windows app:</p>
+        <p xml:lang="de">Sicherheits-Update und gemeinsamer Kern mit der Windows-App:</p>
+        <p xml:lang="fr">Mise à jour de sécurité et cœur commun avec l’app Windows :</p>
+        <ul>
+          <li>Flatpak no longer has access to your whole keyring – it stores its own data encrypted (sign in once again after the update)</li>
+          <li xml:lang="de">Das Flatpak hat keinen Zugriff mehr auf deinen ganzen Schlüsselbund – es speichert seine Daten selbst verschlüsselt (nach dem Update einmal neu anmelden)</li>
+          <li xml:lang="fr">Le Flatpak n’a plus accès à tout ton trousseau – il chiffre lui-même ses données (reconnecte-toi une fois après la mise à jour)</li>
+          <li>Sign-in token is only sent to the platform’s own server; images only from the platform</li>
+          <li xml:lang="de">Der Anmelde-Token geht nur noch an den Server der Plattform; Bilder nur von der Plattform</li>
+          <li xml:lang="fr">Le jeton de connexion n’est envoyé qu’au serveur de la plateforme ; images uniquement depuis la plateforme</li>
+          <li>TeamSpeak channels below separators are shown correctly</li>
+          <li xml:lang="de">TeamSpeak-Kanäle unter Trennern werden richtig angezeigt</li>
+          <li xml:lang="fr">Les salons TeamSpeak sous les séparateurs s’affichent correctement</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-11-01" type="stable">
       <url type="details">https://github.com/Rebels-of-Gaming/rebelsofgaming-linux/releases/tag/v0.1.0</url>
       <description>

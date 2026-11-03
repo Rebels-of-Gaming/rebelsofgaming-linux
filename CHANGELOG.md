@@ -6,6 +6,8 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
+## [0.2.0] – 2026-11-03
+
 ### Sicherheit
 
 - **Flatpak ohne Zugriff auf den ganzen Schlüsselbund** (Audit M1): Die App fragt nicht mehr direkt beim Secret Service
