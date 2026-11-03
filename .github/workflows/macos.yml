@@ -126,6 +126,29 @@ jobs:
           }
           # erst ohne Sandbox (Laufzeit + Oberfläche), dann ad-hoc signiert in der Sandbox wie im Store
           smoke arm64 "" plain
+          # DIAGNOSE (vorübergehend): Varianten der Signatur einzeln
+          variant() {
+            local name="$1" ent="$2" opts="$3" app="artifacts/macos/diag-$1/Rebels of Gaming.app"
+            mkdir -p "artifacts/macos/diag-$name"
+            ditto "artifacts/macos/arm64/Rebels of Gaming.app" "$app"
+            find "$app/Contents/MacOS" -type f ! -name rebelsofgaming -exec codesign --force $opts --sign - {} \; 2>/dev/null
+            codesign --force $opts ${ent:+--entitlements "$ent"} --sign - "$app/Contents/MacOS/rebelsofgaming" 2>/dev/null
+            codesign --force $opts ${ent:+--entitlements "$ent"} --sign - "$app" 2>/dev/null
+            "$app/Contents/MacOS/rebelsofgaming" --smoke-test > "artifacts/macos/diag-$name.log" 2>&1 &
+            local pid=$! i
+            for i in $(seq 1 40); do kill -0 "$pid" 2>/dev/null || break; sleep 1; done
+            kill -9 "$pid" 2>/dev/null || true
+            wait "$pid"; local rc=$?
+            echo "== Variante $name: exit $rc, $(grep -c 'rog-smoke-test: ok' "artifacts/macos/diag-$name.log") ok"
+            head -c 1500 "artifacts/macos/diag-$name.log"
+          }
+          printf '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>com.apple.security.cs.allow-jit</key><true/></dict></plist>' > "$RUNNER_TEMP/jit.plist"
+          printf '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>com.apple.security.app-sandbox</key><true/></dict></plist>' > "$RUNNER_TEMP/sb.plist"
+          variant adhoc-plain "" "" || true
+          variant runtime-jit "$RUNNER_TEMP/jit.plist" "--options runtime" || true
+          variant sandbox-only "$RUNNER_TEMP/sb.plist" "" || true
+          variant dev-noruntime packaging/macos/RebelsOfGaming.dev.entitlements "" || true
+          log show --last 4m --style compact --predicate 'eventMessage CONTAINS[c] "rebelsofgaming" OR subsystem == "com.apple.secinit" OR process == "rebelsofgaming"' 2>/dev/null | grep -v ContextStoreAgent | grep -v siriknowledged | tail -n 80 || true
           smoke arm64 "" sandbox
           if arch -x86_64 /usr/bin/true 2>/dev/null; then
             smoke x64 "arch -x86_64" sandbox
