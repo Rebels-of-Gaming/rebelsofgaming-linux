@@ -74,7 +74,19 @@ public sealed partial class App
             return;
         }
 
-        Console.WriteLine($"rog-smoke-test: ok ({HostPlatform.UserAgent}, {Environment.OSVersion})");
+        var line = $"rog-smoke-test: ok ({HostPlatform.UserAgent}, {Environment.OSVersion})";
+        Console.WriteLine(line);
+        try
+        {
+            // zusätzlich als Datei: in der Sandbox (Start über LaunchServices) erreicht stdout die CI nicht immer –
+            // TMPDIR liegt dann im Container (~/Library/Containers/<Bundle-ID>/Data/tmp)
+            File.WriteAllText(Path.Combine(Path.GetTempPath(), "rog-smoke-test.txt"), line + Environment.NewLine);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // nur Diagnose
+        }
+
         DispatcherTimer.RunOnce(() => desktop.TryShutdown(), TimeSpan.FromSeconds(2));
     }
 }

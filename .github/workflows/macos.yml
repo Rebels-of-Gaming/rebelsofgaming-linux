@@ -131,6 +131,9 @@ jobs:
               return 1
             fi
             wait "$pid" || true
+            # Sandbox: Meldung auch als Datei im Container-TMPDIR (stdout geht über LaunchServices nicht immer durch)
+            find "$HOME/Library/Containers/com.rebelsofgaming.app/Data" -name rog-smoke-test.txt -newer "$app/Contents/Info.plist" \
+              -exec cat {} \; >> "$log" 2>/dev/null || true
             cat "$log"
             grep -q 'rog-smoke-test: ok' "$log" || { crash_reports; echo "::error::Rauchtest $arch ($mode): keine Erfolgsmeldung"; return 1; }
           }
