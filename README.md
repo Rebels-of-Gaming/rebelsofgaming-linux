@@ -49,14 +49,19 @@ Versionierte Dateien mit SHA-256: `https://cdn.rogclan.de/apps/linux/<version>/`
 `0270 92E9 4A7C 7F09 1DAE 3E5C 285E 5FD5 A7C1 1AEC` (`packaging/flatpak/rebelsofgaming.asc`). Details und
 Bau-Anleitung: [`packaging/README.md`](packaging/README.md).
 
+**macOS (Mac App Store, in Vorbereitung):** gleiche App für Macs mit Apple-Chip, macOS 14 oder neuer – unter demselben
+Store-Eintrag wie die iOS-App. Bau, Einrichtung und Veröffentlichung: [`packaging/macos/README.md`](packaging/macos/README.md).
+
 ## Aufbau
 
 | Projekt | Inhalt |
 |---|---|
 | `external/rog-windows` | Git-Submodul des Windows-Repos (fester Commit). Daraus wird **`src/RoG.Core`** gebaut (API-Client, Pipeline, Login, Echtzeit, Parser) – unverändert, nicht kopiert. Außerdem Übersetzungen (`.resw`), Schrift und Logo. |
 | `src/RoG.Linux.Platform` | Linux-Verdrahtung ohne Oberfläche: Token und Cache-Schlüssel im Schlüsselbund (Secret Service über D-Bus; im Flatpak über das Secret-Portal), Desktop-Benachrichtigungen (Dienst bzw. Portal), Tray (StatusNotifierItem), Autostart (XDG bzw. Portal), Single-Instance, Dateimanager, `xdg-open`, XDG-Ordner, Gerätename, Übersetzungen |
-| `src/RoG.Linux.App` | Avalonia-12-Oberfläche (MVVM mit CommunityToolkit.Mvvm): Shell, Start, News, Nachrichten (+ Chat-Fenster), Forum, Squads, Mitglieder, Termine, Server (Minecraft, TeamSpeak, Discord), Matches + Stats, Bestenlisten, Freunde, Mitgliederkarte, Votes, Server-Steuerung (Konsole, Configs, Dateien, Backups, RCON, Bans), App-Sperre, Wiki (offline), Verwaltung + Moderation, Minecraft-Karte, Medien, Uploads, Info, Suche, Glocke, Konto, Einstellungen, Tray |
+| `src/RoG.Mac.Platform` | macOS-Verdrahtung ohne Oberfläche (nur P/Invoke): Schlüsselbund (Security.framework), Mitteilungen (UserNotifications), Links/Finder (NSWorkspace), Ordner im Sandbox-Container |
+| `src/RoG.Linux.App` | Avalonia-12-Oberfläche für Linux **und macOS** (MVVM mit CommunityToolkit.Mvvm): Shell, Start, News, Nachrichten (+ Chat-Fenster), Forum, Squads, Mitglieder, Termine, Server (Minecraft, TeamSpeak, Discord), Matches + Stats, Bestenlisten, Freunde, Mitgliederkarte, Votes, Server-Steuerung (Konsole, Configs, Dateien, Backups, RCON, Bans), App-Sperre, Wiki (offline), Verwaltung + Moderation, Minecraft-Karte, Medien, Uploads, Info, Suche, Glocke, Konto, Einstellungen, Tray |
 | `tests/RoG.Linux.Tests` | xUnit: Plattform-Dienste, ViewModels gegen einen Fake-Server, Headless-Screenshots (`artifacts/screenshots/`) |
+| `tests/RoG.Mac.Tests` | xUnit: macOS-Verdrahtung (unter macOS mit echtem Schlüsselbund, im Workflow `macos.yml`) |
 | `packaging/` | Flatpak-Manifest (Bau aus dem Quelltext), eigenes Repo (`.flatpakref`, öffentlicher Schlüssel), `.deb`, `.desktop`-Datei, AppStream-Metadaten, Store-Screenshots, Skripte – Anleitung in [`packaging/README.md`](packaging/README.md) |
 
 ## Entwicklung

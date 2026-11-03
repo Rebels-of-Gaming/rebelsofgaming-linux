@@ -5,6 +5,12 @@ Stand, Stufen, Annahmen und offene Fragen der Linux-App. Funktionsumfang wie die
 
 ## Stand
 
+**macOS (Mac App Store), Stufe 1 (03.11.2026) – im Repo erledigt:** gleiche Oberfläche (`src/RoG.Linux.App`) mit
+macOS-Verdrahtung `src/RoG.Mac.Platform` (Schlüsselbund, Mitteilungen, NSWorkspace, Sandbox-Ordner), Menüleiste,
+Dock-Verhalten, `rog://` über Apple Events, Bundle + Sandbox-Rechte, Workflow `macos.yml` (Build, Tests, Rauchtest in
+der Sandbox; Signieren/Upload nur bei Tag + Secrets). Bundle-ID der iOS-App `com.rebelsofgaming.app` (Universal
+Purchase). **Offen nur für den Owner:** Zertifikate, Profil, API-Schlüssel, Secrets, macOS im App-Store-Connect-Eintrag
+anlegen – Anleitung `packaging/macos/README.md`. Annahmen M1–M8 unten.
 **Verteilung (31.10.2026, F15) – im Repo erledigt:** eigenes GPG-signiertes Flatpak-Repo
 `https://cdn.rogclan.de/apps/linux/flatpak/` (Bau aus dem Quelltext ohne Netz, x86_64 + aarch64 nativ auf GitHub-Runnern,
 Ein-Klick-`.flatpakref`, Offline-Bundles `.flatpak`), `.deb` (amd64/arm64) und Tarballs; Release-Pipeline `release.yml` (Tag `v*` auf `main`,
@@ -210,6 +216,9 @@ Wayland-Compositor (auf dem Entwicklungsrechner keiner vorhanden) – bitte einm
   ist seit Website v0.53.1 nicht mehr nötig, F6 erledigt). **Hinweis an die Windows-App (kein Kern-Thema):** In
   `VoiceViewModel.Add` beendet `channel.Spacer` die Rekursion – Unterkanäle unter Trennern (so liefert die Produktion
   alle Squad-Kanäle) erscheinen dort nie; Linux zeigt Trenner als Überschrift (L29).
+- **Wünsche an den Kern (macOS, 03.11.2026):** **K-Mac1** `ClientPlatform.MacOS = "macos"` und `Product("macos")` →
+  `RoG-macOS` (heute `RoG-Macos`; die App setzt den User-Agent über `HttpClient.DefaultRequestHeaders` selbst, Reverb
+  meldet `client=rog-macos`). **K-Mac2** `DeviceName.For` mit „Mac“ ist schon nutzbar (kein Bedarf).
 - **Kern anheben:** `git -C external/rog-windows fetch && git -C external/rog-windows checkout <commit>`, bauen,
   testen, Commit `chore: bump core to <hash>`.
 
@@ -325,6 +334,12 @@ wieder auftreten: `libfontconfig1` + `fonts-dejavu-core` auf dem Runner installi
    Workflow warnt, wenn sie fehlen.
 
 ## Datenschutz (Stand Stufe 10)
+
+- **Neu mit macOS (03.11.2026):** keine neuen API-Aufrufe (Plattform `macos`, User-Agent `RoG-macOS`). Lokal: Token,
+  PIN und Cache-Schlüssel im Schlüsselbund von macOS (nur dieses Gerät, kein iCloud), Einstellungen/verschlüsselte
+  Caches im Sandbox-Container `~/Library/Containers/com.rebelsofgaming.app/` (Löschen der App entfernt alles,
+  Speicherdauer wie Linux). Mitteilungen zeigt macOS an (lokal, kein Push-Dienst). **Vertrieb über den Mac App Store:**
+  Apple verarbeitet Download-/Kaufdaten – wie bei der iOS-App; gehört in den Abschnitt Apps der Datenschutzerklärung.
 
 - **Neu in Stufe 10:** keine neuen API-Aufrufe. Lokal neu in `linux.json`: „Controller an/aus“. Controller-Eingaben
   werden nur verarbeitet, solange das Fenster den Fokus hat, nie gespeichert. „Bewegung reduzieren“ wird vom lokalen
@@ -609,7 +624,34 @@ docs/                       LINUX-BAUPLAN.md
 - **L16 – Fensterlage:** Größe in DIP, Position in Pixeln (nur X11 – Wayland erlaubt Apps keine Position). Gespeichert
   beim Schließen und bei SIGTERM; beim Start an den heutigen Bildschirm angepasst (`WindowPlacement.FitInto` des Kerns).
 
+- **M1 – Eine Oberfläche, zwei Systeme (macOS, 03.11.2026):** kein eigenes App-Projekt für macOS (das würde Views
+  doppeln oder ein Programm auf ein Programm verweisen lassen). `RoG.Linux.App` wählt zur Laufzeit
+  (`HostPlatform.IsMac`) die Dienste aus `RoG.Mac.Platform` (nur P/Invoke auf Systembibliotheken, **keine neuen
+  NuGet-Pakete** – Flatpak-Quellen unverändert); Linux-Teile (Tray, D-Bus-Single-Instance, Portale) laufen dort nicht.
+  Der Projektname bleibt (Umbenennen wäre viel Lärm ohne Nutzen).
+- **M2 – Bundle-ID `com.rebelsofgaming.app`** wie die iOS-App (Universal Purchase, Owner-Vorgabe); Kennungen nur in
+  `MacIdentity` und `packaging/macos/Info.plist.in`. Die Linux-App-ID bleibt `com.rebelsofgaming.RebelsOfGaming`.
+- **M3 – Schlüsselbund:** generisches Passwort je Eintrag (Dienst = Bundle-ID, Konto = sortierte Attribute), zuerst
+  Datenschutz-Schlüsselbund (nur dieses Gerät, nach erstem Entsperren, kein iCloud), bei `errSecMissingEntitlement`
+  (unsignierte Builds) Rückfall auf den Anmelde-Schlüsselbund; ohne Schlüsselbund wie unter Linux „nur diese Sitzung“.
+- **M4 – Nur arm64 im Store (vorerst):** Rahmenbibliotheken von .NET sind je Architektur vorkompiliert – `lipo` reicht
+  nicht für eine Universal-App. Der Mac App Store nimmt reine Apple-silicon-Apps an. Später: universeller Starter
+  (siehe `packaging/macos/README.md`). x64 wird mitgebaut und unter Rosetta im Rauchtest gestartet.
+- **M5 – macOS ab 14 (Sonoma)** (`LSMinimumSystemVersion`), weil .NET 10 nichts Älteres unterstützt.
+- **M6 – Rechte:** Sandbox, `network.client`, `network.server` (Login-Rücksprung über Loopback), Datei-Rechte
+  (gewählte Dateien, Downloads), `cs.allow-jit` (CoreCLR), Hardened Runtime; Schlüsselbund-Gruppe = App-ID-Präfix.
+  `createdump` wird aus dem Bundle entfernt (eigenes Programm ohne Sandbox – Store-Prüfung würde ablehnen).
+- **M7 – Stufe-1-Lücken auf macOS:** Klick auf Mitteilung springt nicht zum Ziel (kein Delegate), kein Autostart
+  (`SMAppService`), kein Touch ID (App-Sperre nur PIN), kein Bildschirmfoto-Knopf, keine Controller (SDL fehlt).
+  Schließen blendet das Fenster aus (App bleibt im Dock, Klick aufs Dock-Symbol holt es zurück, ⌘Q beendet).
+- **M8 – Build-Nummer** (`CFBundleVersion`) = Laufnummer des Workflows `macos.yml`; Version = `RoGLinuxVersion`
+  (eine Version für Linux und macOS).
+
 ## Offene Fragen (an Wahke)
+
+- **F16 – macOS (03.11.2026):** (a) Intel-Macs im Store nötig (Universal-Starter, Aufwand mittel) oder reicht
+  Apple-Chip? (b) Eigene Version/Release-Takt für macOS oder wie jetzt gemeinsam mit Linux? (c) Mac-Bildschirmfotos:
+  die 1280×800-Aufnahmen aus `packaging/screenshots/` verwenden? (d) Einrichtung laut `packaging/macos/README.md`.
 
 - **Nur vom Owner zu erledigen/testen (blockiert nichts):** F5 Wayland-Test + Tray unter GNOME/KDE · `libfontconfig1`
   und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · S3-Zugang für

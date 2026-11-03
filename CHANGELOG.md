@@ -6,6 +6,15 @@ Version sammelt `## [Unveröffentlicht]`.
 
 ## [Unveröffentlicht]
 
+### Neu
+
+- **macOS-Version für den Mac App Store** (Vorbereitung, noch nicht eingereicht): dieselbe Oberfläche wie unter
+  Linux, Anmeldung im Schlüsselbund von macOS, Mitteilungen der Mitteilungszentrale, Menüleiste mit „Über“ und
+  „Einstellungen …“ (⌘,), Schließen behält die App im Dock, `rog://`-Links öffnen die App. Gleicher App-Store-Eintrag
+  wie die iOS-App („Rebels of Gaming“). Gebaut und hochgeladen von GitHub Actions (`macos.yml`), Anleitung
+  `packaging/macos/README.md`.
+- Startargument `--smoke-test` (startet, meldet `rog-smoke-test: ok` und beendet sich – für die CI)
+
 ## [0.2.0] – 2026-11-03
 
 ### Sicherheit
