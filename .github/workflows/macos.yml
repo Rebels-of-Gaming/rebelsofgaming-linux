@@ -97,6 +97,53 @@ jobs:
               "artifacts/macos/rebelsofgaming-macos-$arch-unsigned.zip"
           done
 
+      - name: DIAGNOSE AppKit gelinkt vs. dlopen (M9)
+        continue-on-error: true
+        run: |
+          t="$RUNNER_TEMP/m9"; mkdir -p "$t"
+          cat > "$t/linked.c" <<'C'
+          #include <objc/runtime.h>
+          #include <objc/message.h>
+          #include <stdio.h>
+          extern void *NSApp; void *volatile anchor = &NSApp;
+          int main(void) { ((void *(*)(void *, SEL))objc_msgSend)(objc_getClass("NSApplication"), sel_registerName("sharedApplication")); puts("linked-ok"); return 0; }
+          C
+          cat > "$t/dlopen.c" <<'C'
+          #include <dlfcn.h>
+          #include <objc/runtime.h>
+          #include <objc/message.h>
+          #include <stdio.h>
+          int main(void) { dlopen("/System/Library/Frameworks/AppKit.framework/AppKit", RTLD_NOW); ((void *(*)(void *, SEL))objc_msgSend)(objc_getClass("NSApplication"), sel_registerName("sharedApplication")); puts("dlopen-ok"); return 0; }
+          C
+          run_variant() {
+            local name="$1" app="$t/$1/M9$1.app"
+            mkdir -p "$app/Contents/MacOS"
+            cp "$t/$name.bin" "$app/Contents/MacOS/m9"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.example.m9$name" -c "Add :CFBundleExecutable string m9" -c "Add :CFBundlePackageType string APPL" "$app/Contents/Info.plist" >/dev/null
+            codesign --force --options runtime --entitlements packaging/macos/RebelsOfGaming.dev.entitlements --sign - "$app"
+            : > "$t/$name.log"
+            open -W -n --stdout "$t/$name.log" --stderr "$t/$name.log" "$app" || true
+            sleep 2
+            echo "== $name: $(cat "$t/$name.log")"
+          }
+          clang -O1 -o "$t/linked.bin" "$t/linked.c" -framework AppKit -lobjc
+          clang -O1 -o "$t/dlopen.bin" "$t/dlopen.c" -lobjc
+          run_variant linked
+          run_variant dlopen
+          # unsere App mit nativem Starter (AppKit gelinkt, .NET über hostfxr)
+          app="$t/launcher/Rebels of Gaming.app"; mkdir -p "$t/launcher"
+          ditto "artifacts/macos/arm64/Rebels of Gaming.app" "$app"
+          clang -O2 -mmacosx-version-min=14.0 -o "$app/Contents/MacOS/rebelsofgaming" packaging/macos/launcher.c -framework AppKit
+          otool -L "$app/Contents/MacOS/rebelsofgaming" | head -n 5
+          "$app/Contents/MacOS/rebelsofgaming" --smoke-test 2>&1 | tail -n 2 || true
+          packaging/macos/sign-app.sh adhoc "$app" 2>&1 | tail -n 2
+          rm -rf "$HOME/Library/Containers/com.rebelsofgaming.app/Data/tmp/rog-smoke-test.txt"
+          : > "$t/launcher.log"
+          open -W -n --stdout "$t/launcher.log" --stderr "$t/launcher.log" "$app" --args --smoke-test &
+          o=$!; for i in $(seq 1 60); do kill -0 $o 2>/dev/null || break; sleep 1; done; kill $o 2>/dev/null || true
+          cat "$t/launcher.log"
+          echo "== launcher: $(cat "$HOME/Library/Containers/com.rebelsofgaming.app/Data/tmp/rog-smoke-test.txt" 2>&1)"
+
       - name: Ad-hoc signieren und starten (Sandbox, Rauchtest)
         run: |
           crash_reports() {
