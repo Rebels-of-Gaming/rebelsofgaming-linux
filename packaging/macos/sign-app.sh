@@ -2,6 +2,8 @@
 # Signiert das App-Bundle (Hardened Runtime) und baut auf Wunsch das Installationspaket für den Mac App Store.
 #
 #   packaging/macos/sign-app.sh adhoc  <App>                    # CI-Rauchtest/lokal: Ad-hoc, Sandbox ohne Profil
+#   packaging/macos/sign-app.sh devid  <App>                    # Test mit echter Signatur „Developer ID Application“
+#                                                               # (MAC_DEVID_IDENTITY), Sandbox ohne Profil, Zeitstempel
 #   packaging/macos/sign-app.sh store  <App> <Profil> <pkg>     # Mac App Store: „Apple Distribution“ + Profil,
 #                                                               # .pkg mit „Mac Installer Distribution“
 # Für „store“ müssen die Zertifikate im Schlüsselbund liegen (Workflow: temporärer Schlüsselbund), die Namen kommen aus
@@ -18,6 +20,11 @@ case "$mode" in
   adhoc)
     identity="-"
     entitlements="$here/RebelsOfGaming.dev.entitlements"
+    ;;
+  devid)
+    identity="${MAC_DEVID_IDENTITY:?MAC_DEVID_IDENTITY fehlt}"
+    entitlements="$here/RebelsOfGaming.dev.entitlements"
+    timestamp="--timestamp"
     ;;
   store)
     profile="${3:?Pfad zum Mac-App-Store-Provisioning-Profil}"
@@ -36,17 +43,17 @@ esac
 # in der Avalonia-Doku zum Mac App Store).
 while IFS= read -r -d '' file; do
   if [ "$file" != "$exe" ]; then
-    codesign --force --options runtime --sign "$identity" "$file"
+    codesign --force --options runtime ${timestamp:-} --sign "$identity" "$file"
   fi
 done < <(find "$app/Contents/MacOS" -type f -print0)
 # native Bibliotheken außerhalb von Contents/MacOS (derzeit keine)
 while IFS= read -r -d '' file; do
   if file -b "$file" | grep -q 'Mach-O'; then
-    codesign --force --options runtime --sign "$identity" "$file"
+    codesign --force --options runtime ${timestamp:-} --sign "$identity" "$file"
   fi
 done < <(find "$app/Contents" -path "$app/Contents/MacOS" -prune -o -type f -print0)
-codesign --force --options runtime --entitlements "$entitlements" --sign "$identity" "$exe"
-codesign --force --options runtime --entitlements "$entitlements" --sign "$identity" "$app"
+codesign --force --options runtime ${timestamp:-} --entitlements "$entitlements" --sign "$identity" "$exe"
+codesign --force --options runtime ${timestamp:-} --entitlements "$entitlements" --sign "$identity" "$app"
 codesign --verify --deep --strict --verbose=2 "$app"
 codesign --display --entitlements - "$app" >/dev/null
 

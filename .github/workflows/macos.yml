@@ -16,6 +16,11 @@ on:
     branches: [develop]
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      devid_sandbox_test:
+        description: 'Sandbox-Start mit echter Signatur (Developer ID) testen – Diagnose zu Bauplan M9'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -287,6 +292,151 @@ jobs:
           xcrun altool --upload-app -f "$pkg" -t macos --apiKey "$ASC_API_KEY_ID" --apiIssuer "$ASC_API_ISSUER_ID"
           rm -f "$keys/AuthKey_$ASC_API_KEY_ID.p8"
           echo "::notice::Build $VERSION ($BUILD) hochgeladen – in App Store Connect unter macOS → TestFlight/Builds prüfen"
+
+      - name: Schlüsselbund aufräumen
+        if: always() && env.MAC_SIGNING_KEYCHAIN != ''
+        run: security delete-keychain "$MAC_SIGNING_KEYCHAIN" || true
+
+  devid-sandbox-test:
+    name: Sandbox-Test mit Developer-ID-Signatur (Diagnose M9)
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.devid_sandbox_test
+    runs-on: macos-15
+    timeout-minutes: 40
+    environment: release
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+      BUILD: ${{ needs.build.outputs.build }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: packaging/macos
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: macos-unsigned-${{ needs.build.outputs.version }}-${{ needs.build.outputs.build }}
+          path: artifacts/macos
+
+      - name: Developer-ID-Zertifikat in temporären Schlüsselbund
+        env:
+          MAC_DEVID_CERT_P12_BASE64: ${{ secrets.MAC_DEVID_CERT_P12_BASE64 }}
+          MAC_DEVID_CERT_PASSWORD: ${{ secrets.MAC_DEVID_CERT_PASSWORD }}
+        run: |
+          if [ -z "$MAC_DEVID_CERT_P12_BASE64" ]; then
+            echo "::error::Secret MAC_DEVID_CERT_P12_BASE64 fehlt"; exit 1
+          fi
+          keychain="$RUNNER_TEMP/rog-devid.keychain-db"
+          kc_pass="$(openssl rand -hex 24)"
+          security create-keychain -p "$kc_pass" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$kc_pass" "$keychain"
+          printf '%s' "$MAC_DEVID_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/devid.p12"
+          security import "$RUNNER_TEMP/devid.p12" -k "$keychain" -P "$MAC_DEVID_CERT_PASSWORD" -T /usr/bin/codesign >/dev/null
+          rm -f "$RUNNER_TEMP/devid.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$kc_pass" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          identity="$(security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -n1)"
+          [ -n "$identity" ] || { echo "::error::Kein „Developer ID Application“ im .p12"; exit 1; }
+          echo "MAC_SIGNING_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          echo "MAC_DEVID_IDENTITY=$identity" >> "$GITHUB_ENV"
+
+      - name: Signieren (Hardened Runtime + Sandbox, ohne Profil) und prüfen
+        run: |
+          mkdir -p diag
+          ditto -x -k artifacts/macos/rebelsofgaming-macos-arm64-unsigned.zip artifacts/macos/devid
+          app="artifacts/macos/devid/Rebels of Gaming.app"
+          packaging/macos/sign-app.sh devid "$app" 2>&1 | grep -v 'replacing existing signature' | tail -n 5
+          codesign --verify --deep --strict --verbose=2 "$app" 2>&1 | tail -n 3
+          codesign --display --entitlements - --xml "$app" > diag/entitlements.plist 2>/dev/null || true
+          codesign -dvv "$app" 2>&1 | grep -E 'Authority|TeamIdentifier|Runtime|flags' | tee diag/codesign.txt
+          spctl -a -vv "$app" 2>&1 | tee diag/spctl-before-notarization.txt || true
+
+      - name: Notarisieren und heften (optional)
+        continue-on-error: true
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+          ASC_API_KEY_P8_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
+        run: |
+          key="$RUNNER_TEMP/notary.p8"
+          if printf '%s' "$ASC_API_KEY_P8_BASE64" | grep -q "BEGIN PRIVATE KEY"; then
+            printf '%s\n' "$ASC_API_KEY_P8_BASE64" > "$key"
+          else
+            printf '%s' "$ASC_API_KEY_P8_BASE64" | base64 --decode > "$key"
+          fi
+          chmod 600 "$key"
+          app="artifacts/macos/devid/Rebels of Gaming.app"
+          ditto -c -k --keepParent "$app" "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" --key "$key" --key-id "$ASC_API_KEY_ID" \
+            --issuer "$ASC_API_ISSUER_ID" --wait --timeout 20m 2>&1 | tee diag/notarytool.txt
+          rm -f "$key"
+          xcrun stapler staple "$app" 2>&1 | tee diag/stapler.txt
+          spctl -a -vv "$app" 2>&1 | tee diag/spctl-after-notarization.txt || true
+
+      - name: Starten (Sandbox) und beobachten
+        run: |
+          app="$PWD/artifacts/macos/devid/Rebels of Gaming.app"
+          touch "$RUNNER_TEMP/start-marker"
+          # 1) normaler Start wie per Doppelklick – lebt der Prozess nach 25 s noch?
+          open -n "$app"
+          sleep 25
+          if pgrep -x rebelsofgaming > diag/pid.txt; then
+            echo "::notice::App läuft nach 25 s (PID $(cat diag/pid.txt)) – Sandbox-Start mit Developer-ID-Signatur OK"
+            echo "alive" > diag/result.txt
+          else
+            echo "::warning::App läuft nach 25 s NICHT mehr – Absturz in der Sandbox auch mit echter Signatur"
+            echo "dead" > diag/result.txt
+          fi
+          screencapture -x diag/screen.png || true
+          pkill -x rebelsofgaming || true
+          sleep 3
+          # 2) Rauchtest-Lauf (meldet sich selbst und beendet sich)
+          : > diag/smoke.log
+          open -W -n --env ROG_STARTUP_TRACE=1 --stdout "$PWD/diag/smoke.log" --stderr "$PWD/diag/smoke.log" "$app" --args --smoke-test &
+          opener=$!
+          for i in $(seq 1 90); do kill -0 "$opener" 2>/dev/null || break; sleep 1; done
+          kill "$opener" 2>/dev/null || true
+          pkill -x rebelsofgaming || true
+          find "$HOME/Library/Containers/com.rebelsofgaming.app/Data" -name rog-smoke-test.txt -exec cat {} \; >> diag/smoke.log 2>/dev/null || true
+          cat diag/smoke.log
+          # 3) Absturzberichte und Protokolle
+          sleep 10
+          find "$HOME/Library/Logs/DiagnosticReports" -name 'rebelsofgaming*' -newer "$RUNNER_TEMP/start-marker" -exec cp {} diag/ \; 2>/dev/null || true
+          ls diag
+          log show --last 5m --style compact --predicate 'process == "rebelsofgaming"' > diag/log-process.txt 2>/dev/null || true
+          log show --last 5m --style compact --predicate 'sender == "Sandbox" OR subsystem == "com.apple.sandbox.reporting"' \
+            | grep -i rebelsofgaming > diag/log-sandbox.txt 2>/dev/null || true
+          log show --last 5m --style compact --predicate 'eventMessage CONTAINS "rebelsofgaming" AND (process == "launchd" OR process == "secinitd")' \
+            > diag/log-launchd.txt 2>/dev/null || true
+          echo "--- Sandbox-Verweigerungen ---"; grep -E 'deny' diag/log-sandbox.txt | head -n 40 || true
+          echo "--- launchd ---"; grep -E 'denied|SIGABRT|exited' diag/log-launchd.txt | head -n 20 || true
+          for report in diag/rebelsofgaming*.ips; do
+            [ -f "$report" ] || continue
+            echo "== $report"
+            python3 -I -c '
+          import json, sys
+          text = open(sys.argv[1]).read()
+          body = json.loads(text[text.index("\n") + 1:])
+          for key in ("exception", "termination", "asi"):
+              if key in body: print(key, json.dumps(body[key])[:800])
+          images = body.get("usedImages", [])
+          for thread in body.get("threads", []):
+              if thread.get("triggered"):
+                  for f in thread.get("frames", [])[:25]:
+                      i = f.get("imageIndex", -1)
+                      name = images[i].get("name", "?") if 0 <= i < len(images) else "?"
+                      print("  ", name, f.get("symbol", hex(f.get("imageOffset", 0))))
+          ' "$report" || true
+          done
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: macos-devid-sandbox-diagnose-${{ needs.build.outputs.build }}
+          path: diag/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Schlüsselbund aufräumen
         if: always() && env.MAC_SIGNING_KEYCHAIN != ''
