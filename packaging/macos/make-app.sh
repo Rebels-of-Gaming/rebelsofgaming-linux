@@ -45,6 +45,22 @@ fi
 rm -f "$app/Contents/MacOS/createdump"
 chmod 755 "$app/Contents/MacOS/rebelsofgaming"
 
+# Der .NET-apphost ist mit minos 12.0 gelinkt. AppKit/HIServices wählen danach einen älteren Weg, die App bei
+# LaunchServices anzumelden – in der App Sandbox sperrt launchd den und die App bricht beim Start ab (Bauplan M9).
+# Deshalb Build-Version des Programms auf die echte Mindestversion setzen (passt zu LSMinimumSystemVersion) und neu
+# ad-hoc signieren (sign-app.sh signiert später richtig).
+if command -v vtool >/dev/null || xcrun -f vtool >/dev/null 2>&1; then
+  sdk="$(xcrun --show-sdk-version 2>/dev/null || echo 15.0)"
+  exe="$app/Contents/MacOS/rebelsofgaming"
+  xcrun vtool -set-build-version macos "$min_macos" "$sdk" -replace -output "$exe.tmp" "$exe"
+  mv "$exe.tmp" "$exe"
+  chmod 755 "$exe"
+  codesign --force --sign - "$exe"
+  xcrun vtool -show-build "$exe" | grep -E 'minos|sdk'
+else
+  echo "Hinweis: vtool fehlt (kein macOS) – Build-Version des Programms unverändert" >&2
+fi
+
 sed -e "s/@VERSION@/$version/g" -e "s/@BUILD@/$build/g" -e "s/@MIN_MACOS@/$min_macos/g" \
   "$here/Info.plist.in" > "$app/Contents/Info.plist"
 printf 'APPL????' > "$app/Contents/PkgInfo"
