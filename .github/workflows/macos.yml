@@ -275,7 +275,12 @@ jobs:
         run: |
           keys="$HOME/.appstoreconnect/private_keys"
           mkdir -p "$keys"
-          printf '%s' "$ASC_API_KEY_P8_BASE64" | base64 --decode > "$keys/AuthKey_$ASC_API_KEY_ID.p8"
+          # Secret darf Base64 ODER der rohe Inhalt der .p8-Datei sein (im GitHub-Formular einfach einfügen)
+          if printf '%s' "$ASC_API_KEY_P8_BASE64" | grep -q "BEGIN PRIVATE KEY"; then
+            printf '%s\n' "$ASC_API_KEY_P8_BASE64" > "$keys/AuthKey_$ASC_API_KEY_ID.p8"
+          else
+            printf '%s' "$ASC_API_KEY_P8_BASE64" | base64 --decode > "$keys/AuthKey_$ASC_API_KEY_ID.p8"
+          fi
           chmod 600 "$keys/AuthKey_$ASC_API_KEY_ID.p8"
           pkg="artifacts/macos/rebelsofgaming-$VERSION-$BUILD.pkg"
           xcrun altool --validate-app -f "$pkg" -t macos --apiKey "$ASC_API_KEY_ID" --apiIssuer "$ASC_API_ISSUER_ID"
