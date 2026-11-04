@@ -20,8 +20,8 @@ für das öffentliche Repo kostenlos). Ein Mac ist für die Einrichtung **nicht*
 - Version = `RoGLinuxVersion` aus `Directory.Build.props` (eine Version für Linux und macOS),
   Build-Nummer (`CFBundleVersion`) = fortlaufende Laufnummer des Workflows (steigt bei jedem Upload).
 - **Hochgeladen wird die Apple-silicon-Version (arm64).** Der Mac App Store nimmt reine arm64-Apps an
-  („Erfordert einen Mac mit Apple-Chip“). Eine Universal-App (auch Intel) ist vorbereitet, aber noch nicht gebaut –
-  siehe „Offen“ unten.
+  („Erfordert einen Mac mit Apple-Chip“). Owner-Entscheidung 04.11.2026: vorerst nur
+  Apple-Chip (F16); Intel/Universal siehe „Offen“ unten.
 - Lokal (nur auf einem Mac): `packaging/macos/make-app.sh arm64` → `artifacts/macos/arm64/Rebels of Gaming.app`,
   `packaging/macos/sign-app.sh adhoc "artifacts/macos/arm64/Rebels of Gaming.app"`, dann
   `open "artifacts/macos/arm64/Rebels of Gaming.app"`.
@@ -156,6 +156,15 @@ Textvorschlag (EN):
 > (files.downloads.read-write), uploads use the system file picker (files.user-selected.read-write). No tracking,
 > no third-party analytics; all content is loaded from the operator's own servers.
 
+## Symbol
+
+- Vorlage: `rog-icon-square-1024.png` – Kopie von `resources/brand/icon/rog-icon-square-1024.png` aus dem
+  Website-Repo (Brand-Kit, einzige Quelle aller Logos; Stand 04.11.2026). Ändert sich das Brand-Kit, Datei neu kopieren.
+- `AppIcon-1024.png` = Mac-Symbolraster nach Apple (1024er Leinwand, Körper 824 × 824 mit 100 px Rand, Radius 185,
+  Schatten), erzeugt mit `dotnet run packaging/macos/make-icon.cs -- packaging/macos/rog-icon-square-1024.png
+  packaging/macos/AppIcon-1024.png`. Nur verkleinert, nie vergrößert.
+- `make-app.sh` baut daraus `AppIcon.icns` mit allen Größen 16–512 jeweils @1x und @2x (bis 1024 px).
+
 ## Rechte der App (Sandbox)
 
 `RebelsOfGaming.entitlements` (Store) – Begründung je Recht steht in der Datei. `RebelsOfGaming.dev.entitlements` ist
@@ -171,7 +180,7 @@ und `disable-library-validation` braucht .NET 10 nicht – alle Bibliotheken tra
   denselben Rechten im selben Bundle läuft. Ob das mit echtem Store-Profil auf einem Mac auch passiert, zeigt erst der
   erste TestFlight-Build – **vor dem Einreichen zur Prüfung testen.**
 
-- **Universal (Intel + Apple-Chip):** .NET-Rahmenbibliotheken sind je Architektur vorkompiliert – ein einfaches
+- **Universal (Intel + Apple-Chip)** – vorerst nicht gewünscht (F16): .NET-Rahmenbibliotheken sind je Architektur vorkompiliert – ein einfaches
   `lipo` reicht nicht. Plan: kleiner nativer Starter (universal) unter `Contents/MacOS`, der je Architektur die passende
   .NET-Laufzeit lädt. Der Workflow baut x64 schon mit und startet es unter Rosetta (Rauchtest).
 - Klick auf eine Mitteilung holt die App nach vorn, springt aber noch nicht zum Ziel (eigener

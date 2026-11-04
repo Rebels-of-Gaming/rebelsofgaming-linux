@@ -659,9 +659,11 @@ docs/                       LINUX-BAUPLAN.md
 
 ## Offene Fragen (an Wahke)
 
-- **F16 – macOS (03.11.2026):** (a) Intel-Macs im Store nötig (Universal-Starter, Aufwand mittel) oder reicht
-  Apple-Chip? (b) Eigene Version/Release-Takt für macOS oder wie jetzt gemeinsam mit Linux? (c) Mac-Bildschirmfotos:
-  die 1280×800-Aufnahmen aus `packaging/screenshots/` verwenden? (d) Einrichtung laut `packaging/macos/README.md`.
+- **F16 – macOS – entschieden (Owner 04.11.2026):** (a) **nur Apple-Chip (arm64)** vorerst, kein Universal-Starter;
+  (b) **eine gemeinsame Version** für Linux und macOS (`RoGLinuxVersion`); (c) Mac-Bildschirmfotos = die
+  **1280×800-Aufnahmen** aus `packaging/screenshots/`; (d) Symbol aus dem Brand-Kit der Website
+  (`resources/brand/icon/rog-icon-square-1024.png`, Kopie unter `packaging/macos/`), ohne Hochskalieren.
+  Offen bleibt nur die Einrichtung laut `packaging/macos/README.md` (Owner) und M9 (Sandbox-Start).
 
 - **Nur vom Owner zu erledigen/testen (blockiert nichts):** F5 Wayland-Test + Tray unter GNOME/KDE · `libfontconfig1`
   und `fonts-dejavu-core` auf den Runnern · echter Login gegen Staging/Produktion · Steam Deck (Gerät) · S3-Zugang für

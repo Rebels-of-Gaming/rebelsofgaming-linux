@@ -58,6 +58,9 @@ if command -v iconutil >/dev/null && command -v sips >/dev/null; then
     sips -z "$double" "$double" "$here/AppIcon-1024.png" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
   done
   iconutil -c icns "$iconset" -o "$app/Contents/Resources/AppIcon.icns"
+  # Vorlage muss 1024 px haben (größte Stufe 512@2x) – nie hochskalieren
+  [ "$(sips -g pixelWidth "$here/AppIcon-1024.png" | awk '/pixelWidth/ {print $2}')" = 1024 ] \
+    || { echo "AppIcon-1024.png ist nicht 1024 px breit" >&2; exit 1; }
   rm -rf "$iconset"
 else
   echo "Hinweis: sips/iconutil fehlen (kein macOS) – Bundle ohne AppIcon.icns" >&2
