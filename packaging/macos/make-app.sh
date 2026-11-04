@@ -45,20 +45,17 @@ fi
 rm -f "$app/Contents/MacOS/createdump"
 chmod 755 "$app/Contents/MacOS/rebelsofgaming"
 
-# Der .NET-apphost ist mit minos 12.0 gelinkt. AppKit/HIServices wählen danach einen älteren Weg, die App bei
-# LaunchServices anzumelden – in der App Sandbox sperrt launchd den und die App bricht beim Start ab (Bauplan M9).
-# Deshalb Build-Version des Programms auf die echte Mindestversion setzen (passt zu LSMinimumSystemVersion) und neu
-# ad-hoc signieren (sign-app.sh signiert später richtig).
-if command -v vtool >/dev/null || xcrun -f vtool >/dev/null 2>&1; then
-  sdk="$(xcrun --show-sdk-version 2>/dev/null || echo 15.0)"
+# Nativer Starter statt .NET-apphost (Bauplan M9): Der apphost linkt kein AppKit, AppKit käme erst per dlopen
+# (libAvaloniaNative) – in der App Sandbox verweigert launchd AppKit dann die Anmeldung bei LaunchServices und die App
+# bricht in [NSApplication sharedApplication] ab. launcher.c linkt AppKit und startet .NET über libhostfxr.dylib.
+if command -v clang >/dev/null && [ "$(uname -s)" = Darwin ]; then
+  case "$arch" in arm64) clang_arch=arm64 ;; x64) clang_arch=x86_64 ;; esac
   exe="$app/Contents/MacOS/rebelsofgaming"
-  xcrun vtool -set-build-version macos "$min_macos" "$sdk" -replace -output "$exe.tmp" "$exe"
-  mv "$exe.tmp" "$exe"
-  chmod 755 "$exe"
+  clang -O2 -Wall -Werror -arch "$clang_arch" -mmacosx-version-min="$min_macos" \
+    -o "$exe" "$here/launcher.c" -framework AppKit
   codesign --force --sign - "$exe"
-  xcrun vtool -show-build "$exe" | grep -E 'minos|sdk'
 else
-  echo "Hinweis: vtool fehlt (kein macOS) – Build-Version des Programms unverändert" >&2
+  echo "Hinweis: kein macOS/clang – .NET-apphost bleibt (startet NICHT in der Sandbox, nur zum Prüfen des Inhalts)" >&2
 fi
 
 sed -e "s/@VERSION@/$version/g" -e "s/@BUILD@/$build/g" -e "s/@MIN_MACOS@/$min_macos/g" \
